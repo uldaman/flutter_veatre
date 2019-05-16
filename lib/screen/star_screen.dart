@@ -8,6 +8,18 @@ class StarScreen extends StatefulWidget {
 
 class _StarScreenState extends State<StarScreen>
     with AutomaticKeepAliveClientMixin {
+  final stars = <Map>[
+    {
+      "icon":
+          "https://apps.vechain.org/img/com.laalaguer.token-transfer.3be1b8d3.png",
+      "url": "https://laalaguer.github.io/vechain-token-transfer/",
+    },
+    {
+      "icon": "https://apps.vechain.org/img/come.vepool.vepool.a07e2818.png",
+      "url": "https://vepool.xyz/",
+    },
+  ];
+
   @override
   bool get wantKeepAlive => true;
 
@@ -24,22 +36,20 @@ class _StarScreenState extends State<StarScreen>
         padding: EdgeInsets.all(4.0),
         child: GridView.count(
           crossAxisCount: 3,
-          children: List.generate(4, (index) {
+          children: List.generate(stars.length, (index) {
             return Container(
               margin: EdgeInsets.all(15.0),
               child: Column(
                 children: <Widget>[
                   InkWell(
                     onTap: () {
-                      bus.emit("goUrl",
-                          "https://laalaguer.github.io/vechain-token-transfer/");
+                      bus.emit("goUrl", stars[index]["url"]);
                     },
                     child: Container(
                       width: 55.0,
                       height: 55.0,
                       margin: EdgeInsets.only(bottom: 10.0),
-                      child: Image.network(
-                          'https://apps.vechain.org/img/com.laalaguer.token-transfer.3be1b8d3.png'),
+                      child: Image.network(stars[index]["icon"]),
                     ),
                   ),
                   Text("Tokens"),

@@ -21,17 +21,13 @@ class _NavigationState extends State<Navigation> {
   Future navigationTapped(int page) async {
     switch (page) {
       case 0:
-        if (_currentPage == _feedPage &&
-            webView != null &&
-            await webView.canGoBack()) {
-          webView.goBack();
+        if (_currentPage == _feedPage) {
+          feeds.goBack();
         }
         break;
       case 1:
-        if (_currentPage == _feedPage &&
-            webView != null &&
-            await webView.canGoForward()) {
-          webView.goForward();
+        if (_currentPage == _feedPage) {
+          feeds.goForward();
         }
         break;
       case 2:
@@ -47,12 +43,8 @@ class _NavigationState extends State<Navigation> {
   }
 
   Future onPageChanged(int page) async {
-    _canGoBack = (page == _feedPage && webView != null)
-        ? await webView.canGoBack()
-        : false;
-    _canGoForward = (page == _feedPage && webView != null)
-        ? await webView.canGoForward()
-        : false;
+    _canGoBack = page == _feedPage ? await feeds.canGoBack() : false;
+    _canGoForward = page == _feedPage ? await feeds.canGoForward() : false;
     setState(() {
       switch (page) {
         case 0:
@@ -75,11 +67,7 @@ class _NavigationState extends State<Navigation> {
       onPageChanged(_feedPage);
     });
     bus.on("goUrl", (arg) {
-      if (webView == null) {
-        initialUrl = arg;
-      } else {
-        webView.loadUrl(arg);
-      }
+      feeds.loadUrl(arg);
       _pageController.jumpToPage(_feedPage);
     });
   }
@@ -106,7 +94,7 @@ class _NavigationState extends State<Navigation> {
     return Scaffold(
       body: PageView(
         children: [
-          Container(child: FeedScreen()),
+          Container(child: feeds.current),
           Container(child: TabScreen()),
           Container(child: StarScreen()),
           Container(child: WalletScreen()),

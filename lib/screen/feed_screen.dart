@@ -24,7 +24,7 @@ class _FeedScreenState extends State<FeedScreen>
         backgroundColor: Colors.white,
         title: Container(
           child: SearchWidget(),
-          padding: EdgeInsets.only(bottom: 11.0),
+          padding: EdgeInsets.only(bottom: 3.0),
         ),
       ),
       body: Center(

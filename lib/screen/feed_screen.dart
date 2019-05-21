@@ -84,7 +84,7 @@ class FeedScreens {
   }
 }
 
-FeedScreens feeds = new FeedScreens();
+FeedScreens feeds = FeedScreens();
 
 class FeedScreen extends StatefulWidget {
   final onWebViewCreatedCallback onScreenCreated;

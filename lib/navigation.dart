@@ -94,10 +94,10 @@ class _NavigationState extends State<Navigation> {
     return Scaffold(
       body: PageView(
         children: [
-          Container(child: feeds.current),
-          Container(child: TabScreen()),
-          Container(child: StarScreen()),
-          Container(child: WalletScreen()),
+          feeds.current,
+          TabScreen(),
+          StarScreen(),
+          WalletScreen(),
         ],
         controller: _pageController,
         physics: NeverScrollableScrollPhysics(),

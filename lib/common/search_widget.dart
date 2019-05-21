@@ -29,6 +29,8 @@ class SearchWidget extends StatelessWidget {
   }
 
   onSubmitted(String url) {
-    bus.emit("goUrl", url);
+    if (url != "") {
+      bus.emit("goUrl", url);
+    }
   }
 }

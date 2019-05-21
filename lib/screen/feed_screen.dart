@@ -103,6 +103,18 @@ class _FeedScreenState extends State<FeedScreen>
   @override
   bool get wantKeepAlive => true;
 
+  double _progress = 0;
+
+  Widget _progressIndicator(double value) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 7.0),
+      child: SizedBox(
+        height: 2.0,
+        child: new LinearProgressIndicator(value: value),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -110,7 +122,13 @@ class _FeedScreenState extends State<FeedScreen>
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Container(
-          child: SearchWidget(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SearchWidget(),
+              (_progress != 1.0) ? _progressIndicator(_progress) : null,
+            ].where((Object o) => o != null).toList(),
+          ),
           padding: EdgeInsets.only(bottom: 3.0),
         ),
       ),

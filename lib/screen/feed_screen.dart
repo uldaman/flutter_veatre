@@ -106,29 +106,17 @@ class _FeedScreenState extends State<FeedScreen>
   double _progress = 0;
 
   Widget _progressIndicator(double value) {
-    // return DecoratedBox(
-    //   child: Padding(
-    //     child: SizedBox(
-    //       height: 2.0,
-    //       child: new LinearProgressIndicator(value: value),
-    //     ),
-    //     padding: EdgeInsets.symmetric(horizontal: 7.0),
-    //   ),
-    //   decoration: BoxDecoration(
-    //     borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    //   ),
-    // );
     return Padding(
       child: SizedBox(
-        height: 3.0,
+        height: 2.5,
         child: PhysicalModel(
           child: LinearProgressIndicator(value: value),
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(80.0),
-          clipBehavior: Clip.antiAlias,
+          borderRadius: BorderRadius.circular(45.0),
+          clipBehavior: Clip.hardEdge,
         ),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 7.0),
+      padding: EdgeInsets.symmetric(horizontal: 8.8),
     );
   }
 

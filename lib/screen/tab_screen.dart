@@ -1,76 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:vetheat/screen/feed_screen.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
 
 class TabScreen extends StatefulWidget {
+  final bool spread;
+
+  const TabScreen({Key key, this.spread = false}) : super(key: key);
+
   @override
   _TabScreenState createState() => _TabScreenState();
 }
 
 class _TabScreenState extends State<TabScreen>
     with AutomaticKeepAliveClientMixin {
-  final PageController _pageController = PageController(viewportFraction: 0.8);
+  List<Widget> _feeds = <Widget>[FeedScreen(), Icon(Icons.add_circle)];
   int _currentPage = 0;
 
   @override
   bool get wantKeepAlive => true;
 
-  @override
-  void initState() {
-    super.initState();
-    _pageController.addListener(() {
-      int next = _pageController.page.round();
-      if (_currentPage != next) {
-        setState(() {
-          _currentPage = next;
-        });
-      }
+  void onPageChanged(int page) {
+    setState(() {
+      _currentPage = page;
+    });
+  }
+
+  void onPageTap(int page) {
+    setState(() {
+      // TODO: open web
     });
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final int feedNums = feeds.length;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Tabs'),
-        centerTitle: true,
-      ),
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: feedNums + 1,
-        itemBuilder: (context, int currentIdx) {
-          if (currentIdx == feedNums) {
-            return _buildPage(currentIdx, true);
-          } else if (currentIdx < feedNums) {
-            return _buildPage(currentIdx);
-          }
+      appBar: widget.spread
+          ? AppBar(
+              backgroundColor: Colors.white,
+              title: Text('Tabs'),
+              centerTitle: true,
+            )
+          : null,
+      body: Swiper(
+        itemCount: _feeds.length,
+        itemBuilder: (BuildContext context, int index) {
+          return _buildPage(index);
         },
+        onIndexChanged: onPageChanged,
+        onTap: onPageTap,
+        viewportFraction: widget.spread ? 0.8 : 1.0,
+        loop: false,
+        physics: widget.spread
+            ? PageScrollPhysics()
+            : NeverScrollableScrollPhysics(),
       ),
     );
   }
 
-  Widget _buildPage(int index, [bool isAdd = false]) {
+  AnimatedContainer _buildPage(int index) {
     final bool active = index == _currentPage;
-    final double top = active ? 100 : 200;
-    final double elevation = active ? 2.0 : 1.0;
-    final Color shadowColor = active ? Colors.black87 : Colors.transparent;
-    final Widget page = isAdd ? Icon(Icons.add_circle) : feeds[index];
-    final Color color = isAdd ? Colors.grey[300] : Colors.transparent;
-
+    final Widget page = _feeds[index];
     return AnimatedContainer(
       duration: Duration(milliseconds: 500),
       curve: Curves.easeOutQuint,
-      margin: EdgeInsets.only(top: top, bottom: 50, right: 30),
+      margin: EdgeInsets.only(
+        top: widget.spread ? (active ? 100 : 200) : 0,
+        bottom: widget.spread ? 50 : 0,
+        right: widget.spread ? 30 : 0,
+      ),
       child: PhysicalModel(
-        elevation: elevation,
+        elevation: widget.spread ? (active ? 20.0 : 1.0) : 0,
         child: page,
-        color: color,
-        // borderRadius: BorderRadius.circular(35.0),
+        color: Colors.transparent,
         // https://github.com/OpenFlutter/amap_base_flutter/issues/58
-        clipBehavior: Clip.hardEdge,
-        shadowColor: shadowColor,
+        // borderRadius: BorderRadius.circular(35.0),
+        // clipBehavior: Clip.hardEdge,
+        shadowColor: (page is Icon || !widget.spread)
+            ? Colors.transparent
+            : Colors.black87,
       ),
     );
   }

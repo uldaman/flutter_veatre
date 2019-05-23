@@ -17,7 +17,6 @@ class TabScreen extends StatefulWidget {
 class _TabScreenState extends State<TabScreen>
     with AutomaticKeepAliveClientMixin {
   int _currentPage = 0;
-  SwiperController _swiperController = SwiperController();
   List<Widget> _feeds = <Widget>[];
   Map<int, InAppWebViewController> _ctrlMap = {};
 
@@ -46,7 +45,6 @@ class _TabScreenState extends State<TabScreen>
           setState(() {
             _feeds.insert(index, _makeFeedScreen(index));
           });
-          _swiperController.move(index);
         },
       ),
     );
@@ -79,7 +77,7 @@ class _TabScreenState extends State<TabScreen>
             )
           : null,
       body: Swiper(
-        controller: _swiperController,
+        index: _currentPage,
         itemCount: _feeds.length,
         itemBuilder: (BuildContext context, int index) {
           return _buildPage(index);

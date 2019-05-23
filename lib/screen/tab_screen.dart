@@ -93,28 +93,26 @@ class _TabScreenState extends State<TabScreen>
     );
   }
 
-  AnimatedContainer _buildPage(int index) {
+  Container _buildPage(int index) {
     final bool active = index == _currentPage;
     final Widget page = _feeds[index];
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 500),
-      curve: Curves.easeOutQuint,
+    final bool shadow = widget.spread && active && !(page is IconButton);
+    return Container(
       margin: EdgeInsets.only(
         top: widget.spread ? (active ? 100 : 200) : 0,
         bottom: widget.spread ? 50 : 0,
         right: widget.spread ? 30 : 0,
       ),
-      child: PhysicalModel(
-        elevation: widget.spread ? (active ? 20.0 : 1.0) : 0,
-        child: page,
-        color: Colors.transparent,
-        // https://github.com/OpenFlutter/amap_base_flutter/issues/58
-        // borderRadius: BorderRadius.circular(35.0),
-        // clipBehavior: Clip.hardEdge,
-        shadowColor: (page is IconButton || !widget.spread)
-            ? Colors.transparent
-            : Colors.black87,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: shadow ? Colors.black87 : Colors.transparent,
+            blurRadius: shadow ? 30 : 0,
+            offset: Offset(10, 10),
+          )
+        ],
       ),
+      child: page,
     );
   }
 }

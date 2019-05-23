@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:vetheat/common/event_bus.dart';
+import 'package:vetheat/common/event.dart';
 
 class SearchWidget extends StatelessWidget {
-  final TextEditingController editingController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -21,7 +19,6 @@ class SearchWidget extends StatelessWidget {
               border: InputBorder.none,
             ),
             onSubmitted: onSubmitted,
-            controller: editingController,
           ),
         ),
       ),
@@ -30,7 +27,7 @@ class SearchWidget extends StatelessWidget {
 
   onSubmitted(String url) {
     if (url != "") {
-      bus.emit("goUrl", url);
+      onGoUrl.emit(url);
     }
   }
 }

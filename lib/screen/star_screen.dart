@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vetheat/common/event_bus.dart';
+import 'package:vetheat/common/event.dart';
 
 class StarScreen extends StatefulWidget {
   @override
@@ -10,11 +10,13 @@ class _StarScreenState extends State<StarScreen>
     with AutomaticKeepAliveClientMixin {
   final stars = <Map>[
     {
+      "title": "Tokens",
       "icon":
           "https://apps.vechain.org/img/com.laalaguer.token-transfer.3be1b8d3.png",
       "url": "https://laalaguer.github.io/vechain-token-transfer/",
     },
     {
+      "title": "Vepool",
       "icon": "https://apps.vechain.org/img/come.vepool.vepool.a07e2818.png",
       "url": "https://vepool.xyz/",
     },
@@ -43,7 +45,7 @@ class _StarScreenState extends State<StarScreen>
                 children: <Widget>[
                   InkWell(
                     onTap: () {
-                      bus.emit("goUrl", stars[index]["url"]);
+                      onGoUrl.emit(stars[index]["url"]);
                     },
                     child: Container(
                       width: 55.0,
@@ -52,7 +54,7 @@ class _StarScreenState extends State<StarScreen>
                       child: Image.network(stars[index]["icon"]),
                     ),
                   ),
-                  Text("Tokens"),
+                  Text(stars[index]["title"]),
                 ],
               ),
             );

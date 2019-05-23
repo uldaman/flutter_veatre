@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:vetheat/screen/feed_screen.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+
+InAppWebViewController webView;
 
 class TabScreen extends StatefulWidget {
   final bool spread;
@@ -13,15 +16,34 @@ class TabScreen extends StatefulWidget {
 
 class _TabScreenState extends State<TabScreen>
     with AutomaticKeepAliveClientMixin {
-  List<Widget> _feeds = <Widget>[FeedScreen(), Icon(Icons.add_circle)];
   int _currentPage = 0;
+  List<Widget> _feeds = <Widget>[];
+  Map<int, InAppWebViewController> _ctrlMap = {};
 
   @override
   bool get wantKeepAlive => true;
 
+  @override
+  void initState() {
+    super.initState();
+    _feeds.add(
+      FeedScreen(
+        onScreenCreated: (InAppWebViewController controller) {
+          _ctrlMap[0] = controller;
+          webView = controller;
+          initialUrl = "about:blank";
+        },
+      ),
+    );
+    _feeds.add(Icon(Icons.add_circle));
+  }
+
   void onPageChanged(int page) {
     setState(() {
       _currentPage = page;
+      if (_currentPage < _feeds.length - 1) {
+        webView = _ctrlMap[_currentPage];
+      }
     });
   }
 

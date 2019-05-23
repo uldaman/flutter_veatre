@@ -60,6 +60,11 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+  void _expandTab() {
+    _spread = false;
+    _currentPage == _tabPage ? _updateNavBar(true, () {}) : goToWebPage();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -73,8 +78,10 @@ class _NavigationState extends State<Navigation> {
       } else {
         initialUrl = arg;
       }
-      _spread = false;
-      goToWebPage();
+      _expandTab();
+    });
+    onTabExpanded.on((arg) {
+      _expandTab();
     });
   }
 

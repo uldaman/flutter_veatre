@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:vetheat/common/event.dart';
 import 'package:vetheat/screen/feed_screen.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
@@ -42,9 +43,8 @@ class _TabScreenState extends State<TabScreen>
         icon: Icon(Icons.add_circle),
         onPressed: () {
           int index = _feeds.length - 1;
-          setState(() {
-            _feeds.insert(index, _makeFeedScreen(index));
-          });
+          _feeds.insert(index, _makeFeedScreen(index));
+          onTabExpanded.emit();
         },
       ),
     );
@@ -61,7 +61,7 @@ class _TabScreenState extends State<TabScreen>
 
   void onPageTap(int page) {
     setState(() {
-      // TODO: open web
+      onTabExpanded.emit();
     });
   }
 

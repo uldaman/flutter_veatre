@@ -93,11 +93,13 @@ class _TabScreenState extends State<TabScreen>
     );
   }
 
-  Container _buildPage(int index) {
+  AnimatedContainer _buildPage(int index) {
     final bool active = index == _currentPage;
     final Widget page = _feeds[index];
     final bool shadow = widget.spread && active && !(page is IconButton);
-    return Container(
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeOutQuint,
       margin: EdgeInsets.only(
         top: widget.spread ? (active ? 100 : 200) : 0,
         bottom: widget.spread ? 50 : 0,

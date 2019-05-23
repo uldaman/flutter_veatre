@@ -17,25 +17,39 @@ class TabScreen extends StatefulWidget {
 class _TabScreenState extends State<TabScreen>
     with AutomaticKeepAliveClientMixin {
   int _currentPage = 0;
+  SwiperController _swiperController = SwiperController();
   List<Widget> _feeds = <Widget>[];
   Map<int, InAppWebViewController> _ctrlMap = {};
 
   @override
   bool get wantKeepAlive => true;
 
+  FeedScreen _makeFeedScreen(int index) {
+    return FeedScreen(
+      onScreenCreated: (InAppWebViewController controller) {
+        _ctrlMap[index] = controller;
+        webView = controller;
+        initialUrl = "about:blank";
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    _feeds.add(_makeFeedScreen(0));
     _feeds.add(
-      FeedScreen(
-        onScreenCreated: (InAppWebViewController controller) {
-          _ctrlMap[0] = controller;
-          webView = controller;
-          initialUrl = "about:blank";
+      IconButton(
+        icon: Icon(Icons.add_circle),
+        onPressed: () {
+          int index = _feeds.length - 1;
+          setState(() {
+            _feeds.insert(index, _makeFeedScreen(index));
+          });
+          _swiperController.move(index);
         },
       ),
     );
-    _feeds.add(Icon(Icons.add_circle));
   }
 
   void onPageChanged(int page) {
@@ -65,6 +79,7 @@ class _TabScreenState extends State<TabScreen>
             )
           : null,
       body: Swiper(
+        controller: _swiperController,
         itemCount: _feeds.length,
         itemBuilder: (BuildContext context, int index) {
           return _buildPage(index);
@@ -98,7 +113,7 @@ class _TabScreenState extends State<TabScreen>
         // https://github.com/OpenFlutter/amap_base_flutter/issues/58
         // borderRadius: BorderRadius.circular(35.0),
         // clipBehavior: Clip.hardEdge,
-        shadowColor: (page is Icon || !widget.spread)
+        shadowColor: (page is IconButton || !widget.spread)
             ? Colors.transparent
             : Colors.black87,
       ),

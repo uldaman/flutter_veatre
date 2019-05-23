@@ -48,7 +48,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   Future _updateNavBar(bool isTabPage, VoidCallback fn) async {
-    final bool b = isTabPage && webView != null;
+    final bool b = isTabPage && !_spread && webView != null;
     _canGoBack = b ? await webView.canGoBack() : false;
     _canGoForward = b ? await webView.canGoForward() : false;
     setState(fn);

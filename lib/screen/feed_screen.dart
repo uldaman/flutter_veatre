@@ -2,22 +2,78 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:vetheat/common/event_bus.dart';
 import 'package:vetheat/common/search_widget.dart';
+import 'package:vetheat/common/vechain.dart';
 
 String initialUrl = "about:blank";
 
-class FeedScreen extends StatefulWidget {
-  final onWebViewCreatedCallback onScreenCreated;
+class FeedScreen {
+  int _current = 0;
+  List<CustomWebView> _views = [];
+  Map<int, InAppWebViewController> _ctrls = {};
+  Map<int, String> _titles = {};
 
-  const FeedScreen({
+  CustomWebView get webView => _views[_current];
+  InAppWebViewController get controller => _ctrls[_current];
+  String get title => _titles[_current];
+
+  CustomWebView _buildWebView(int index) {
+    return CustomWebView(
+      onWebViewCreated: (InAppWebViewController controller) {
+        _ctrls[index] = controller;
+        initialUrl = "about:blank";
+      },
+      onLoadStop: (InAppWebViewController controller, String url) {
+        controller.getTitle().then((title) => _titles[index] = title);
+      },
+    );
+  }
+
+  FeedScreen() {
+    _views.add(_buildWebView(0));
+  }
+
+  CustomWebView addWebView() {
+    _views.add(_buildWebView(_views.length));
+    _current++;
+    return webView;
+  }
+
+  void loadUrl(String url) {
+    controller == null ? initialUrl = url : controller.loadUrl(url);
+  }
+
+  Future<bool> canGoBack() async {
+    return controller == null ? false : await controller.canGoBack();
+  }
+
+  Future<bool> canGoForward() async {
+    return controller == null ? false : await controller.canGoForward();
+  }
+
+  void goBack() {
+    if (controller != null) controller.goBack();
+  }
+
+  void goForward() {
+    if (controller != null) controller.goForward();
+  }
+}
+
+class CustomWebView extends StatefulWidget {
+  final onWebViewCreatedCallback onWebViewCreated;
+  final onWebViewLoadStopCallback onLoadStop;
+
+  const CustomWebView({
     Key key,
-    @required this.onScreenCreated,
+    this.onWebViewCreated,
+    this.onLoadStop,
   }) : super(key: key);
 
   @override
-  _FeedScreenState createState() => _FeedScreenState();
+  _CustomWebViewState createState() => _CustomWebViewState();
 }
 
-class _FeedScreenState extends State<FeedScreen>
+class _CustomWebViewState extends State<CustomWebView>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -56,16 +112,29 @@ class _FeedScreenState extends State<FeedScreen>
           padding: EdgeInsets.only(bottom: 3.0),
         ),
       ),
-      body: Center(
-        child: InAppWebView(
-          initialUrl: initialUrl,
-          onWebViewCreated: (InAppWebViewController controller) {
-            webView.addJavaScriptHandler("pageChange", (arguments) async {
-            widget.onScreenCreated(controller);
-              bus.emit("pageChange");
-            });
-          },
-        ),
+      body: InAppWebView(
+        initialUrl: initialUrl,
+        onWebViewCreated: (InAppWebViewController controller) {
+          controller.addJavaScriptHandler("debugLog", (arguments) async {
+            debugPrint("debugLog: " + arguments.join(","));
+          });
+          controller.addJavaScriptHandler("webChanged", (arguments) async {
+            bus.emit("webChanged");
+          });
+          controller.addJavaScriptHandler("vechain", (arguments) async {
+            return Vechain().callMethod(arguments);
+          });
+          // TODO, 心跳
+          widget.onWebViewCreated(controller);
+        },
+        onLoadStop: (InAppWebViewController controller, String url) async {
+          widget.onLoadStop(controller, url);
+        },
+        onProgressChanged: (InAppWebViewController controller, int progress) {
+          setState(() {
+            _progress = progress / 100;
+          });
+        },
       ),
     );
   }

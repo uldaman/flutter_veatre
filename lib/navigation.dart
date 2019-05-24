@@ -12,76 +12,27 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
-  final _tabPage = 2;
-  int _currentPage = 3; // Icons.star
+  final FeedScreen feed = FeedScreen();
+  final PageController _pageController = PageController(
+    initialPage: 2,
+  ); // star page
   bool _canGoBack = false;
   bool _canGoForward = false;
-  bool _spread = false;
-
-  PageController _pageController;
-  void goToWebPage() => _pageController.jumpToPage(0);
-
-  Future navigationTapped(int page) async {
-    final bool b1 = _currentPage == _tabPage;
-    final bool b2 = _currentPage == page;
-    switch (page) {
-      case 0:
-        if (b1 && webView != null && await webView.canGoBack()) {
-          webView.goBack();
-        }
-        break;
-      case 1:
-        if (b1 && webView != null && await webView.canGoForward()) {
-          webView.goForward();
-        }
-        break;
-      case 2:
-        _spread = b1 ? !_spread : true;
-        b2 ? _updateNavBar(true, () {}) : goToWebPage();
-        break;
-      case 3:
-      case 4:
-        _spread = false;
-        b2 ? goToWebPage() : _pageController.jumpToPage(page - 2);
-        break;
-    }
-  }
-
-  Future _updateNavBar(bool isTabPage, VoidCallback fn) async {
-    final bool b = isTabPage && !_spread && webView != null;
-    _canGoBack = b ? await webView.canGoBack() : false;
-    _canGoForward = b ? await webView.canGoForward() : false;
-    setState(fn);
-  }
-
-  Future onPageChanged(int page) async {
-    await _updateNavBar(page == _tabPage, () {
-      _currentPage = page + 2;
-    });
-  }
-
-  void _expandTab() {
-    _spread = false;
-    _currentPage == _tabPage ? _updateNavBar(true, () {}) : goToWebPage();
-  }
+  int _currentNav = 3; // star navigation
+  bool get isAtWebView => _currentNav == 1;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1); //  StarScreen
-    onWebChanged.on((arg) {
-      _updateNavBar(_currentPage == _tabPage, () {});
-    });
     onGoUrl.on((arg) {
-      if (webView != null) {
-        webView.loadUrl(arg);
-      } else {
-        initialUrl = arg;
-      }
-      _expandTab();
+      feed.loadUrl(arg);
+      // webview navigation
+      if (_currentNav != 1) _pageController.jumpToPage(0); // webview page
     });
-    onTabExpanded.on((arg) {
-      _expandTab();
+    onWebChanged.on((arg) async {
+      _canGoBack = await feed.canGoBack();
+      _canGoForward = await feed.canGoForward();
+      setState(() {});
     });
   }
 
@@ -102,12 +53,37 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
+  Future onPageChanged(int page) async {
+    setState(() {
+      _currentNav = page + 1;
+    });
+  }
+
+  Future navigationTapped(int index) async {
+    switch (index) {
+      case 0:
+        if (isAtWebView) feed.goBack();
+        break;
+      case 1:
+        if (isAtWebView) feed.goForward();
+        break;
+      case 2:
+      case 3:
+      case 4:
+        _currentNav == index
+            ? _pageController.jumpToPage(0)
+            : _pageController.jumpToPage(index - 1);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
         children: [
-          TabScreen(spread: _spread),
+          feed.webView,
+          TabScreen(),
           StarScreen(),
           WalletScreen(),
         ],
@@ -118,17 +94,14 @@ class _NavigationState extends State<Navigation> {
       bottomNavigationBar: CupertinoTabBar(
         activeColor: Colors.orange,
         items: <BottomNavigationBarItem>[
-          makeNavBarItem(Icons.arrow_back_ios, _canGoBack),
-          makeNavBarItem(Icons.arrow_forward_ios, _canGoForward),
-          makeNavBarItem(
-            Icons.filter_none,
-            _currentPage == 2 && _spread,
-          ),
-          makeNavBarItem(Icons.star, _currentPage == 3),
-          makeNavBarItem(Icons.account_balance_wallet, _currentPage == 4),
+          makeNavBarItem(Icons.arrow_back_ios, isAtWebView && _canGoBack),
+          makeNavBarItem(Icons.arrow_forward_ios, isAtWebView && _canGoForward),
+          makeNavBarItem(Icons.filter_none, _currentNav == 2),
+          makeNavBarItem(Icons.star, _currentNav == 3),
+          makeNavBarItem(Icons.account_balance_wallet, _currentNav == 4),
         ],
         onTap: navigationTapped,
-        currentIndex: _currentPage,
+        currentIndex: _currentNav,
       ),
     );
   }

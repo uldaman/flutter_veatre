@@ -18,4 +18,3 @@ class Event {
 
 const onGoUrl = Event("goUrl");
 const onWebChanged = Event("webChanged");
-const onTabExpanded = Event("tabExpanded");

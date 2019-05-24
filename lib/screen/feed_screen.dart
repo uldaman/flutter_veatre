@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:vetheat/common/event.dart';
 import 'package:vetheat/common/event_bus.dart';
 import 'package:vetheat/common/search_widget.dart';
 import 'package:vetheat/common/vechain.dart';
@@ -10,20 +11,20 @@ class FeedScreen {
   int _current = 0;
   List<CustomWebView> _views = [];
   Map<int, InAppWebViewController> _ctrls = {};
-  Map<int, String> _titles = {};
+  Map<int, String> titles = {};
 
   CustomWebView get webView => _views[_current];
   InAppWebViewController get controller => _ctrls[_current];
-  String get title => _titles[_current];
 
   CustomWebView _buildWebView(int index) {
     return CustomWebView(
+      key: Key(index.toString()),
       onWebViewCreated: (InAppWebViewController controller) {
         _ctrls[index] = controller;
         initialUrl = "about:blank";
       },
       onLoadStop: (InAppWebViewController controller, String url) {
-        controller.getTitle().then((title) => _titles[index] = title);
+        controller.getTitle().then((title) => titles[index] = title);
       },
     );
   }
@@ -32,10 +33,15 @@ class FeedScreen {
     _views.add(_buildWebView(0));
   }
 
-  CustomWebView addWebView() {
+  void chooseWebView(int index) {
+    if (index >= 0 && index < _views.length) _current = index;
+    onWebChanged.emit();
+  }
+
+  void addWebView() {
     _views.add(_buildWebView(_views.length));
-    _current++;
-    return webView;
+    _current = _views.length - 1;
+    onWebChanged.emit();
   }
 
   void loadUrl(String url) {

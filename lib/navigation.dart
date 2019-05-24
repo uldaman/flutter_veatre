@@ -26,13 +26,12 @@ class _NavigationState extends State<Navigation> {
     super.initState();
     onGoUrl.on((arg) {
       feed.loadUrl(arg);
-      // webview navigation
-      if (_currentNav != 1) _pageController.jumpToPage(0); // webview page
+      if (!isAtWebView) _pageController.jumpToPage(0); // webview page
     });
     onWebChanged.on((arg) async {
       _canGoBack = await feed.canGoBack();
       _canGoForward = await feed.canGoForward();
-      setState(() {});
+      !isAtWebView ? _pageController.jumpToPage(0) : setState(() {});
     });
   }
 
@@ -83,7 +82,7 @@ class _NavigationState extends State<Navigation> {
       body: PageView(
         children: [
           feed.webView,
-          TabScreen(),
+          TabScreen(feed: feed),
           StarScreen(),
           WalletScreen(),
         ],

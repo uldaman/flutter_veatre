@@ -16,5 +16,5 @@ class Event {
   }
 }
 
-const onGoUrl = Event("goUrl");
 const onWebChanged = Event("webChanged");
+const onWebViewSelected = Event("webSelected");

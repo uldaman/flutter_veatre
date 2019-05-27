@@ -31,8 +31,6 @@ dev_dependencies:
   flutter_inappbrowser:
         path: /Users/hanxiao/Documents/FlutterProjects/flutter_inappbrowser
 
-  flutter_swiper: 1.1.6
-
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
 

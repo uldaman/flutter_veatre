@@ -5,6 +5,7 @@ import 'package:vetheat/screen/feed_screen.dart';
 import 'package:vetheat/screen/star_screen.dart';
 import 'package:vetheat/screen/tab_screen.dart';
 import 'package:vetheat/screen/wallet_screen.dart';
+import 'package:vetheat/common/web_views.dart' as web_view;
 
 class Navigation extends StatefulWidget {
   @override
@@ -12,25 +13,18 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
-  final FeedScreen feed = FeedScreen();
-  final PageController _pageController = PageController(
-    initialPage: 2,
-  ); // star page
+  final PageController _pageController = PageController();
   bool _canGoBack = false;
   bool _canGoForward = false;
-  int _currentNav = 3; // star navigation
+  int _currentNav = 1; // star navigation
   bool get isAtWebView => _currentNav == 1;
 
   @override
   void initState() {
     super.initState();
-    onGoUrl.on((arg) {
-      feed.loadUrl(arg);
-      if (!isAtWebView) _pageController.jumpToPage(0); // webview page
-    });
     onWebChanged.on((arg) async {
-      _canGoBack = await feed.canGoBack();
-      _canGoForward = await feed.canGoForward();
+      _canGoBack = await web_view.canGoBack();
+      _canGoForward = await web_view.canGoForward();
       !isAtWebView ? _pageController.jumpToPage(0) : setState(() {});
     });
   }
@@ -61,10 +55,10 @@ class _NavigationState extends State<Navigation> {
   Future navigationTapped(int index) async {
     switch (index) {
       case 0:
-        if (isAtWebView) feed.goBack();
+        if (isAtWebView) web_view.goBack();
         break;
       case 1:
-        if (isAtWebView) feed.goForward();
+        if (isAtWebView) web_view.goForward();
         break;
       case 2:
       case 3:
@@ -81,8 +75,8 @@ class _NavigationState extends State<Navigation> {
     return Scaffold(
       body: PageView(
         children: [
-          feed.webView,
-          TabScreen(feed: feed),
+          FeedScreen(),
+          TabScreen(),
           StarScreen(),
           WalletScreen(),
         ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vetheat/common/event.dart';
+import 'package:vetheat/common/web_views.dart' as web_view;
 
 class SearchWidget extends StatelessWidget {
   @override
@@ -27,7 +27,7 @@ class SearchWidget extends StatelessWidget {
 
   onSubmitted(String url) {
     if (url != "") {
-      onGoUrl.emit(url);
+      web_view.loadUrl(url);
     }
   }
 }

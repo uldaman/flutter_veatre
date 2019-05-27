@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:vetheat/common/event.dart';
-import 'package:vetheat/screen/feed_screen.dart';
+import 'package:vetheat/common/web_views.dart' as web_view;
 
 class TabScreen extends StatefulWidget {
-  final FeedScreen feed;
-
-  const TabScreen({Key key, this.feed}) : super(key: key);
+  const TabScreen({Key key}) : super(key: key);
 
   @override
   _TabScreenState createState() => _TabScreenState();
@@ -28,7 +26,7 @@ class _TabScreenState extends State<TabScreen>
         ),
         child: InkWell(
           onTap: () {
-            widget.feed.chooseWebView(index);
+            onWebViewSelected.emit(index);
           },
           child: Text(
             title == "" ? "空" : title[0].toUpperCase(),
@@ -46,7 +44,8 @@ class _TabScreenState extends State<TabScreen>
       alignment: Alignment.center,
       child: InkWell(
         onTap: () {
-          widget.feed.addWebView();
+          int index = web_view.createWebView();
+          onWebViewSelected.emit(index);
         },
         child: Icon(Icons.add_circle),
       ),
@@ -56,7 +55,7 @@ class _TabScreenState extends State<TabScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    List<Widget> thumbs = widget.feed.titles.map(_buildThumb).values.toList();
+    List<Widget> thumbs = web_view.titleMap.map(_buildThumb).values.toList();
     thumbs.add(_buildAdd());
     return Scaffold(
       appBar: AppBar(

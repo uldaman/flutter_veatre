@@ -13,6 +13,7 @@ class SearchWidget extends StatelessWidget {
           margin: EdgeInsets.symmetric(horizontal: 10.0),
           child: TextField(
             maxLines: 1,
+            keyboardAppearance: Brightness.light,
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.only(bottom: 6.0, top: 8.0),
               hintText: "Url | app | block | tx | account",

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
-import 'package:vetheat/common/event_bus.dart';
-import 'package:vetheat/common/search_widget.dart';
-import 'package:vetheat/common/vechain.dart';
+import 'package:veatre/common/event_bus.dart';
+import 'package:veatre/common/search_widget.dart';
+import 'package:veatre/common/vechain.dart';
 
 String initialUrl = "about:blank";
 

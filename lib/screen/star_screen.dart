@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vetheat/common/web_views.dart' as web_view;
+import 'package:veatre/common/web_views.dart' as web_view;
 
 class StarScreen extends StatefulWidget {
   @override

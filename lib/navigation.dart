@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:vetheat/common/event.dart';
-import 'package:vetheat/screen/feed_screen.dart';
-import 'package:vetheat/screen/star_screen.dart';
-import 'package:vetheat/screen/tab_screen.dart';
-import 'package:vetheat/screen/wallet_screen.dart';
-import 'package:vetheat/common/web_views.dart' as web_view;
+import 'package:veatre/common/event.dart';
+import 'package:veatre/screen/feed_screen.dart';
+import 'package:veatre/screen/star_screen.dart';
+import 'package:veatre/screen/tab_screen.dart';
+import 'package:veatre/screen/wallet_screen.dart';
+import 'package:veatre/common/web_views.dart' as web_view;
 
 class Navigation extends StatefulWidget {
   @override

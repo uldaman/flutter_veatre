@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:vetheat/common/event_bus.dart';
+import 'package:veatre/common/event_bus.dart';
 
 @immutable
 class Event {

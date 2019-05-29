@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:vetheat/navigation.dart';
+import 'package:veatre/navigation.dart';
 // import 'package:flutter/rendering.dart';
+import 'package:veatre/common/vechain.dart';
 
 void main() {
   // debugPaintSizeEnabled = true;
+  // Vechain().getBlockByHash("hash");
   runApp(MyApp());
 }
 
@@ -11,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'VETHEAT',
+      title: 'VEATRE',
       theme: new ThemeData(
           primarySwatch: Colors.blue,
           primaryColor: Colors.black,

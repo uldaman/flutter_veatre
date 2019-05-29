@@ -2,7 +2,7 @@ library web_view;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
-import 'package:vetheat/common/web_view.dart';
+import 'package:veatre/common/web_view.dart';
 
 int index = 0;
 Map<int, InAppWebViewController> _ctrlMap = {};

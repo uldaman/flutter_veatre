@@ -1,4 +1,4 @@
-package com.example.vetheat;
+package com.example.veatre;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/navigation.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
+import 'package:veatre/src/ui/walletDetail.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
 import 'package:veatre/src/ui/generateMnemonic.dart';
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         Navigation.routeName: (context) => new Navigation(),
         ManageWallets.routeName: (context) => new ManageWallets(),
+        WalletDetail.routeName: (context) => new WalletDetail(),
         CreateWallet.routeName: (context) => new CreateWallet(),
         ImportWallet.routeName: (context) => new ImportWallet(),
         GenerateMnemonic.routeName: (context) => new GenerateMnemonic(),

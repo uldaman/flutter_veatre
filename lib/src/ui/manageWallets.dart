@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/storage/storage.dart';
-import 'package:veatre/src/ui/CreateWallet.dart';
-import 'package:veatre/src/ui/ImportWallet.dart';
+import 'package:veatre/src/ui/createWallet.dart';
+import 'package:veatre/src/ui/importWallet.dart';
+import 'package:veatre/src/ui/walletDetail.dart';
 
 class ManageWallets extends StatefulWidget {
   static const routeName = '/wallets_management';
@@ -152,6 +153,8 @@ class ManageWalletsState extends State<ManageWallets> {
       ),
       onTap: () {
         print('tap wallet');
+        Navigator.pushNamed(context, WalletDetail.routeName,
+            arguments: walletEntity);
       },
     );
   }

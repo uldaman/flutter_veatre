@@ -4,8 +4,11 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web3dart/crypto.dart';
-import "package:pointycastle/key_derivators/scrypt.dart";
 import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/bip39/mnemonic.dart';
+import 'package:veatre/src/bip39/hdkey.dart';
+
+import "package:pointycastle/key_derivators/scrypt.dart";
 import 'package:pointycastle/key_derivators/api.dart';
 import 'package:pointycastle/impl.dart';
 import 'package:pointycastle/api.dart';
@@ -255,4 +258,42 @@ List<int> _encryptPrivateKey(ScryptKeyDerivator _derivator, Uint8List _password,
   var aesKey = derived.sublist(0, 16);
   var aes = _initCipher(true, aesKey, _iv);
   return aes.process(hexToBytes(privateKey));
+}
+
+class Decriptions {
+  KeyStore keystore;
+  String password;
+
+  Decriptions({KeyStore keystore, String password}) {
+    this.keystore = keystore;
+    this.password = password;
+  }
+}
+
+Uint8List decrypt(Decriptions decriptions) {
+  return KeyStore.decrypt(
+    keyS: decriptions.keystore,
+    passphrase: decriptions.password,
+  );
+}
+
+class MnemonicDecriptions {
+  String mnemonic;
+  String password;
+
+  MnemonicDecriptions({String mnemonic, String password}) {
+    this.mnemonic = mnemonic;
+    this.password = password;
+  }
+}
+
+Future<KeyStore> decryptMnemonic(
+    MnemonicDecriptions mnemonicDecriptions) async {
+  Uint8List seed =
+      Mnemonic.generateMasterSeed(mnemonicDecriptions.mnemonic, "");
+  Uint8List rootSeed = getRootSeed(seed);
+  Uint8List privateKey = getPrivateKey(rootSeed, defaultKeyPathNodes());
+  KeyStore keystore = await KeyStore.encrypt(
+      bytesToHex(privateKey), mnemonicDecriptions.password);
+  return keystore;
 }

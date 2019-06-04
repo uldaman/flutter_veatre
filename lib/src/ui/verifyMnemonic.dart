@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
@@ -6,13 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/bip39/hdkey.dart';
-import 'package:veatre/src/bip39/mnemonic.dart';
 import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
-import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/keyStore.dart';
-import 'package:web3dart/crypto.dart';
 
 class VerifyMnemonic extends StatefulWidget {
   static const routeName = '/wallet/mnemonic/verification';
@@ -234,8 +229,8 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
                           verify(args.mnemonics);
                           if (isValid) {
                             KeyStore keystore = await compute(
-                                decryptMnemonics,
-                                MnemonicPhase(
+                                decryptMnemonic,
+                                MnemonicDecriptions(
                                     mnemonic: args.mnemonics.join(" "),
                                     password: args.password));
                             await WalletStorage.write(
@@ -329,23 +324,4 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
     }
     return true;
   }
-}
-
-class MnemonicPhase {
-  String mnemonic;
-  String password;
-
-  MnemonicPhase({String mnemonic, String password}) {
-    this.mnemonic = mnemonic;
-    this.password = password;
-  }
-}
-
-Future<KeyStore> decryptMnemonics(MnemonicPhase mnemonicPhase) async {
-  Uint8List seed = Mnemonic.generateMasterSeed(mnemonicPhase.mnemonic, "");
-  Uint8List rootSeed = getRootSeed(seed);
-  Uint8List privateKey = getPrivateKey(rootSeed, defaultKeyPathNodes());
-  KeyStore keystore =
-      await KeyStore.encrypt(bytesToHex(privateKey), mnemonicPhase.password);
-  return keystore;
 }

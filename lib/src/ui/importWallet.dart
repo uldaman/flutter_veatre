@@ -4,12 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:veatre/src/bip39/mnemonic.dart';
-import 'package:veatre/src/bip39/hdkey.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
-import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/bip39/mnemonic.dart';
 import 'package:veatre/src/models/keyStore.dart';
 import 'package:veatre/src/storage/storage.dart';
 import 'package:web3dart/crypto.dart';
@@ -24,7 +22,7 @@ class ImportWallet extends StatefulWidget {
 class ImportWalletState extends State<ImportWallet> {
   int currentPage = 0;
   bool loading = false;
-  Key key;
+  Decriptions decriptions;
   TextEditingController mnemonicController = TextEditingController();
   TextEditingController mnemonicWalletNameController = TextEditingController();
   TextEditingController mnemonicPasswordController = TextEditingController();
@@ -208,6 +206,7 @@ class ImportWalletState extends State<ImportWallet> {
       ],
     );
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text('Import Wallet'),
@@ -319,7 +318,7 @@ class ImportWalletState extends State<ImportWallet> {
                             }
                             KeyStore keystore = await compute(
                               decryptMnemonic,
-                              MnemonicPhase(
+                              MnemonicDecriptions(
                                   mnemonic: mnemonic, password: password),
                             );
                             WalletEntity existed =
@@ -405,13 +404,17 @@ class ImportWalletState extends State<ImportWallet> {
                                   "keystore is invalid");
                             }
                             try {
-                              Uint8List privateKey = await compute(decryptKey,
-                                  Key(keystore: keystore, password: password));
+                              Uint8List privateKey = await compute(
+                                decrypt,
+                                Decriptions(
+                                    keystore: keystore, password: password),
+                              );
                               Uint8List publicKey =
                                   privateKeyBytesToPublic(privateKey);
                               Uint8List addr = publicKeyToAddress(publicKey);
                               WalletEntity existed =
                                   await walletExisted(bytesToHex(addr));
+                              keystore.address = bytesToHex(addr);
                               if (existed != null) {
                                 setState(() {
                                   loading = false;
@@ -479,40 +482,4 @@ class ImportWalletState extends State<ImportWallet> {
       ),
     );
   }
-}
-
-class MnemonicPhase {
-  String mnemonic;
-  String password;
-
-  MnemonicPhase({String mnemonic, String password}) {
-    this.mnemonic = mnemonic;
-    this.password = password;
-  }
-}
-
-Future<KeyStore> decryptMnemonic(MnemonicPhase mnemonicPhase) async {
-  Uint8List seed = Mnemonic.generateMasterSeed(mnemonicPhase.mnemonic, "");
-  Uint8List rootSeed = getRootSeed(seed);
-  Uint8List privateKey = getPrivateKey(rootSeed, defaultKeyPathNodes());
-  KeyStore keystore =
-      await KeyStore.encrypt(bytesToHex(privateKey), mnemonicPhase.password);
-  return keystore;
-}
-
-class Key {
-  KeyStore keystore;
-  String password;
-
-  Key({KeyStore keystore, String password}) {
-    this.keystore = keystore;
-    this.password = password;
-  }
-}
-
-Uint8List decryptKey(Key key) {
-  return KeyStore.decrypt(
-    keyS: key.keystore,
-    passphrase: key.password,
-  );
 }

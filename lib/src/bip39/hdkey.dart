@@ -222,34 +222,6 @@ Uint8List getPrivateKey(
   return keypair[0];
 }
 
-//m/44'/818'/0'/0/0
-Future<void> privateKeyForVET(Uint8List masterExtendedKey) async {
-  var hardenedExtendedKey_44 =
-      ckdPrivHardened(masterExtendedKey, 44).expand((i) => i).toList();
-
-  var hardenedExtendedKey_818 =
-      ckdPrivHardened(new Uint8List.fromList(hardenedExtendedKey_44), 818)
-          .expand((i) => i)
-          .toList();
-
-  var hardenedExtendedKey_0 =
-      ckdPrivHardened(new Uint8List.fromList(hardenedExtendedKey_818), 0)
-          .expand((i) => i)
-          .toList();
-
-  var nonHardened1 =
-      ckdPrivNonHardened(new Uint8List.fromList(hardenedExtendedKey_0), 0);
-  var extendedKey_1 = nonHardened1.expand((i) => i).toList();
-  var nonHardened2 =
-      ckdPrivNonHardened(new Uint8List.fromList(extendedKey_1), 0);
-  print("private key:${bytesToHex(nonHardened2[0])}");
-  var privateKey = nonHardened2[0];
-  var publicKey = privateKeyBytesToPublic(privateKey);
-  print("Public Key: ${bytesToHex(publicKey)} ");
-  var addr = publicKeyToAddress(publicKey);
-  print("addr: ${bytesToHex(addr)}");
-}
-
 String exportExtendedPrivKey(
     {String network,
     String depth,

@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/ui/CreateWallet.dart';
 import 'package:veatre/src/ui/ImportWallet.dart';
-import 'package:veatre/src/ui/RouteObserver.dart';
 
 class ManageWallets extends StatefulWidget {
   static const routeName = '/wallets_management';

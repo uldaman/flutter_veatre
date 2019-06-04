@@ -1,0 +1,116 @@
+import 'dart:math';
+import 'dart:typed_data';
+import 'package:web3dart/crypto.dart';
+import 'package:pointycastle/api.dart';
+import 'package:veatre/src/bip39/hdkey.dart';
+
+String zero2(word) {
+  if (word.length == 1)
+    return '0' + word;
+  else
+    return word;
+}
+
+bool isSurrogatePair(String msg, i) {
+  if ((msg.codeUnitAt(i) & 0xFC00) != 0xD800) {
+    return false;
+  }
+  if (i < 0 || i + 1 >= msg.length) {
+    return false;
+  }
+  return (msg.codeUnitAt(i + 1) & 0xFC00) == 0xDC00;
+}
+
+List<int> toArray(String msg, [String enc]) {
+  if (enc == 'hex') {
+    List<int> hexRes = new List();
+    msg = msg.replaceAll(new RegExp("[^a-z0-9]"), '');
+    if (msg.length % 2 != 0) msg = '0' + msg;
+    for (var i = 0; i < msg.length; i += 2) {
+      var cul = msg[i] + msg[i + 1];
+      var result = int.parse(cul, radix: 16);
+      hexRes.add(result);
+    }
+    return hexRes;
+  } else {
+    List<int> noHexRes = new List();
+    for (var i = 0; i < msg.length; i++) {
+      var c = msg.codeUnitAt(i);
+      var hi = c >> 8;
+      var lo = c & 0xff;
+      if (hi > 0) {
+        noHexRes.add(hi);
+        noHexRes.add(lo);
+      } else {
+        noHexRes.add(lo);
+      }
+    }
+
+    return noHexRes;
+  }
+}
+
+List<int> randomBytes(int byteLength) {
+  Random random = new Random.secure();
+  return RandomBridge(random).nextBytes(byteLength);
+}
+
+String randomHex(int hexLength) {
+  return bytesToHex(randomBytes(hexLength ~/ 2));
+}
+
+List<KeyPathNode> defaultKeyPathNodes() {
+  return [
+    KeyPathNode(44, true),
+    KeyPathNode(818, true),
+    KeyPathNode(0, true),
+    KeyPathNode(0, false),
+    KeyPathNode(0, false)
+  ];
+}
+
+class RandomBridge implements SecureRandom {
+  Random dartRandom;
+
+  RandomBridge(this.dartRandom);
+
+  @override
+  String get algorithmName => 'DartRandom';
+
+  @override
+  BigInt nextBigInteger(int bitLength) {
+    final fullBytes = bitLength ~/ 8;
+    final remainingBits = bitLength % 8;
+
+    // Generate a number from the full bytes. Then, prepend a smaller number
+    // covering the remaining bits.
+    final main = bytesToInt(nextBytes(fullBytes));
+    final additional = dartRandom.nextInt(1 << remainingBits);
+    return main + (BigInt.from(additional) << (fullBytes * 8));
+  }
+
+  @override
+  Uint8List nextBytes(int count) {
+    final list = Uint8List(count);
+
+    for (var i = 0; i < list.length; i++) {
+      list[i] = nextUint8();
+    }
+
+    return list;
+  }
+
+  @override
+  int nextUint16() => dartRandom.nextInt(1 << 16);
+
+  @override
+  int nextUint32() => dartRandom.nextInt(1 << 32);
+
+  @override
+  int nextUint8() => dartRandom.nextInt(1 << 8);
+
+  @override
+  void seed(CipherParameters params) {
+    // ignore, dartRandom will already be seeded if wanted
+  }
+}

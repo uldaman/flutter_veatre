@@ -4,10 +4,12 @@ import 'package:veatre/common/event.dart';
 import 'package:veatre/screen/feed_screen.dart';
 import 'package:veatre/screen/star_screen.dart';
 import 'package:veatre/screen/tab_screen.dart';
-import 'package:veatre/screen/wallet_screen.dart';
+import 'package:veatre/screen/Settings.dart';
 import 'package:veatre/common/web_views.dart' as web_view;
 
 class Navigation extends StatefulWidget {
+  static const routeName = '/';
+
   @override
   _NavigationState createState() => _NavigationState();
 }
@@ -78,7 +80,7 @@ class _NavigationState extends State<Navigation> {
           FeedScreen(),
           TabScreen(),
           StarScreen(),
-          WalletScreen(),
+          Settings(),
         ],
         controller: _pageController,
         physics: NeverScrollableScrollPhysics(),

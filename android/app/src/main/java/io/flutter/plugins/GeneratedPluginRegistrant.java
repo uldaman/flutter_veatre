@@ -2,6 +2,7 @@ package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
 import com.pichillilorenzo.flutter_inappbrowser.InAppBrowserFlutterPlugin;
+import com.it_nomads.fluttersecurestorage.FlutterSecureStoragePlugin;
 
 /**
  * Generated file. Do not edit.
@@ -12,6 +13,7 @@ public final class GeneratedPluginRegistrant {
       return;
     }
     InAppBrowserFlutterPlugin.registerWith(registry.registrarFor("com.pichillilorenzo.flutter_inappbrowser.InAppBrowserFlutterPlugin"));
+    FlutterSecureStoragePlugin.registerWith(registry.registrarFor("com.it_nomads.fluttersecurestorage.FlutterSecureStoragePlugin"));
   }
 
   private static boolean alreadyRegisteredWith(PluginRegistry registry) {

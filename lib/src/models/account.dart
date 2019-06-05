@@ -1,13 +1,13 @@
 class Account {
-  String address;
   BigInt balance;
   BigInt energy;
+  bool hasCode;
 
   static final unit = BigInt.from(1e18);
 
-  Account({this.address, this.balance, this.energy});
+  Account({this.balance, this.energy, this.hasCode});
 
-  formatBalance() {
+  String formatBalance() {
     double b = (this.balance / unit).toDouble();
     String fixed2 = b.toStringAsFixed(2);
     if (fixed2.split('.')[1].endsWith('0')) {
@@ -20,7 +20,7 @@ class Account {
     return fixed2;
   }
 
-  formatEnergy() {
+  String formatEnergy() {
     double ene = (this.energy / unit).toDouble();
     String fixed2 = ene.toStringAsFixed(2);
     if (fixed2.split('.')[1].endsWith('0')) {
@@ -35,13 +35,14 @@ class Account {
 
   factory Account.fromJSON(Map<String, dynamic> parsedJson) {
     return Account(
-      address: parsedJson['address'] == null ? '' : parsedJson['address'],
+      // address: parsedJson['address'] == null ? '' : parsedJson['address'],
       balance: parsedJson['balance'] == null
           ? BigInt.from(0)
           : BigInt.parse(parsedJson['balance']),
       energy: parsedJson['energy'] == null
           ? BigInt.from(0)
           : BigInt.parse(parsedJson['energy']),
+      hasCode: parsedJson['hasCode'],
     );
   }
 }

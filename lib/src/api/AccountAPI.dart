@@ -1,11 +1,12 @@
-import 'package:veatre/src/models/Account.dart';
-import 'package:veatre/src/api/API.dart';
+import 'package:veatre/src/models/account.dart';
+import 'package:veatre/common/vechain.dart';
 
 class AccountAPI {
-  static Future<Account> getAccount(String address) async {
-    Map<dynamic, dynamic> json = await API.get("/accounts/" + address);
+  static Future<Account> get(String address) async {
+    String addr = address.startsWith('0x') ? address : '0x$address';
+    Map<dynamic, dynamic> json = await Vechain.getAccount(addr);
+    print(json);
     Account acc = Account.fromJSON(json);
-    acc.address = address;
     return acc;
   }
 }

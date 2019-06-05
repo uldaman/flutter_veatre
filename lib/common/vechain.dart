@@ -17,16 +17,16 @@ class BadParameter implements Exception {
 
 @immutable
 class Vechain {
-  final dio = Dio();
+  static final dio = Dio();
 
-  dynamic callMethod(List<dynamic> args) async {
+  static dynamic callMethod(List<dynamic> args) async {
     var methodMap = {
-      "getAccount": () => _getAccount(args[1]),
-      "getAccountCode": () => _getAccountCode(args[1]),
-      "getAccountStorage": () => _getAccountStorage(args[1], args[2]),
-      "getBlock": () => _getBlock(args[1]),
-      "getTransaction": () => _getTransaction(args[1]),
-      "getTransactionReceipt": () => _getTransactionReceipt(args[1]),
+      "getAccount": () => getAccount(args[1]),
+      "getAccountCode": () => getAccountCode(args[1]),
+      "getAccountStorage": () => getAccountStorage(args[1], args[2]),
+      "getBlock": () => getBlock(args[1]),
+      "getTransaction": () => getTransaction(args[1]),
+      "getTransactionReceipt": () => getTransactionReceipt(args[1]),
     };
 
     if (methodMap.containsKey(args[0])) {
@@ -34,9 +34,9 @@ class Vechain {
     }
   }
 
-  Future<Map<String, dynamic>> status() async {
+  static Future<Map<String, dynamic>> status() async {
     var fn = (time) => (time - genesisTime) ~/ interval;
-    dynamic block = await _getBlock("best");
+    dynamic block = await getBlock("best");
     int now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     return {
       "progress": fn(block["timestamp"]) / fn(now),
@@ -49,35 +49,41 @@ class Vechain {
     };
   }
 
-  dynamic _getBlock(dynamic revision) async {
+  static dynamic getBlock(dynamic revision) async {
     Response response = await dio.get("$testnet/blocks/$revision");
     return response.data;
   }
 
-  dynamic _getTransaction(String txId) async {
+  static dynamic getTransaction(String txId) async {
     Response response = await dio.get("$testnet/transactions/$txId");
     return response.data;
   }
 
-  dynamic _getTransactionReceipt(String txId) async {
+  static dynamic getTransactionReceipt(String txId) async {
     Response response = await dio.get("$testnet/transactions/$txId/receipt");
     return response.data;
   }
 
-  dynamic _getAccount(String address) async {
+  static dynamic getAccount(String address) async {
     Response response = await dio.get("$testnet/accounts/$address");
     return response.data;
     // throw BadParameter("'addr' expected address type");
   }
 
-  dynamic _getAccountCode(String address) async {
+  static dynamic getAccountCode(String address) async {
     Response response = await dio.get("$testnet/accounts/$address/code");
     return response.data;
   }
 
-  dynamic _getAccountStorage(String address, String key) async {
+  static dynamic getAccountStorage(String address, String key) async {
     Response response =
         await dio.get("$testnet/accounts/$address/Storage/$key");
+    return response.data;
+  }
+
+  static dynamic senTransaction(String raw) async {
+    Response response =
+        await dio.post("$testnet/transactions", data: {"raw": raw});
     return response.data;
   }
 }

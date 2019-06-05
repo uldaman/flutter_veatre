@@ -205,16 +205,15 @@ class ImportWalletState extends State<ImportWallet> {
         ),
       ],
     );
-    return Scaffold(
-      resizeToAvoidBottomPadding: false,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Import Wallet'),
-        centerTitle: true,
-      ),
-      body: ProgressHUD(
-        isLoading: loading,
-        child: Column(
+    return ProgressHUD(
+      child: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text('Import Wallet'),
+          centerTitle: true,
+        ),
+        body: Column(
           children: <Widget>[
             Row(
               children: <Widget>[
@@ -480,6 +479,7 @@ class ImportWalletState extends State<ImportWallet> {
           ],
         ),
       ),
+      isLoading: loading,
     );
   }
 }

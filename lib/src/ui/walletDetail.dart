@@ -29,16 +29,15 @@ class WalletDetailState extends State<WalletDetail> {
   @override
   Widget build(BuildContext context) {
     WalletEntity walletEntity = ModalRoute.of(context).settings.arguments;
-    return Scaffold(
-      resizeToAvoidBottomPadding: false,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Details'),
-        centerTitle: true,
-      ),
-      body: ProgressHUD(
-        isLoading: loading,
-        child: Column(
+    return ProgressHUD(
+      child: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text('Details'),
+          centerTitle: true,
+        ),
+        body: Column(
           children: <Widget>[
             Container(
               width: MediaQuery.of(context).size.width,
@@ -304,6 +303,7 @@ class WalletDetailState extends State<WalletDetail> {
           ],
         ),
       ),
+      isLoading: loading,
     );
   }
 

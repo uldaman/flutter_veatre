@@ -165,15 +165,14 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
     );
 
     double width = MediaQuery.of(context).size.width - 40;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Verify Mnemonic'),
-        centerTitle: true,
-      ),
-      body: ProgressHUD(
-        isLoading: loading,
-        child: Center(
+    return ProgressHUD(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text('Verify Mnemonic'),
+          centerTitle: true,
+        ),
+        body: Center(
           child: Container(
             height: 600,
             child: Column(
@@ -218,7 +217,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
                       ),
                       onPressed: () async {
                         if (this.currentPage < 5) {
-                          pageController.nextPage(
+                          await pageController.nextPage(
                               duration: Duration(milliseconds: 300),
                               curve: Curves.easeOut);
                         } else {
@@ -261,6 +260,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
           ),
         ),
       ),
+      isLoading: loading,
     );
   }
 

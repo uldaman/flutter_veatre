@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:veatre/common/event_bus.dart';
 import 'package:veatre/common/search_widget.dart';
+import 'package:veatre/common/signTxDialog.dart';
 import 'package:veatre/common/vechain.dart';
 
 String initialUrl = "about:blank";
@@ -67,9 +69,16 @@ class _CustomWebViewState extends State<CustomWebView>
           });
           controller.addJavaScriptHandler("webChanged", (arguments) async {
             bus.emit("webChanged");
+            print("webChanged");
+            // await showDialog(
+            //     context: context,
+            //     barrierDismissible: false,
+            //     builder: (context) {
+            //       return SignTxDialog();
+            //     });
           });
           controller.addJavaScriptHandler("vechain", (arguments) async {
-            return Vechain().callMethod(arguments);
+            return Vechain.callMethod(arguments);
           });
           // TODO, 心跳
           widget.onWebViewCreated(controller);

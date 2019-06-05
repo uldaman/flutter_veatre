@@ -70,12 +70,12 @@ class _CustomWebViewState extends State<CustomWebView>
           controller.addJavaScriptHandler("webChanged", (arguments) async {
             bus.emit("webChanged");
             print("webChanged");
-            // await showDialog(
-            //     context: context,
-            //     barrierDismissible: false,
-            //     builder: (context) {
-            //       return SignTxDialog();
-            //     });
+            await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return SignTxDialog();
+                });
           });
           controller.addJavaScriptHandler("vechain", (arguments) async {
             return Vechain.callMethod(arguments);

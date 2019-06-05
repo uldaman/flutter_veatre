@@ -17,18 +17,14 @@ class SignTxDialogState extends State<SignTxDialog> {
   int currentPage = 0;
   double priority = 0.5;
   List<Wallet> wallets = [];
-  bool loading = false;
+
   @override
   void initState() {
     super.initState();
-    setState(() {
-      loading = true;
-    });
     WalletStorage.readAll().then((walletEntities) {
       walletList(walletEntities).then((wallets) {
         setState(() {
           this.wallets = wallets;
-          this.loading = false;
         });
       }).catchError((err) => print(err));
     });
@@ -160,7 +156,7 @@ class SignTxDialogState extends State<SignTxDialog> {
       children: walletWidgets,
     );
     return ProgressHUD(
-      isLoading: loading,
+      isLoading: wallets.length == 0,
       child: Scaffold(
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(

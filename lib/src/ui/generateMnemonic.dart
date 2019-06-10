@@ -105,7 +105,6 @@ class GenerateMnemonicState extends State<GenerateMnemonic> {
               ),
               color: Colors.blue,
               onPressed: () {
-                print("ok");
                 Navigator.pushNamed(context, VerifyMnemonic.routeName,
                     arguments: args);
               },

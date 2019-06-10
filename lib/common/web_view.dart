@@ -5,6 +5,7 @@ import 'package:veatre/common/event_bus.dart';
 import 'package:veatre/common/search_widget.dart';
 import 'package:veatre/common/signTxDialog.dart';
 import 'package:veatre/common/vechain.dart';
+import 'package:veatre/src/models/transaction.dart';
 
 String initialUrl = "about:blank";
 
@@ -70,12 +71,32 @@ class _CustomWebViewState extends State<CustomWebView>
           controller.addJavaScriptHandler("webChanged", (arguments) async {
             bus.emit("webChanged");
             print("webChanged");
-            await showDialog(
+            dynamic clauses = [
+              {
+                'to': '0x87bBd37455ef0B2A04e63Ae49c5Ca5ec55371986',
+                'value': '100000000000000000000',
+                'data': '0x',
+                'comment': 'Transfer 100 VET'
+              },
+              {
+                'to': '0xf2c109c9b3A24583Fb8D71832194580Bf33e26fa',
+                'value': '100000000000000000000',
+                'data': '0x',
+                'comment': 'Transfer 100 VET'
+              },
+            ];
+            List<RawClause> rawClauses = [];
+            for (Map<String, dynamic> clause in clauses) {
+              rawClauses.add(RawClause.fromJSON(clause));
+            }
+            var res = await showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (context) {
-                  return SignTxDialog();
+                  return SignTxDialog(rawClauses: rawClauses);
                 });
+
+            print("res $res");
           });
           controller.addJavaScriptHandler("vechain", (arguments) async {
             return Vechain.callMethod(arguments);

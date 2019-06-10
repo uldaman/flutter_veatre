@@ -1,36 +1,33 @@
+import 'package:veatre/src/models/keyStore.dart';
+
 class Account {
-  BigInt balance;
-  BigInt energy;
-  bool hasCode;
+  final BigInt balance;
+  final BigInt energy;
+  final bool hasCode;
 
   static final unit = BigInt.from(1e18);
 
   Account({this.balance, this.energy, this.hasCode});
 
-  String formatBalance() {
-    double b = (this.balance / unit).toDouble();
-    String fixed2 = b.toStringAsFixed(2);
+  static String fixed2Value(BigInt value) {
+    double v = (value / unit).toDouble();
+    String fixed2 = v.toStringAsFixed(2);
     if (fixed2.split('.')[1].endsWith('0')) {
-      String fixed1 = b.toStringAsFixed(1);
+      String fixed1 = v.toStringAsFixed(1);
       if (fixed1.split('.')[1].endsWith('0')) {
-        return b.toStringAsFixed(0);
+        return v.toStringAsFixed(0);
       }
       return fixed1;
     }
     return fixed2;
   }
 
+  String formatBalance() {
+    return fixed2Value(balance);
+  }
+
   String formatEnergy() {
-    double ene = (this.energy / unit).toDouble();
-    String fixed2 = ene.toStringAsFixed(2);
-    if (fixed2.split('.')[1].endsWith('0')) {
-      String fixed1 = ene.toStringAsFixed(1);
-      if (fixed1.split('.')[1].endsWith('0')) {
-        return ene.toStringAsFixed(0);
-      }
-      return fixed1;
-    }
-    return fixed2;
+    return fixed2Value(energy);
   }
 
   factory Account.fromJSON(Map<String, dynamic> parsedJson) {
@@ -45,4 +42,12 @@ class Account {
       hasCode: parsedJson['hasCode'],
     );
   }
+}
+
+class Wallet {
+  Account account;
+  KeyStore keystore;
+  String name;
+
+  Wallet({this.account, this.keystore, this.name});
 }

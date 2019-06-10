@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
 import 'package:veatre/src/ui/walletDetail.dart';
+import 'package:veatre/src/models/account.dart';
+import 'package:veatre/src/api/accountAPI.dart';
 
 class ManageWallets extends StatefulWidget {
   static const routeName = '/wallets_management';
@@ -14,24 +15,42 @@ class ManageWallets extends StatefulWidget {
 }
 
 class ManageWalletsState extends State<ManageWallets> {
-  List<WalletEntity> walletEntities = [];
+  List<Wallet> wallets = [];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('didChangeDependencies');
     WalletStorage.readAll().then((walletEntities) {
-      setState(() {
-        this.walletEntities = walletEntities;
+      walletList(walletEntities).then((wallets) {
+        setState(() {
+          this.wallets = wallets;
+        });
       });
+    }).catchError((err) {
+      print(err);
     });
+  }
+
+  Future<List<Wallet>> walletList(List<WalletEntity> walletEntities) async {
+    List<Wallet> walltes = [];
+    for (WalletEntity walletEntity in walletEntities) {
+      Account acc = await AccountAPI.get(walletEntity.keystore.address);
+      walltes.add(
+        Wallet(
+          account: acc,
+          keystore: walletEntity.keystore,
+          name: walletEntity.name,
+        ),
+      );
+    }
+    return walltes;
   }
 
   @override
   Widget build(BuildContext context) {
     List<Widget> walletWidgets = [];
-    for (WalletEntity walletEntity in walletEntities) {
-      walletWidgets.add(walletWidget(walletEntity));
+    for (Wallet wallet in wallets) {
+      walletWidgets.add(buildWalletCard(wallet));
     }
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +93,6 @@ class ManageWalletsState extends State<ManageWallets> {
                           textColor: Colors.white,
                           child: Text("Import"),
                           onPressed: () {
-                            print("Import");
                             Navigator.pushNamed(
                                 context, ImportWallet.routeName);
                           },
@@ -91,71 +109,102 @@ class ManageWalletsState extends State<ManageWallets> {
     );
   }
 
-  Widget walletWidget(WalletEntity walletEntity) {
-    return GestureDetector(
-      child: Container(
-        height: 110,
+  Widget buildWalletCard(Wallet wallet) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 200,
+      child: GestureDetector(
         child: Card(
+          margin: EdgeInsets.all(10),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: Column(
             children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    child: Icon(
-                      FontAwesomeIcons.wallet,
-                      color: Colors.blue,
-                    ),
-                    height: 30,
+              Container(
+                height: 100,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
                   ),
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    child: Text(
-                      walletEntity.name,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
+                  gradient: LinearGradient(
+                    colors: [const Color(0xFF81269D), const Color(0xFFEE112D)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                ),
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      child: Container(
+                        padding: EdgeInsets.all(15),
+                        child: Text(
+                          wallet.name,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                    height: 30,
-                  ),
-                ],
+                    Container(
+                      padding: EdgeInsets.only(left: 15, right: 15),
+                      width: MediaQuery.of(context).size.width,
+                      child: Text(
+                        '0x' + wallet.keystore.address,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              Row(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    child: Icon(
-                      FontAwesomeIcons.addressCard,
-                      color: Colors.blue,
-                    ),
-                    height: 30,
-                  ),
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.fromLTRB(0, 6, 0, 5),
-                    child: Text(
-                      '0x' + walletEntity.keystore.address,
-                      textAlign: TextAlign.justify,
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        color: Colors.grey,
+              Container(
+                margin: EdgeInsets.only(top: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Text(wallet.account.formatBalance()),
+                    Container(
+                      margin: EdgeInsets.only(left: 5, right: 14),
+                      child: Text(
+                        'VET',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10,
+                        ),
                       ),
-                    ),
-                    height: 30,
-                  ),
-                ],
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Text(wallet.account.formatEnergy()),
+                    Container(
+                      margin: EdgeInsets.only(left: 5, right: 5),
+                      child: Text(
+                        'VTHO',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
             ],
           ),
         ),
+        onTap: () async {
+          Navigator.pushNamed(context, WalletDetail.routeName,
+              arguments: wallet);
+        },
       ),
-      onTap: () {
-        print('tap wallet');
-        Navigator.pushNamed(context, WalletDetail.routeName,
-            arguments: walletEntity);
-      },
     );
   }
 }

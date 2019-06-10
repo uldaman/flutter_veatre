@@ -48,7 +48,6 @@ class ImportWalletState extends State<ImportWallet> {
       controller: pageController,
       physics: new ClampingScrollPhysics(),
       onPageChanged: (int page) async {
-        print('page changed $page');
         setState(() {
           this.currentPage = page;
         });
@@ -224,7 +223,6 @@ class ImportWalletState extends State<ImportWallet> {
                     textColor: Colors.white,
                     child: Text('Mnemonic'),
                     onPressed: () {
-                      print('Mnemonic');
                       pageController.jumpTo(0);
                     },
                   ),
@@ -238,7 +236,6 @@ class ImportWalletState extends State<ImportWallet> {
                     textColor: Colors.white,
                     child: Text('Keystore'),
                     onPressed: () {
-                      print('Keystore');
                       setState(() {
                         pageController.jumpToPage(1);
                       });
@@ -444,7 +441,6 @@ class ImportWalletState extends State<ImportWallet> {
                                 );
                               }
                             } catch (err) {
-                              print("compute err $err");
                               setState(() {
                                 loading = false;
                               });

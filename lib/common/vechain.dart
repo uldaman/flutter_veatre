@@ -81,6 +81,12 @@ class Vechain {
     return response.data;
   }
 
+  static dynamic call(Map<String, dynamic> callData, dynamic revision) async {
+    Response response = await dio.post("$testnet/accounts/*?revision=$revision",
+        data: callData);
+    return response.data;
+  }
+
   static dynamic senTransaction(String raw) async {
     Response response =
         await dio.post("$testnet/transactions", data: {"raw": raw});

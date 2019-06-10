@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/models/keyStore.dart';
+import 'package:veatre/src/models/account.dart';
+
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
@@ -28,7 +30,7 @@ class WalletDetailState extends State<WalletDetail> {
   bool loading = false;
   @override
   Widget build(BuildContext context) {
-    WalletEntity walletEntity = ModalRoute.of(context).settings.arguments;
+    Wallet wallet = ModalRoute.of(context).settings.arguments;
     return ProgressHUD(
       child: Scaffold(
         resizeToAvoidBottomPadding: false,
@@ -46,14 +48,14 @@ class WalletDetailState extends State<WalletDetail> {
                   children: <Widget>[
                     new QrImage(
                       padding: EdgeInsets.all(100),
-                      data: '0x' + walletEntity.keystore.address,
+                      data: '0x' + wallet.keystore.address,
                       size: MediaQuery.of(context).size.width,
                     ),
                     Container(
                       margin: EdgeInsets.only(top: 25),
                       width: MediaQuery.of(context).size.width,
                       child: Text(
-                        walletEntity.name,
+                        wallet.name,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 30),
                       ),
@@ -64,12 +66,12 @@ class WalletDetailState extends State<WalletDetail> {
                       width: MediaQuery.of(context).size.width,
                       child: GestureDetector(
                         child: Text(
-                          '0x' + walletEntity.keystore.address,
+                          '0x' + wallet.keystore.address,
                           textAlign: TextAlign.center,
                         ),
                         onLongPress: () async {
                           await Clipboard.setData(new ClipboardData(
-                              text: '0x' + walletEntity.keystore.address));
+                              text: '0x' + wallet.keystore.address));
                           showDialog(
                               context: context,
                               barrierDismissible: true,
@@ -116,10 +118,9 @@ class WalletDetailState extends State<WalletDetail> {
                 try {
                   await compute(
                     decrypt,
-                    Decriptions(
-                        keystore: walletEntity.keystore, password: password),
+                    Decriptions(keystore: wallet.keystore, password: password),
                   );
-                  await WalletStorage.delete(walletEntity.name);
+                  await WalletStorage.delete(wallet.name);
                   Navigator.popUntil(
                       context, ModalRoute.withName(ManageWallets.routeName));
                 } catch (err) {
@@ -169,8 +170,7 @@ class WalletDetailState extends State<WalletDetail> {
                 try {
                   await compute(
                     decrypt,
-                    Decriptions(
-                        keystore: walletEntity.keystore, password: password),
+                    Decriptions(keystore: wallet.keystore, password: password),
                   );
                   setState(() {
                     loading = false;
@@ -184,8 +184,7 @@ class WalletDetailState extends State<WalletDetail> {
                           content: GestureDetector(
                             onLongPress: () async {
                               await Clipboard.setData(new ClipboardData(
-                                  text: json
-                                      .encode(walletEntity.keystore.encode())));
+                                  text: json.encode(wallet.keystore.encode())));
                               showDialog(
                                   context: context,
                                   barrierDismissible: true,
@@ -196,7 +195,7 @@ class WalletDetailState extends State<WalletDetail> {
                                   });
                             },
                             child: Text(
-                              json.encode(walletEntity.keystore.encode()),
+                              json.encode(wallet.keystore.encode()),
                             ),
                           ),
                         );
@@ -272,14 +271,13 @@ class WalletDetailState extends State<WalletDetail> {
                   Uint8List privateKey = await compute(
                     decrypt,
                     Decriptions(
-                        keystore: walletEntity.keystore,
-                        password: originalPassword),
+                        keystore: wallet.keystore, password: originalPassword),
                   );
                   KeyStore newKeyStore = await KeyStore.encrypt(
                       bytesToHex(privateKey), newPassword);
                   await WalletStorage.write(
-                    walletEntity: WalletEntity(
-                        keystore: newKeyStore, name: walletEntity.name),
+                    walletEntity:
+                        WalletEntity(keystore: newKeyStore, name: wallet.name),
                     isMainWallet: true,
                   );
                   return alert(context, Text('Success'),

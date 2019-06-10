@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/navigation.dart';
-import 'package:veatre/common/signTxDialog.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/walletDetail.dart';
 import 'package:veatre/src/ui/createWallet.dart';
@@ -20,7 +19,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       routes: {
         Navigation.routeName: (context) => new Navigation(),
-        SignTxDialog.routeName: (context) => new SignTxDialog(),
         ManageWallets.routeName: (context) => new ManageWallets(),
         WalletDetail.routeName: (context) => new WalletDetail(),
         CreateWallet.routeName: (context) => new CreateWallet(),

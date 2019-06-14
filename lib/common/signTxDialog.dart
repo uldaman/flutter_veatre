@@ -44,20 +44,28 @@ class SignTxDialogState extends State<SignTxDialog> {
   void initState() {
     super.initState();
     updateSpendValue();
-    WalletStorage.readAll().then((walletEntities) {
-      if (walletEntities.length > 0) {
-        walletFrom(walletEntities[0]).then((wallet) {
-          setState(() {
-            this.wallet = wallet;
-          });
-          estimateClauses(wallet.keystore.address).whenComplete(() {
-            setState(() {
-              this.loading = false;
-            });
-          });
-        });
+    void Function(WalletEntity walletEntity) setWallet =
+        (WalletEntity walletEntity) async {
+      Account acc = await AccountAPI.get(walletEntity.keystore.address);
+      setState(() {
+        this.wallet = Wallet(
+          account: acc,
+          keystore: walletEntity.keystore,
+          name: walletEntity.name,
+        );
+      });
+      setState(() {
+        this.loading = false;
+      });
+    };
+
+    WalletStorage.getMainWallet().then((walletEntity) {
+      if (walletEntity != null) {
+        setWallet(walletEntity);
       } else {
-        //TODO create wallet
+        WalletStorage.readAll().then((walletEntities) {
+          setWallet(walletEntities[0]);
+        });
       }
     });
   }
@@ -119,6 +127,23 @@ VM error: ${result.vmError}''';
     }
   }
 
+  showMenu() async {
+    final Wallet selectedWallet = await Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => new Wallets()),
+    );
+    if (selectedWallet != null) {
+      setState(() {
+        loading = true;
+        this.wallet = selectedWallet;
+      });
+      await estimateClauses(selectedWallet.keystore.address);
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
   BigInt estimateFee() {
     return initialBaseGasPrice *
         BigInt.from((1 + priority) * 1e10) *
@@ -130,15 +155,6 @@ VM error: ${result.vmError}''';
     return AccountAPI.call(
       widget.rawClauses,
       caller: addr,
-    );
-  }
-
-  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc = await AccountAPI.get(walletEntity.keystore.address);
-    return Wallet(
-      account: acc,
-      keystore: walletEntity.keystore,
-      name: walletEntity.name,
     );
   }
 
@@ -167,20 +183,7 @@ VM error: ${result.vmError}''';
               color: Colors.blue,
             ),
             onPressed: () async {
-              final Wallet selectedWallet = await Navigator.push(
-                context,
-                new MaterialPageRoute(builder: (context) => new Wallets()),
-              );
-              if (selectedWallet != null) {
-                setState(() {
-                  loading = true;
-                  this.wallet = selectedWallet;
-                });
-                await estimateClauses(selectedWallet.keystore.address);
-                setState(() {
-                  loading = false;
-                });
-              }
+              await showMenu();
             },
           )
         ],
@@ -188,104 +191,167 @@ VM error: ${result.vmError}''';
       body: ProgressHUD(
         child: Column(
           children: <Widget>[
-            Container(
-              child: Card(
-                margin: EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      height: 100,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10),
-                        ),
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFF81269D),
-                            const Color(0xFFEE112D)
-                          ],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
+            isInsufficient
+                ? Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          color: Colors.orangeAccent,
+                          padding: EdgeInsets.all(10),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.error,
+                                color: Colors.limeAccent,
+                                size: 18,
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(left: 5),
+                                child: Text(
+                                  "Insufficient energy",
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            width: MediaQuery.of(context).size.width,
-                            child: Container(
-                              padding: EdgeInsets.all(15),
-                              child: Text(
-                                wallet == null ? '' : wallet.name,
-                                style: TextStyle(
-                                  color: Colors.white,
+                    ],
+                  )
+                : Row(),
+            vmError != ''
+                ? Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          color: Colors.orangeAccent,
+                          padding: EdgeInsets.all(10),
+                          child: Row(
+                            children: <Widget>[
+                              Container(
+                                child: Icon(
+                                  Icons.error,
+                                  color: Colors.limeAccent,
+                                  size: 18,
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(left: 5),
+                                child: Text(
+                                  vmError,
+                                  textAlign: TextAlign.left,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(),
+            GestureDetector(
+              child: Container(
+                child: Card(
+                  margin: EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        height: 100,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF81269D),
+                              const Color(0xFFEE112D)
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Container(
+                                padding: EdgeInsets.all(15),
+                                child: Text(
+                                  wallet == null ? '' : wallet.name,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(left: 15, right: 15),
-                            width: MediaQuery.of(context).size.width,
-                            child: Text(
-                              wallet == null
-                                  ? ''
-                                  : '0x' + wallet.keystore.address,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          Text(wallet == null
-                              ? '0'
-                              : wallet.account.formatBalance()),
-                          Container(
-                            margin: EdgeInsets.only(left: 5, right: 14),
-                            child: Text(
-                              'VET',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 10,
+                            Container(
+                              padding: EdgeInsets.only(left: 15, right: 15),
+                              width: MediaQuery.of(context).size.width,
+                              child: Text(
+                                wallet == null
+                                    ? ''
+                                    : '0x' + wallet.keystore.address,
+                                style: TextStyle(color: Colors.white),
                               ),
                             ),
-                          )
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          Text(wallet == null
-                              ? '0'
-                              : wallet.account.formatEnergy()),
-                          Container(
-                            margin: EdgeInsets.only(left: 5, right: 5),
-                            child: Text(
-                              'VTHO',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 10,
+                      Container(
+                        margin: EdgeInsets.only(top: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Text(wallet == null
+                                ? '0'
+                                : wallet.account.formatBalance()),
+                            Container(
+                              margin: EdgeInsets.only(left: 5, right: 14),
+                              child: Text(
+                                'VET',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 10,
+                                ),
                               ),
-                            ),
-                          )
-                        ],
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      Container(
+                        margin: EdgeInsets.only(top: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Text(wallet == null
+                                ? '0'
+                                : wallet.account.formatEnergy()),
+                            Container(
+                              margin: EdgeInsets.only(left: 5, right: 5),
+                              child: Text(
+                                'VTHO',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                width: MediaQuery.of(context).size.width,
+                height: 195,
               ),
-              width: MediaQuery.of(context).size.width,
-              height: 195,
+              onTap: () async {
+                await showMenu();
+              },
             ),
             Container(
               margin: EdgeInsets.all(10),
@@ -352,7 +418,7 @@ VM error: ${result.vmError}''';
               child: Row(
                 children: <Widget>[
                   Text(
-                    'Priority',
+                    'Accelaration',
                     style: TextStyle(color: Colors.grey),
                   ),
                   Expanded(
@@ -367,9 +433,8 @@ VM error: ${result.vmError}''';
                       },
                       value: priority,
                       activeColor: Colors.blueAccent,
-                      label: "$priority",
                     ),
-                  )
+                  ),
                 ],
               ),
               width: MediaQuery.of(context).size.width,
@@ -399,64 +464,6 @@ VM error: ${result.vmError}''';
                 ),
               ],
             ),
-            isInsufficient
-                ? Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          color: Colors.orangeAccent,
-                          padding: EdgeInsets.all(10),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.error,
-                                color: Colors.limeAccent,
-                                size: 18,
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Text(
-                                  "Insufficient energy",
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Row(),
-            vmError != ''
-                ? Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          color: Colors.orangeAccent,
-                          padding: EdgeInsets.all(10),
-                          child: Row(
-                            children: <Widget>[
-                              Container(
-                                child: Icon(
-                                  Icons.error,
-                                  color: Colors.limeAccent,
-                                  size: 18,
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Text(
-                                  vmError,
-                                  textAlign: TextAlign.left,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Row(),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -546,14 +553,19 @@ VM error: ${result.vmError}''';
                                 );
                                 tx.sign(privateKey);
                                 try {
+                                  await WalletStorage.setMainWallet(
+                                    WalletEntity(
+                                      keystore: wallet.keystore,
+                                      name: wallet.name,
+                                    ),
+                                  );
                                   Map<String, dynamic> result =
-                                      await TransactionAPI.send(
-                                          tx.serialized());
+                                      await TransactionAPI.send(tx.serialized);
                                   Navigator.of(context).pop(result);
                                 } catch (err) {
-                                  print("err ${err.message} ");
+                                  print("send tx err ${err.message} ");
                                   return alert(context, Text("Error"),
-                                      "Sedn transaction failed");
+                                      "Send transaction failed");
                                 } finally {
                                   setState(() {
                                     loading = false;

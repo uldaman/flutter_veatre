@@ -1,11 +1,13 @@
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/transaction.dart';
-import 'package:veatre/common/vechain.dart';
+import 'package:veatre/common/net.dart';
 
 class AccountAPI {
+  static final net = Net();
+
   static Future<Account> get(String address) async {
     String addr = address.startsWith('0x') ? address : '0x$address';
-    Map<String, dynamic> json = await Vechain.getAccount(addr);
+    Map<String, dynamic> json = await net.getAccount(addr);
     return Account.fromJSON(json);
   }
 
@@ -26,7 +28,7 @@ class AccountAPI {
         'data': clause.data,
       });
     }
-    List<dynamic> callResults = await Vechain.call({
+    List<dynamic> callResults = await net.explain({
       'clauses': clausesJson,
       'caller': addr,
       'gasPrice': gasPrice,

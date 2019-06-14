@@ -56,18 +56,18 @@ class Transaction {
     int nonce = 0,
     List<dynamic> reserved,
   }) {
-    this._clauses = clauses == null ? [] : clauses;
+    this._clauses = clauses ?? [];
     this.gasPriceCoef = gasPriceCoef;
     this.gas = gas;
-    this._dependsOn = dependsOn == null ? Uint8List(0) : dependsOn;
-    this._reserved = reserved == null ? [] : reserved;
+    this._dependsOn = dependsOn ?? Uint8List(0);
+    this._reserved = reserved ?? [];
   }
 
   void sign(Uint8List privateKey) {
-    this._signature = Crypto.sign(signingHash(), privateKey);
+    this._signature = Crypto.sign(signingHash, privateKey);
   }
 
-  List<dynamic> _unserializedParams() {
+  List<dynamic> get _unserializedParams {
     // print(
     //     "${this.chainTag} ${this.blockRef.number} ${this.expiration} ${this._clauses} ${this.gasPriceCoef} ${this.gas} ${this._dependsOn} ${this._nonce} ${this._reserved}");
     List<dynamic> data = [];
@@ -91,18 +91,18 @@ class Transaction {
     return data;
   }
 
-  Uint8List unserialized() {
-    return rlp.encode(_unserializedParams());
+  Uint8List get _unserialized {
+    return rlp.encode(_unserializedParams);
   }
 
-  Uint8List signingHash() {
-    Uint8List data = unserialized();
+  Uint8List get signingHash {
+    Uint8List data = _unserialized;
     Blake2bDigest blake2b = Blake2bDigest(digestSize: 32);
     return blake2b.process(data);
   }
 
-  Uint8List serialized() {
-    List unserializedParams = List.from(_unserializedParams());
+  Uint8List get serialized {
+    List unserializedParams = List.from(_unserializedParams);
     if (_signature.length > 0) {
       unserializedParams.add(this._signature);
     }
@@ -141,9 +141,9 @@ class Clause {
   }
 
   Clause({Uint8List to, BigInt value, Uint8List data}) {
-    this._to = to == null ? Uint8List(0) : to;
-    this._value = value == null ? BigInt.zero : value;
-    this._data = data == null ? Uint8List(0) : data;
+    this._to = to ?? Uint8List(0);
+    this._value = value ?? BigInt.zero;
+    this._data = data ?? Uint8List(0);
   }
 
   List<dynamic> encode() {

@@ -183,8 +183,11 @@ class WalletDetailState extends State<WalletDetail> {
                           title: Text('KeyStore'),
                           content: GestureDetector(
                             onLongPress: () async {
-                              await Clipboard.setData(new ClipboardData(
-                                  text: json.encode(wallet.keystore.encode())));
+                              await Clipboard.setData(
+                                new ClipboardData(
+                                  text: json.encode(wallet.keystore.encoded),
+                                ),
+                              );
                               showDialog(
                                   context: context,
                                   barrierDismissible: true,
@@ -195,7 +198,7 @@ class WalletDetailState extends State<WalletDetail> {
                                   });
                             },
                             child: Text(
-                              json.encode(wallet.keystore.encode()),
+                              json.encode(wallet.keystore.encoded),
                             ),
                           ),
                         );

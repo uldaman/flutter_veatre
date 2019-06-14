@@ -4,8 +4,14 @@ import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:veatre/common/event_bus.dart';
 import 'package:veatre/common/search_widget.dart';
 import 'package:veatre/common/signTxDialog.dart';
-import 'package:veatre/common/vechain.dart';
+import 'package:veatre/common/signCertificateDialog.dart';
+import 'package:veatre/src/ui/manageWallets.dart';
+import 'package:veatre/src/storage/storage.dart';
+
+import 'package:veatre/common/net.dart';
+import 'package:veatre/common/driver.dart';
 import 'package:veatre/src/models/transaction.dart';
+import 'package:veatre/src/ui/alert.dart';
 
 String initialUrl = "about:blank";
 
@@ -65,41 +71,67 @@ class _CustomWebViewState extends State<CustomWebView>
       body: InAppWebView(
         initialUrl: initialUrl,
         onWebViewCreated: (InAppWebViewController controller) {
+          Net net = Net();
+          Driver driver = Driver(net);
           controller.addJavaScriptHandler("debugLog", (arguments) async {
             debugPrint("debugLog: " + arguments.join(","));
           });
-          controller.addJavaScriptHandler("webChanged", (arguments) async {
-            bus.emit("webChanged");
-            print("webChanged");
-            dynamic clauses = [
-              {
-                'to': '0x87bBd37455ef0B2A04e63Ae49c5Ca5ec55371986',
-                'value': '100000000000000000000',
-                'data': '0x',
-                'comment': 'Transfer 100 VET'
-              },
-              {
-                'to': '0xf2c109c9b3A24583Fb8D71832194580Bf33e26fa',
-                'value': '100000000000000000000',
-                'data': '0x',
-                'comment': 'Transfer 100 VET'
-              },
-            ];
-            List<RawClause> rawClauses = [];
-            for (Map<String, dynamic> clause in clauses) {
-              rawClauses.add(RawClause.fromJSON(clause));
-            }
-            var res = await showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) {
-                  return SignTxDialog(rawClauses: rawClauses);
-                });
+          // controller.addJavaScriptHandler("webChanged", (arguments) async {
+          //   bus.emit("webChanged");
+          //   print("webChanged");
+          //   List<WalletEntity> walletEntities = await WalletStorage.readAll();
+          //   if (walletEntities.length == 0) {
+          //     await customAlert(
+          //       context,
+          //       title: Text('No wallet available'),
+          //       content: Text('Create a new wallet?'),
+          //       confirmAction: () async {
+          //         await Navigator.of(context)
+          //             .pushNamed(ManageWallets.routeName);
+          //         Navigator.pop(context);
+          //       },
+          //       cancelAction: () async {
+          //         Navigator.pop(context);
+          //       },
+          //     );
+          //   } else {
+          //     dynamic clauses = [
+          //       {
+          //         'to': '0x87bBd37455ef0B2A04e63Ae49c5Ca5ec55371986',
+          //         'value': '100000000000000000000',
+          //         'data': '0x',
+          //         'comment': 'Transfer 100 VET'
+          //       },
+          //       {
+          //         'to': '0xf2c109c9b3A24583Fb8D71832194580Bf33e26fa',
+          //         'value': '100000000000000000000',
+          //         'data': '0x',
+          //         'comment': 'Transfer 100 VET'
+          //       },
+          //     ];
+          //     List<RawClause> rawClauses = [];
+          //     for (Map<String, dynamic> clause in clauses) {
+          //       rawClauses.add(RawClause.fromJSON(clause));
+          //     }
+          //     var res = await showDialog(
+          //       context: context,
+          //       barrierDismissible: false,
+          //       builder: (context) {
+          //         return SignCertificateDialog();
+          //         // return SignTxDialog(rawClauses: rawClauses);
+          //       },
+          //     );
 
-            print("res $res");
+          //     print("res $res");
+          //   }
+          // });
+          controller.addJavaScriptHandler("Thor", (arguments) async {
+            print('Thor arguments $arguments');
+            return driver.callMethod(arguments);
           });
-          controller.addJavaScriptHandler("vechain", (arguments) async {
-            return Vechain.callMethod(arguments);
+          controller.addJavaScriptHandler("Vendor", (arguments) async {
+            print('Vendor arguments $arguments');
+            return driver.callMethod(arguments);
           });
           // TODO, 心跳
           widget.onWebViewCreated(controller);

@@ -34,12 +34,12 @@ class WalletStorage {
       {WalletEntity walletEntity, bool isMainWallet = false}) async {
     await storage.write(
       key: walletEntity.name,
-      value: json.encode(walletEntity.keystore.encode()),
+      value: json.encode(walletEntity.keystore.encoded),
     );
     if (isMainWallet) {
       await storage.write(
         key: mainWalletKey,
-        value: json.encode(walletEntity.encode()),
+        value: json.encode(walletEntity.encoded),
       );
     }
   }
@@ -47,7 +47,7 @@ class WalletStorage {
   static Future<void> setMainWallet(WalletEntity walletEntity) async {
     await storage.write(
       key: mainWalletKey,
-      value: json.encode(walletEntity.encode()),
+      value: json.encode(walletEntity.encoded),
     );
   }
 
@@ -74,10 +74,10 @@ class WalletEntity {
 
   WalletEntity({this.name, this.keystore});
 
-  Map<String, dynamic> encode() {
+  Map<String, dynamic> get encoded {
     return {
       'name': this.name,
-      'keystore': this.keystore.encode(),
+      'keystore': this.keystore.encoded,
     };
   }
 

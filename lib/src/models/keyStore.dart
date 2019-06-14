@@ -108,11 +108,11 @@ class KeyStore {
     return aes.process(encryptedPrivateKey);
   }
 
-  Map<String, dynamic> encode() {
+  Map<String, dynamic> get encoded {
     return {
       'id': this.id,
       'address': this.address,
-      'crypto': this.crypto.encode(),
+      'crypto': this.crypto.encoded,
       'version': this.version,
     };
   }
@@ -173,13 +173,13 @@ class KeystoreKeyHeader {
     );
   }
 
-  Map<String, dynamic> encode() {
+  Map<String, dynamic> get encoded {
     var map = {
       'ciphertext': this.cipherText,
       'cipher': this.cipher,
-      'cipherparams': this.cipherParams.encode(),
+      'cipherparams': this.cipherParams.encoded,
       'kdf': this.kdf,
-      'kdfparams': this.kdfParams.encode(),
+      'kdfparams': this.kdfParams.encoded,
       'mac': this.mac,
     };
     return map;
@@ -199,7 +199,7 @@ class CipherParams {
     return CipherParams(iv: parsedJson["iv"]);
   }
 
-  Map<String, String> encode() {
+  Map<String, String> get encoded {
     return {'iv': this.iv};
   }
 }
@@ -214,7 +214,7 @@ class ScryptParams extends ScryptParameters {
   ScryptParams(this.N, this.r, this.p, this.desiredKeyLength, this.salt)
       : super(N, r, p, desiredKeyLength, salt);
 
-  Map<String, dynamic> encode() {
+  Map<String, dynamic> get encoded {
     return {
       "n": this.N,
       "r": this.r,

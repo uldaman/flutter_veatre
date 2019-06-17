@@ -85,6 +85,9 @@ class _CustomWebViewState extends State<CustomWebView>
             print("Thor response $data");
             return data;
           });
+          controller.addJavaScriptHandler("webChanged", (arguments) async {
+            onWebChanged.emit();
+          });
           controller.addJavaScriptHandler("Vendor", (arguments) async {
             print('Vendor arguments $arguments');
             List<WalletEntity> walletEntities = await WalletStorage.readAll();

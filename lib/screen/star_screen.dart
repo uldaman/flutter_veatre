@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/common/event.dart';
 import 'package:veatre/common/web_views.dart' as web_view;
 
 class StarScreen extends StatefulWidget {
@@ -50,6 +51,7 @@ class _StarScreenState extends State<StarScreen>
                 children: <Widget>[
                   InkWell(
                     onTap: () {
+                      onWebChanged.emit();
                       web_view.loadUrl(stars[index]["url"]);
                     },
                     child: Container(

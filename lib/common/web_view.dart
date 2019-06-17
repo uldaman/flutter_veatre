@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:veatre/common/event.dart';
 import 'package:veatre/common/search_widget.dart';
+import 'package:veatre/src/ui/signCertificateDialog.dart';
 import 'package:veatre/src/ui/signTxDialog.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/ui/manageWallets.dart';

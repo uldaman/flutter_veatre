@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:veatre/common/event.dart';
 import 'package:veatre/common/event_bus.dart';
 import 'package:veatre/common/search_widget.dart';
 import 'package:veatre/common/signTxDialog.dart';
@@ -133,7 +134,9 @@ class _CustomWebViewState extends State<CustomWebView>
             print('Vendor arguments $arguments');
             return driver.callMethod(arguments);
           });
-          // TODO, 心跳
+          onBlockChainChanged.on((status) {
+            controller.injectScriptCode('window.block_chain_status=$status');
+          });
           widget.onWebViewCreated(controller);
         },
         onLoadStop: (InAppWebViewController controller, String url) async {

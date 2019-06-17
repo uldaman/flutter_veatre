@@ -2,10 +2,13 @@
 .dart_tool/
 
 build/
+ios/
+
 .flutter-plugins
 packages
 .packages
 .pub/
+
 
 .atom/
 .idea

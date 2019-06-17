@@ -151,7 +151,7 @@ class Clause {
   }
 }
 
-class RawClause {
+class SigningTxMessage {
   final String to;
 
   final String value;
@@ -160,10 +160,10 @@ class RawClause {
 
   final String comment;
 
-  RawClause({this.to, this.value, this.data, this.comment});
+  SigningTxMessage({this.to, this.value, this.data, this.comment});
 
-  factory RawClause.fromJSON(Map<String, dynamic> parsedJson) {
-    return RawClause(
+  factory SigningTxMessage.fromJSON(Map<String, dynamic> parsedJson) {
+    return SigningTxMessage(
       to: parsedJson['to'],
       value: parsedJson['value'],
       data: parsedJson['data'],
@@ -177,6 +177,49 @@ class RawClause {
       value: BigInt.parse(value),
       data: hexToBytes(data),
     );
+  }
+}
+
+class SigningTxOptions {
+  bool delegated;
+  String signer;
+  int gas;
+  String dependsOn;
+  String link;
+  String comment;
+
+  SigningTxOptions({
+    this.delegated,
+    this.signer,
+    this.gas,
+    this.dependsOn,
+    this.link,
+    this.comment,
+  });
+
+  factory SigningTxOptions.fromJSON(Map<String, dynamic> parsedJSON) {
+    return SigningTxOptions(
+      delegated: parsedJSON['delegated'],
+      signer: parsedJSON['signer'],
+      gas: parsedJSON['gas'],
+      dependsOn: parsedJSON['dependsOn'],
+      link: parsedJSON['link'],
+      comment: parsedJSON['comment'],
+    );
+  }
+}
+
+class SigningTxResponse {
+  String txid;
+  String signer;
+
+  SigningTxResponse({this.txid, this.signer});
+
+  Map<String, String> get encoded {
+    return {
+      'txid': txid,
+      'signer': signer,
+    };
   }
 }
 

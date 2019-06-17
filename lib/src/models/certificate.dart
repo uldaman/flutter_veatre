@@ -7,8 +7,7 @@ import 'package:web3dart/crypto.dart';
 
 class Certificate {
   String domain;
-  Payload payload;
-  String purpose;
+  SigningCertMessage certMessage;
   String signer;
   int timestamp;
 
@@ -17,20 +16,18 @@ class Certificate {
   Certificate({
     String domain,
     int timestamp,
-    String purpose,
-    Payload payload,
+    SigningCertMessage certMessage,
   }) {
     this.domain = domain ?? '';
     this.timestamp = timestamp ?? 0;
-    this.purpose = purpose ?? '';
-    this.payload = payload ?? Payload();
+    this.certMessage = certMessage;
   }
 
-  void sign(Uint8List privateKey) {
+  Uint8List sign(Uint8List privateKey) {
     Uint8List publicKey = privateKeyBytesToPublic(privateKey);
     Uint8List address = publicKeyToAddress(publicKey);
     signer = '0x' + bytesToHex(address);
-    _signature = Crypto.sign(signingHash, privateKey);
+    return Crypto.sign(signingHash, privateKey);
   }
 
   bool verify() {
@@ -56,31 +53,22 @@ class Certificate {
     return blake2b.process(data);
   }
 
-  factory Certificate.fromJSON(Map<String, dynamic> parsedJSON) {
-    return Certificate(
-      domain: parsedJSON['domain'] ?? '',
-      timestamp: parsedJSON['timestamp'] ?? 0,
-      purpose: parsedJSON['purpose'] ?? '',
-      payload: parsedJSON['payload'] ?? Payload(),
-    );
-  }
-
   Map<String, dynamic> get encoded {
-    return {
-      'domain': domain,
-      'payload': payload.encoded,
-      'purpose': purpose,
-      'signer': signer,
-      'timestamp': timestamp.toInt(),
-      '_signature': bytesToHex(_signature),
-    };
+    return SigningCertResponse(
+      annex: Annex(
+        signer: signer,
+        timestamp: timestamp,
+        domain: domain,
+      ),
+      signature: '0x' + bytesToHex(_signature),
+    ).encoded;
   }
 
   Map<String, dynamic> get unserialized {
     return {
       'domain': domain,
-      'payload': payload.encoded,
-      'purpose': purpose,
+      'payload': certMessage.payload.encoded,
+      'purpose': certMessage.purpose,
       'signer': signer,
       'timestamp': timestamp,
     };
@@ -103,6 +91,84 @@ class Payload {
     return {
       'content': content,
       'type': type,
+    };
+  }
+
+  factory Payload.fromJSON(Map<String, dynamic> parsedJSON) {
+    return Payload(
+      content: parsedJSON['content'],
+      type: parsedJSON['type'],
+    );
+  }
+}
+
+class SigningCertMessage {
+  String purpose;
+  Payload payload;
+
+  SigningCertMessage({
+    this.purpose,
+    this.payload,
+  });
+
+  factory SigningCertMessage.fromJSON(Map<String, dynamic> parsedJSON) {
+    return SigningCertMessage(
+      purpose: parsedJSON['purpose'] ?? '',
+      payload: Payload.fromJSON(parsedJSON['payload']) ?? '',
+    );
+  }
+}
+
+class SigningCertOptions {
+  String signer;
+  String link;
+
+  SigningCertOptions({
+    this.signer,
+    this.link,
+  });
+
+  factory SigningCertOptions.fromJSON(Map<String, dynamic> parsedJSON) {
+    return SigningCertOptions(
+      signer: parsedJSON['signer'],
+      link: parsedJSON['link'],
+    );
+  }
+}
+
+class SigningCertResponse {
+  Annex annex;
+  String signature;
+
+  SigningCertResponse({
+    this.annex,
+    this.signature,
+  });
+
+  Map<String, dynamic> get encoded {
+    return {
+      'annex': annex.encoded,
+      'signature': signature,
+    };
+  }
+}
+
+class Annex {
+  String domain;
+  int timestamp;
+  String signer;
+
+  Annex({
+    this.domain,
+    this.timestamp,
+    this.signer,
+  });
+
+  Map<String, dynamic> get encoded {
+    return {
+      'domain': domain,
+      'timestamp': timestamp,
+      'signer': signer,
     };
   }
 }

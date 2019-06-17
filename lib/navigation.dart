@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:veatre/common/net.dart';
+import 'package:veatre/common/driver.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/event.dart';
@@ -34,7 +35,8 @@ class _NavigationState extends State<Navigation> {
       !isAtWebView ? _pageController.jumpToPage(0) : setState(() {});
     });
     _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-      onBlockChainChanged.emit(await _net.status());
+      final Driver _driver = Driver(_net);
+      onBlockChainChanged.emit(await _driver.head());
     });
   }
 

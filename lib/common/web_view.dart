@@ -1,11 +1,14 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:veatre/common/event.dart';
 import 'package:veatre/common/event_bus.dart';
 import 'package:veatre/common/search_widget.dart';
-import 'package:veatre/common/signTxDialog.dart';
-import 'package:veatre/common/signCertificateDialog.dart';
+import 'package:veatre/src/ui/signTxDialog.dart';
+import 'package:veatre/src/ui/signCertificateDialog.dart';
+import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/storage/storage.dart';
 
@@ -30,11 +33,13 @@ class CustomWebView extends StatefulWidget {
   _CustomWebViewState createState() => _CustomWebViewState();
 }
 
+final net = Net(network: testnet);
+final driver = Driver(net);
+
 class _CustomWebViewState extends State<CustomWebView>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-
   double _progress = 0;
 
   Widget _progressIndicator(double value) {
@@ -71,71 +76,71 @@ class _CustomWebViewState extends State<CustomWebView>
       ),
       body: InAppWebView(
         initialUrl: initialUrl,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+          new Factory<OneSequenceGestureRecognizer>(
+            () => new EagerGestureRecognizer(),
+          ),
+        ].toSet(),
         onWebViewCreated: (InAppWebViewController controller) {
-          Net net = Net();
-          Driver driver = Driver(net);
           controller.addJavaScriptHandler("debugLog", (arguments) async {
             debugPrint("debugLog: " + arguments.join(","));
           });
-          // controller.addJavaScriptHandler("webChanged", (arguments) async {
-          //   bus.emit("webChanged");
-          //   print("webChanged");
-          //   List<WalletEntity> walletEntities = await WalletStorage.readAll();
-          //   if (walletEntities.length == 0) {
-          //     await customAlert(
-          //       context,
-          //       title: Text('No wallet available'),
-          //       content: Text('Create a new wallet?'),
-          //       confirmAction: () async {
-          //         await Navigator.of(context)
-          //             .pushNamed(ManageWallets.routeName);
-          //         Navigator.pop(context);
-          //       },
-          //       cancelAction: () async {
-          //         Navigator.pop(context);
-          //       },
-          //     );
-          //   } else {
-          //     dynamic clauses = [
-          //       {
-          //         'to': '0x87bBd37455ef0B2A04e63Ae49c5Ca5ec55371986',
-          //         'value': '100000000000000000000',
-          //         'data': '0x',
-          //         'comment': 'Transfer 100 VET'
-          //       },
-          //       {
-          //         'to': '0xf2c109c9b3A24583Fb8D71832194580Bf33e26fa',
-          //         'value': '100000000000000000000',
-          //         'data': '0x',
-          //         'comment': 'Transfer 100 VET'
-          //       },
-          //     ];
-          //     List<RawClause> rawClauses = [];
-          //     for (Map<String, dynamic> clause in clauses) {
-          //       rawClauses.add(RawClause.fromJSON(clause));
-          //     }
-          //     var res = await showDialog(
-          //       context: context,
-          //       barrierDismissible: false,
-          //       builder: (context) {
-          //         return SignCertificateDialog();
-          //         // return SignTxDialog(rawClauses: rawClauses);
-          //       },
-          //     );
-
-          //     print("res $res");
-          //   }
-          // });
           controller.addJavaScriptHandler("Thor", (arguments) async {
             print('Thor arguments $arguments');
-            return driver.callMethod(arguments);
+            dynamic data = await driver.callMethod(arguments);
+            print("Thor response $data");
+            return data;
           });
           controller.addJavaScriptHandler("Vendor", (arguments) async {
             print('Vendor arguments $arguments');
-            return driver.callMethod(arguments);
+            List<WalletEntity> walletEntities = await WalletStorage.readAll();
+            if (walletEntities.length == 0) {
+              return customAlert(
+                context,
+                title: Text('No wallet available'),
+                content: Text('Create a new wallet?'),
+                confirmAction: () async {
+                  await Navigator.of(context)
+                      .pushNamed(ManageWallets.routeName);
+                  Navigator.pop(context);
+                },
+                cancelAction: () async {
+                  Navigator.pop(context);
+                },
+              );
+            }
+            if (arguments[0] == 'signTx') {
+              List<SigningTxMessage> txMessages = [];
+              for (Map<String, dynamic> txMsg in arguments[1]) {
+                txMessages.add(SigningTxMessage.fromJSON(txMsg));
+              }
+              SigningTxOptions options =
+                  SigningTxOptions.fromJSON(arguments[2]);
+              SigningTxResponse result = await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return SignTxDialog(
+                    txMessages: txMessages,
+                    options: options,
+                  );
+                },
+              );
+              if (result == null) {
+                throw ArgumentError('user cancelled');
+              }
+              return result.encoded;
+            } else if (arguments[0] == 'signCert') {
+              // TODO signCert
+              SigningCertMessage certMessage =
+                  SigningCertMessage.fromJSON(arguments[1]);
+              SigningCertOptions options =
+                  SigningCertOptions.fromJSON(arguments[2]);
+            }
+            throw ArgumentError('unsupported methor');
           });
-          onBlockChainChanged.on((status) {
-            controller.injectScriptCode('window.block_chain_status=$status');
+          onBlockChainChanged.on((head) {
+            controller.injectScriptCode('window.block_head=$head');
           });
           widget.onWebViewCreated(controller);
         },

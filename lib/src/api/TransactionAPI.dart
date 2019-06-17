@@ -4,7 +4,7 @@ import 'package:veatre/common/net.dart';
 import 'package:web3dart/crypto.dart';
 
 class TransactionAPI {
-  static final net = Net();
+  static final net = Net(network: testnet);
 
   static Future<Map<String, dynamic>> send(Uint8List raw) async {
     Map<String, dynamic> data =

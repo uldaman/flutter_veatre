@@ -9,8 +9,10 @@ import 'package:veatre/src/ui/wallets.dart';
 import 'package:veatre/src/storage/storage.dart';
 
 class SignCertificateDialog extends StatefulWidget {
-  final Certificate cert;
-  SignCertificateDialog({this.cert});
+  final SigningCertMessage certMessage;
+  final SigningCertOptions options;
+
+  SignCertificateDialog({this.certMessage, this.options});
 
   @override
   SignCertificateDialogState createState() => SignCertificateDialogState();
@@ -37,14 +39,9 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
         this.loading = false;
       });
     };
-    WalletStorage.getMainWallet().then((walletEntity) {
-      if (walletEntity != null) {
-        setWallet(walletEntity);
-      } else {
-        WalletStorage.readAll().then((walletEntities) {
-          setWallet(walletEntities[0]);
-        });
-      }
+
+    getWalletEntity(widget.options.signer).then((walletEntity) {
+      setWallet(walletEntity);
     });
     // Certificate c = Certificate(
     //   domain: 'domain',
@@ -61,6 +58,23 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
     //   print('encoded ${c.encoded}');
     //   print('veify ${c.verify()}');
     // });
+  }
+
+  Future<WalletEntity> getWalletEntity(String signer) async {
+    if (signer != null) {
+      List<WalletEntity> walletEntities = await WalletStorage.readAll();
+      for (WalletEntity walletEntity in walletEntities) {
+        if ('0x' + walletEntity.keystore.address == signer) {
+          return walletEntity;
+        }
+      }
+    }
+    WalletEntity mianWalletEntity = await WalletStorage.getMainWallet();
+    if (mianWalletEntity != null) {
+      return mianWalletEntity;
+    }
+    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+    return walletEntities[0];
   }
 
   showMenu() async {

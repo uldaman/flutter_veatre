@@ -18,8 +18,10 @@ import 'package:web3dart/contracts.dart';
 import 'package:web3dart/crypto.dart';
 
 class SignTxDialog extends StatefulWidget {
-  final List<RawClause> rawClauses;
-  SignTxDialog({this.rawClauses});
+  final List<SigningTxMessage> txMessages;
+  final SigningTxOptions options;
+
+  SignTxDialog({this.txMessages, this.options});
 
   @override
   SignTxDialogState createState() => SignTxDialogState();
@@ -31,7 +33,7 @@ class SignTxDialogState extends State<SignTxDialog> {
 
   String vmError = '';
   bool isInsufficient = false;
-  double totalGas = 0;
+  int totalGas = 0;
   BigInt spendValue = BigInt.from(0);
   BigInt estimatedFee = BigInt.from(0);
   bool loading = true;
@@ -54,40 +56,52 @@ class SignTxDialogState extends State<SignTxDialog> {
           name: walletEntity.name,
         );
       });
+      await estimateGas(wallet.keystore.address);
       setState(() {
         this.loading = false;
       });
     };
-
-    WalletStorage.getMainWallet().then((walletEntity) {
-      if (walletEntity != null) {
-        setWallet(walletEntity);
-      } else {
-        WalletStorage.readAll().then((walletEntities) {
-          setWallet(walletEntities[0]);
-        });
-      }
+    getWalletEntity(widget.options.signer).then((walletEntity) {
+      print(walletEntity.keystore.address);
+      setWallet(walletEntity);
     });
+  }
+
+  Future<WalletEntity> getWalletEntity(String signer) async {
+    if (signer != null) {
+      List<WalletEntity> walletEntities = await WalletStorage.readAll();
+      for (WalletEntity walletEntity in walletEntities) {
+        if ('0x' + walletEntity.keystore.address == signer) {
+          return walletEntity;
+        }
+      }
+    }
+    WalletEntity mianWalletEntity = await WalletStorage.getMainWallet();
+    if (mianWalletEntity != null) {
+      return mianWalletEntity;
+    }
+    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+    return walletEntities[0];
   }
 
   updateSpendValue() {
     BigInt value = BigInt.from(0);
-    for (RawClause rawClause in widget.rawClauses) {
-      value += rawClause.toClause().value;
+    for (SigningTxMessage txMsg in widget.txMessages) {
+      value += txMsg.toClause().value;
     }
     setState(() {
       this.spendValue = value;
     });
   }
 
-  estimateClauses(String addr) async {
-    double gas = 0;
+  estimateGas(String addr) async {
+    int gas = 0;
     gas += txGas;
-    List<CallResult> results = await callTx(addr);
+    List<CallResult> results = await callTx(addr, widget.options.gas);
     bool hasVmError = false;
     for (CallResult result in results) {
       gas += clauseGas;
-      gas += result.gasUsed * 1.2;
+      gas += (result.gasUsed.toDouble() * 1.2).toInt();
       if (result.reverted) {
         hasVmError = true;
         Uint8List data = hexToBytes(result.data);
@@ -110,7 +124,7 @@ VM error: ${result.vmError}''';
       });
     }
     setState(() {
-      this.totalGas = gas;
+      this.totalGas = widget.options.gas ?? gas;
     });
     BigInt fee = estimateFee();
     setState(() {
@@ -127,7 +141,7 @@ VM error: ${result.vmError}''';
     }
   }
 
-  showMenu() async {
+  showWallets() async {
     final Wallet selectedWallet = await Navigator.push(
       context,
       new MaterialPageRoute(builder: (context) => new Wallets()),
@@ -137,7 +151,7 @@ VM error: ${result.vmError}''';
         loading = true;
         this.wallet = selectedWallet;
       });
-      await estimateClauses(selectedWallet.keystore.address);
+      await estimateGas(selectedWallet.keystore.address);
       setState(() {
         loading = false;
       });
@@ -151,10 +165,11 @@ VM error: ${result.vmError}''';
         BigInt.from(1e10);
   }
 
-  Future<List<CallResult>> callTx(String addr) async {
+  Future<List<CallResult>> callTx(String addr, int gas) async {
     return AccountAPI.call(
-      widget.rawClauses,
+      widget.txMessages,
       caller: addr,
+      gas: gas,
     );
   }
 
@@ -183,7 +198,7 @@ VM error: ${result.vmError}''';
               color: Colors.blue,
             ),
             onPressed: () async {
-              await showMenu();
+              await showWallets();
             },
           )
         ],
@@ -350,7 +365,7 @@ VM error: ${result.vmError}''';
                 height: 195,
               ),
               onTap: () async {
-                await showMenu();
+                await showWallets();
               },
             ),
             Container(
@@ -422,23 +437,41 @@ VM error: ${result.vmError}''';
                     style: TextStyle(color: Colors.grey),
                   ),
                   Expanded(
-                    child: Slider(
-                      onChanged: (priority) async {
-                        setState(() {
-                          this.priority = priority;
-                        });
-                        setState(() {
-                          this.estimatedFee = estimateFee();
-                        });
-                      },
-                      value: priority,
-                      activeColor: Colors.blueAccent,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        Slider(
+                          activeColor: Colors.blueAccent,
+                          onChanged: (value) async {
+                            setState(() {
+                              this.priority = value;
+                            });
+                            setState(() {
+                              this.estimatedFee = estimateFee();
+                            });
+                          },
+                          value: priority,
+                        )
+                      ],
                     ),
-                  ),
+                  )
                 ],
               ),
               width: MediaQuery.of(context).size.width,
             ),
+            widget.options.comment != null
+                ? Container(
+                    margin: EdgeInsets.all(10),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text('${widget.options.comment}'),
+                        ),
+                      ],
+                    ),
+                    width: MediaQuery.of(context).size.width,
+                  )
+                : Row(),
             Row(
               children: <Widget>[
                 Expanded(
@@ -464,64 +497,6 @@ VM error: ${result.vmError}''';
                 ),
               ],
             ),
-            isInsufficient
-                ? Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          color: Colors.orangeAccent,
-                          padding: EdgeInsets.all(10),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.error,
-                                color: Colors.limeAccent,
-                                size: 18,
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Text(
-                                  "Insufficient energy",
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Row(),
-            vmError != ''
-                ? Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          color: Colors.orangeAccent,
-                          padding: EdgeInsets.all(10),
-                          child: Row(
-                            children: <Widget>[
-                              Container(
-                                child: Icon(
-                                  Icons.error,
-                                  color: Colors.limeAccent,
-                                  size: 18,
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Text(
-                                  vmError,
-                                  textAlign: TextAlign.left,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Row(),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -597,16 +572,19 @@ VM error: ${result.vmError}''';
                                 int nonce = Random(DateTime.now().millisecond)
                                     .nextInt(1 << 32);
                                 List<Clause> clauses = [];
-                                for (RawClause rawClause in widget.rawClauses) {
-                                  clauses.add(rawClause.toClause());
+                                for (SigningTxMessage txMsg
+                                    in widget.txMessages) {
+                                  clauses.add(txMsg.toClause());
                                 }
                                 Transaction tx = Transaction(
                                   blockRef: BlockRef(number32: block.number),
                                   expiration: 20,
-                                  chainTag: mainNetwork,
+                                  chainTag: testNetwork,
                                   clauses: clauses,
                                   gasPriceCoef: (255 * priority).toInt(),
-                                  gas: totalGas.toInt(),
+                                  gas: totalGas,
+                                  dependsOn:
+                                      widget.options.dependsOn ?? Uint8List(0),
                                   nonce: nonce,
                                 );
                                 tx.sign(privateKey);
@@ -619,7 +597,12 @@ VM error: ${result.vmError}''';
                                   );
                                   Map<String, dynamic> result =
                                       await TransactionAPI.send(tx.serialized);
-                                  Navigator.of(context).pop(result);
+                                  Navigator.of(context).pop(
+                                    SigningTxResponse(
+                                      txid: result['id'],
+                                      signer: '0x' + wallet.keystore.address,
+                                    ),
+                                  );
                                 } catch (err) {
                                   print("send tx err ${err.message} ");
                                   return alert(context, Text("Error"),

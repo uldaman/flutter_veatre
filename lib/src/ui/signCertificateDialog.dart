@@ -221,28 +221,31 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                 await showWallets();
               },
             ),
-            Container(
-              margin: EdgeInsets.all(20),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      widget.certMessage.payload.content,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      alignment: Alignment.topLeft,
+                      margin: EdgeInsets.all(20),
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              widget.certMessage.payload.content,
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -310,6 +313,12 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                     domain: widget.options.link,
                                   );
                                   cert.sign(privateKey);
+                                  await WalletStorage.setMainWallet(
+                                    WalletEntity(
+                                      keystore: wallet.keystore,
+                                      name: wallet.name,
+                                    ),
+                                  );
                                   Navigator.of(context).pop(cert.encoded);
                                 } catch (err) {
                                   setState(() {

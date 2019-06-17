@@ -131,11 +131,24 @@ class _CustomWebViewState extends State<CustomWebView>
               }
               return result.encoded;
             } else if (arguments[0] == 'signCert') {
-              // TODO signCert
               SigningCertMessage certMessage =
                   SigningCertMessage.fromJSON(arguments[1]);
               SigningCertOptions options =
                   SigningCertOptions.fromJSON(arguments[2]);
+              SigningCertResponse result = await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return SignCertificateDialog(
+                    certMessage: certMessage,
+                    options: options,
+                  );
+                },
+              );
+              if (result == null) {
+                throw ArgumentError('user cancelled');
+              }
+              return result.encoded;
             }
             throw ArgumentError('unsupported methor');
           });

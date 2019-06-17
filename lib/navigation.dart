@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:veatre/common/net.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/event.dart';
@@ -15,7 +17,9 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
+  final Net _net = Net(network: testnet);
   final PageController _pageController = PageController();
+  Timer _timer;
   bool _canGoBack = false;
   bool _canGoForward = false;
   int _currentNav = 1; // star navigation
@@ -29,11 +33,15 @@ class _NavigationState extends State<Navigation> {
       _canGoForward = await web_view.canGoForward();
       !isAtWebView ? _pageController.jumpToPage(0) : setState(() {});
     });
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+      onBlockChainChanged.emit(await _net.status());
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
+    _timer.cancel();
     _pageController.dispose();
   }
 

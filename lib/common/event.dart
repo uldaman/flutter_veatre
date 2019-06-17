@@ -18,3 +18,4 @@ class Event {
 
 const onWebChanged = Event("webChanged");
 const onWebViewSelected = Event("webSelected");
+const onBlockChainChanged = Event("blockChainChanged");

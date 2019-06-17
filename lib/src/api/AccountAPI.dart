@@ -3,7 +3,7 @@ import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/common/net.dart';
 
 class AccountAPI {
-  static final net = Net(network: testnet);
+  static final net = Net(testnet);
 
   static Future<Account> get(String address) async {
     String addr = address.startsWith('0x') ? address : '0x$address';

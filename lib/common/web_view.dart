@@ -4,15 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:veatre/common/event.dart';
-import 'package:veatre/common/event_bus.dart';
 import 'package:veatre/common/search_widget.dart';
 import 'package:veatre/src/ui/signTxDialog.dart';
-import 'package:veatre/src/ui/signCertificateDialog.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/storage/storage.dart';
-
-import 'package:veatre/common/net.dart';
 import 'package:veatre/common/driver.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/ui/alert.dart';
@@ -32,9 +28,6 @@ class CustomWebView extends StatefulWidget {
   @override
   _CustomWebViewState createState() => _CustomWebViewState();
 }
-
-final net = Net(network: testnet);
-final driver = Driver(net);
 
 class _CustomWebViewState extends State<CustomWebView>
     with AutomaticKeepAliveClientMixin {

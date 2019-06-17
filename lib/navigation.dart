@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:veatre/common/net.dart';
 import 'package:veatre/common/driver.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
-  final Net _net = Net(network: testnet);
   final PageController _pageController = PageController();
   Timer _timer;
   bool _canGoBack = false;
@@ -35,8 +33,7 @@ class _NavigationState extends State<Navigation> {
       !isAtWebView ? _pageController.jumpToPage(0) : setState(() {});
     });
     _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-      final Driver _driver = Driver(_net);
-      onBlockChainChanged.emit(await _driver.head());
+      onBlockChainChanged.emit(await driver.head());
     });
   }
 

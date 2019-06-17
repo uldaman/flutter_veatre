@@ -1,26 +1,12 @@
 import 'package:veatre/src/models/keyStore.dart';
+import 'package:veatre/src/utils/common.dart';
 
 class Account {
   final BigInt balance;
   final BigInt energy;
   final bool hasCode;
 
-  static final unit = BigInt.from(1e18);
-
   Account({this.balance, this.energy, this.hasCode});
-
-  static String fixed2Value(BigInt value) {
-    double v = (value / unit).toDouble();
-    String fixed2 = v.toStringAsFixed(2);
-    if (fixed2.split('.')[1].endsWith('0')) {
-      String fixed1 = v.toStringAsFixed(1);
-      if (fixed1.split('.')[1].endsWith('0')) {
-        return v.toStringAsFixed(0);
-      }
-      return fixed1;
-    }
-    return fixed2;
-  }
 
   String formatBalance() {
     return fixed2Value(balance);

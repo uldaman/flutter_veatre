@@ -11,11 +11,13 @@ import 'package:veatre/src/models/keyStore.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/ui/TransactionDetail.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/wallets.dart';
 import 'package:web3dart/contracts.dart';
 import 'package:web3dart/crypto.dart';
+import 'package:veatre/src/utils/common.dart';
 
 class SignTxDialog extends StatefulWidget {
   final List<SigningTxMessage> txMessages;
@@ -381,7 +383,7 @@ VM error: ${result.vmError}''';
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         Text(
-                          "${Account.fixed2Value(spendValue)}",
+                          "${fixed2Value(spendValue)}",
                           style: TextStyle(color: Colors.black),
                         ),
                         Container(
@@ -411,7 +413,7 @@ VM error: ${result.vmError}''';
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         Text(
-                          "${Account.fixed2Value(estimatedFee)}",
+                          "${fixed2Value(estimatedFee)}",
                           style: TextStyle(color: Colors.black),
                         ),
                         Container(
@@ -488,7 +490,10 @@ VM error: ${result.vmError}''';
                             ),
                           ),
                           onPressed: () async {
-                            print('more');
+                            Navigator.of(context).pushNamed(
+                              TransactionDetail.routeName,
+                              arguments: widget.txMessages,
+                            );
                           },
                         ),
                       ),

@@ -69,6 +69,19 @@ List<KeyPathNode> defaultKeyPathNodes() {
   ];
 }
 
+String fixed2Value(BigInt value) {
+  double v = (value / BigInt.from(1e18)).toDouble();
+  String fixed2 = v.toStringAsFixed(2);
+  if (fixed2.split('.')[1].endsWith('0')) {
+    String fixed1 = v.toStringAsFixed(1);
+    if (fixed1.split('.')[1].endsWith('0')) {
+      return v.toStringAsFixed(0);
+    }
+    return fixed1;
+  }
+  return fixed2;
+}
+
 class RandomBridge implements SecureRandom {
   Random dartRandom;
 

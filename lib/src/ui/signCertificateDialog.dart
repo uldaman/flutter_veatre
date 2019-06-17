@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
@@ -5,7 +7,10 @@ import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/keyStore.dart';
 import 'package:veatre/src/api/accountAPI.dart';
+import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/wallets.dart';
+import 'package:veatre/src/ui/alert.dart';
+
 import 'package:veatre/src/storage/storage.dart';
 
 class SignCertificateDialog extends StatefulWidget {
@@ -21,6 +26,7 @@ class SignCertificateDialog extends StatefulWidget {
 class SignCertificateDialogState extends State<SignCertificateDialog> {
   bool loading = true;
   Wallet wallet;
+  TextEditingController passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -77,7 +83,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
     return walletEntities[0];
   }
 
-  showMenu() async {
+  showWallets() async {
     final Wallet selectedWallet = await Navigator.push(
       context,
       new MaterialPageRoute(builder: (context) => new Wallets()),
@@ -118,10 +124,254 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
               color: Colors.blue,
             ),
             onPressed: () async {
-              await showMenu();
+              await showWallets();
             },
           )
         ],
+      ),
+      body: ProgressHUD(
+        child: Column(
+          children: <Widget>[
+            GestureDetector(
+              child: Container(
+                child: Card(
+                  margin: EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        height: 100,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF81269D),
+                              const Color(0xFFEE112D)
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Container(
+                                padding: EdgeInsets.all(15),
+                                child: Text(
+                                  wallet == null ? '' : wallet.name,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(left: 15, right: 15),
+                              width: MediaQuery.of(context).size.width,
+                              child: Text(
+                                wallet == null
+                                    ? ''
+                                    : '0x' + wallet.keystore.address,
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Text(wallet == null
+                                ? '0'
+                                : wallet.account.formatBalance()),
+                            Container(
+                              margin: EdgeInsets.only(left: 5, right: 14),
+                              child: Text(
+                                'VET',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Text(wallet == null
+                                ? '0'
+                                : wallet.account.formatEnergy()),
+                            Container(
+                              margin: EdgeInsets.only(left: 5, right: 5),
+                              child: Text(
+                                'VTHO',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                width: MediaQuery.of(context).size.width,
+                height: 195,
+              ),
+              onTap: () async {
+                await showWallets();
+              },
+            ),
+            // Container(
+            //   height: 40,
+            //   child: Row(
+            //     children: <Widget>[
+            //       Expanded(
+            //         child: Text(
+            //           widget.certMessage.purpose,
+            //           textAlign: TextAlign.center,
+            //           style: TextStyle(
+            //             color: Colors.black,
+            //             fontWeight: FontWeight.bold,
+            //             fontSize: 20,
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            Container(
+              margin: EdgeInsets.all(20),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      widget.certMessage.payload.content,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          height: 50,
+                          child: FlatButton(
+                            color: Colors.blue,
+                            child: Text(
+                              'Confirm',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            onPressed: () async {
+                              await customAlert(context,
+                                  title: Text('Sign Certificate'),
+                                  content: TextField(
+                                    controller: passwordController,
+                                    maxLength: 20,
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.lightBlue,
+                                        ),
+                                      ),
+                                      hintText: 'Input your password',
+                                    ),
+                                  ), confirmAction: () async {
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                                String password = passwordController.text;
+                                if (password.isEmpty) {
+                                  return alert(
+                                    context,
+                                    Text('Warnning'),
+                                    "Password can't be empty",
+                                  );
+                                }
+                                Navigator.pop(context);
+                                setState(() {
+                                  loading = true;
+                                });
+                                Uint8List privateKey;
+                                try {
+                                  privateKey = await compute(
+                                    decrypt,
+                                    Decriptions(
+                                        keystore: wallet.keystore,
+                                        password: password),
+                                  );
+                                } catch (err) {
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                  return alert(
+                                    context,
+                                    Text('Warnning'),
+                                    "Password Invalid",
+                                  );
+                                }
+                                try {
+                                  Certificate cert = Certificate(
+                                    certMessage: widget.certMessage,
+                                    timestamp: new DateTime.now()
+                                            .millisecondsSinceEpoch ~/
+                                        1000,
+                                    domain: widget.options.link,
+                                  );
+                                  cert.sign(privateKey);
+                                  Navigator.of(context).pop(cert.encoded);
+                                } catch (err) {
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                  return alert(
+                                      context, Text("Error"), "Unkown error");
+                                } finally {
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                }
+                              }, cancelAction: () async {
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                                Navigator.pop(context);
+                              });
+                            },
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+        isLoading: loading,
       ),
     );
   }

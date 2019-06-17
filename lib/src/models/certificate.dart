@@ -8,9 +8,9 @@ import 'package:web3dart/crypto.dart';
 class Certificate {
   String domain;
   SigningCertMessage certMessage;
-  String signer;
   int timestamp;
 
+  String _signer;
   Uint8List _signature = Uint8List(0);
 
   Certificate({
@@ -23,11 +23,11 @@ class Certificate {
     this.certMessage = certMessage;
   }
 
-  Uint8List sign(Uint8List privateKey) {
+  void sign(Uint8List privateKey) {
     Uint8List publicKey = privateKeyBytesToPublic(privateKey);
     Uint8List address = publicKeyToAddress(publicKey);
-    signer = '0x' + bytesToHex(address);
-    return Crypto.sign(signingHash, privateKey);
+    _signer = '0x' + bytesToHex(address);
+    _signature = Crypto.sign(signingHash, privateKey);
   }
 
   bool verify() {
@@ -43,7 +43,7 @@ class Certificate {
     Uint8List publicKey =
         Crypto.sigToPub(_signature.last, ECSignature(r, s), signingHash);
     Uint8List address = publicKeyToAddress(publicKey);
-    return '0x' + bytesToHex(address) == signer;
+    return '0x' + bytesToHex(address) == _signer;
   }
 
   Uint8List get signingHash {
@@ -53,15 +53,15 @@ class Certificate {
     return blake2b.process(data);
   }
 
-  Map<String, dynamic> get encoded {
+  SigningCertResponse get encoded {
     return SigningCertResponse(
       annex: Annex(
-        signer: signer,
+        signer: _signer,
         timestamp: timestamp,
         domain: domain,
       ),
       signature: '0x' + bytesToHex(_signature),
-    ).encoded;
+    );
   }
 
   Map<String, dynamic> get unserialized {
@@ -69,7 +69,7 @@ class Certificate {
       'domain': domain,
       'payload': certMessage.payload.encoded,
       'purpose': certMessage.purpose,
-      'signer': signer,
+      'signer': _signer,
       'timestamp': timestamp,
     };
   }

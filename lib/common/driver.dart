@@ -1,11 +1,25 @@
+import 'dart:core';
 import 'package:veatre/common/net.dart';
 
-class Driver {
-  Net net;
-  Driver(this.net);
+const bool _isReleaseMode = const bool.fromEnvironment('dart.vm.product');
+
+class _Driver {
+  static _Driver _singleton;
+  final Net _net;
+
+  factory _Driver() {
+    if (_singleton == null) {
+      _singleton = _Driver._internal(
+        _isReleaseMode ? Net(mainnet) : Net(testnet),
+      );
+    }
+    return _singleton;
+  }
+
+  _Driver._internal(this._net);
 
   Future<Map<String, dynamic>> head() async {
-    dynamic block = await net.getBlock("best");
+    dynamic block = await _net.getBlock("best");
     return {
       "id": block["id"],
       "number": block["number"],
@@ -16,18 +30,20 @@ class Driver {
 
   dynamic callMethod(List<dynamic> args) async {
     var methodMap = {
-      "getAccount": () => net.getAccount(args[1], revision: args[2]),
-      "getCode": () => net.getCode(args[1], revision: args[2]),
-      "getStorage": () => net.getStorage(args[1], args[2], revision: args[3]),
-      "getBlock": () => net.getBlock(args[1]),
-      "getTransaction": () => net.getTransaction(args[1]),
-      "getReceipt": () => net.getReceipt(args[1]),
-      "filterTransferLogs": () => net.filterTransferLogs(args[1]),
-      "filterEventLogs": () => net.filterEventLogs(args[1]),
-      "explain": () => net.explain(args[1], revision: args[2]),
+      "getAccount": () => _net.getAccount(args[1], revision: args[2]),
+      "getCode": () => _net.getCode(args[1], revision: args[2]),
+      "getStorage": () => _net.getStorage(args[1], args[2], revision: args[3]),
+      "getBlock": () => _net.getBlock(args[1]),
+      "getTransaction": () => _net.getTransaction(args[1]),
+      "getReceipt": () => _net.getReceipt(args[1]),
+      "filterTransferLogs": () => _net.filterTransferLogs(args[1]),
+      "filterEventLogs": () => _net.filterEventLogs(args[1]),
+      "explain": () => _net.explain(args[1], revision: args[2]),
     };
     if (methodMap.containsKey(args[0])) {
       return methodMap[args[0]]();
     }
   }
 }
+
+_Driver driver = _Driver();

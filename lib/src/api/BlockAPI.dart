@@ -2,7 +2,7 @@ import 'package:veatre/src/models/block.dart';
 import 'package:veatre/common/net.dart';
 
 class BlockAPI {
-  static final net = Net(network: testnet);
+  static final net = Net(testnet);
   static Future<Block> best() async {
     Map<dynamic, dynamic> json = await net.getBlock('best');
     return Block.fromJSON(json);

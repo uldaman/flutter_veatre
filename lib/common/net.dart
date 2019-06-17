@@ -18,8 +18,8 @@ class BadParameter implements Exception {
 
 class Net {
   static final dio = Dio();
-  String network;
-  Net({this.network});
+  final String network;
+  Net(this.network);
 
   dynamic getBlock(dynamic revision) async {
     if (revision == null) {

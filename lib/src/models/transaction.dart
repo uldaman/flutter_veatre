@@ -167,7 +167,7 @@ class SigningTxMessage {
       to: parsedJson['to'],
       value: parsedJson['value'],
       data: parsedJson['data'],
-      comment: parsedJson['comment'],
+      comment: parsedJson['comment'] ?? '',
     );
   }
 

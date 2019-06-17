@@ -49,21 +49,6 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
     getWalletEntity(widget.options.signer).then((walletEntity) {
       setWallet(walletEntity);
     });
-    // Certificate c = Certificate(
-    //   domain: 'domain',
-    //   timestamp: 10,
-    //   purpose: 'purpose',
-    //   payload: Payload(content: 'content', type: 'type'),
-    // );
-    // print('c.unserialized ${c.unserialized}');
-    // compute(
-    //   decrypt,
-    //   Decriptions(keystore: wallet.keystore, password: 'a'),
-    // ).then((privateKey) {
-    //   c.sign(privateKey);
-    //   print('encoded ${c.encoded}');
-    //   print('veify ${c.verify()}');
-    // });
   }
 
   Future<WalletEntity> getWalletEntity(String signer) async {
@@ -236,24 +221,6 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                 await showWallets();
               },
             ),
-            // Container(
-            //   height: 40,
-            //   child: Row(
-            //     children: <Widget>[
-            //       Expanded(
-            //         child: Text(
-            //           widget.certMessage.purpose,
-            //           textAlign: TextAlign.center,
-            //           style: TextStyle(
-            //             color: Colors.black,
-            //             fontWeight: FontWeight.bold,
-            //             fontSize: 20,
-            //           ),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
             Container(
               margin: EdgeInsets.all(20),
               child: Row(

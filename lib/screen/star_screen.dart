@@ -20,6 +20,11 @@ class _StarScreenState extends State<StarScreen>
       "icon": "https://apps.vechain.org/img/come.vepool.vepool.a07e2818.png",
       "url": "https://vepool.xyz/",
     },
+    {
+      "title": "Insight",
+      "icon": "https://apps.vechain.org/img/com.vechain.insight.5b9cf491.png",
+      "url": "https://insight.vecha.in/#/",
+    },
   ];
 
   @override

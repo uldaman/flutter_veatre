@@ -290,17 +290,12 @@ class MnemonicDecriptions {
 
 Future<KeyStore> decryptMnemonic(
     MnemonicDecriptions mnemonicDecriptions) async {
-  print("1 ${new DateTime.now().millisecondsSinceEpoch ~/ 1000}");
-
   Uint8List seed =
       Mnemonic.generateMasterSeed(mnemonicDecriptions.mnemonic, "");
   Uint8List rootSeed = getRootSeed(seed);
   Uint8List privateKey = getPrivateKey(rootSeed, defaultKeyPathNodes());
-  print("2 ${new DateTime.now().millisecondsSinceEpoch ~/ 1000}");
-
   KeyStore keystore = await KeyStore.encrypt(
       bytesToHex(privateKey), mnemonicDecriptions.password);
-  print("3 ${new DateTime.now().millisecondsSinceEpoch ~/ 1000}");
 
   return keystore;
 }

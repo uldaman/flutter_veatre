@@ -7,10 +7,7 @@ class AccountAPI {
 
   static Future<Account> get(String address) async {
     String addr = address.startsWith('0x') ? address : '0x$address';
-    print(addr);
     Map<String, dynamic> json = await net.getAccount(addr);
-    print(json);
-
     return Account.fromJSON(json);
   }
 
@@ -30,14 +27,12 @@ class AccountAPI {
         'data': txMsg.data,
       });
     }
-    print(clausesJson);
     List<dynamic> callResults = await net.explain({
       'clauses': clausesJson,
       'caller': addr,
       'gasPrice': gasPrice,
       'gas': gas,
     }, revision: revision);
-    print("callResults: $callResults");
     List<CallResult> results = [];
     for (Map<String, dynamic> callResult in callResults) {
       results.add(CallResult.fromJSON(callResult));

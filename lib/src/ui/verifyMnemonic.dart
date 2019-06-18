@@ -103,7 +103,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
   bool loading = false;
   int currentPage = 0;
   bool computing = false;
-  KeyStore keystore;
+  KeyStore _keystore;
 
   Future<KeyStore> computeKeystore(
       MnemonicDecriptions mnemonicDecriptions) async {
@@ -115,7 +115,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
       mnemonicDecriptions,
     );
     setState(() {
-      this.keystore = keystore;
+      this._keystore = keystore;
     });
     return keystore;
   }
@@ -249,7 +249,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
                           });
                           if (verify(args.mnemonics)) {
                             await Future.delayed(Duration(seconds: 3));
-                            while (keystore == null) {
+                            while (_keystore == null) {
                               await Future.delayed(Duration(seconds: 1));
                             }
                             // KeyStore keystore = await compute(
@@ -262,7 +262,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
                             await WalletStorage.write(
                               walletEntity: WalletEntity(
                                 name: args.walletName,
-                                keystore: keystore,
+                                keystore: _keystore,
                               ),
                               isMainWallet: true,
                             );

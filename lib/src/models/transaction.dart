@@ -68,8 +68,6 @@ class Transaction {
   }
 
   List<dynamic> get _unserializedParams {
-    // print(
-    //     "${this.chainTag} ${this.blockRef.number} ${this.expiration} ${this._clauses} ${this.gasPriceCoef} ${this.gas} ${this._dependsOn} ${this._nonce} ${this._reserved}");
     List<dynamic> data = [];
     data.addAll([
       this.chainTag,

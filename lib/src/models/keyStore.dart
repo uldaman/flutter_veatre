@@ -52,7 +52,7 @@ class KeyStore {
     String salt = randomHex(64);
     List<int> iv = randomBytes(16);
     String kdf = 'scrypt';
-    ScryptParams scryptParams = ScryptParams(1024, 8, 1, 32, hexToBytes(salt));
+    ScryptParams scryptParams = ScryptParams(8192, 8, 1, 32, hexToBytes(salt));
     ScryptKeyDerivator scryptKeyDerivator =
         ScryptKeyDerivator(params: scryptParams);
 
@@ -296,6 +296,5 @@ Future<KeyStore> decryptMnemonic(
   Uint8List privateKey = getPrivateKey(rootSeed, defaultKeyPathNodes());
   KeyStore keystore = await KeyStore.encrypt(
       bytesToHex(privateKey), mnemonicDecriptions.password);
-
   return keystore;
 }

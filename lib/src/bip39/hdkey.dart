@@ -221,13 +221,3 @@ Uint8List getPrivateKey(
   }
   return keypair[0];
 }
-
-String exportExtendedPrivKey(
-    {String network,
-    String depth,
-    String parenFingerPrint,
-    String keyIndex,
-    String chainCode,
-    String key}) {
-  return "";
-}

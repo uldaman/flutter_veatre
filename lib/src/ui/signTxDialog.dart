@@ -63,7 +63,6 @@ class SignTxDialogState extends State<SignTxDialog> {
       });
     };
     getWalletEntity(widget.options.signer).then((walletEntity) {
-      print(walletEntity.keystore.address);
       setWallet(walletEntity);
     });
   }
@@ -614,7 +613,6 @@ VM error: ${result.vmError}''';
                                     ),
                                   );
                                 } catch (err) {
-                                  print("send tx err ${err.message} ");
                                   return alert(context, Text("Error"),
                                       "Send transaction failed");
                                 } finally {

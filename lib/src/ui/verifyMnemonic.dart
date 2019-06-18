@@ -103,34 +103,10 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
   bool loading = false;
   int currentPage = 0;
   bool computing = false;
-  KeyStore _keystore;
-
-  Future<KeyStore> computeKeystore(
-      MnemonicDecriptions mnemonicDecriptions) async {
-    setState(() {
-      this.computing = true;
-    });
-    KeyStore keystore = await compute(
-      decryptMnemonic,
-      mnemonicDecriptions,
-    );
-    setState(() {
-      this._keystore = keystore;
-    });
-    return keystore;
-  }
 
   @override
   Widget build(BuildContext context) {
     final WalletArguments args = ModalRoute.of(context).settings.arguments;
-    if (!computing) {
-      computeKeystore(
-        MnemonicDecriptions(
-          mnemonic: args.mnemonics.join(" "),
-          password: args.password,
-        ),
-      );
-    }
     if (this.topBtns.length < 3) {
       for (int i = 0; i < 3; i++) {
         List<TopButton> pageTopBtns = [];
@@ -248,21 +224,17 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
                             this.loading = true;
                           });
                           if (verify(args.mnemonics)) {
-                            await Future.delayed(Duration(seconds: 3));
-                            while (_keystore == null) {
-                              await Future.delayed(Duration(seconds: 1));
-                            }
-                            // KeyStore keystore = await compute(
-                            //   decryptMnemonic,
-                            //   MnemonicDecriptions(
-                            //     mnemonic: args.mnemonics.join(" "),
-                            //     password: args.password,
-                            //   ),
-                            // );
+                            KeyStore keystore = await compute(
+                              decryptMnemonic,
+                              MnemonicDecriptions(
+                                mnemonic: args.mnemonics.join(" "),
+                                password: args.password,
+                              ),
+                            );
                             await WalletStorage.write(
                               walletEntity: WalletEntity(
                                 name: args.walletName,
-                                keystore: _keystore,
+                                keystore: keystore,
                               ),
                               isMainWallet: true,
                             );

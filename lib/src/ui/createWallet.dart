@@ -133,6 +133,7 @@ class CreateWalletState extends State<CreateWallet> {
                     }
                     String mnemonic =
                         await Mnemonic.generateMnemonic(randomBytes(16));
+                    print('mnemonic $mnemonic');
                     List<String> words = await Mnemonic.populateWordList();
                     List<List<String>> randomWordsList = List<List<String>>();
                     List<String> mnemonics = mnemonic.split(" ");

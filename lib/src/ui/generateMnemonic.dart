@@ -70,27 +70,6 @@ class GenerateMnemonicState extends State<GenerateMnemonic> {
                     children: widgets.sublist(8, 12),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: widgets.sublist(12, 16),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: widgets.sublist(16, 20),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: widgets.sublist(20, 24),
-                  ),
-                ),
               ],
             ),
           ),

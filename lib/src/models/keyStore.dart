@@ -2,6 +2,7 @@ import 'dart:core';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:collection/collection.dart';
+
 import 'package:uuid/uuid.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:veatre/src/utils/common.dart';
@@ -51,7 +52,7 @@ class KeyStore {
     String salt = randomHex(64);
     List<int> iv = randomBytes(16);
     String kdf = 'scrypt';
-    ScryptParams scryptParams = ScryptParams(8192, 8, 1, 32, hexToBytes(salt));
+    ScryptParams scryptParams = ScryptParams(1024, 8, 1, 32, hexToBytes(salt));
     ScryptKeyDerivator scryptKeyDerivator =
         ScryptKeyDerivator(params: scryptParams);
 
@@ -289,11 +290,17 @@ class MnemonicDecriptions {
 
 Future<KeyStore> decryptMnemonic(
     MnemonicDecriptions mnemonicDecriptions) async {
+  print("1 ${new DateTime.now().millisecondsSinceEpoch ~/ 1000}");
+
   Uint8List seed =
       Mnemonic.generateMasterSeed(mnemonicDecriptions.mnemonic, "");
   Uint8List rootSeed = getRootSeed(seed);
   Uint8List privateKey = getPrivateKey(rootSeed, defaultKeyPathNodes());
+  print("2 ${new DateTime.now().millisecondsSinceEpoch ~/ 1000}");
+
   KeyStore keystore = await KeyStore.encrypt(
       bytesToHex(privateKey), mnemonicDecriptions.password);
+  print("3 ${new DateTime.now().millisecondsSinceEpoch ~/ 1000}");
+
   return keystore;
 }

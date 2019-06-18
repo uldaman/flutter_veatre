@@ -11,7 +11,6 @@ import 'package:veatre/src/models/keyStore.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/storage/storage.dart';
-import 'package:veatre/src/ui/TransactionDetail.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/wallets.dart';
@@ -474,38 +473,44 @@ VM error: ${result.vmError}''';
                     width: MediaQuery.of(context).size.width,
                   )
                 : Row(),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(right: 15),
-                        child: FlatButton(
-                          child: Text(
-                            'transaction details',
-                            style: TextStyle(
-                              color: Colors.blueAccent,
-                            ),
-                          ),
-                          onPressed: () async {
-                            Navigator.of(context).pushNamed(
-                              TransactionDetail.routeName,
-                              arguments: widget.txMessages,
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            // Row(
+            //   children: <Widget>[
+            //     Expanded(
+            //       child: Row(
+            //         mainAxisAlignment: MainAxisAlignment.end,
+            //         children: <Widget>[
+            //           Container(
+            //             margin: EdgeInsets.only(right: 15),
+            //             child: FlatButton(
+            //               child: Text(
+            //                 'transaction details',
+            //                 style: TextStyle(
+            //                   color: Colors.blueAccent,
+            //                 ),
+            //               ),
+            //               onPressed: () async {
+            //                 Navigator.of(context).pushNamed(
+            //                   TransactionDetail.routeName,
+            //                   arguments: widget.txMessages,
+            //                 );
+            //               },
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            // ),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
+                  Expanded(
+                    child: ListView(
+                      physics: new ClampingScrollPhysics(),
+                      children: buildClauses(widget.txMessages),
+                    ),
+                  ),
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -636,5 +641,115 @@ VM error: ${result.vmError}''';
         isLoading: loading,
       ),
     );
+  }
+
+  List<Widget> buildClauses(List<SigningTxMessage> txMessages) {
+    List<Widget> clauseCards = [];
+    for (SigningTxMessage txMessage in txMessages) {
+      Widget clauseCard = Container(
+        child: Card(
+          child: Column(
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Container(
+                    width: 80,
+                    margin: EdgeInsets.only(top: 15, left: 10),
+                    child: Text(
+                      'To',
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 15, left: 5, right: 10),
+                      child: Text(txMessage.to),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(top: 15, left: 10),
+                    width: 80,
+                    child: Text(
+                      'Value',
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 15, left: 5, right: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Text("${fixed2Value(BigInt.parse(txMessage.value))}"),
+                          Container(
+                            margin: EdgeInsets.only(left: 5),
+                            child: Text(
+                              'VET',
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 10),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(top: 15, left: 10),
+                    width: 80,
+                    child: Text(
+                      'Inpu data',
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 15, left: 5, right: 10),
+                      child: Text(txMessage.data),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  Container(
+                    width: 80,
+                    margin: EdgeInsets.only(top: 15, left: 10, bottom: 15),
+                    child: Text(
+                      'Comment',
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(
+                          top: 15, left: 5, right: 10, bottom: 15),
+                      child: Text(txMessage.comment),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+      clauseCards.add(clauseCard);
+    }
+    return clauseCards;
   }
 }

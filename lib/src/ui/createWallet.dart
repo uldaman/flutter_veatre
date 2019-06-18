@@ -132,11 +132,11 @@ class CreateWalletState extends State<CreateWallet> {
                           "This wallet name has been already existed");
                     }
                     String mnemonic =
-                        await Mnemonic.generateMnemonic(randomBytes(32));
+                        await Mnemonic.generateMnemonic(randomBytes(16));
                     List<String> words = await Mnemonic.populateWordList();
                     List<List<String>> randomWordsList = List<List<String>>();
                     List<String> mnemonics = mnemonic.split(" ");
-                    for (int i = 0; i < 6; i++) {
+                    for (int i = 0; i < 3; i++) {
                       List<String> randomWords =
                           mnemonics.sublist(i * 4, (i + 1) * 4);
                       while (randomWords.length < 12) {
@@ -153,9 +153,16 @@ class CreateWalletState extends State<CreateWallet> {
                     setState(() {
                       this.loading = false;
                     });
-                    Navigator.pushNamed(context, GenerateMnemonic.routeName,
-                        arguments: WalletArguments(
-                            walletName, password, mnemonics, randomWordsList));
+                    Navigator.pushNamed(
+                      context,
+                      GenerateMnemonic.routeName,
+                      arguments: WalletArguments(
+                        walletName,
+                        password,
+                        mnemonics,
+                        randomWordsList,
+                      ),
+                    );
                   },
                 ),
                 width: MediaQuery.of(context).size.width - 40,

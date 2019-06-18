@@ -19,7 +19,6 @@ class VerifyMnemonic extends StatefulWidget {
 }
 
 class TopButton {
-  // Widget child;
   String word;
   bool isSelected = false;
   int selectedIndex;
@@ -65,7 +64,6 @@ class TopButton {
 }
 
 class BottomButton {
-  // Widget child;
   String word;
   bool isEnabled = true;
   int index;
@@ -104,12 +102,37 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
   List<List<BottomButton>> bottomBtns = [];
   bool loading = false;
   int currentPage = 0;
+  bool computing = false;
+  KeyStore keystore;
+
+  Future<KeyStore> computeKeystore(
+      MnemonicDecriptions mnemonicDecriptions) async {
+    setState(() {
+      this.computing = true;
+    });
+    KeyStore keystore = await compute(
+      decryptMnemonic,
+      mnemonicDecriptions,
+    );
+    setState(() {
+      this.keystore = keystore;
+    });
+    return keystore;
+  }
 
   @override
   Widget build(BuildContext context) {
     final WalletArguments args = ModalRoute.of(context).settings.arguments;
-    if (this.topBtns.length < 6) {
-      for (int i = 0; i < 6; i++) {
+    if (!computing) {
+      computeKeystore(
+        MnemonicDecriptions(
+          mnemonic: args.mnemonics.join(" "),
+          password: args.password,
+        ),
+      );
+    }
+    if (this.topBtns.length < 3) {
+      for (int i = 0; i < 3; i++) {
         List<TopButton> pageTopBtns = [];
         for (int k = i * 4; k < (i + 1) * 4; k++) {
           pageTopBtns
@@ -146,7 +169,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
     }
 
     List<Widget> pages = [];
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 3; i++) {
       pages.add(this.buildPage(i, context));
     }
 
@@ -195,7 +218,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
                     child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Text("${currentPage + 1}/6"),
+                    Text("${currentPage + 1}/3"),
                     IconButton(
                       icon: Icon(
                         Icons.arrow_back,
@@ -216,7 +239,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
                         color: Colors.blue,
                       ),
                       onPressed: () async {
-                        if (this.currentPage < 5) {
+                        if (this.currentPage < 2) {
                           await pageController.nextPage(
                               duration: Duration(milliseconds: 300),
                               curve: Curves.easeOut);
@@ -224,20 +247,25 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
                           setState(() {
                             this.loading = true;
                           });
-                          bool isValid = true;
-                          verify(args.mnemonics);
-                          if (isValid) {
-                            KeyStore keystore = await compute(
-                                decryptMnemonic,
-                                MnemonicDecriptions(
-                                    mnemonic: args.mnemonics.join(" "),
-                                    password: args.password));
+                          if (verify(args.mnemonics)) {
+                            await Future.delayed(Duration(seconds: 3));
+                            while (keystore == null) {
+                              await Future.delayed(Duration(seconds: 1));
+                            }
+                            // KeyStore keystore = await compute(
+                            //   decryptMnemonic,
+                            //   MnemonicDecriptions(
+                            //     mnemonic: args.mnemonics.join(" "),
+                            //     password: args.password,
+                            //   ),
+                            // );
                             await WalletStorage.write(
-                                walletEntity: WalletEntity(
-                                  name: args.walletName,
-                                  keystore: keystore,
-                                ),
-                                isMainWallet: true);
+                              walletEntity: WalletEntity(
+                                name: args.walletName,
+                                keystore: keystore,
+                              ),
+                              isMainWallet: true,
+                            );
                             setState(() {
                               this.loading = false;
                             });
@@ -314,7 +342,7 @@ class VerifyMnemonicState extends State<VerifyMnemonic> {
   }
 
   bool verify(List<String> mnemonic) {
-    for (int page = 0; page < 6; page++) {
+    for (int page = 0; page < 3; page++) {
       List<TopButton> btns = this.topBtns[page];
       for (int index = 0; index < 4; index++) {
         if (mnemonic[page * 4 + index] != btns[index].word) {

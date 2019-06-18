@@ -327,7 +327,7 @@ class ImportWalletState extends State<ImportWallet> {
                                 context,
                                 title: Text('Warnning'),
                                 content: Text(
-                                    'this address has been already existed,would you like to cover it?'),
+                                    'This address has been already existed,would you like to cover it?'),
                                 confirmAction: () async {
                                   await WalletStorage.delete(existed.name);
                                   await WalletStorage.write(

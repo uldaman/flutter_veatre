@@ -85,7 +85,7 @@ class _CustomWebViewState extends State<CustomWebView>
             print("Thor response $data");
             return data;
           });
-          controller.addJavaScriptHandler("webChanged", (arguments) async {
+          controller.addJavaScriptHandler("navigatedInPage", (arguments) async {
             onWebChanged.emit();
           });
           controller.addJavaScriptHandler("Vendor", (arguments) async {
@@ -153,6 +153,9 @@ class _CustomWebViewState extends State<CustomWebView>
             controller.injectScriptCode('window.block_head=$head');
           });
           widget.onWebViewCreated(controller);
+        },
+        onLoadStart: (InAppWebViewController controller, String url) async {
+          onWebChanged.emit();
         },
         onLoadStop: (InAppWebViewController controller, String url) async {
           widget.onLoadStop(controller, url);

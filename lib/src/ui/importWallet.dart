@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
@@ -410,7 +409,6 @@ class ImportWalletState extends State<ImportWallet> {
                               Uint8List addr = publicKeyToAddress(publicKey);
                               WalletEntity existed =
                                   await walletExisted(bytesToHex(addr));
-                              keystore.address = bytesToHex(addr);
                               if (existed != null) {
                                 setState(() {
                                   loading = false;
@@ -421,10 +419,12 @@ class ImportWalletState extends State<ImportWallet> {
                                   content: Text(
                                       'this address has been already existed,would you like to cover it?'),
                                   confirmAction: () async {
+                                    KeyStore keyS = await KeyStore.encrypt(
+                                        bytesToHex(privateKey), password);
                                     await WalletStorage.delete(existed.name);
                                     await WalletStorage.write(
                                       walletEntity: WalletEntity(
-                                        keystore: keystore,
+                                        keystore: keyS,
                                         name: walletName,
                                       ),
                                       isMainWallet: true,

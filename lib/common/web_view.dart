@@ -79,6 +79,9 @@ class _CustomWebViewState extends State<CustomWebView>
           controller.addJavaScriptHandler("debugLog", (arguments) async {
             debugPrint("debugLog: " + arguments.join(","));
           });
+          controller.addJavaScriptHandler("errorLog", (arguments) async {
+            debugPrint("errorLog: " + arguments.join(","));
+          });
           controller.addJavaScriptHandler("Thor", (arguments) async {
             print('Thor arguments $arguments');
             dynamic data = await driver.callMethod(arguments);

@@ -2,13 +2,11 @@ import 'dart:core';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:collection/collection.dart';
-
 import 'package:uuid/uuid.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/bip39/mnemonic.dart';
 import 'package:veatre/src/bip39/hdkey.dart';
-
 import "package:pointycastle/key_derivators/scrypt.dart";
 import 'package:pointycastle/key_derivators/api.dart';
 import 'package:pointycastle/impl.dart';
@@ -83,10 +81,10 @@ class KeyStore {
     );
   }
 
-  static Uint8List decrypt({KeyStore keyS, String passphrase}) {
-    List<int> ciphertext = hexToBytes(keyS.crypto.cipherText);
-    ScryptParams kdfparams = keyS.crypto.kdfParams;
-    Uint8List iv = hexToBytes(keyS.crypto.cipherParams.iv);
+  static Uint8List decrypt({KeyStore keyStore, String passphrase}) {
+    List<int> ciphertext = hexToBytes(keyStore.crypto.cipherText);
+    ScryptParams kdfparams = keyStore.crypto.kdfParams;
+    Uint8List iv = hexToBytes(keyStore.crypto.cipherParams.iv);
     ScryptKeyDerivator scryptKeyDerivator =
         ScryptKeyDerivator(params: kdfparams);
 
@@ -97,14 +95,14 @@ class KeyStore {
     List.copyRange(macBuffer, 16, ciphertext);
 
     String mac = bytesToHex(SHA3Digest(256).process(macBuffer));
-    String macString = keyS.crypto.mac;
+    String macString = keyStore.crypto.mac;
 
     Function eq = const ListEquality().equals;
     if (!eq(mac.toUpperCase().codeUnits, macString.toUpperCase().codeUnits)) {
       throw 'Decryption Failed';
     }
     var aesKey = derivedKey.sublist(0, 16);
-    var encryptedPrivateKey = hexToBytes(keyS.crypto.cipherText);
+    var encryptedPrivateKey = hexToBytes(keyStore.crypto.cipherText);
     var aes = _initCipher(false, aesKey, iv);
     return aes.process(encryptedPrivateKey);
   }
@@ -273,7 +271,7 @@ class Decriptions {
 
 Uint8List decrypt(Decriptions decriptions) {
   return KeyStore.decrypt(
-    keyS: decriptions.keystore,
+    keyStore: decriptions.keystore,
     passphrase: decriptions.password,
   );
 }

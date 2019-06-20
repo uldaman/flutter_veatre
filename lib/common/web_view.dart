@@ -86,114 +86,119 @@ class _CustomWebViewState extends State<CustomWebView>
         ),
       ),
       body: InAppWebView(
-        initialJs: _makeHeadJs(driver.head),
-        initialUrl: initialUrl,
-        onConsoleMessage:
-            (InAppWebViewController controller, ConsoleMessage consoleMessage) {
-          String str = """
+          initialOptions: {"useShouldOverrideUrlLoading": true},
+          initialJs: _makeHeadJs(driver.head),
+          initialUrl: initialUrl,
+          onConsoleMessage: (InAppWebViewController controller,
+              ConsoleMessage consoleMessage) {
+            String str = """
           console output:
             sourceURL: ${consoleMessage.sourceURL}
             lineNumber: ${consoleMessage.lineNumber}
             message: ${consoleMessage.message}
             messageLevel: ${consoleMessage.messageLevel}""";
-          debugPrint(str);
-        },
-        onWebViewCreated: (InAppWebViewController controller) async {
-          controller.addJavaScriptHandler("debugLog", (arguments) async {
-            debugPrint("debugLog: " + arguments.join(","));
-          });
-          controller.addJavaScriptHandler("errorLog", (arguments) async {
-            debugPrint("errorLog: " + arguments.join(","));
-          });
-          controller.addJavaScriptHandler("Thor", (arguments) async {
-            debugPrint('Thor arguments $arguments');
-            dynamic data = await driver.callMethod(arguments);
-            debugPrint("Thor response $data");
-            return data;
-          });
-          controller.addJavaScriptHandler("navigatedInPage", (arguments) async {
-            onWebChanged.emit();
-          });
-          controller.addJavaScriptHandler("Vendor", (arguments) async {
-            debugPrint('Vendor arguments $arguments');
-            List<WalletEntity> walletEntities = await WalletStorage.readAll();
-            if (walletEntities.length == 0) {
-              return customAlert(
-                context,
-                title: Text('No wallet available'),
-                content: Text('Create a new wallet?'),
-                confirmAction: () async {
-                  await Navigator.of(context)
-                      .pushNamed(ManageWallets.routeName);
-                  Navigator.pop(context);
-                },
-                cancelAction: () async {
-                  Navigator.pop(context);
-                },
-              );
-            }
-            if (arguments[0] == 'signTx') {
-              List<SigningTxMessage> txMessages = [];
-              for (Map<String, dynamic> txMsg in arguments[1]) {
-                txMessages.add(SigningTxMessage.fromJSON(txMsg));
-              }
-              SigningTxOptions options =
-                  SigningTxOptions.fromJSON(arguments[2]);
-              SigningTxResponse result = await showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) {
-                  return SignTxDialog(
-                    txMessages: txMessages,
-                    options: options,
-                  );
-                },
-              );
-              if (result == null) {
-                throw ArgumentError('user cancelled');
-              }
-              return result.encoded;
-            } else if (arguments[0] == 'signCert') {
-              SigningCertMessage certMessage =
-                  SigningCertMessage.fromJSON(arguments[1]);
-              SigningCertOptions options =
-                  SigningCertOptions.fromJSON(arguments[2]);
-              SigningCertResponse result = await showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) {
-                  return SignCertificateDialog(
-                    certMessage: certMessage,
-                    options: options,
-                  );
-                },
-              );
-              if (result == null) {
-                throw ArgumentError('user cancelled');
-              }
-              return result.encoded;
-            }
-            throw ArgumentError('unsupported methor');
-          });
-          _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-            driver.syncHead().then((head) {
-              controller.injectScriptCode(_makeHeadJs(head));
+            debugPrint(str);
+          },
+          onWebViewCreated: (InAppWebViewController controller) async {
+            controller.addJavaScriptHandler("debugLog", (arguments) async {
+              debugPrint("debugLog: " + arguments.join(","));
             });
-          });
-          widget.onWebViewCreated(controller);
-        },
-        onLoadStart: (InAppWebViewController controller, String url) async {
-          onWebChanged.emit();
-        },
-        onLoadStop: (InAppWebViewController controller, String url) async {
-          widget.onLoadStop(controller, url);
-        },
-        onProgressChanged: (InAppWebViewController controller, int progress) {
-          setState(() {
-            _progress = progress / 100;
-          });
-        },
-      ),
+            controller.addJavaScriptHandler("errorLog", (arguments) async {
+              debugPrint("errorLog: " + arguments.join(","));
+            });
+            controller.addJavaScriptHandler("Thor", (arguments) async {
+              debugPrint('Thor arguments $arguments');
+              dynamic data = await driver.callMethod(arguments);
+              debugPrint("Thor response $data");
+              return data;
+            });
+            controller.addJavaScriptHandler("navigatedInPage",
+                (arguments) async {
+              onWebChanged.emit();
+            });
+            controller.addJavaScriptHandler("Vendor", (arguments) async {
+              debugPrint('Vendor arguments $arguments');
+              List<WalletEntity> walletEntities = await WalletStorage.readAll();
+              if (walletEntities.length == 0) {
+                return customAlert(
+                  context,
+                  title: Text('No wallet available'),
+                  content: Text('Create a new wallet?'),
+                  confirmAction: () async {
+                    await Navigator.of(context)
+                        .pushNamed(ManageWallets.routeName);
+                    Navigator.pop(context);
+                  },
+                  cancelAction: () async {
+                    Navigator.pop(context);
+                  },
+                );
+              }
+              if (arguments[0] == 'signTx') {
+                List<SigningTxMessage> txMessages = [];
+                for (Map<String, dynamic> txMsg in arguments[1]) {
+                  txMessages.add(SigningTxMessage.fromJSON(txMsg));
+                }
+                SigningTxOptions options =
+                    SigningTxOptions.fromJSON(arguments[2]);
+                SigningTxResponse result = await showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) {
+                    return SignTxDialog(
+                      txMessages: txMessages,
+                      options: options,
+                    );
+                  },
+                );
+                if (result == null) {
+                  throw ArgumentError('user cancelled');
+                }
+                return result.encoded;
+              } else if (arguments[0] == 'signCert') {
+                SigningCertMessage certMessage =
+                    SigningCertMessage.fromJSON(arguments[1]);
+                SigningCertOptions options =
+                    SigningCertOptions.fromJSON(arguments[2]);
+                SigningCertResponse result = await showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) {
+                    return SignCertificateDialog(
+                      certMessage: certMessage,
+                      options: options,
+                    );
+                  },
+                );
+                if (result == null) {
+                  throw ArgumentError('user cancelled');
+                }
+                return result.encoded;
+              }
+              throw ArgumentError('unsupported methor');
+            });
+            _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+              driver.syncHead().then((head) {
+                controller.injectScriptCode(_makeHeadJs(head));
+              });
+            });
+            widget.onWebViewCreated(controller);
+          },
+          onLoadStart: (InAppWebViewController controller, String url) async {
+            onWebChanged.emit();
+          },
+          onLoadStop: (InAppWebViewController controller, String url) async {
+            widget.onLoadStop(controller, url);
+          },
+          onProgressChanged: (InAppWebViewController controller, int progress) {
+            setState(() {
+              _progress = progress / 100;
+            });
+          },
+          shouldOverrideUrlLoading:
+              (InAppWebViewController controller, String url) {
+            controller.loadUrl(url);
+          }),
     );
   }
 }

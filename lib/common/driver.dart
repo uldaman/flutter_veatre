@@ -5,12 +5,7 @@ const bool _isReleaseMode = const bool.fromEnvironment('dart.vm.product');
 
 class _Driver {
   static _Driver _singleton;
-  Map<String, dynamic> _head = {
-    "id": "0x",
-    "number": 0,
-    "timestamp": 0,
-    "parentID": "0x",
-  };
+  Map<String, dynamic> _head;
   final Net _net;
 
   factory _Driver() {

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:veatre/common/driver.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   final PageController _pageController = PageController();
-  Timer _timer;
   bool _canGoBack = false;
   bool _canGoForward = false;
   int _currentNav = 1; // star navigation
@@ -32,15 +30,11 @@ class _NavigationState extends State<Navigation> {
       _canGoForward = await web_view.canGoForward();
       !isAtWebView ? _pageController.jumpToPage(0) : setState(() {});
     });
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-      onBlockChainChanged.emit(await driver.head());
-    });
   }
 
   @override
   void dispose() {
     super.dispose();
-    _timer.cancel();
     _pageController.dispose();
   }
 

@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
@@ -35,6 +35,13 @@ class _CustomWebViewState extends State<CustomWebView>
   @override
   bool get wantKeepAlive => true;
   double _progress = 0;
+  Timer _timer;
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
   Widget _progressIndicator(double value) {
     return Padding(
@@ -49,6 +56,16 @@ class _CustomWebViewState extends State<CustomWebView>
       ),
       padding: EdgeInsets.symmetric(horizontal: 8.8),
     );
+  }
+
+  String _makeHeadJs(Map<String, dynamic> head) {
+    return '''
+            window.block_head={
+              id: '${head["id"]}',
+              number:${head["number"]},
+              timestamp:${head["timestamp"]},
+              parentID:'${head["parentID"]}'
+            }''';
   }
 
   @override
@@ -69,13 +86,19 @@ class _CustomWebViewState extends State<CustomWebView>
         ),
       ),
       body: InAppWebView(
+        initialJs: _makeHeadJs(driver.head),
         initialUrl: initialUrl,
-        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-          new Factory<OneSequenceGestureRecognizer>(
-            () => new EagerGestureRecognizer(),
-          ),
-        ].toSet(),
-        onWebViewCreated: (InAppWebViewController controller) {
+        onConsoleMessage:
+            (InAppWebViewController controller, ConsoleMessage consoleMessage) {
+          String str = """
+          console output:
+            sourceURL: ${consoleMessage.sourceURL}
+            lineNumber: ${consoleMessage.lineNumber}
+            message: ${consoleMessage.message}
+            messageLevel: ${consoleMessage.messageLevel}""";
+          debugPrint(str);
+        },
+        onWebViewCreated: (InAppWebViewController controller) async {
           controller.addJavaScriptHandler("debugLog", (arguments) async {
             debugPrint("debugLog: " + arguments.join(","));
           });
@@ -83,16 +106,16 @@ class _CustomWebViewState extends State<CustomWebView>
             debugPrint("errorLog: " + arguments.join(","));
           });
           controller.addJavaScriptHandler("Thor", (arguments) async {
-            print('Thor arguments $arguments');
+            debugPrint('Thor arguments $arguments');
             dynamic data = await driver.callMethod(arguments);
-            print("Thor response $data");
+            debugPrint("Thor response $data");
             return data;
           });
           controller.addJavaScriptHandler("navigatedInPage", (arguments) async {
             onWebChanged.emit();
           });
           controller.addJavaScriptHandler("Vendor", (arguments) async {
-            print('Vendor arguments $arguments');
+            debugPrint('Vendor arguments $arguments');
             List<WalletEntity> walletEntities = await WalletStorage.readAll();
             if (walletEntities.length == 0) {
               return customAlert(
@@ -152,8 +175,10 @@ class _CustomWebViewState extends State<CustomWebView>
             }
             throw ArgumentError('unsupported methor');
           });
-          onBlockChainChanged.on((head) {
-            controller.injectScriptCode('window.block_head=$head');
+          _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+            driver.syncHead().then((head) {
+              controller.injectScriptCode(_makeHeadJs(head));
+            });
           });
           widget.onWebViewCreated(controller);
         },

@@ -90,16 +90,22 @@ class WalletDetailState extends State<WalletDetail> {
             buildCell("delete wallet", () async {
               customAlert(context,
                   title: Text('Are you sure to delete your wallet?'),
-                  content: TextField(
-                    controller: passwordController,
-                    maxLength: 20,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.lightBlue,
+                  content: Theme(
+                    data: ThemeData(
+                      primaryColor: Colors.blue,
+                      primaryColorDark: Colors.blueAccent,
+                    ),
+                    child: TextField(
+                      controller: passwordController,
+                      maxLength: 20,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.lightBlue,
+                          ),
                         ),
+                        hintText: 'Password',
                       ),
-                      hintText: 'Password',
                     ),
                   ), confirmAction: () async {
                 FocusScope.of(context).requestFocus(FocusNode());
@@ -142,16 +148,22 @@ class WalletDetailState extends State<WalletDetail> {
             buildCell("backup wallet", () async {
               customAlert(context,
                   title: Text('Back up your wallet'),
-                  content: TextField(
-                    controller: passwordController,
-                    maxLength: 20,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.lightBlue,
+                  content: Theme(
+                    data: ThemeData(
+                      primaryColor: Colors.blue,
+                      primaryColorDark: Colors.blueAccent,
+                    ),
+                    child: TextField(
+                      controller: passwordController,
+                      maxLength: 20,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.lightBlue,
+                          ),
                         ),
+                        hintText: 'Password',
                       ),
-                      hintText: 'Password',
                     ),
                   ), confirmAction: () async {
                 FocusScope.of(context).requestFocus(FocusNode());
@@ -229,30 +241,42 @@ class WalletDetailState extends State<WalletDetail> {
                     height: 170,
                     child: Column(
                       children: <Widget>[
-                        TextField(
-                          controller: originalPasswordController,
-                          maxLength: 20,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.lightBlue,
+                        Theme(
+                          data: ThemeData(
+                            primaryColor: Colors.blue,
+                            primaryColorDark: Colors.blueAccent,
+                          ),
+                          child: TextField(
+                            controller: originalPasswordController,
+                            maxLength: 20,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.lightBlue,
+                                ),
                               ),
+                              hintText: 'Original Password',
                             ),
-                            hintText: 'Original Password',
                           ),
                         ),
-                        TextField(
-                          controller: newPasswordController,
-                          maxLength: 20,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.lightBlue,
-                              ),
-                            ),
-                            hintText: 'New Password',
+                        Theme(
+                          data: ThemeData(
+                            primaryColor: Colors.blue,
+                            primaryColorDark: Colors.blueAccent,
                           ),
-                        ),
+                          child: TextField(
+                            controller: newPasswordController,
+                            maxLength: 20,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.lightBlue,
+                                ),
+                              ),
+                              hintText: 'New Password',
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   ), confirmAction: () async {

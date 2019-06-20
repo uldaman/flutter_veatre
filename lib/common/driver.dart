@@ -5,6 +5,7 @@ const bool _isReleaseMode = const bool.fromEnvironment('dart.vm.product');
 
 class _Driver {
   static _Driver _singleton;
+  Map<String, dynamic> _head;
   final Net _net;
 
   factory _Driver() {
@@ -18,14 +19,18 @@ class _Driver {
 
   _Driver._internal(this._net);
 
-  Future<Map<String, dynamic>> head() async {
-    dynamic block = await _net.getBlock("best");
-    return {
-      "id": block["id"],
-      "number": block["number"],
-      "timestamp": block["timestamp"],
-      "parentID": block["parentID"],
-    };
+  Map<String, dynamic> get head => _head;
+
+  Future syncHead() {
+    return _net.getBlock("best").then((block) {
+      _head = {
+        "id": block["id"],
+        "number": block["number"],
+        "timestamp": block["timestamp"],
+        "parentID": block["parentID"],
+      };
+      return _head;
+    });
   }
 
   dynamic callMethod(List<dynamic> args) async {

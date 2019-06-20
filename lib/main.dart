@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/common/driver.dart';
 import 'package:veatre/navigation.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/walletDetail.dart';
@@ -11,7 +12,9 @@ import 'package:veatre/src/ui/verifyMnemonic.dart';
 void main() {
   // debugPaintSizeEnabled = true;
   // Vechain().getBlockByHash("hash");
-  runApp(MyApp());
+  driver.syncHead().then((_) {
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {

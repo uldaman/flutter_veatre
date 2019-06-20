@@ -59,19 +59,25 @@ class ImportWalletState extends State<ImportWallet> {
                 Container(
                   padding: EdgeInsets.only(top: 5, left: 5, right: 5),
                   child: Card(
-                    child: TextFormField(
-                      controller: mnemonicController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.all(10),
-                        hintText:
-                            'Input your mnemonic phase which is splited by whitespace',
+                    child: Theme(
+                      data: ThemeData(
+                        primaryColor: Colors.blue,
+                        primaryColorDark: Colors.blueAccent,
                       ),
-                      maxLines: 30,
+                      child: TextFormField(
+                        controller: mnemonicController,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.lightBlue,
+                            ),
+                          ),
+                          contentPadding: EdgeInsets.all(10),
+                          hintText:
+                              'Input your mnemonic phase which is splited by whitespace',
+                        ),
+                        maxLines: 30,
+                      ),
                     ),
                   ),
                   height: 120,
@@ -86,16 +92,22 @@ class ImportWalletState extends State<ImportWallet> {
                     height: 80,
                     margin: EdgeInsets.only(bottom: 10, top: 10),
                     padding: EdgeInsets.only(left: 10, right: 10),
-                    child: TextField(
-                      controller: mnemonicWalletNameController,
-                      maxLength: 20,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
+                    child: Theme(
+                      data: ThemeData(
+                        primaryColor: Colors.blue,
+                        primaryColorDark: Colors.blueAccent,
+                      ),
+                      child: TextField(
+                        controller: mnemonicWalletNameController,
+                        maxLength: 20,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.lightBlue,
+                            ),
                           ),
+                          hintText: 'wallet name',
                         ),
-                        hintText: 'wallet name',
                       ),
                     ),
                   ),
@@ -109,16 +121,22 @@ class ImportWalletState extends State<ImportWallet> {
                     height: 80,
                     margin: EdgeInsets.only(bottom: 10),
                     padding: EdgeInsets.only(left: 10, right: 10),
-                    child: TextField(
-                      controller: mnemonicPasswordController,
-                      maxLength: 20,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
+                    child: Theme(
+                      data: ThemeData(
+                        primaryColor: Colors.blue,
+                        primaryColorDark: Colors.blueAccent,
+                      ),
+                      child: TextField(
+                        controller: mnemonicPasswordController,
+                        maxLength: 20,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.lightBlue,
+                            ),
                           ),
+                          hintText: 'new password',
                         ),
-                        hintText: 'new password',
                       ),
                     ),
                   ),
@@ -134,18 +152,24 @@ class ImportWalletState extends State<ImportWallet> {
                 Container(
                   padding: EdgeInsets.only(top: 5, left: 5, right: 5),
                   child: Card(
-                    child: TextFormField(
-                      controller: keystoreController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.all(10),
-                        hintText: 'Input your keystore',
+                    child: Theme(
+                      data: ThemeData(
+                        primaryColor: Colors.blue,
+                        primaryColorDark: Colors.blueAccent,
                       ),
-                      maxLines: 30,
+                      child: TextFormField(
+                        controller: keystoreController,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.lightBlue,
+                            ),
+                          ),
+                          contentPadding: EdgeInsets.all(10),
+                          hintText: 'Input your keystore',
+                        ),
+                        maxLines: 30,
+                      ),
                     ),
                   ),
                   height: 120,
@@ -160,16 +184,22 @@ class ImportWalletState extends State<ImportWallet> {
                     height: 80,
                     margin: EdgeInsets.only(bottom: 10, top: 10),
                     padding: EdgeInsets.only(left: 10, right: 10),
-                    child: TextField(
-                      controller: keystoreWalletNameController,
-                      maxLength: 20,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
+                    child: Theme(
+                      data: ThemeData(
+                        primaryColor: Colors.blue,
+                        primaryColorDark: Colors.blueAccent,
+                      ),
+                      child: TextField(
+                        controller: keystoreWalletNameController,
+                        maxLength: 20,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.lightBlue,
+                            ),
                           ),
+                          hintText: 'wallet name',
                         ),
-                        hintText: 'wallet name',
                       ),
                     ),
                   ),
@@ -183,16 +213,22 @@ class ImportWalletState extends State<ImportWallet> {
                     height: 80,
                     margin: EdgeInsets.only(bottom: 10),
                     padding: EdgeInsets.only(left: 10, right: 10),
-                    child: TextField(
-                      controller: keystorePasswordController,
-                      maxLength: 20,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
+                    child: Theme(
+                      data: ThemeData(
+                        primaryColor: Colors.blue,
+                        primaryColorDark: Colors.blueAccent,
+                      ),
+                      child: TextField(
+                        controller: keystorePasswordController,
+                        maxLength: 20,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.lightBlue,
+                            ),
                           ),
+                          hintText: 'keystore password',
                         ),
-                        hintText: 'keystore password',
                       ),
                     ),
                   ),

@@ -273,7 +273,7 @@ VM error: ${result.vmError}''';
                   child: Column(
                     children: <Widget>[
                       Container(
-                        height: 100,
+                        height: 85,
                         width: MediaQuery.of(context).size.width,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.only(
@@ -317,7 +317,7 @@ VM error: ${result.vmError}''';
                         ),
                       ),
                       Container(
-                        margin: EdgeInsets.only(top: 15),
+                        margin: EdgeInsets.only(top: 10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
@@ -338,7 +338,7 @@ VM error: ${result.vmError}''';
                         ),
                       ),
                       Container(
-                        margin: EdgeInsets.only(top: 15),
+                        margin: EdgeInsets.only(top: 10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
@@ -362,7 +362,7 @@ VM error: ${result.vmError}''';
                   ),
                 ),
                 width: MediaQuery.of(context).size.width,
-                height: 195,
+                height: 170,
               ),
               onTap: () async {
                 await showWallets();
@@ -524,16 +524,22 @@ VM error: ${result.vmError}''';
                             onPressed: () async {
                               await customAlert(context,
                                   title: Text('Sign transaction'),
-                                  content: TextField(
-                                    controller: passwordController,
-                                    maxLength: 20,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Colors.lightBlue,
+                                  content: Theme(
+                                    data: ThemeData(
+                                      primaryColor: Colors.blue,
+                                      primaryColorDark: Colors.blueAccent,
+                                    ),
+                                    child: TextField(
+                                      controller: passwordController,
+                                      maxLength: 20,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.lightBlue,
+                                          ),
                                         ),
+                                        hintText: 'Input your password',
                                       ),
-                                      hintText: 'Input your password',
                                     ),
                                   ), confirmAction: () async {
                                 FocusScope.of(context)

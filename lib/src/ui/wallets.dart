@@ -68,6 +68,7 @@ class WalletsState extends State<Wallets> {
           children: <Widget>[
             Expanded(
               child: ListView(
+                physics: ClampingScrollPhysics(),
                 children: walletWidgets,
               ),
             ),
@@ -81,16 +82,16 @@ class WalletsState extends State<Wallets> {
   Widget buildWalletCard(Wallet wallet) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 200,
+      height: 170,
       child: GestureDetector(
         child: Card(
-          margin: EdgeInsets.all(10),
+          margin: EdgeInsets.only(left: 10, right: 10, top: 10),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: Column(
             children: <Widget>[
               Container(
-                height: 100,
+                height: 85,
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(

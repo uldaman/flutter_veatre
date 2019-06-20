@@ -17,15 +17,15 @@ class Settings extends StatelessWidget {
         },
       ),
     );
-    widgets.add(
-      buildCell(
-        Icons.help,
-        'Help',
-        () {
-          Navigator.of(context).pushNamed(ManageWallets.routeName);
-        },
-      ),
-    );
+    // widgets.add(
+    //   buildCell(
+    //     Icons.help,
+    //     'Help',
+    //     () {
+    //       Navigator.of(context).pushNamed(ManageWallets.routeName);
+    //     },
+    //   ),
+    // );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -48,7 +48,7 @@ class Settings extends StatelessWidget {
           child: Row(
             children: <Widget>[
               Container(
-                margin: EdgeInsets.only(left: 20),
+                margin: EdgeInsets.only(left: 15),
                 child: Icon(
                   icon,
                   size: 20,
@@ -56,7 +56,7 @@ class Settings extends StatelessWidget {
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(left: 20),
+                margin: EdgeInsets.only(left: 15),
                 child: Text(
                   title,
                   style: TextStyle(fontSize: 18, color: Colors.black54),
@@ -64,7 +64,7 @@ class Settings extends StatelessWidget {
               ),
               Expanded(
                 child: Container(
-                  margin: EdgeInsets.only(right: 10),
+                  margin: EdgeInsets.only(right: 15),
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: Icon(

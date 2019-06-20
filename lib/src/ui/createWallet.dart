@@ -12,7 +12,6 @@ import 'package:veatre/src/storage/storage.dart';
 
 class CreateWallet extends StatefulWidget {
   static const routeName = '/wallets/creation';
-
   CreateWallet() : super();
 
   @override
@@ -39,50 +38,68 @@ class CreateWalletState extends State<CreateWallet> {
           child: Column(
             children: <Widget>[
               Container(
-                margin: EdgeInsets.only(top: 30),
-                child: TextField(
-                  controller: walletNameController,
-                  maxLength: 20,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.lightBlue,
+                margin: EdgeInsets.only(top: 20),
+                child: Theme(
+                  data: ThemeData(
+                    primaryColor: Colors.blue,
+                    primaryColorDark: Colors.blueAccent,
+                  ),
+                  child: TextField(
+                    controller: walletNameController,
+                    maxLength: 20,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.blue,
+                        ),
                       ),
+                      hintText: 'Wallet Name',
                     ),
-                    hintText: 'Wallet Name',
                   ),
                 ),
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
               ),
               Container(
-                child: TextField(
-                  controller: passwordController,
-                  maxLength: 20,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.lightBlue,
+                child: Theme(
+                  data: ThemeData(
+                    primaryColor: Colors.blue,
+                    primaryColorDark: Colors.blueAccent,
+                  ),
+                  child: TextField(
+                    controller: passwordController,
+                    maxLength: 20,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.lightBlue,
+                        ),
                       ),
+                      hintText: 'Password',
                     ),
-                    hintText: 'Password',
                   ),
                 ),
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
               ),
               Container(
-                child: TextField(
-                  controller: repeatPasswordController,
-                  maxLength: 20,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.lightBlue,
+                child: Theme(
+                  data: ThemeData(
+                    primaryColor: Colors.blue,
+                    primaryColorDark: Colors.blueAccent,
+                  ),
+                  child: TextField(
+                    controller: repeatPasswordController,
+                    maxLength: 20,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.lightBlue,
+                        ),
                       ),
+                      hintText: 'Repeat password',
                     ),
-                    hintText: 'Repeat password',
                   ),
                 ),
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 30),

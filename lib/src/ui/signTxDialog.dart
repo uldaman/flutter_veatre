@@ -472,34 +472,6 @@ VM error: ${result.vmError}''';
                     width: MediaQuery.of(context).size.width,
                   )
                 : Row(),
-            // Row(
-            //   children: <Widget>[
-            //     Expanded(
-            //       child: Row(
-            //         mainAxisAlignment: MainAxisAlignment.end,
-            //         children: <Widget>[
-            //           Container(
-            //             margin: EdgeInsets.only(right: 15),
-            //             child: FlatButton(
-            //               child: Text(
-            //                 'transaction details',
-            //                 style: TextStyle(
-            //                   color: Colors.blueAccent,
-            //                 ),
-            //               ),
-            //               onPressed: () async {
-            //                 Navigator.of(context).pushNamed(
-            //                   TransactionDetail.routeName,
-            //                   arguments: widget.txMessages,
-            //                 );
-            //               },
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //     ),
-            //   ],
-            // ),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -532,6 +504,8 @@ VM error: ${result.vmError}''';
                                     child: TextField(
                                       controller: passwordController,
                                       maxLength: 20,
+                                      keyboardAppearance: Brightness.light,
+                                      autofocus: true,
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(

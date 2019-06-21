@@ -141,13 +141,18 @@ class _CustomWebViewState extends State<CustomWebView>
                 }
                 SigningTxOptions options =
                     SigningTxOptions.fromJSON(arguments[2]);
-                SigningTxResponse result = await showDialog(
+                SigningTxResponse result = await showGeneralDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) {
-                    return SignTxDialog(
-                      txMessages: txMessages,
-                      options: options,
+                  transitionDuration: Duration(milliseconds: 300),
+                  pageBuilder: (context, a, b) {
+                    return SlideTransition(
+                      position: Tween(begin: Offset(0, 1), end: Offset.zero)
+                          .animate(a),
+                      child: SignTxDialog(
+                        txMessages: txMessages,
+                        options: options,
+                      ),
                     );
                   },
                 );
@@ -160,13 +165,18 @@ class _CustomWebViewState extends State<CustomWebView>
                     SigningCertMessage.fromJSON(arguments[1]);
                 SigningCertOptions options =
                     SigningCertOptions.fromJSON(arguments[2]);
-                SigningCertResponse result = await showDialog(
+                SigningCertResponse result = await showGeneralDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) {
-                    return SignCertificateDialog(
-                      certMessage: certMessage,
-                      options: options,
+                  transitionDuration: Duration(milliseconds: 300),
+                  pageBuilder: (context, a, b) {
+                    return SlideTransition(
+                      position: Tween(begin: Offset(0, 1), end: Offset.zero)
+                          .animate(a),
+                      child: SignCertificateDialog(
+                        certMessage: certMessage,
+                        options: options,
+                      ),
                     );
                   },
                 );

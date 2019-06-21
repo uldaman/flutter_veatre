@@ -268,6 +268,8 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                     child: TextField(
                                       controller: passwordController,
                                       maxLength: 20,
+                                      keyboardAppearance: Brightness.light,
+                                      autofocus: true,
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(

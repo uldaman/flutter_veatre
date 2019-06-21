@@ -66,6 +66,7 @@ class ImportWalletState extends State<ImportWallet> {
                       ),
                       child: TextFormField(
                         controller: mnemonicController,
+                        keyboardAppearance: Brightness.light,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -100,6 +101,7 @@ class ImportWalletState extends State<ImportWallet> {
                       child: TextField(
                         controller: mnemonicWalletNameController,
                         maxLength: 20,
+                        keyboardAppearance: Brightness.light,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -129,6 +131,7 @@ class ImportWalletState extends State<ImportWallet> {
                       child: TextField(
                         controller: mnemonicPasswordController,
                         maxLength: 20,
+                        keyboardAppearance: Brightness.light,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -159,6 +162,7 @@ class ImportWalletState extends State<ImportWallet> {
                       ),
                       child: TextFormField(
                         controller: keystoreController,
+                        keyboardAppearance: Brightness.light,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -192,6 +196,7 @@ class ImportWalletState extends State<ImportWallet> {
                       child: TextField(
                         controller: keystoreWalletNameController,
                         maxLength: 20,
+                        keyboardAppearance: Brightness.light,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -221,6 +226,7 @@ class ImportWalletState extends State<ImportWallet> {
                       child: TextField(
                         controller: keystorePasswordController,
                         maxLength: 20,
+                        keyboardAppearance: Brightness.light,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -456,7 +462,7 @@ class ImportWalletState extends State<ImportWallet> {
                                       'this address has been already existed,would you like to cover it?'),
                                   confirmAction: () async {
                                     KeyStore keyS = await KeyStore.encrypt(
-                                        bytesToHex(privateKey), password);
+                                        privateKey, password);
                                     await WalletStorage.delete(existed.name);
                                     await WalletStorage.write(
                                       walletEntity: WalletEntity(

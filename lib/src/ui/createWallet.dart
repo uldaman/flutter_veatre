@@ -48,6 +48,7 @@ class CreateWalletState extends State<CreateWallet> {
                     controller: walletNameController,
                     maxLength: 20,
                     autofocus: true,
+                    keyboardAppearance: Brightness.light,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderSide: BorderSide(
@@ -70,6 +71,7 @@ class CreateWalletState extends State<CreateWallet> {
                     controller: passwordController,
                     maxLength: 20,
                     autofocus: true,
+                    keyboardAppearance: Brightness.light,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderSide: BorderSide(
@@ -91,7 +93,7 @@ class CreateWalletState extends State<CreateWallet> {
                   child: TextField(
                     controller: repeatPasswordController,
                     maxLength: 20,
-                    autofocus: true,
+                    keyboardAppearance: Brightness.light,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderSide: BorderSide(

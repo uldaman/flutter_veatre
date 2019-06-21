@@ -86,36 +86,36 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomPadding: false,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Sign Certificate'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.close,
-            size: 25,
-          ),
-          onPressed: () async {
-            Navigator.of(context).pop();
-          },
-        ),
-        actions: <Widget>[
-          IconButton(
+    return ProgressHUD(
+      child: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text('Sign Certificate'),
+          centerTitle: true,
+          leading: IconButton(
             icon: Icon(
-              Icons.menu,
+              Icons.close,
               size: 25,
-              color: Colors.blue,
             ),
             onPressed: () async {
-              await showWallets();
+              Navigator.of(context).pop();
             },
-          )
-        ],
-      ),
-      body: ProgressHUD(
-        child: Column(
+          ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.menu,
+                size: 25,
+                color: Colors.blue,
+              ),
+              onPressed: () async {
+                await showWallets();
+              },
+            )
+          ],
+        ),
+        body: Column(
           children: <Widget>[
             GestureDetector(
               child: Container(
@@ -343,8 +343,8 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
             )
           ],
         ),
-        isLoading: loading,
       ),
+      isLoading: loading,
     );
   }
 }

@@ -31,9 +31,10 @@ class MyApp extends StatelessWidget {
         GenerateMnemonic.routeName: (context) => new GenerateMnemonic(),
         VerifyMnemonic.routeName: (context) => new VerifyMnemonic(),
       },
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue,
         primaryColor: Colors.black,
+        primaryColorBrightness: Brightness.light,
         primaryIconTheme: IconThemeData(color: Colors.black),
         primaryTextTheme: TextTheme(
           title: TextStyle(color: Colors.black, fontFamily: "Aveny"),

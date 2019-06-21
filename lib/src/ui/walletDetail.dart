@@ -93,11 +93,6 @@ class WalletDetailState extends State<WalletDetail> {
                     maxLength: 20,
                     autofocus: true,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.lightBlue,
-                        ),
-                      ),
                       hintText: 'Password',
                     ),
                   ), confirmAction: () async {
@@ -146,11 +141,6 @@ class WalletDetailState extends State<WalletDetail> {
                     maxLength: 20,
                     autofocus: true,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.lightBlue,
-                        ),
-                      ),
                       hintText: 'Password',
                     ),
                   ), confirmAction: () async {
@@ -234,11 +224,6 @@ class WalletDetailState extends State<WalletDetail> {
                           maxLength: 20,
                           autofocus: true,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.lightBlue,
-                              ),
-                            ),
                             hintText: 'Original Password',
                           ),
                         ),
@@ -246,11 +231,6 @@ class WalletDetailState extends State<WalletDetail> {
                           controller: newPasswordController,
                           maxLength: 20,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.lightBlue,
-                              ),
-                            ),
                             hintText: 'New Password',
                           ),
                         ),

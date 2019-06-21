@@ -62,11 +62,6 @@ class ImportWalletState extends State<ImportWallet> {
                     child: TextFormField(
                       controller: mnemonicController,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
-                          ),
-                        ),
                         contentPadding: EdgeInsets.all(10),
                         hintText:
                             'Input your mnemonic phase which is splited by whitespace',
@@ -90,11 +85,6 @@ class ImportWalletState extends State<ImportWallet> {
                       controller: mnemonicWalletNameController,
                       maxLength: 20,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
-                          ),
-                        ),
                         hintText: 'wallet name',
                       ),
                     ),
@@ -113,11 +103,6 @@ class ImportWalletState extends State<ImportWallet> {
                       controller: mnemonicPasswordController,
                       maxLength: 20,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
-                          ),
-                        ),
                         hintText: 'new password',
                       ),
                     ),
@@ -137,11 +122,6 @@ class ImportWalletState extends State<ImportWallet> {
                     child: TextFormField(
                       controller: keystoreController,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
-                          ),
-                        ),
                         contentPadding: EdgeInsets.all(10),
                         hintText: 'Input your keystore',
                       ),
@@ -164,11 +144,6 @@ class ImportWalletState extends State<ImportWallet> {
                       controller: keystoreWalletNameController,
                       maxLength: 20,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
-                          ),
-                        ),
                         hintText: 'wallet name',
                       ),
                     ),
@@ -187,11 +162,6 @@ class ImportWalletState extends State<ImportWallet> {
                       controller: keystorePasswordController,
                       maxLength: 20,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.lightBlue,
-                          ),
-                        ),
                         hintText: 'keystore password',
                       ),
                     ),

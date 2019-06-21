@@ -265,11 +265,6 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                     maxLength: 20,
                                     autofocus: true,
                                     decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Colors.lightBlue,
-                                        ),
-                                      ),
                                       hintText: 'Input your password',
                                     ),
                                   ), confirmAction: () async {

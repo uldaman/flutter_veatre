@@ -44,11 +44,6 @@ class CreateWalletState extends State<CreateWallet> {
                   maxLength: 20,
                   autofocus: true,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.blue,
-                      ),
-                    ),
                     hintText: 'Wallet Name',
                   ),
                 ),
@@ -60,11 +55,6 @@ class CreateWalletState extends State<CreateWallet> {
                   maxLength: 20,
                   autofocus: true,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.lightBlue,
-                      ),
-                    ),
                     hintText: 'Password',
                   ),
                 ),
@@ -75,11 +65,6 @@ class CreateWalletState extends State<CreateWallet> {
                   controller: repeatPasswordController,
                   maxLength: 20,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.lightBlue,
-                      ),
-                    ),
                     hintText: 'Repeat password',
                   ),
                 ),

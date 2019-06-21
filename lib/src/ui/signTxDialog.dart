@@ -501,11 +501,6 @@ VM error: ${result.vmError}''';
                                     maxLength: 20,
                                     autofocus: true,
                                     decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Colors.lightBlue,
-                                        ),
-                                      ),
                                       hintText: 'Input your password',
                                     ),
                                   ), confirmAction: () async {

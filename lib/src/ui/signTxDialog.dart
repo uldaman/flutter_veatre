@@ -496,24 +496,17 @@ VM error: ${result.vmError}''';
                             onPressed: () async {
                               await customAlert(context,
                                   title: Text('Sign transaction'),
-                                  content: Theme(
-                                    data: ThemeData(
-                                      primaryColor: Colors.blue,
-                                      primaryColorDark: Colors.blueAccent,
-                                    ),
-                                    child: TextField(
-                                      controller: passwordController,
-                                      maxLength: 20,
-                                      keyboardAppearance: Brightness.light,
-                                      autofocus: true,
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.lightBlue,
-                                          ),
+                                  content: TextField(
+                                    controller: passwordController,
+                                    maxLength: 20,
+                                    autofocus: true,
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.lightBlue,
                                         ),
-                                        hintText: 'Input your password',
                                       ),
+                                      hintText: 'Input your password',
                                     ),
                                   ), confirmAction: () async {
                                 FocusScope.of(context)

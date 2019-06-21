@@ -39,69 +39,48 @@ class CreateWalletState extends State<CreateWallet> {
             children: <Widget>[
               Container(
                 margin: EdgeInsets.only(top: 20),
-                child: Theme(
-                  data: ThemeData(
-                    primaryColor: Colors.blue,
-                    primaryColorDark: Colors.blueAccent,
-                  ),
-                  child: TextField(
-                    controller: walletNameController,
-                    maxLength: 20,
-                    autofocus: true,
-                    keyboardAppearance: Brightness.light,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.blue,
-                        ),
+                child: TextField(
+                  controller: walletNameController,
+                  maxLength: 20,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.blue,
                       ),
-                      hintText: 'Wallet Name',
                     ),
+                    hintText: 'Wallet Name',
                   ),
                 ),
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
               ),
               Container(
-                child: Theme(
-                  data: ThemeData(
-                    primaryColor: Colors.blue,
-                    primaryColorDark: Colors.blueAccent,
-                  ),
-                  child: TextField(
-                    controller: passwordController,
-                    maxLength: 20,
-                    autofocus: true,
-                    keyboardAppearance: Brightness.light,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.lightBlue,
-                        ),
+                child: TextField(
+                  controller: passwordController,
+                  maxLength: 20,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.lightBlue,
                       ),
-                      hintText: 'Password',
                     ),
+                    hintText: 'Password',
                   ),
                 ),
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
               ),
               Container(
-                child: Theme(
-                  data: ThemeData(
-                    primaryColor: Colors.blue,
-                    primaryColorDark: Colors.blueAccent,
-                  ),
-                  child: TextField(
-                    controller: repeatPasswordController,
-                    maxLength: 20,
-                    keyboardAppearance: Brightness.light,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.lightBlue,
-                        ),
+                child: TextField(
+                  controller: repeatPasswordController,
+                  maxLength: 20,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.lightBlue,
                       ),
-                      hintText: 'Repeat password',
                     ),
+                    hintText: 'Repeat password',
                   ),
                 ),
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 30),

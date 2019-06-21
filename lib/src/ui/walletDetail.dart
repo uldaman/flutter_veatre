@@ -2,18 +2,16 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:web3dart/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/models/keyStore.dart';
 import 'package:veatre/src/models/account.dart';
-
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 class WalletDetail extends StatefulWidget {
   static const routeName = '/wallet/detail';
@@ -89,7 +87,7 @@ class WalletDetailState extends State<WalletDetail> {
             ),
             buildCell("delete wallet", () async {
               customAlert(context,
-                  title: Text('Are you sure to delete your wallet?'),
+                  title: Text('Delete wallet'),
                   content: Theme(
                     data: ThemeData(
                       primaryColor: Colors.blue,
@@ -98,6 +96,8 @@ class WalletDetailState extends State<WalletDetail> {
                     child: TextField(
                       controller: passwordController,
                       maxLength: 20,
+                      keyboardAppearance: Brightness.light,
+                      autofocus: true,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
@@ -147,7 +147,7 @@ class WalletDetailState extends State<WalletDetail> {
             }),
             buildCell("backup wallet", () async {
               customAlert(context,
-                  title: Text('Back up your wallet'),
+                  title: Text('Back up wallet'),
                   content: Theme(
                     data: ThemeData(
                       primaryColor: Colors.blue,
@@ -156,6 +156,8 @@ class WalletDetailState extends State<WalletDetail> {
                     child: TextField(
                       controller: passwordController,
                       maxLength: 20,
+                      keyboardAppearance: Brightness.light,
+                      autofocus: true,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
@@ -236,7 +238,7 @@ class WalletDetailState extends State<WalletDetail> {
             }),
             buildCell("change password", () async {
               customAlert(context,
-                  title: Text('Are you sure to delete your wallet?'),
+                  title: Text('Change wallet password'),
                   content: Container(
                     height: 170,
                     child: Column(
@@ -249,6 +251,8 @@ class WalletDetailState extends State<WalletDetail> {
                           child: TextField(
                             controller: originalPasswordController,
                             maxLength: 20,
+                            keyboardAppearance: Brightness.light,
+                            autofocus: true,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
                                 borderSide: BorderSide(
@@ -267,6 +271,7 @@ class WalletDetailState extends State<WalletDetail> {
                           child: TextField(
                             controller: newPasswordController,
                             maxLength: 20,
+                            keyboardAppearance: Brightness.light,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
                                 borderSide: BorderSide(
@@ -300,8 +305,8 @@ class WalletDetailState extends State<WalletDetail> {
                     Decriptions(
                         keystore: wallet.keystore, password: originalPassword),
                   );
-                  KeyStore newKeyStore = await KeyStore.encrypt(
-                      bytesToHex(privateKey), newPassword);
+                  KeyStore newKeyStore =
+                      await KeyStore.encrypt(privateKey, newPassword);
                   await WalletStorage.write(
                     walletEntity:
                         WalletEntity(keystore: newKeyStore, name: wallet.name),
@@ -313,7 +318,7 @@ class WalletDetailState extends State<WalletDetail> {
                   return alert(
                     context,
                     Text('Warnning'),
-                    "Password Invalid",
+                    "Password incorrect",
                   );
                 } finally {
                   setState(() {

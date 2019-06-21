@@ -45,7 +45,7 @@ class KeyStore {
     );
   }
 
-  static Future<KeyStore> encrypt(String privateKey, String passphrase,
+  static Future<KeyStore> encrypt(Uint8List privateKey, String passphrase,
       [Map<String, dynamic> options]) async {
     String salt = randomHex(64);
     List<int> iv = randomBytes(16);
@@ -56,13 +56,13 @@ class KeyStore {
 
     Uint8List encodedPassword = utf8.encode(passphrase);
     Uint8List derivedKey = scryptKeyDerivator.deriveKey(encodedPassword);
-    Uint8List ciphertextBytes =
-        _encryptPrivateKey(scryptKeyDerivator, encodedPassword, iv, privateKey);
+    Uint8List ciphertextBytes = _encryptPrivateKey(
+        scryptKeyDerivator, encodedPassword, iv, bytesToHex(privateKey));
     Uint8List macBuffer = Uint8List(16 + 32);
     List.copyRange(macBuffer, 0, derivedKey, 16, 32);
     List.copyRange(macBuffer, 16, ciphertextBytes);
     String mac = bytesToHex(SHA3Digest(256).process(macBuffer));
-    Uint8List publicKey = privateKeyBytesToPublic(hexToBytes(privateKey));
+    Uint8List publicKey = privateKeyBytesToPublic(privateKey);
     Uint8List address = publicKeyToAddress(publicKey);
 
     KeystoreKeyHeader keystoreKeyHeader = KeystoreKeyHeader(
@@ -292,7 +292,7 @@ Future<KeyStore> decryptMnemonic(
       Mnemonic.generateMasterSeed(mnemonicDecriptions.mnemonic, "");
   Uint8List rootSeed = getRootSeed(seed);
   Uint8List privateKey = getPrivateKey(rootSeed, defaultKeyPathNodes());
-  KeyStore keystore = await KeyStore.encrypt(
-      bytesToHex(privateKey), mnemonicDecriptions.password);
+  KeyStore keystore =
+      await KeyStore.encrypt(privateKey, mnemonicDecriptions.password);
   return keystore;
 }

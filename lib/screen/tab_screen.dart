@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:veatre/common/event.dart';
 import 'package:veatre/common/web_views.dart' as web_view;
@@ -14,39 +16,71 @@ class _TabScreenState extends State<TabScreen>
   @override
   bool get wantKeepAlive => true;
 
-  MapEntry<int, Container> _buildThumb(int index, String title) {
-    return MapEntry(
-      index,
-      Container(
-        margin: EdgeInsets.all(20.0),
-        alignment: Alignment.center,
+  final PageController _ctrl = PageController(viewportFraction: 0.8);
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl.addListener(
+      () {
+        int next = _ctrl.page.round();
+        if (_currentPage != next) {
+          setState(() {
+            _currentPage = next;
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  InkWell _buildScreenshotCard(int index, bool active) {
+    // Animated Properties
+    final double blur = active ? 30 : 0;
+    final double offset = active ? 20 : 0;
+    final double top = active ? 100 : 200;
+
+    return InkWell(
+      onTap: () {
+        onWebViewSelected.emit(index);
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeOutQuint,
+        margin: EdgeInsets.only(top: top, bottom: 50, right: 30),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          color: Colors.grey,
-        ),
-        child: InkWell(
-          onTap: () {
-            onWebViewSelected.emit(index);
-          },
-          child: Text(
-            title == "" ? "空" : title[0].toUpperCase(),
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontSize: 55.0),
+          borderRadius: BorderRadius.circular(20),
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            image: MemoryImage(web_view.screenshotMap[index]),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black87,
+              blurRadius: blur,
+              offset: Offset(offset, offset),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Container _buildAdd() {
-    return Container(
-      margin: EdgeInsets.all(20.0),
-      alignment: Alignment.center,
-      child: InkWell(
-        onTap: () {
-          int index = web_view.createWebView();
-          onWebViewSelected.emit(index);
-        },
+  InkWell _buildAddCard() {
+    return InkWell(
+      onTap: () {
+        int index = web_view.createWebView();
+        onWebViewSelected.emit(index);
+      },
+      child: Container(
+        margin: EdgeInsets.all(20.0),
+        alignment: Alignment.center,
         child: Icon(Icons.add_circle),
       ),
     );
@@ -55,20 +89,21 @@ class _TabScreenState extends State<TabScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    List<Widget> thumbs = web_view.titleMap.map(_buildThumb).values.toList();
-    thumbs.add(_buildAdd());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text('Tabs'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(25.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          children: thumbs,
-        ),
+      body: PageView.builder(
+        controller: _ctrl,
+        itemCount: web_view.screenshotMap.length + 1,
+        itemBuilder: (BuildContext context, int currentIdx) {
+          if (currentIdx == web_view.screenshotMap.length) {
+            return _buildAddCard();
+          }
+          return _buildScreenshotCard(currentIdx, currentIdx == _currentPage);
+        },
       ),
     );
   }

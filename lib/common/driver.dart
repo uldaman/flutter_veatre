@@ -2,10 +2,24 @@ import 'dart:core';
 import 'package:veatre/common/net.dart';
 
 const bool _isReleaseMode = const bool.fromEnvironment('dart.vm.product');
+const mainGenesis = {
+  "id": "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a",
+  "number": 0,
+  "timestamp": 1530316800,
+  "parentID":
+      "0xffffffff53616c757465202620526573706563742c20457468657265756d2100",
+};
+const testGenesis = {
+  "id": "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127",
+  "number": 0,
+  "timestamp": 1530014400,
+  "parentID":
+      "0xffffffff00000000000000000000000000000000000000000000000000000000",
+};
 
 class _Driver {
   static _Driver _singleton;
-  Map<String, dynamic> _head;
+  Map<String, dynamic> _head = _isReleaseMode ? mainGenesis : testGenesis;
   final Net _net;
 
   factory _Driver() {

@@ -138,22 +138,16 @@ class _CustomWebViewState extends State<CustomWebView>
         backgroundColor: Colors.white,
         title: InkWell(
           child: _title,
-          onTap: () {
-            _openSearchBox();
-          },
+          onTap: () => _openSearchBox(),
         ),
         leading: IconButton(
           icon: Icon(Icons.search),
-          onPressed: () {
-            _openSearchBox();
-          },
+          onPressed: () => _openSearchBox(),
         ),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.refresh),
-            onPressed: () {
-              web_view.refresh();
-            },
+            onPressed: () => web_view.refresh(),
           ),
         ],
       ),

@@ -44,3 +44,7 @@ void goForward() {
 void loadUrl(String url) {
   if (_ctrlMap[index] != null) _ctrlMap[index].loadUrl(url);
 }
+
+void refresh() {
+  if (_ctrlMap[index] != null) _ctrlMap[index].reload();
+}

@@ -44,6 +44,8 @@ dev_dependencies:
     git:
       url: git://github.com/uldaman/flutter_inappbrowser.git
       ref: connex
+  material_search: ^0.2.8
+  cached_network_image: ^0.8.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

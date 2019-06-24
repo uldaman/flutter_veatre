@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
-import 'package:veatre/src/ui/walletDetail.dart';
+import 'package:veatre/src/ui/walletInfo.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 
@@ -48,10 +48,6 @@ class ManageWalletsState extends State<ManageWallets> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> walletWidgets = [];
-    for (Wallet wallet in wallets) {
-      walletWidgets.add(buildWalletCard(wallet));
-    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -62,9 +58,10 @@ class ManageWalletsState extends State<ManageWallets> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Expanded(
-            child: ListView(
+            child: ListView.builder(
               physics: ClampingScrollPhysics(),
-              children: walletWidgets,
+              itemBuilder: buildWalletCard,
+              itemCount: wallets.length,
             ),
           ),
           Row(
@@ -110,7 +107,8 @@ class ManageWalletsState extends State<ManageWallets> {
     );
   }
 
-  Widget buildWalletCard(Wallet wallet) {
+  Widget buildWalletCard(BuildContext context, int index) {
+    Wallet wallet = wallets[index];
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 170,
@@ -202,8 +200,13 @@ class ManageWalletsState extends State<ManageWallets> {
           ),
         ),
         onTap: () async {
-          Navigator.pushNamed(context, WalletDetail.routeName,
-              arguments: wallet);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WalletInfo(
+                wallet: wallet,
+              ),
+            ),
+          );
         },
       ),
     );

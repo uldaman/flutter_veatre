@@ -268,7 +268,10 @@ class _CustomWebViewState extends State<CustomWebView>
               },
               onLoadStop:
                   (InAppWebViewController controller, String url) async {
-                _title = Text(url);
+                setState(() {
+                  _title = Text(url);
+                  _progress = 1;
+                });
                 widget.onLoadStop(controller, url);
               },
               onProgressChanged:

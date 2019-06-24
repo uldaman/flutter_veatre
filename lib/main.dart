@@ -9,9 +9,7 @@ import 'package:veatre/src/ui/importWallet.dart';
 void main() {
   // debugPaintSizeEnabled = true;
   // Vechain().getBlockByHash("hash");
-  driver.syncHead().then((_) {
-    runApp(MyApp());
-  });
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

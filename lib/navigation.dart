@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/event.dart';
 import 'package:veatre/screen/feed_screen.dart';
-import 'package:veatre/screen/star_screen.dart';
+import 'package:veatre/screen/dapp_screen.dart';
 import 'package:veatre/screen/tab_screen.dart';
 import 'package:veatre/screen/Settings.dart';
 import 'package:veatre/common/web_views.dart' as web_view;
@@ -19,7 +19,7 @@ class _NavigationState extends State<Navigation> {
   final PageController _pageController = PageController();
   bool _canGoBack = false;
   bool _canGoForward = false;
-  int _currentNav = 1; // star navigation
+  int _currentNav = 1; // dapp navigation
   bool get isAtWebView => _currentNav == 1;
 
   @override
@@ -80,7 +80,7 @@ class _NavigationState extends State<Navigation> {
         children: [
           FeedScreen(),
           TabScreen(),
-          StarScreen(),
+          DappScreen(),
           Settings(),
         ],
         controller: _pageController,

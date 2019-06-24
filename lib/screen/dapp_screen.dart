@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:veatre/common/event.dart';
 import 'package:veatre/common/web_views.dart' as web_view;
 
-class StarScreen extends StatefulWidget {
+class DappScreen extends StatefulWidget {
   @override
-  _StarScreenState createState() => _StarScreenState();
+  _DappScreenState createState() => _DappScreenState();
 }
 
-class _StarScreenState extends State<StarScreen>
+class _DappScreenState extends State<DappScreen>
     with AutomaticKeepAliveClientMixin {
-  final stars = <Map>[
+  final dapps = <Map>[
     {
       "title": "Tokens",
       "icon":
@@ -37,14 +37,14 @@ class _StarScreenState extends State<StarScreen>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('Stars'),
+        title: Text('Dapps'),
         centerTitle: true,
       ),
       body: Padding(
         padding: EdgeInsets.all(4.0),
         child: GridView.count(
           crossAxisCount: 3,
-          children: List.generate(stars.length, (index) {
+          children: List.generate(dapps.length, (index) {
             return Container(
               margin: EdgeInsets.all(15.0),
               child: Column(
@@ -52,16 +52,16 @@ class _StarScreenState extends State<StarScreen>
                   InkWell(
                     onTap: () {
                       onWebChanged.emit();
-                      web_view.loadUrl(stars[index]["url"]);
+                      web_view.loadUrl(dapps[index]["url"]);
                     },
                     child: Container(
                       width: 55.0,
                       height: 55.0,
                       margin: EdgeInsets.only(bottom: 10.0),
-                      child: Image.network(stars[index]["icon"]),
+                      child: dapps[index]["icon"],
                     ),
                   ),
-                  Text(stars[index]["title"]),
+                  Text(dapps[index]["title"]),
                 ],
               ),
             );

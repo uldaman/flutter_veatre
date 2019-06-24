@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         CreateWallet.routeName: (context) => new CreateWallet(),
         ImportWallet.routeName: (context) => new ImportWallet(),
       },
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue,
         primaryColorBrightness: Brightness.light,
         primaryColor: Colors.blue,

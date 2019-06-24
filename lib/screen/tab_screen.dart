@@ -18,20 +18,22 @@ class _TabScreenState extends State<TabScreen>
     return MapEntry(
       index,
       Container(
-        margin: EdgeInsets.all(20.0),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          color: Colors.grey,
-        ),
         child: InkWell(
           onTap: () {
             onWebViewSelected.emit(index);
           },
-          child: Text(
-            title == "" ? "空" : title[0].toUpperCase(),
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontSize: 55.0),
+          child: Container(
+            margin: EdgeInsets.all(20.0),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              color: Colors.grey,
+            ),
+            child: Text(
+              title == "" ? "空" : title[0].toUpperCase(),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white, fontSize: 55.0),
+            ),
           ),
         ),
       ),
@@ -40,14 +42,16 @@ class _TabScreenState extends State<TabScreen>
 
   Container _buildAdd() {
     return Container(
-      margin: EdgeInsets.all(20.0),
-      alignment: Alignment.center,
       child: InkWell(
         onTap: () {
           int index = web_view.createWebView();
           onWebViewSelected.emit(index);
         },
-        child: Icon(Icons.add_circle),
+        child: Container(
+          margin: EdgeInsets.all(20.0),
+          alignment: Alignment.center,
+          child: Icon(Icons.add_circle),
+        ),
       ),
     );
   }

@@ -2,6 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 final dapps = <Map>[
   {
+    "title": "Apphub",
+    "icon": CachedNetworkImage(
+      imageUrl: "https://apps.vechain.org/img/icons/favicon-32x32.png",
+    ),
+    "url": "http://apps.vechain.org/",
+  },
+  {
     "title": "Tokens",
     "icon": CachedNetworkImage(
       imageUrl:

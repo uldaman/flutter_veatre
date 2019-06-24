@@ -80,7 +80,7 @@ class _CustomWebViewState extends State<CustomWebView>
       builder: (BuildContext context) {
         return Material(
           child: MaterialSearch<String>(
-            placeholder: 'Search',
+            placeholder: 'Search or enter website name',
             results: dapps
                 .map((Map<dynamic, dynamic> dapp) =>
                     MaterialSearchResult<String>(
@@ -105,12 +105,12 @@ class _CustomWebViewState extends State<CustomWebView>
 
   void _onSubmitted(String url) {
     if (url != null && url != "") {
-      web_view.loadUrl(_matchUrl(url.toLowerCase()));
+      web_view.loadUrl(Uri.encodeFull(_matchUrl(url.trim().toLowerCase())));
     }
   }
 
   String _matchUrl(String str) {
-    final RegExp reg = new RegExp(
+    final RegExp reg = RegExp(
       r"^(http(s)?:\/\/)?[\w\-]+(\.[\w\-]+)+([\w\-.,@?^=%&:\/~+#]*[\w\-@?^=%&\/~+#])?$",
     );
     if (!reg.hasMatch(str)) {
@@ -122,23 +122,30 @@ class _CustomWebViewState extends State<CustomWebView>
     return "http://$str";
   }
 
+  void _openSearchBox() {
+    Navigator.of(context).push(_buildMaterialSearchPage(context)).then(
+      (dynamic value) {
+        _onSubmitted(value);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: _title,
+        title: InkWell(
+          child: _title,
+          onTap: () {
+            _openSearchBox();
+          },
+        ),
         leading: IconButton(
           icon: Icon(Icons.search),
           onPressed: () {
-            Navigator.of(context).push(_buildMaterialSearchPage(context)).then(
-              (dynamic value) {
-                setState(
-                  () => _onSubmitted(value),
-                );
-              },
-            );
+            _openSearchBox();
           },
         ),
         actions: <Widget>[
@@ -257,11 +264,11 @@ class _CustomWebViewState extends State<CustomWebView>
               },
               onLoadStart:
                   (InAppWebViewController controller, String url) async {
-                _title = Text(url);
                 onWebChanged.emit();
               },
               onLoadStop:
                   (InAppWebViewController controller, String url) async {
+                _title = Text(url);
                 widget.onLoadStop(controller, url);
               },
               onProgressChanged:

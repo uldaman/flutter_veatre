@@ -14,44 +14,40 @@ class _TabScreenState extends State<TabScreen>
   @override
   bool get wantKeepAlive => true;
 
-  MapEntry<int, Container> _buildThumb(int index, String title) {
+  MapEntry<int, InkWell> _buildThumb(int index, String title) {
     return MapEntry(
       index,
-      Container(
-        child: InkWell(
-          onTap: () {
-            onWebViewSelected.emit(index);
-          },
-          child: Container(
-            margin: EdgeInsets.all(20.0),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              color: Colors.grey,
-            ),
-            child: Text(
-              title == "" ? "空" : title[0].toUpperCase(),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 55.0),
-            ),
+      InkWell(
+        onTap: () {
+          onWebViewSelected.emit(index);
+        },
+        child: Container(
+          margin: EdgeInsets.all(20.0),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.0),
+            color: Colors.grey,
+          ),
+          child: Text(
+            title == "" ? "空" : title[0].toUpperCase(),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white, fontSize: 55.0),
           ),
         ),
       ),
     );
   }
 
-  Container _buildAdd() {
-    return Container(
-      child: InkWell(
-        onTap: () {
-          int index = web_view.createWebView();
-          onWebViewSelected.emit(index);
-        },
-        child: Container(
-          margin: EdgeInsets.all(20.0),
-          alignment: Alignment.center,
-          child: Icon(Icons.add_circle),
-        ),
+  InkWell _buildAdd() {
+    return InkWell(
+      onTap: () {
+        int index = web_view.createWebView();
+        onWebViewSelected.emit(index);
+      },
+      child: Container(
+        margin: EdgeInsets.all(20.0),
+        alignment: Alignment.center,
+        child: Icon(Icons.add_circle),
       ),
     );
   }

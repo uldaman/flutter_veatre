@@ -1,5 +1,6 @@
 library web_view;
 
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:veatre/common/web_view.dart';
@@ -7,7 +8,7 @@ import 'package:veatre/common/web_view.dart';
 int index = 0;
 Map<int, InAppWebViewController> _ctrlMap = {};
 List<CustomWebView> views = <CustomWebView>[];
-Map<int, String> titleMap = {};
+Map<int, Uint8List> screenshotMap = {};
 
 int createWebView() {
   int index = views.length;
@@ -18,7 +19,7 @@ int createWebView() {
       initialUrl = "about:blank";
     },
     onLoadStop: (InAppWebViewController controller, String url) {
-      controller.getTitle().then((title) => titleMap[index] = title);
+      controller.takeScreenshot().then((shot) => screenshotMap[index] = shot);
     },
   );
   views.add(wv);

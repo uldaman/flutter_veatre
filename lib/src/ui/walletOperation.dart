@@ -69,41 +69,39 @@ class WalletOperationState extends State<WalletOperation> {
                 builder: (context) {
                   return AlertDialog(
                     title: Text('KeyStore'),
-                    content: Container(
-                      height: 380,
+                    content: SizedBox(
+                      height:
+                          MediaQuery.of(context).size.width > 360 ? 360 : 410,
                       child: Column(
                         children: <Widget>[
                           Card(
                             child: Container(
-                              padding: EdgeInsets.all(15),
+                              padding: EdgeInsets.all(10),
                               child: Text(
                                 json.encode(wallet.keystore.encoded),
                               ),
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Container(
-                                height: 50,
-                                child: FlatButton(
-                                  child: Text(
-                                    'copy',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                    ),
+                          SizedBox(
+                            height: 44,
+                            child: Center(
+                              child: FlatButton(
+                                child: Text(
+                                  'copy',
+                                  style: TextStyle(
+                                    color: Colors.blue,
                                   ),
-                                  onPressed: () async {
-                                    await Clipboard.setData(
-                                      new ClipboardData(
-                                        text: json
-                                            .encode(wallet.keystore.encoded),
-                                      ),
-                                    );
-                                  },
                                 ),
+                                onPressed: () async {
+                                  await Clipboard.setData(
+                                    new ClipboardData(
+                                      text:
+                                          json.encode(wallet.keystore.encoded),
+                                    ),
+                                  );
+                                },
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -252,8 +250,12 @@ class WalletOperationState extends State<WalletOperation> {
         centerTitle: true,
       ),
       body: ProgressHUD(
-        child: ListView(
-          children: widgets,
+        child: Container(
+          color: Colors.grey[100],
+          child: ListView(
+            padding: EdgeInsets.only(top: 8),
+            children: widgets,
+          ),
         ),
         isLoading: loading,
       ),

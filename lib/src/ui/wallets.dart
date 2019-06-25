@@ -52,10 +52,6 @@ class WalletsState extends State<Wallets> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> walletWidgets = [];
-    for (Wallet wallet in wallets) {
-      walletWidgets.add(buildWalletCard(wallet));
-    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -67,9 +63,10 @@ class WalletsState extends State<Wallets> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Expanded(
-              child: ListView(
+              child: ListView.builder(
+                itemBuilder: buildWalletCard,
+                itemCount: wallets.length,
                 physics: ClampingScrollPhysics(),
-                children: walletWidgets,
               ),
             ),
           ],
@@ -79,7 +76,8 @@ class WalletsState extends State<Wallets> {
     );
   }
 
-  Widget buildWalletCard(Wallet wallet) {
+  Widget buildWalletCard(BuildContext context, int index) {
+    Wallet wallet = wallets[index];
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 170,

@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/ui/addressDetail.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
 import 'package:veatre/src/ui/walletInfo.dart';
@@ -59,6 +62,7 @@ class ManageWalletsState extends State<ManageWallets> {
         children: <Widget>[
           Expanded(
             child: ListView.builder(
+              padding: EdgeInsets.only(bottom: 10),
               physics: ClampingScrollPhysics(),
               itemBuilder: buildWalletCard,
               itemCount: wallets.length,
@@ -111,7 +115,7 @@ class ManageWalletsState extends State<ManageWallets> {
     Wallet wallet = wallets[index];
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 170,
+      height: 200,
       child: GestureDetector(
         child: Card(
           margin: EdgeInsets.only(left: 10, right: 10, top: 10),
@@ -120,7 +124,7 @@ class ManageWalletsState extends State<ManageWallets> {
           child: Column(
             children: <Widget>[
               Container(
-                height: 85,
+                height: 100,
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
@@ -135,26 +139,69 @@ class ManageWalletsState extends State<ManageWallets> {
                 ),
                 child: Column(
                   children: <Widget>[
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      child: Container(
-                        padding: EdgeInsets.all(15),
-                        child: Text(
-                          wallet.name,
-                          style: TextStyle(
-                            color: Colors.white,
+                    Row(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(left: 15, top: 15),
+                          child: Text(
+                            wallet.name,
+                            style: TextStyle(
+                              fontSize: 30,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    Container(
-                      padding: EdgeInsets.only(left: 15, right: 15),
-                      width: MediaQuery.of(context).size.width,
-                      child: Text(
-                        '0x' + wallet.keystore.address,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
+                    Row(
+                      children: <Widget>[
+                        FlatButton(
+                          onPressed: () async {
+                            await showGeneralDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              transitionDuration: Duration(milliseconds: 200),
+                              pageBuilder: (context, a, b) {
+                                return SlideTransition(
+                                  position: Tween(
+                                          begin: Offset(0, 1), end: Offset.zero)
+                                      .animate(a),
+                                  child: AddressDetail(
+                                    wallet: wallet,
+                                  ),
+                                );
+                              },
+                            );
+                            // Navigator.of(context).push(
+                            //   MaterialPageRoute(
+                            //     builder: (context) => AddressDetail(
+                            //           wallet: wallet,
+                            //         ),
+                            //   ),
+                            // );
+                          },
+                          child: Row(
+                            children: <Widget>[
+                              Text(
+                                '0x' +
+                                    wallet.keystore.address.substring(0, 8) +
+                                    '...' +
+                                    wallet.keystore.address.substring(32, 40),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 5),
+                                child: Icon(
+                                  FontAwesomeIcons.qrcode,
+                                  color: Colors.white,
+                                  size: 15,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -163,9 +210,12 @@ class ManageWalletsState extends State<ManageWallets> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Text(wallet.account.formatBalance()),
+                    Text(
+                      wallet.account.formatBalance(),
+                      style: TextStyle(fontSize: 30),
+                    ),
                     Container(
-                      margin: EdgeInsets.only(left: 5, right: 14),
+                      margin: EdgeInsets.only(left: 5, right: 14, top: 10),
                       child: Text(
                         'VET',
                         style: TextStyle(
@@ -182,14 +232,15 @@ class ManageWalletsState extends State<ManageWallets> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Text(wallet.account.formatEnergy()),
+                    Text(wallet.account.formatEnergy(),
+                        style: TextStyle(fontSize: 12)),
                     Container(
-                      margin: EdgeInsets.only(left: 5, right: 5),
+                      margin: EdgeInsets.only(left: 5, right: 15, top: 2),
                       child: Text(
                         'VTHO',
                         style: TextStyle(
                           color: Colors.grey,
-                          fontSize: 10,
+                          fontSize: 8,
                         ),
                       ),
                     )
@@ -203,8 +254,8 @@ class ManageWalletsState extends State<ManageWallets> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => WalletInfo(
-                wallet: wallet,
-              ),
+                    wallet: wallet,
+                  ),
             ),
           );
         },

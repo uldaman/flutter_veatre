@@ -1,19 +1,11 @@
-import 'dart:typed_data';
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/api/TransactionAPI.dart';
 import 'package:veatre/src/models/transaction.dart';
-import 'package:veatre/src/storage/storage.dart';
-import 'package:veatre/src/models/keyStore.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/ui/walletOperation.dart';
 import 'package:veatre/src/utils/common.dart';
-import 'package:veatre/src/ui/manageWallets.dart';
 
 class WalletInfo extends StatefulWidget {
   final Wallet wallet;
@@ -25,14 +17,11 @@ class WalletInfo extends StatefulWidget {
 
 class WalletInfoState extends State<WalletInfo> {
   TextEditingController passwordController = TextEditingController();
-
   TextEditingController originalPasswordController = TextEditingController();
   TextEditingController newPasswordController = TextEditingController();
 
   bool loadMore = false;
-
   ScrollController _scrollController = new ScrollController();
-
   int offset = 0;
   int limit = 10;
   Wallet wallet;
@@ -98,33 +87,38 @@ class WalletInfoState extends State<WalletInfo> {
                     Column(
                       children: <Widget>[
                         Container(
-                          margin: EdgeInsets.only(top: 120),
-                          height: 60,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: <Widget>[
-                              Text(
-                                wallet.account.formatBalance(),
-                                style: TextStyle(
-                                  fontSize: 40,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(
-                                    left: 5, top: 15, right: 15),
-                                child: Text(
-                                  'VET',
-                                  style: TextStyle(
-                                    color: Colors.greenAccent,
-                                    fontSize: 12,
+                            margin: EdgeInsets.only(top: 120),
+                            height: 60,
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: <Widget>[
+                                      Text(
+                                        wallet.account.formatBalance(),
+                                        style: TextStyle(
+                                          fontSize: 40,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                            left: 5, top: 15, right: 15),
+                                        child: Text(
+                                          'VET',
+                                          style: TextStyle(
+                                            color: Colors.greenAccent,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      )
+                                    ],
                                   ),
                                 ),
-                              )
-                            ],
-                          ),
-                        ),
+                              ],
+                            )),
                         Container(
                           height: 50,
                           child: Row(
@@ -133,7 +127,7 @@ class WalletInfoState extends State<WalletInfo> {
                               Text(
                                 wallet.account.formatEnergy(),
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 15,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -145,7 +139,7 @@ class WalletInfoState extends State<WalletInfo> {
                                   'VTHO',
                                   style: TextStyle(
                                     color: Colors.greenAccent,
-                                    fontSize: 10,
+                                    fontSize: 8,
                                   ),
                                 ),
                               )
@@ -163,104 +157,66 @@ class WalletInfoState extends State<WalletInfo> {
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                        child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.only(left: 15),
-                          width: 55,
-                          child: IconButton(
-                            icon: Icon(Icons.arrow_back),
-                            iconSize: 30,
-                            color: Colors.white,
-                            onPressed: () async {
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ),
-                        Container(
-                          child: Text(
-                            wallet.name,
-                            style: TextStyle(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.only(left: 15),
+                            width: 55,
+                            child: IconButton(
+                              icon: Icon(Icons.arrow_back_ios),
+                              iconSize: 25,
                               color: Colors.white,
-                              fontSize: 30,
+                              onPressed: () async {
+                                Navigator.pop(context);
+                              },
                             ),
                           ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(right: 15),
-                          width: 55,
-                          child: IconButton(
-                            icon: Icon(FontAwesomeIcons.wrench),
-                            iconSize: 20,
-                            color: Colors.white,
-                            onPressed: () async {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => WalletOperation(
-                                    wallet: wallet,
-                                  ),
-                                ),
-                              );
-                            },
+                          Container(
+                            child: Text(
+                              wallet.name,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ))
+                          Container(
+                            margin: EdgeInsets.only(right: 15),
+                            width: 55,
+                            child: IconButton(
+                              icon: Icon(FontAwesomeIcons.wrench),
+                              iconSize: 20,
+                              color: Colors.white,
+                              onPressed: () async {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => WalletOperation(
+                                          wallet: wallet,
+                                        ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               )
             ],
           ),
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    child: ListView.builder(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      physics: ClampingScrollPhysics(),
-                      controller: _scrollController,
-                      itemCount: transfers.length,
-                      itemBuilder: buildCell,
-                    ),
-                    color: Colors.grey[100],
-                  ),
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Container(
-                        child: Row(
-                          children: <Widget>[
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              height: 50,
-                              child: RaisedButton(
-                                color: Colors.blue,
-                                textColor: Colors.white,
-                                child: Text("Send"),
-                                onPressed: () {},
-                              ),
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              height: 50,
-                              child: RaisedButton(
-                                color: Colors.red,
-                                textColor: Colors.white,
-                                child: Text("Receive"),
-                                onPressed: () {},
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ],
+            child: Container(
+              child: ListView.builder(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                physics: ClampingScrollPhysics(),
+                controller: _scrollController,
+                itemCount: transfers.length,
+                itemBuilder: buildCell,
+              ),
+              color: Colors.grey[100],
             ),
           ),
         ],

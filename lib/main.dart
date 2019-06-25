@@ -32,6 +32,9 @@ class MyApp extends StatelessWidget {
           title: TextStyle(color: Colors.black, fontFamily: "Aveny"),
         ),
         textTheme: TextTheme(title: TextStyle(color: Colors.black)),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(),
+        ),
       ),
     );
   }

@@ -105,7 +105,7 @@ class _CustomWebViewState extends State<CustomWebView>
 
   void _onSubmitted(String url) {
     if (url != null && url != "") {
-      web_view.loadUrl(Uri.encodeFull(_matchUrl(url.trim().toLowerCase())));
+      web_view.loadUrl(Uri.encodeFull(_matchUrl(url.trim())));
     }
   }
 
@@ -161,12 +161,6 @@ class _CustomWebViewState extends State<CustomWebView>
               initialJs: _makeHeadJs(driver.head),
               initialUrl: initialUrl,
               onWebViewCreated: (InAppWebViewController controller) async {
-                controller.addJavaScriptHandler("debugLog", (arguments) async {
-                  debugPrint("debugLog: " + arguments.join(","));
-                });
-                controller.addJavaScriptHandler("errorLog", (arguments) async {
-                  debugPrint("errorLog: " + arguments.join(","));
-                });
                 controller.addJavaScriptHandler("Thor", (arguments) async {
                   debugPrint('Thor arguments $arguments');
                   dynamic data = await driver.callMethod(arguments);
@@ -270,9 +264,7 @@ class _CustomWebViewState extends State<CustomWebView>
               },
               onProgressChanged:
                   (InAppWebViewController controller, int progress) {
-                setState(() {
-                  _progress = progress / 100;
-                });
+                setState(() => _progress = progress / 100);
               },
               onConsoleMessage: (InAppWebViewController controller,
                   ConsoleMessage consoleMessage) {

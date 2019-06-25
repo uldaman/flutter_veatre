@@ -17,15 +17,6 @@ class Settings extends StatelessWidget {
         },
       ),
     );
-    // widgets.add(
-    //   buildCell(
-    //     Icons.help,
-    //     'Help',
-    //     () {
-    //       Navigator.of(context).pushNamed(ManageWallets.routeName);
-    //     },
-    //   ),
-    // );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,

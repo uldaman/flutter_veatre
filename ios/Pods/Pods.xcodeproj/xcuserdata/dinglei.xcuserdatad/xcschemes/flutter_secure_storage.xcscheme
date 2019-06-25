@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0930"
+   LastUpgradeVersion = "1100"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CB009F4F8FC03BE9D161EF91480E1865"
+               BlueprintIdentifier = "15490FE8E4E35B20C7777FA3316A00AA"
                BuildableName = "flutter_secure_storage.framework"
                BlueprintName = "flutter_secure_storage"
                ReferencedContainer = "container:Pods.xcodeproj">

@@ -200,7 +200,7 @@ class _CustomWebViewState extends State<CustomWebView>
                     SigningTxResponse result = await showGeneralDialog(
                       context: context,
                       barrierDismissible: false,
-                      transitionDuration: Duration(milliseconds: 300),
+                      transitionDuration: Duration(milliseconds: 200),
                       pageBuilder: (context, a, b) {
                         return SlideTransition(
                           position: Tween(begin: Offset(0, 1), end: Offset.zero)
@@ -224,7 +224,7 @@ class _CustomWebViewState extends State<CustomWebView>
                     SigningCertResponse result = await showGeneralDialog(
                       context: context,
                       barrierDismissible: false,
-                      transitionDuration: Duration(milliseconds: 300),
+                      transitionDuration: Duration(milliseconds: 200),
                       pageBuilder: (context, a, b) {
                         return SlideTransition(
                           position: Tween(begin: Offset(0, 1), end: Offset.zero)

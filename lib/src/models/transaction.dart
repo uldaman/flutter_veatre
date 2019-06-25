@@ -245,14 +245,45 @@ class Transfer {
   final String sender;
   final String recipient;
   final String amount;
-
-  Transfer({this.sender, this.recipient, this.amount});
+  final Meta meta;
+  Transfer({this.sender, this.recipient, this.amount, this.meta});
 
   factory Transfer.fromJSON(Map<String, dynamic> parsedJson) {
     return Transfer(
       sender: parsedJson['sender'],
       recipient: parsedJson['recipient'],
       amount: parsedJson['amount'],
+      meta:
+          parsedJson['meta'] == null ? null : Meta.fromJSON(parsedJson['meta']),
+    );
+  }
+}
+
+class Meta {
+  String blockID;
+  int blockNumber;
+  int blockTimestamp;
+  String txID;
+  String txOrigin;
+  int clauseIndex;
+
+  Meta({
+    this.blockID,
+    this.blockNumber,
+    this.blockTimestamp,
+    this.txID,
+    this.txOrigin,
+    this.clauseIndex,
+  });
+
+  factory Meta.fromJSON(Map<String, dynamic> parsedJSON) {
+    return Meta(
+      blockID: parsedJSON['blockID'],
+      blockNumber: parsedJSON['blockNumber'],
+      blockTimestamp: parsedJSON['blockTimestamp'],
+      txID: parsedJSON['txID'],
+      txOrigin: parsedJSON['txOrigin'],
+      clauseIndex: parsedJSON['clauseIndex'],
     );
   }
 }

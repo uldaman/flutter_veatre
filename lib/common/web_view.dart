@@ -105,7 +105,7 @@ class _CustomWebViewState extends State<CustomWebView>
 
   void _onSubmitted(String url) {
     if (url != null && url != "") {
-      web_view.loadUrl(Uri.encodeFull(_matchUrl(url.trim().toLowerCase())));
+      web_view.loadUrl(Uri.encodeFull(_matchUrl(url.trim())));
     }
   }
 

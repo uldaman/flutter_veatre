@@ -195,13 +195,14 @@ class SigningTxOptions {
     this.comment,
   });
 
-  factory SigningTxOptions.fromJSON(Map<String, dynamic> parsedJSON) {
+  factory SigningTxOptions.fromJSON(
+      Map<String, dynamic> parsedJSON, String link) {
     return SigningTxOptions(
       delegated: parsedJSON['delegated'],
       signer: parsedJSON['signer'],
       gas: parsedJSON['gas'],
       dependsOn: parsedJSON['dependsOn'],
-      link: parsedJSON['link'],
+      link: link,
       comment: parsedJSON['comment'],
     );
   }

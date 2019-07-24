@@ -2,11 +2,11 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:veatre/src/storage/storage.dart';
-import 'package:veatre/src/models/keyStore.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
+import 'package:bip_key_derivation/keystore.dart';
+import 'package:bip_key_derivation/bip_key_derivation.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/alert.dart';
@@ -56,9 +56,9 @@ class WalletOperationState extends State<WalletOperation> {
             loading = true;
           });
           try {
-            await compute(
-              decrypt,
-              Decriptions(keystore: wallet.keystore, password: password),
+            await BipKeyDerivation.decryptedByKeystore(
+              wallet.keystore,
+              password,
             );
             setState(() {
               loading = false;
@@ -68,43 +68,42 @@ class WalletOperationState extends State<WalletOperation> {
                 barrierDismissible: true,
                 builder: (context) {
                   return AlertDialog(
-                    title: Text('KeyStore'),
-                    content: SizedBox(
-                      height:
-                          MediaQuery.of(context).size.width > 360 ? 360 : 410,
-                      child: Column(
-                        children: <Widget>[
-                          Card(
-                            child: Container(
-                              padding: EdgeInsets.all(10),
+                    contentPadding: EdgeInsets.all(12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    title: Text('Keystore'),
+                    content: Wrap(
+                      children: <Widget>[
+                        Card(
+                          color: Colors.grey[100],
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Text(
+                              json.encode(wallet.keystore.encoded),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 44,
+                          child: Center(
+                            child: FlatButton(
                               child: Text(
-                                json.encode(wallet.keystore.encoded),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 44,
-                            child: Center(
-                              child: FlatButton(
-                                child: Text(
-                                  'copy',
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                  ),
+                                'copy',
+                                style: TextStyle(
+                                  color: Colors.blue,
                                 ),
-                                onPressed: () async {
-                                  await Clipboard.setData(
-                                    new ClipboardData(
-                                      text:
-                                          json.encode(wallet.keystore.encoded),
-                                    ),
-                                  );
-                                },
                               ),
+                              onPressed: () async {
+                                await Clipboard.setData(
+                                  new ClipboardData(
+                                    text: json.encode(wallet.keystore.encoded),
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   );
                 });
@@ -112,7 +111,7 @@ class WalletOperationState extends State<WalletOperation> {
             return alert(
               context,
               Text('Warnning'),
-              "Password Invalid",
+              err.toString(),
             );
           } finally {
             setState(() {
@@ -164,13 +163,12 @@ class WalletOperationState extends State<WalletOperation> {
             loading = true;
           });
           try {
-            Uint8List privateKey = await compute(
-              decrypt,
-              Decriptions(
-                  keystore: wallet.keystore, password: originalPassword),
+            Uint8List privateKey = await BipKeyDerivation.decryptedByKeystore(
+              wallet.keystore,
+              originalPassword,
             );
             KeyStore newKeyStore =
-                await KeyStore.encrypt(privateKey, newPassword);
+                await BipKeyDerivation.encrypt(privateKey, newPassword);
             await WalletStorage.write(
               walletEntity:
                   WalletEntity(keystore: newKeyStore, name: wallet.name),
@@ -182,7 +180,7 @@ class WalletOperationState extends State<WalletOperation> {
             return alert(
               context,
               Text('Warnning'),
-              "Password incorrect",
+              err.toString(),
             );
           } finally {
             setState(() {
@@ -219,9 +217,9 @@ class WalletOperationState extends State<WalletOperation> {
             loading = true;
           });
           try {
-            await compute(
-              decrypt,
-              Decriptions(keystore: wallet.keystore, password: password),
+            await BipKeyDerivation.decryptedByKeystore(
+              wallet.keystore,
+              password,
             );
             await WalletStorage.delete(wallet.name);
             Navigator.popUntil(
@@ -230,7 +228,7 @@ class WalletOperationState extends State<WalletOperation> {
             return alert(
               context,
               Text('Warnning'),
-              "Password Invalid",
+              err.toString(),
             );
           } finally {
             setState(() {

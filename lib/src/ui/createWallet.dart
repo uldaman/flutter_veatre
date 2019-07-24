@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/generateWallet.dart';
-import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 
 class CreateWallet extends StatefulWidget {
   static const routeName = '/wallets/creation';

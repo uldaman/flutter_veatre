@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/addressDetail.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
@@ -12,6 +12,7 @@ import 'package:veatre/src/api/accountAPI.dart';
 
 class ManageWallets extends StatefulWidget {
   static const routeName = '/wallets_management';
+
   ManageWallets() : super();
   @override
   ManageWalletsState createState() => ManageWalletsState();
@@ -52,6 +53,7 @@ class ManageWalletsState extends State<ManageWallets> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text('Wallets'),
@@ -194,7 +196,7 @@ class ManageWalletsState extends State<ManageWallets> {
                                 child: Icon(
                                   FontAwesomeIcons.qrcode,
                                   color: Colors.white,
-                                  size: 15,
+                                  size: 10,
                                 ),
                               )
                             ],
@@ -254,8 +256,8 @@ class ManageWalletsState extends State<ManageWallets> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => WalletInfo(
-                    wallet: wallet,
-                  ),
+                wallet: wallet,
+              ),
             ),
           );
         },

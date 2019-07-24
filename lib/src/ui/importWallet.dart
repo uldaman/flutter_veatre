@@ -1,15 +1,14 @@
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:bip_key_derivation/keystore.dart';
+import 'package:bip_key_derivation/bip_key_derivation.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
-import 'package:veatre/src/bip39/mnemonic.dart';
-import 'package:veatre/src/models/keyStore.dart';
-import 'package:veatre/src/storage/storage.dart';
-import 'package:web3dart/crypto.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
+import 'package:veatre/src/utils/common.dart';
 
 class ImportWallet extends StatefulWidget {
   static final routeName = '/wallets/import';
@@ -21,7 +20,6 @@ class ImportWallet extends StatefulWidget {
 class ImportWalletState extends State<ImportWallet> {
   int currentPage = 0;
   bool loading = false;
-  Decriptions decriptions;
   TextEditingController mnemonicController = TextEditingController();
   TextEditingController mnemonicWalletNameController = TextEditingController();
   TextEditingController mnemonicPasswordController = TextEditingController();
@@ -243,17 +241,15 @@ class ImportWalletState extends State<ImportWallet> {
                               return alert(context, Text('Warnning'),
                                   "Mnemonic can't be empty");
                             }
-                            List<String> words =
-                                await Mnemonic.populateWordList();
-                            List<String> mnemonics = mnemonic.split(' ');
-                            for (String m in mnemonics) {
-                              if (!words.contains(m)) {
-                                setState(() {
-                                  loading = false;
-                                });
-                                return alert(context, Text('Warnning'),
-                                    "Invalid mnemonic phase");
-                              }
+                            bool isValid =
+                                await BipKeyDerivation.isValidMnemonic(
+                                    mnemonic);
+                            if (!isValid) {
+                              setState(() {
+                                loading = false;
+                              });
+                              return alert(context, Text('Warnning'),
+                                  "Invalid mnemonic phase");
                             }
                             String walletName =
                                 mnemonicWalletNameController.text;
@@ -281,11 +277,18 @@ class ImportWalletState extends State<ImportWallet> {
                               return alert(context, Text('Warnning'),
                                   "Password can't be empty");
                             }
-                            KeyStore keystore = await compute(
-                              decryptMnemonic,
-                              MnemonicDecriptions(
-                                  mnemonic: mnemonic, password: password),
-                            );
+                            Uint8List privateKey =
+                                await BipKeyDerivation.decryptedByMnemonic(
+                                    mnemonic, defaultDerivationPath);
+                            Uint8List publicKey =
+                                await BipKeyDerivation.privateToPublic(
+                                    privateKey);
+                            Uint8List address =
+                                await BipKeyDerivation.publicToAddress(
+                                    publicKey);
+                            KeyStore keystore = await BipKeyDerivation.encrypt(
+                                privateKey, password);
+                            keystore.address = bytesToHex(address);
                             WalletEntity existed =
                                 await walletExisted(keystore.address);
                             if (existed != null) {
@@ -369,16 +372,15 @@ class ImportWalletState extends State<ImportWallet> {
                                   "keystore is invalid");
                             }
                             try {
-                              Uint8List privateKey = await compute(
-                                decrypt,
-                                Decriptions(
-                                    keystore: keystore, password: password),
-                              );
-                              Uint8List publicKey =
-                                  privateKeyBytesToPublic(privateKey);
-                              Uint8List addr = publicKeyToAddress(publicKey);
+                              await BipKeyDerivation.decryptedByKeystore(
+                                  keystore, password);
+                            } catch (err) {
+                              return alert(
+                                  context, Text('Warnning'), err.toString());
+                            }
+                            try {
                               WalletEntity existed =
-                                  await walletExisted(bytesToHex(addr));
+                                  await walletExisted(keystore.address);
                               if (existed != null) {
                                 setState(() {
                                   loading = false;
@@ -389,12 +391,10 @@ class ImportWalletState extends State<ImportWallet> {
                                   content: Text(
                                       'this address has been already existed,would you like to cover it?'),
                                   confirmAction: () async {
-                                    KeyStore keyS = await KeyStore.encrypt(
-                                        privateKey, password);
                                     await WalletStorage.delete(existed.name);
                                     await WalletStorage.write(
                                       walletEntity: WalletEntity(
-                                        keystore: keyS,
+                                        keystore: keystore,
                                         name: walletName,
                                       ),
                                       isMainWallet: true,

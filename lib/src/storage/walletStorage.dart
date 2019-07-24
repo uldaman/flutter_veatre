@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:veatre/src/models/keyStore.dart';
+import 'package:bip_key_derivation/keystore.dart';
 
 class WalletStorage {
   static final storage = new FlutterSecureStorage();

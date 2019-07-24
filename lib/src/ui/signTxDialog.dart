@@ -1,21 +1,22 @@
 import 'dart:typed_data';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/api/blockAPI.dart';
 import 'package:veatre/src/api/transactionAPI.dart';
 import 'package:veatre/src/models/account.dart';
-import 'package:veatre/src/models/keyStore.dart';
+import 'package:bip_key_derivation/bip_key_derivation.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/transaction.dart';
-import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
+import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/wallets.dart';
 import 'package:web3dart/contracts.dart';
-import 'package:web3dart/crypto.dart';
 import 'package:veatre/src/utils/common.dart';
 
 class SignTxDialog extends StatefulWidget {
@@ -521,11 +522,10 @@ VM error: ${result.vmError}''';
                                 });
                                 Uint8List privateKey;
                                 try {
-                                  privateKey = await compute(
-                                    decrypt,
-                                    Decriptions(
-                                        keystore: wallet.keystore,
-                                        password: password),
+                                  privateKey = await BipKeyDerivation
+                                      .decryptedByKeystore(
+                                    wallet.keystore,
+                                    password,
                                   );
                                 } catch (err) {
                                   setState(() {
@@ -575,6 +575,39 @@ VM error: ${result.vmError}''';
                                   );
                                   Map<String, dynamic> result =
                                       await TransactionAPI.send(tx.serialized);
+                                  int timestamp = new DateTime.now()
+                                          .millisecondsSinceEpoch ~/
+                                      1000;
+                                  String comment = 'Empty transaction';
+                                  if (widget.options == null) {
+                                    if (widget.txMessages.length > 1) {
+                                      comment = 'Perform a batch of clauses';
+                                    } else if (widget.txMessages.length == 1) {
+                                      SigningTxMessage msg =
+                                          widget.txMessages.first;
+                                      comment =
+                                          msg.comment ?? msg.data.length > 2
+                                              ? 'Make a contract call'
+                                              : 'Transfer VET';
+                                    }
+                                  }
+                                  await ActivityStorage.insert(
+                                    Activity(
+                                      hash: result['id'],
+                                      content: json.encode({
+                                        'amount': fixed2Value(spendValue),
+                                        'fee': fixed2Value(estimatedFee),
+                                      }),
+                                      link: widget.options == null
+                                          ? null
+                                          : widget.options.link,
+                                      walletName: wallet.name,
+                                      type: ActivityType.Transaction,
+                                      comment: comment,
+                                      timestamp: timestamp,
+                                      status: ActivityStatus.Pending,
+                                    ),
+                                  );
                                   Navigator.of(context).pop(
                                     SigningTxResponse(
                                       txid: result['id'],

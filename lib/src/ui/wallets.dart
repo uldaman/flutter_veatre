@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/api/accountAPI.dart';

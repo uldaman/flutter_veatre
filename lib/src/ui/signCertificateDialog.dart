@@ -1,17 +1,16 @@
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/account.dart';
-import 'package:veatre/src/models/keyStore.dart';
+import 'package:bip_key_derivation/bip_key_derivation.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/wallets.dart';
 import 'package:veatre/src/ui/alert.dart';
-
-import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
+import 'package:veatre/src/storage/activitiyStorage.dart';
 
 class SignCertificateDialog extends StatefulWidget {
   final SigningCertMessage certMessage;
@@ -284,11 +283,10 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                 });
                                 Uint8List privateKey;
                                 try {
-                                  privateKey = await compute(
-                                    decrypt,
-                                    Decriptions(
-                                        keystore: wallet.keystore,
-                                        password: password),
+                                  privateKey = await BipKeyDerivation
+                                      .decryptedByKeystore(
+                                    wallet.keystore,
+                                    password,
                                   );
                                 } catch (err) {
                                   setState(() {
@@ -301,11 +299,12 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                   );
                                 }
                                 try {
+                                  int timestamp = new DateTime.now()
+                                          .millisecondsSinceEpoch ~/
+                                      1000;
                                   Certificate cert = Certificate(
                                     certMessage: widget.certMessage,
-                                    timestamp: new DateTime.now()
-                                            .millisecondsSinceEpoch ~/
-                                        1000,
+                                    timestamp: timestamp,
                                     domain: widget.options.link,
                                   );
                                   cert.sign(privateKey);
@@ -313,6 +312,18 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                     WalletEntity(
                                       keystore: wallet.keystore,
                                       name: wallet.name,
+                                    ),
+                                  );
+                                  await ActivityStorage.insert(
+                                    Activity(
+                                      content:
+                                          json.encode(cert.encoded.encoded),
+                                      link: cert.domain,
+                                      walletName: wallet.name,
+                                      type: ActivityType.Certificate,
+                                      comment: cert.certMessage.purpose,
+                                      timestamp: timestamp,
+                                      status: ActivityStatus.Finished,
                                     ),
                                   );
                                   Navigator.of(context).pop(cert.encoded);

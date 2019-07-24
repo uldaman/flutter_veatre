@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 
-final dapps = <Map>[
+final apps = <Map>[
   {
     "title": "Apphub",
     "icon": CachedNetworkImage(

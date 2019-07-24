@@ -598,9 +598,7 @@ VM error: ${result.vmError}''';
                                         'amount': fixed2Value(spendValue),
                                         'fee': fixed2Value(estimatedFee),
                                       }),
-                                      link: widget.options == null
-                                          ? null
-                                          : widget.options.link,
+                                      link: widget.options.link,
                                       walletName: wallet.name,
                                       type: ActivityType.Transaction,
                                       comment: comment,

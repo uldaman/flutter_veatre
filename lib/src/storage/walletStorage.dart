@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bip_key_derivation/keystore.dart';
+import 'package:veatre/main.dart';
 
 class WalletStorage {
   static final storage = new FlutterSecureStorage();
@@ -19,6 +20,20 @@ class WalletStorage {
       }
     }
     return walletEntities;
+  }
+
+  static Future<List<String>> get wallets async {
+    Map<String, String> allKeystores = await storage.readAll();
+    List<String> wallets = [];
+    for (var keystoreEntity in allKeystores.entries) {
+      String walletName = keystoreEntity.key;
+      if (walletName != mainWalletKey) {
+        KeyStore keystore =
+            KeyStore.fromJSON(json.decode(keystoreEntity.value));
+        wallets.add("0x${keystore.address}");
+      }
+    }
+    return wallets;
   }
 
   static Future<WalletEntity> read(String name) async {
@@ -42,6 +57,7 @@ class WalletStorage {
         value: json.encode(walletEntity.encoded),
       );
     }
+    walletsChangedController.value = await wallets;
   }
 
   static Future<void> setMainWallet(WalletEntity walletEntity) async {
@@ -61,10 +77,12 @@ class WalletStorage {
 
   static Future<void> delete(String name) async {
     await storage.delete(key: name);
+    walletsChangedController.value = await wallets;
   }
 
   static Future<void> deleteAll() async {
     await storage.deleteAll();
+    walletsChangedController.value = await wallets;
   }
 }
 

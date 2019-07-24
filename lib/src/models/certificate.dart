@@ -128,10 +128,13 @@ class SigningCertOptions {
     this.link,
   });
 
-  factory SigningCertOptions.fromJSON(Map<String, dynamic> parsedJSON) {
+  factory SigningCertOptions.fromJSON(
+    Map<String, dynamic> parsedJSON,
+    String link,
+  ) {
     return SigningCertOptions(
       signer: parsedJSON['signer'],
-      link: parsedJSON['link'],
+      link: link,
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:veatre/common/driver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/ui/signCertificateDialog.dart';
 import 'package:veatre/src/ui/signTxDialog.dart';
 import 'package:veatre/src/models/certificate.dart';
@@ -21,22 +22,30 @@ import 'package:veatre/src/ui/apps.dart';
 typedef onWebViewChangedCallback = void Function(
     InAppWebViewController controller);
 
-class HeadValueController extends ValueNotifier<BlockHead> {
-  HeadValueController(BlockHead value) : super(value);
+class HeadValueController extends ValueNotifier<Block> {
+  HeadValueController(Block value) : super(value);
+}
+
+class GenesisChangedController extends ValueNotifier<Block> {
+  GenesisChangedController(Block value) : super(value);
+}
+
+class WalletsChangedController extends ValueNotifier<List<String>> {
+  WalletsChangedController(List<String> value) : super(value);
 }
 
 class WebView extends StatefulWidget {
   final Key key;
-  final int id;
   final HeadValueController headValueController;
-  // final onWebViewCreatedCallback onWebViewCreated;
+  final GenesisChangedController genesisChangedController;
+  final WalletsChangedController walletsChangedController;
   final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
-    this.id,
     this.headValueController,
-    // this.onWebViewCreated,
+    this.genesisChangedController,
+    this.walletsChangedController,
     this.onWebViewChanged,
   }) : super(key: key);
 
@@ -61,11 +70,27 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     widget.headValueController.addListener(_handleHeadChanged);
+    widget.genesisChangedController.addListener(_handleGenesisChanged);
+    widget.walletsChangedController.addListener(_handleWalletsChanged);
   }
 
   void _handleHeadChanged() {
     if (controller != null) {
       controller.injectScriptCode(_headJS(widget.headValueController.value));
+    }
+  }
+
+  void _handleGenesisChanged() {
+    if (controller != null) {
+      controller
+          .injectScriptCode(_genesisJS(widget.genesisChangedController.value));
+    }
+  }
+
+  void _handleWalletsChanged() {
+    if (controller != null) {
+      controller
+          .injectScriptCode(_walletsJS(widget.walletsChangedController.value));
     }
   }
 
@@ -164,7 +189,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           "databaseEnabled": true,
           "mixedContentMode": "MIXED_CONTENT_ALWAYS_ALLOW",
         },
-        initialJs: _headJS(widget.headValueController.value),
+        initialJs: _headJS(widget.headValueController.value) +
+            _genesisJS(widget.genesisChangedController.value) +
+            _walletsJS(widget.walletsChangedController.value),
         onWebViewCreated: (InAppWebViewController controller) async {
           setState(() {
             this.controller = controller;
@@ -210,7 +237,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 txMessages.add(SigningTxMessage.fromJSON(txMsg));
               }
               SigningTxOptions options =
-                  SigningTxOptions.fromJSON(arguments[2]);
+                  SigningTxOptions.fromJSON(arguments[2], currentURL);
               return _showSigningDialog(
                 SignTxDialog(
                   txMessages: txMessages,
@@ -221,7 +248,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               SigningCertMessage certMessage =
                   SigningCertMessage.fromJSON(arguments[1]);
               SigningCertOptions options =
-                  SigningCertOptions.fromJSON(arguments[2]);
+                  SigningCertOptions.fromJSON(arguments[2], currentURL);
               return _showSigningDialog(
                 SignCertificateDialog(
                   certMessage: certMessage,
@@ -318,14 +345,45 @@ messageLevel: ${consoleMessage.messageLevel}
     return result.encoded;
   }
 
-  String _headJS(BlockHead head) {
+  String _headJS(Block head) {
     return '''
       window.block_head={
         id: '${head.id}',
         number:${head.number},
         timestamp:${head.timestamp},
         parentID:'${head.parentID}'
-      }''';
+      };''';
+  }
+
+  String _genesisJS(Block genesis) {
+    return '''
+      window.genesis={
+        id: '${genesis.id}',
+        number:${genesis.number},
+        timestamp:${genesis.timestamp},
+        parentID:'${genesis.parentID}',
+        gasLimit:'${genesis.gasLimit}',
+        beneficiary:'${genesis.beneficiary}',
+        gasUsed: ${genesis.gasUsed},
+        totalScore:${genesis.totalScore},
+        txsRoot:'${genesis.txsRoot}',
+        txsFeatures:${genesis.txsFeatures},
+        stateRoot:'${genesis.stateRoot}',
+        receiptsRoot:'${genesis.receiptsRoot}',
+        signer:'${genesis.signer}',
+        transactions:${genesis.transactions},
+        isTrunk:${genesis.isTrunk}
+      };''';
+  }
+
+  String _walletsJS(List<String> wallets) {
+    String js = 'window.wallets=[';
+    for (String address in wallets) {
+      js += "'$address',";
+    }
+    js += "];";
+    print("_walletsJS $js");
+    return js;
   }
 
   void updateSearchBar(double progress, String url) {

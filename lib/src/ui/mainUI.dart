@@ -5,9 +5,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:veatre/common/driver.dart';
 import 'package:veatre/src/ui/tabViews.dart';
-import 'package:veatre/src/ui/webView.dart';
 import 'package:veatre/src/ui/webViews.dart';
 import 'package:veatre/src/ui/settings.dart';
 
@@ -18,34 +16,22 @@ class MainUI extends StatefulWidget {
   MainUIState createState() => MainUIState();
 }
 
-class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
+class MainUIState extends State<MainUI>
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   int tabID = 0;
-  HeadValueController headValueController = HeadValueController(driver.genesis);
-  Timer _timer;
   final GlobalKey captureKey = GlobalKey();
   bool canBack = false;
   bool canForward = false;
-
   @override
   void initState() {
     super.initState();
-    createWebView(headValueController, (controller) async {
+    createWebView((controller) async {
       await updateBackForward();
-    });
-    BlockHead currentHead = driver.genesis;
-    _timer = Timer.periodic(Duration(seconds: 5), (time) async {
-      BlockHead head = BlockHead.fromJSON(await driver.head);
-      if (head.number != currentHead.number) {
-        currentHead = head;
-        headValueController.value = currentHead;
-      }
     });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
-    headValueController.dispose();
     super.dispose();
   }
 
@@ -112,7 +98,7 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                 if (tabResult.stage == TabStage.Created ||
                     tabResult.stage == TabStage.RemovedAll) {
                   setState(() {
-                    createWebView(headValueController, (controller) async {
+                    createWebView((controller) async {
                       await updateBackForward();
                     });
                   });

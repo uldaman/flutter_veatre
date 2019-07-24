@@ -4,8 +4,11 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:veatre/src/ui/webView.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:veatre/main.dart';
+import 'package:veatre/src/ui/webView.dart';
+import 'package:veatre/src/models/block.dart';
+import 'package:veatre/common/driver.dart';
 
 class Snapshot {
   String title;
@@ -19,18 +22,17 @@ class Snapshot {
 
 List<Key> _keys = [];
 List<Snapshot> _snapshots = [];
-int _createdID = 0;
 List<WebView> webViews = [];
 
-void createWebView(HeadValueController headValueController,
-    onWebViewChangedCallback onWebViewChanged) {
-  _createdID = webViews.length;
+void createWebView(onWebViewChangedCallback onWebViewChanged) {
+  int id = webViews.length;
   LabeledGlobalKey<WebViewState> key =
-      LabeledGlobalKey<WebViewState>('webview$_createdID');
+      LabeledGlobalKey<WebViewState>('webview$id');
   WebView webView = new WebView(
     key: key,
-    id: _createdID,
-    headValueController: headValueController,
+    headValueController: _headValueController,
+    walletsChangedController: walletsChangedController,
+    genesisChangedController: genesisChangedController,
     onWebViewChanged: (controller) async {
       onWebViewChanged(controller);
     },
@@ -160,4 +162,25 @@ Future<Uint8List> takeScreenshot(int id) async {
     return key.currentState.controller.takeScreenshot();
   }
   return Uint8List(0);
+}
+
+HeadValueController _headValueController = HeadValueController(driver.genesis);
+Block _currentHead = driver.genesis;
+Timer _timer = Timer.periodic(Duration(seconds: 5), (time) async {
+  try {
+    Block head = Block.fromJSON(await driver.head);
+    if (head.number != _currentHead.number) {
+      _currentHead = head;
+      _headValueController.value = _currentHead;
+    }
+  } catch (e) {
+    print("sync block error: $e");
+  }
+});
+
+@override
+void dispose() {
+  print("webviews dispose");
+  _timer.cancel();
+  _headValueController.dispose();
 }

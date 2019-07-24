@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/common/driver.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 import 'package:veatre/src/ui/settings.dart';
+import 'package:veatre/src/ui/webView.dart';
 
-void main() {
-  runApp(MyApp());
+List<String> wallets = [];
+
+WalletsChangedController walletsChangedController;
+
+GenesisChangedController genesisChangedController;
+
+void main() async {
+  wallets = await WalletStorage.wallets;
+  walletsChangedController = WalletsChangedController(wallets);
+  genesisChangedController = GenesisChangedController(driver.genesis);
+  print("wallets $wallets");
+  runApp(App());
 }
 
-class MyApp extends StatelessWidget {
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

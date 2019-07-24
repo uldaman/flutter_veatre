@@ -23,6 +23,7 @@ class TabViews extends StatefulWidget {
 }
 
 class TabViewsState extends State<TabViews> {
+
   @override
   Widget build(BuildContext context) {
     double ratio = MediaQuery.of(context).size.width /

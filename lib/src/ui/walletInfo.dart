@@ -306,7 +306,7 @@ class WalletInfoState extends State<WalletInfo> {
             ),
           ),
           loadMore && index % limit == limit - 1
-              ? Container(
+              ? SizedBox(
                   height: 80,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

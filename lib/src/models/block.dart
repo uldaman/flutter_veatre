@@ -9,6 +9,7 @@ class Block {
   int gasUsed;
   int totalScore;
   String txsRoot;
+  int txsFeatures;
   String stateRoot;
   String receiptsRoot;
   String signer;
@@ -26,6 +27,7 @@ class Block {
     this.gasUsed,
     this.totalScore,
     this.txsRoot,
+    this.txsFeatures,
     this.stateRoot,
     this.receiptsRoot,
     this.signer,
@@ -50,6 +52,7 @@ class Block {
       gasUsed: parsedJson['gasUsed'],
       totalScore: parsedJson['totalScore'],
       txsRoot: parsedJson['txsRoot'],
+      txsFeatures: parsedJson['txsFeatures'],
       stateRoot: parsedJson['stateRoot'],
       receiptsRoot: parsedJson['receiptsRoot'],
       signer: parsedJson['signer'],

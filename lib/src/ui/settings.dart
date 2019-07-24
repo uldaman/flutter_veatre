@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
+import 'package:veatre/src/ui/activities.dart';
 
 class Settings extends StatelessWidget {
   static const routeName = '/settings';
@@ -8,7 +9,7 @@ class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> widgets = [];
-    widgets.add(
+    widgets.addAll([
       buildCell(
         FontAwesomeIcons.wallet,
         'Wallets',
@@ -16,7 +17,14 @@ class Settings extends StatelessWidget {
           Navigator.of(context).pushNamed(ManageWallets.routeName);
         },
       ),
-    );
+      buildCell(
+        Icons.alarm,
+        'Activities',
+        () {
+          Navigator.of(context).pushNamed(Activities.routeName);
+        },
+      ),
+    ]);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,

@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:web3dart/crypto.dart';
 import 'package:pointycastle/api.dart';
-import 'package:veatre/src/bip39/hdkey.dart';
+import 'package:convert/convert.dart';
 
 String zero2(word) {
   if (word.length == 1)
@@ -59,14 +59,8 @@ String randomHex(int hexLength) {
   return bytesToHex(randomBytes(hexLength ~/ 2));
 }
 
-List<KeyPathNode> defaultKeyPathNodes() {
-  return [
-    KeyPathNode(44, true),
-    KeyPathNode(818, true),
-    KeyPathNode(0, true),
-    KeyPathNode(0, false),
-    KeyPathNode(0, false)
-  ];
+String get defaultDerivationPath {
+  return "m/44'/818'/0'/0/0";
 }
 
 String fixed2Value(BigInt value) {
@@ -80,6 +74,14 @@ String fixed2Value(BigInt value) {
     return fixed1;
   }
   return fixed2;
+}
+
+String bytesToHex(Uint8List data) {
+  return hex.encode(data);
+}
+
+Uint8List hexToBytes(String hexStr) {
+  return hex.decode(hexStr);
 }
 
 class RandomBridge implements SecureRandom {

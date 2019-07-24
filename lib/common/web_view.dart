@@ -10,7 +10,7 @@ import 'package:veatre/src/ui/signCertificateDialog.dart';
 import 'package:veatre/src/ui/signTxDialog.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/common/driver.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/ui/alert.dart';
@@ -81,7 +81,7 @@ class _CustomWebViewState extends State<CustomWebView>
         return Material(
           child: MaterialSearch<String>(
             placeholder: 'Search or enter website name',
-            results: dapps
+            results: apps
                 .map((Map<dynamic, dynamic> dapp) =>
                     MaterialSearchResult<String>(
                       icon: Icons.star_border,
@@ -158,7 +158,7 @@ class _CustomWebViewState extends State<CustomWebView>
           Expanded(
             child: InAppWebView(
               initialOptions: {"useShouldOverrideUrlLoading": true},
-              initialJs: _makeHeadJs(driver.head),
+              // initialJs: _makeHeadJs(driver.head),
               initialUrl: initialUrl,
               onWebViewCreated: (InAppWebViewController controller) async {
                 controller.addJavaScriptHandler("Thor", (arguments) async {
@@ -243,11 +243,11 @@ class _CustomWebViewState extends State<CustomWebView>
                   }
                   throw ArgumentError('unsupported methor');
                 });
-                _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-                  driver.syncHead().then((head) {
-                    controller.injectScriptCode(_makeHeadJs(head));
-                  });
-                });
+                // _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+                //   driver.syncHead().then((head) {
+                //     controller.injectScriptCode(_makeHeadJs(head));
+                //   });
+                // });
                 widget.onWebViewCreated(controller);
               },
               onLoadStart:

@@ -87,38 +87,39 @@ class WalletInfoState extends State<WalletInfo> {
                     Column(
                       children: <Widget>[
                         Container(
-                            margin: EdgeInsets.only(top: 120),
-                            height: 60,
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: <Widget>[
-                                      Text(
-                                        wallet.account.formatBalance(),
+                          margin: EdgeInsets.only(top: 120),
+                          height: 60,
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: <Widget>[
+                                    Text(
+                                      wallet.account.formatBalance(),
+                                      style: TextStyle(
+                                        fontSize: 40,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(
+                                          left: 5, top: 15, right: 15),
+                                      child: Text(
+                                        'VET',
                                         style: TextStyle(
-                                          fontSize: 40,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
+                                          color: Colors.greenAccent,
+                                          fontSize: 12,
                                         ),
                                       ),
-                                      Container(
-                                        margin: EdgeInsets.only(
-                                            left: 5, top: 15, right: 15),
-                                        child: Text(
-                                          'VET',
-                                          style: TextStyle(
-                                            color: Colors.greenAccent,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
+                                    )
+                                  ],
                                 ),
-                              ],
-                            )),
+                              ),
+                            ],
+                          ),
+                        ),
                         Container(
                           height: 50,
                           child: Row(
@@ -161,7 +162,7 @@ class WalletInfoState extends State<WalletInfo> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Container(
-                            margin: EdgeInsets.only(left: 15),
+                            margin: EdgeInsets.only(left: 5),
                             width: 55,
                             child: IconButton(
                               icon: Icon(Icons.arrow_back_ios),
@@ -182,7 +183,7 @@ class WalletInfoState extends State<WalletInfo> {
                             ),
                           ),
                           Container(
-                            margin: EdgeInsets.only(right: 15),
+                            margin: EdgeInsets.only(right: 5),
                             width: 55,
                             child: IconButton(
                               icon: Icon(FontAwesomeIcons.wrench),
@@ -192,8 +193,8 @@ class WalletInfoState extends State<WalletInfo> {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => WalletOperation(
-                                          wallet: wallet,
-                                        ),
+                                      wallet: wallet,
+                                    ),
                                   ),
                                 );
                               },

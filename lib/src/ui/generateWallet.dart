@@ -1,10 +1,11 @@
+import 'dart:typed_data';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/foundation.dart';
-import 'package:veatre/src/bip39/mnemonic.dart';
-import 'package:veatre/src/models/keyStore.dart';
-import 'package:veatre/src/storage/storage.dart';
+import 'package:flutter/services.dart';
+import 'package:bip_key_derivation/keystore.dart';
+import 'package:bip_key_derivation/bip_key_derivation.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
@@ -32,12 +33,17 @@ class GenerateWalletState extends State<GenerateWallet> {
     generateWords();
   }
 
+  Future<List<String>> get words async {
+    String words = await rootBundle
+        .loadString("assets/resource/en-mnemonic-word-list.txt");
+    return words.split("\n");
+  }
+
   generateWords() async {
     setState(() {
       loading = true;
     });
-    String mnemonic = await Mnemonic.generateMnemonic(randomBytes(16));
-    print('mnemonic $mnemonic');
+    String mnemonic = await BipKeyDerivation.generateRandomMnemonic(128);
     this.mnemonics = mnemonic.split(" ");
     List<Widget> wordWidgets = [];
     for (int i = 0; i < mnemonics.length; i++) {
@@ -56,7 +62,7 @@ class GenerateWalletState extends State<GenerateWallet> {
       this.wordWidgets = wordWidgets;
     });
 
-    List<String> words = await Mnemonic.populateWordList();
+    List<String> words = await this.words;
     List<WordPage> wordPages = [];
     for (int i = 0; i < 3; i++) {
       List<String> pageWords = mnemonics.sublist(i * 4, (i + 1) * 4);
@@ -81,7 +87,6 @@ class GenerateWalletState extends State<GenerateWallet> {
           ),
         );
       }
-
       List<String> randoms = List.from(pageWords);
       while (randoms.length < 12) {
         Random random = Random();
@@ -213,15 +218,6 @@ class GenerateWalletState extends State<GenerateWallet> {
       }
     }
     return mnemonic.join(' ') == selectedWords.join(' ');
-    // for (int page = 0; page < 3; page++) {
-    //   for (int index = 0; index < 4; index++) {
-    //     if (mnemonic[page * 4 + index] !=
-    //         wordPages[page].waitingWords[index].word) {
-    //       return false;
-    //     }
-    //   }
-    // }
-    // return true;
   }
 
   @override
@@ -350,14 +346,18 @@ class GenerateWalletState extends State<GenerateWallet> {
                     setState(() {
                       this.loading = true;
                     });
-                    if (verify(mnemonics)) {
-                      KeyStore keystore = await compute(
-                        decryptMnemonic,
-                        MnemonicDecriptions(
-                          mnemonic: mnemonics.join(" "),
-                          password: widget.password,
-                        ),
+                    bool isVerified = true;
+                    if (bool.fromEnvironment('dart.vm.product')) {
+                      isVerified = verify(mnemonics);
+                    }
+                    if (isVerified) {
+                      Uint8List privateKey =
+                          await BipKeyDerivation.decryptedByMnemonic(
+                        mnemonics.join(" "),
+                        defaultDerivationPath,
                       );
+                      KeyStore keystore = await BipKeyDerivation.encrypt(
+                          privateKey, widget.password);
                       await WalletStorage.write(
                         walletEntity: WalletEntity(
                           name: widget.walletName,

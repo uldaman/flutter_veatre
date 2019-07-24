@@ -3,19 +3,32 @@ import 'package:flutter/material.dart';
 Future alert(BuildContext context, Widget title, String message) async {
   return showDialog(
     context: context,
-    barrierDismissible: false, // user must tap button for close dialog!
+    barrierDismissible: true, // user must tap button for close dialog!
     builder: (BuildContext context) {
       return AlertDialog(
+        contentPadding:
+            EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         title: title,
-        content: Text(message),
-        actions: <Widget>[
-          FlatButton(
-            child: const Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          )
-        ],
+        content: Wrap(
+          children: <Widget>[
+            Text(message),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: <Widget>[
+            //     FlatButton(
+            //       child: const Text(
+            //         'OK',
+            //         style: TextStyle(color: Colors.blue),
+            //       ),
+            //       onPressed: () async {
+            //         Navigator.pop(context);
+            //       },
+            //     ),
+            //   ],
+            // )
+          ],
+        ),
       );
     },
   );
@@ -33,22 +46,38 @@ Future customAlert(
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
+        contentPadding:
+            EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         title: title,
-        content: content,
-        actions: <Widget>[
-          FlatButton(
-            child: const Text('OK'),
-            onPressed: () async {
-              await confirmAction();
-            },
-          ),
-          FlatButton(
-            child: const Text('Cancel'),
-            onPressed: () async {
-              await cancelAction();
-            },
-          ),
-        ],
+        content: Wrap(
+          children: <Widget>[
+            content,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                FlatButton(
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                  onPressed: () async {
+                    await confirmAction();
+                  },
+                ),
+                FlatButton(
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onPressed: () async {
+                    await cancelAction();
+                  },
+                ),
+              ],
+            )
+          ],
+        ),
       );
     },
   );

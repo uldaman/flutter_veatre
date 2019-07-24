@@ -6,25 +6,12 @@ final mainnet = "https://sync-mainnet.vechain.org";
 final genesisTime = 1530014400;
 final interval = 10;
 
-class BadParameter implements Exception {
-  final String msg;
-
-  const BadParameter(this.msg);
-
-  String toString() {
-    return "BadParameter: ${this.msg}";
-  }
-}
-
 class Net {
   static final dio = Dio();
   final String network;
   Net(this.network);
 
-  dynamic getBlock(dynamic revision) async {
-    if (revision == null) {
-      revision = "best";
-    }
+  Future<Map<String, dynamic>> getBlock({dynamic revision = "best"}) async {
     Response response = await dio.get("$network/blocks/$revision");
     return response.data;
   }

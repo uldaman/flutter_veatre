@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:veatre/common/driver.dart';
-import 'package:veatre/navigation.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/ui/walletDetail.dart';
+import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
+import 'package:veatre/src/ui/mainUI.dart';
+import 'package:veatre/src/ui/settings.dart';
 
 void main() {
-  // debugPaintSizeEnabled = true;
-  // Vechain().getBlockByHash("hash");
   runApp(MyApp());
 }
 
@@ -17,9 +15,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
-        Navigation.routeName: (context) => new Navigation(),
+        // Navigation.routeName: (context) => new Navigation(),
+        MainUI.routeName: (context) => new MainUI(),
+        Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
-        WalletDetail.routeName: (context) => new WalletDetail(),
+        Activities.routeName: (context) => new Activities(),
         CreateWallet.routeName: (context) => new CreateWallet(),
         ImportWallet.routeName: (context) => new ImportWallet(),
       },

@@ -1,4 +1,4 @@
-import 'package:veatre/src/models/keyStore.dart';
+import 'package:bip_key_derivation/keystore.dart';
 import 'package:veatre/src/utils/common.dart';
 
 class Account {
@@ -18,7 +18,6 @@ class Account {
 
   factory Account.fromJSON(Map<String, dynamic> parsedJson) {
     return Account(
-      // address: parsedJson['address'] == null ? '' : parsedJson['address'],
       balance: parsedJson['balance'] == null
           ? BigInt.from(0)
           : BigInt.parse(parsedJson['balance']),

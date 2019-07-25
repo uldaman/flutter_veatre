@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/src/ui/webViews.dart';
@@ -41,15 +43,15 @@ class TabViewsState extends State<TabViews> {
                 fontSize: 18,
               ),
             ),
-            onPressed: () async {
-              removeAllTabs();
+            onPressed: () {
               setState(() {
-                Navigator.of(context).pop(
-                  TabResult(
-                    stage: TabStage.RemovedAll,
-                  ),
-                );
+                removeAllTabs();
               });
+              Navigator.of(context).pop(
+                TabResult(
+                  stage: TabStage.RemovedAll,
+                ),
+              );
             },
           )
         ],
@@ -127,7 +129,7 @@ class TabViewsState extends State<TabViews> {
                         child: Padding(
                           padding: EdgeInsets.only(left: 40, right: 40),
                           child: Text(
-                            tabShots[index].title,
+                            tabShots[index].title ?? '',
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -174,7 +176,9 @@ class TabViewsState extends State<TabViews> {
                     ),
                     image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: MemoryImage(tabShots[index].data),
+                      image: tabShots[index].data == null
+                          ? AssetImage('assets/blank.png')
+                          : MemoryImage(tabShots[index].data),
                     ),
                   ),
                 ),

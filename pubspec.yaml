@@ -35,7 +35,7 @@ dev_dependencies:
   fixnum: ^0.10.9
   validators: ^2.0.0
   flutter_secure_storage: 3.2.1+1
-  dio: 2.1.9
+  dio: 2.1.13
   flutter_inappbrowser:
     git:
       url: git://github.com/uldaman/flutter_inappbrowser.git

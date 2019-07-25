@@ -7,8 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import 'package:veatre/main.dart';
 import 'package:veatre/src/ui/webView.dart';
-import 'package:veatre/src/models/block.dart';
-import 'package:veatre/common/driver.dart';
 
 class Snapshot {
   String title;
@@ -30,7 +28,7 @@ void createWebView(onWebViewChangedCallback onWebViewChanged) {
       LabeledGlobalKey<WebViewState>('webview$id');
   WebView webView = new WebView(
     key: key,
-    headValueController: _headValueController,
+    headValueController: headValueController,
     walletsChangedController: walletsChangedController,
     genesisChangedController: genesisChangedController,
     onWebViewChanged: (controller) async {
@@ -38,8 +36,8 @@ void createWebView(onWebViewChangedCallback onWebViewChanged) {
     },
   );
   _keys.add(key);
-  webViews.add(webView);
   _snapshots.add(Snapshot());
+  webViews.add(webView);
 }
 
 void updateSnapshot(
@@ -162,25 +160,4 @@ Future<Uint8List> takeScreenshot(int id) async {
     return key.currentState.controller.takeScreenshot();
   }
   return Uint8List(0);
-}
-
-HeadValueController _headValueController = HeadValueController(driver.genesis);
-Block _currentHead = driver.genesis;
-Timer _timer = Timer.periodic(Duration(seconds: 5), (time) async {
-  try {
-    Block head = Block.fromJSON(await driver.head);
-    if (head.number != _currentHead.number) {
-      _currentHead = head;
-      _headValueController.value = _currentHead;
-    }
-  } catch (e) {
-    print("sync block error: $e");
-  }
-});
-
-@override
-void dispose() {
-  print("webviews dispose");
-  _timer.cancel();
-  _headValueController.dispose();
 }

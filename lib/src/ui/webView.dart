@@ -187,6 +187,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         initialOptions: {
           "domStorageEnabled": true,
           "databaseEnabled": true,
+          "useShouldOverrideUrlLoading": true,
           "mixedContentMode": "MIXED_CONTENT_ALWAYS_ALLOW",
         },
         initialJs: _headJS(widget.headValueController.value) +
@@ -325,6 +326,15 @@ message: ${consoleMessage.message}
 messageLevel: ${consoleMessage.messageLevel}
                   """);
         },
+        shouldOverrideUrlLoading:
+            (InAppWebViewController controller, String url) async {
+          print("shouldOverrideUrlLoading $url");
+          if (url.startsWith('http')) {
+            await controller.loadUrl(url);
+          } else {
+            print("unknown url $url");
+          }
+        },
       );
 
   Future<dynamic> _showSigningDialog(Widget siginingDialog) async {
@@ -345,6 +355,15 @@ messageLevel: ${consoleMessage.messageLevel}
     return result.encoded;
   }
 
+  String _walletsJS(List<String> wallets) {
+    String js = 'window.wallets=[';
+    for (String address in wallets) {
+      js += "'$address',";
+    }
+    js += "];";
+    return js;
+  }
+
   String _headJS(Block head) {
     return '''
       window.block_head={
@@ -358,11 +377,12 @@ messageLevel: ${consoleMessage.messageLevel}
   String _genesisJS(Block genesis) {
     return '''
       window.genesis={
-        id: '${genesis.id}',
         number:${genesis.number},
+        id:'${genesis.id}',
+        size:${genesis.size},
         timestamp:${genesis.timestamp},
         parentID:'${genesis.parentID}',
-        gasLimit:'${genesis.gasLimit}',
+        gasLimit:${genesis.gasLimit},
         beneficiary:'${genesis.beneficiary}',
         gasUsed: ${genesis.gasUsed},
         totalScore:${genesis.totalScore},
@@ -374,16 +394,6 @@ messageLevel: ${consoleMessage.messageLevel}
         transactions:${genesis.transactions},
         isTrunk:${genesis.isTrunk}
       };''';
-  }
-
-  String _walletsJS(List<String> wallets) {
-    String js = 'window.wallets=[';
-    for (String address in wallets) {
-      js += "'$address',";
-    }
-    js += "];";
-    print("_walletsJS $js");
-    return js;
   }
 
   void updateSearchBar(double progress, String url) {
@@ -427,10 +437,10 @@ messageLevel: ${consoleMessage.messageLevel}
     if (domainRegExp.hasMatch(url)) {
       return "http://$url";
     }
-    Uri uri = Uri.parse(url);
-    if (uri.hasScheme) {
-      return Uri.encodeFull(url);
-    }
+    // Uri uri = Uri.parse(url);
+    // if (uri.hasScheme) {
+    //   return Uri.encodeFull(url);
+    // }
     return Uri.encodeFull("https://cn.bing.com/search?q=$url");
   }
 }

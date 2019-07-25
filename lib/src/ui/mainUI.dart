@@ -84,7 +84,7 @@ class MainUIState extends State<MainUI>
               setState(() {
                 updateSnapshot(
                   tabID,
-                  title: t ?? 'New Tab',
+                  title: t == "" ? 'New Tab' : t,
                   data: captureData,
                 );
               });
@@ -126,9 +126,9 @@ class MainUIState extends State<MainUI>
   BottomNavigationBarItem bottomNavigationBarItem(
     IconData iconData,
     Color color,
+    double size,
   ) {
     Widget nullWidget = SizedBox(height: 0);
-    double size = 30;
     return BottomNavigationBarItem(
       icon: Icon(
         iconData,
@@ -146,22 +146,27 @@ class MainUIState extends State<MainUI>
       bottomNavigationBarItem(
         Icons.arrow_back_ios,
         canBack ? active : inactive,
+        30,
       ),
       bottomNavigationBarItem(
         Icons.arrow_forward_ios,
         canForward ? active : inactive,
+        30,
       ),
       bottomNavigationBarItem(
         Icons.refresh,
         active,
+        40,
       ),
       bottomNavigationBarItem(
         Icons.filter_none,
         active,
+        30,
       ),
       bottomNavigationBarItem(
         Icons.more_horiz,
         active,
+        30,
       ),
     ];
   }

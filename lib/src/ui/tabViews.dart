@@ -23,7 +23,6 @@ class TabViews extends StatefulWidget {
 }
 
 class TabViewsState extends State<TabViews> {
-
   @override
   Widget build(BuildContext context) {
     double ratio = MediaQuery.of(context).size.width /
@@ -43,14 +42,14 @@ class TabViewsState extends State<TabViews> {
               ),
             ),
             onPressed: () async {
+              removeAllTabs();
               setState(() {
-                removeAllTabs();
+                Navigator.of(context).pop(
+                  TabResult(
+                    stage: TabStage.RemovedAll,
+                  ),
+                );
               });
-              Navigator.of(context).pop(
-                TabResult(
-                  stage: TabStage.RemovedAll,
-                ),
-              );
             },
           )
         ],

@@ -60,9 +60,9 @@ void removeTab(int id) {
 }
 
 void removeAllTabs() {
-  _keys.clear();
   _snapshots.clear();
   webViews.clear();
+  _keys.clear();
 }
 
 InAppWebViewController _controllerAt(int id) {

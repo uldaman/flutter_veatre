@@ -16,38 +16,48 @@ import 'package:veatre/src/ui/webView.dart';
 WalletsChangedController walletsChangedController;
 GenesisChangedController genesisChangedController;
 HeadValueController headValueController;
+Timer _timer;
 
-void main() async {
-  walletsChangedController =
-      WalletsChangedController(await WalletStorage.wallets);
-  genesisChangedController = GenesisChangedController(driver.genesis);
-  Block _currentHead = driver.genesis;
-  try {
-    _currentHead = Block.fromJSON(await driver.head);
-  } catch (e) {
-    print("network error: $e");
-  }
-  headValueController = HeadValueController(_currentHead);
-  Timer _timer = Timer.periodic(Duration(seconds: 10), (time) async {
+void main() {
+  runZoned(() async {
+    walletsChangedController =
+        WalletsChangedController(await WalletStorage.wallets);
+    genesisChangedController = GenesisChangedController(driver.genesis);
+    Block _currentHead = driver.genesis;
     try {
-      Block head = Block.fromJSON(await driver.head);
-      if (head.number != _currentHead.number) {
-        _currentHead = head;
-        headValueController.value = _currentHead;
-      }
+      _currentHead = Block.fromJSON(await driver.head);
     } catch (e) {
-      print("sync block error: $e");
+      print("network error: $e");
     }
+    headValueController = HeadValueController(_currentHead);
+    _timer = Timer.periodic(Duration(seconds: 10), (time) async {
+      try {
+        Block head = Block.fromJSON(await driver.head);
+        if (head.number != _currentHead.number) {
+          _currentHead = head;
+          headValueController.value = _currentHead;
+        }
+      } catch (e) {
+        print("sync block error: $e");
+      }
+    });
+    runApp(App());
+  }, onError: (dynamic err, StackTrace stack) {
+    print("unhandled error: $err");
+    print("stack: $stack");
   });
-  runApp(App());
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
+  @override
+  AppState createState() => AppState();
+}
+
+class AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
-        // Navigation.routeName: (context) => new Navigation(),
         MainUI.routeName: (context) => new MainUI(),
         Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
@@ -69,5 +79,15 @@ class App extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    print("App dispose");
+    headValueController.dispose();
+    walletsChangedController.dispose();
+    genesisChangedController.dispose();
+    _timer.cancel();
+    super.dispose();
   }
 }

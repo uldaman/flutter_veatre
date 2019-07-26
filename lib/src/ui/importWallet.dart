@@ -277,6 +277,11 @@ class ImportWalletState extends State<ImportWallet> {
                               return alert(context, Text('Warnning'),
                                   "Password can't be empty");
                             }
+                            if (bool.fromEnvironment('dart.vm.product') &&
+                                password.length < 6) {
+                              return alert(context, Text("Warnning"),
+                                  "Password must be 6 characters at least!");
+                            }
                             Uint8List privateKey =
                                 await BipKeyDerivation.decryptedByMnemonic(
                                     mnemonic, defaultDerivationPath);

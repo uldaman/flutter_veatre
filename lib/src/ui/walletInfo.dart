@@ -96,7 +96,7 @@ class WalletInfoState extends State<WalletInfo> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: <Widget>[
                                     Text(
-                                      wallet.account.formatBalance(),
+                                      wallet.account.formatBalance,
                                       style: TextStyle(
                                         fontSize: 40,
                                         color: Colors.white,
@@ -126,7 +126,7 @@ class WalletInfoState extends State<WalletInfo> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: <Widget>[
                               Text(
-                                wallet.account.formatEnergy(),
+                                wallet.account.formatEnergy,
                                 style: TextStyle(
                                   fontSize: 15,
                                   color: Colors.white,

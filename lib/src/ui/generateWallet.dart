@@ -223,7 +223,6 @@ class GenerateWalletState extends State<GenerateWallet> {
   @override
   Widget build(BuildContext context) {
     PageController pageController = PageController(initialPage: 0);
-
     PageView pageView = PageView(
       scrollDirection: Axis.horizontal,
       controller: pageController,

@@ -78,6 +78,11 @@ class CreateWalletState extends State<CreateWallet> {
                   return alert(
                       context, Text("Warnning"), "Wallet name can't be empty!");
                 }
+                if (bool.fromEnvironment('dart.vm.product') &&
+                    password.length < 6) {
+                  return alert(context, Text("Warnning"),
+                      "Password must be 6 characters at least!");
+                }
                 if (password.isEmpty || repeatPassword.isEmpty) {
                   return alert(
                       context, Text("Warnning"), "Password can't be empty!");

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/src/ui/webViews.dart';
@@ -20,6 +18,9 @@ class TabResult {
 }
 
 class TabViews extends StatefulWidget {
+  final int id;
+  TabViews({this.id});
+
   @override
   TabViewsState createState() => TabViewsState();
 }
@@ -33,7 +34,6 @@ class TabViewsState extends State<TabViews> {
       appBar: AppBar(
         backgroundColor: Colors.grey[50],
         title: Text('Tabs'),
-        leading: SizedBox(),
         actions: <Widget>[
           FlatButton(
             child: Text(
@@ -112,6 +112,7 @@ class TabViewsState extends State<TabViews> {
             BoxShadow(
               blurRadius: 2,
               offset: Offset(2, 2),
+              color: index == widget.id ? Colors.blue : Colors.black87,
             )
           ],
           borderRadius: BorderRadius.all(Radius.circular(10)),

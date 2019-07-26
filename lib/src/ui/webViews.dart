@@ -148,16 +148,16 @@ Future<Uint8List> takeScreenshot(int id) async {
     try {
       RenderRepaintBoundary boundary =
           key.currentState.captureKey.currentContext.findRenderObject();
-      var image = await boundary.toImage(pixelRatio: 3.0);
+      var image = await boundary.toImage(pixelRatio: 1.0);
       ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
       Uint8List bytes = byteData.buffer.asUint8List();
       return bytes;
     } catch (e) {
-      print(e);
+      print("takeScreenshot error: $e");
       return null;
     }
   } else if (key.currentState.controller != null) {
     return key.currentState.controller.takeScreenshot();
   }
-  return Uint8List(0);
+  return null;
 }

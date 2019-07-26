@@ -437,10 +437,10 @@ messageLevel: ${consoleMessage.messageLevel}
     if (domainRegExp.hasMatch(url)) {
       return "http://$url";
     }
-    // Uri uri = Uri.parse(url);
-    // if (uri.hasScheme) {
-    //   return Uri.encodeFull(url);
-    // }
+    Uri uri = Uri.parse(url);
+    if (uri.hasScheme) {
+      return Uri.encodeFull(url);
+    }
     return Uri.encodeFull("https://cn.bing.com/search?q=$url");
   }
 }

@@ -195,7 +195,7 @@ VM error: ${result.vmError}''';
           actions: <Widget>[
             IconButton(
               icon: Icon(
-                Icons.menu,
+                Icons.more_horiz,
                 size: 25,
                 color: Colors.blue,
               ),
@@ -324,7 +324,7 @@ VM error: ${result.vmError}''';
                           children: <Widget>[
                             Text(wallet == null
                                 ? '0'
-                                : wallet.account.formatBalance()),
+                                : wallet.account.formatBalance),
                             Container(
                               margin: EdgeInsets.only(left: 5, right: 14),
                               child: Text(
@@ -345,7 +345,7 @@ VM error: ${result.vmError}''';
                           children: <Widget>[
                             Text(wallet == null
                                 ? '0'
-                                : wallet.account.formatEnergy()),
+                                : wallet.account.formatEnergy),
                             Container(
                               margin: EdgeInsets.only(left: 5, right: 5),
                               child: Text(
@@ -517,6 +517,7 @@ VM error: ${result.vmError}''';
                                   );
                                 }
                                 Navigator.pop(context);
+                                passwordController.clear();
                                 setState(() {
                                   loading = true;
                                 });
@@ -621,6 +622,7 @@ VM error: ${result.vmError}''';
                                   });
                                 }
                               }, cancelAction: () async {
+                                passwordController.clear();
                                 FocusScope.of(context)
                                     .requestFocus(FocusNode());
                                 Navigator.pop(context);
@@ -643,8 +645,8 @@ VM error: ${result.vmError}''';
 
   Widget buildClause(BuildContext context, int index) {
     SigningTxMessage txMessage = widget.txMessages[index];
-
-    Widget clauseCard = Container(
+    Widget clauseCard = Padding(
+      padding: EdgeInsets.all(5),
       child: Card(
         child: Column(
           children: <Widget>[

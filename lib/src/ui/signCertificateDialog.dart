@@ -104,7 +104,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
           actions: <Widget>[
             IconButton(
               icon: Icon(
-                Icons.menu,
+                Icons.more_horiz,
                 size: 25,
                 color: Colors.blue,
               ),
@@ -175,7 +175,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                           children: <Widget>[
                             Text(wallet == null
                                 ? '0'
-                                : wallet.account.formatBalance()),
+                                : wallet.account.formatBalance),
                             Container(
                               margin: EdgeInsets.only(left: 5, right: 14),
                               child: Text(
@@ -196,7 +196,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                           children: <Widget>[
                             Text(wallet == null
                                 ? '0'
-                                : wallet.account.formatEnergy()),
+                                : wallet.account.formatEnergy),
                             Container(
                               margin: EdgeInsets.only(left: 5, right: 5),
                               child: Text(
@@ -225,23 +225,18 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   Expanded(
-                    child: Container(
-                      alignment: Alignment.topLeft,
-                      margin: EdgeInsets.all(20),
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Card(
+                          color: Colors.grey[100],
+                          child: Container(
+                            margin: EdgeInsets.all(10),
                             child: Text(
                               widget.certMessage.payload.content,
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -277,6 +272,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                     "Password can't be empty",
                                   );
                                 }
+                                passwordController.clear();
                                 Navigator.pop(context);
                                 setState(() {
                                   loading = true;
@@ -339,6 +335,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                   });
                                 }
                               }, cancelAction: () async {
+                                passwordController.clear();
                                 FocusScope.of(context)
                                     .requestFocus(FocusNode());
                                 Navigator.pop(context);

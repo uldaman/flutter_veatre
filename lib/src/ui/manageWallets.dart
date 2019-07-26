@@ -174,13 +174,6 @@ class ManageWalletsState extends State<ManageWallets> {
                                 );
                               },
                             );
-                            // Navigator.of(context).push(
-                            //   MaterialPageRoute(
-                            //     builder: (context) => AddressDetail(
-                            //           wallet: wallet,
-                            //         ),
-                            //   ),
-                            // );
                           },
                           child: Row(
                             children: <Widget>[

@@ -160,6 +160,11 @@ class WalletOperationState extends State<WalletOperation> {
               "Password can't be empty",
             );
           }
+          if (bool.fromEnvironment('dart.vm.product') &&
+              newPassword.length < 6) {
+            return alert(context, Text("Warnning"),
+                "Password must be 6 characters at least!");
+          }
           originalPasswordController.clear();
           newPasswordController.clear();
           Navigator.pop(context);

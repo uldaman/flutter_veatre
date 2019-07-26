@@ -29,7 +29,7 @@ class TabViewsState extends State<TabViews> {
   @override
   Widget build(BuildContext context) {
     double ratio = MediaQuery.of(context).size.width /
-        (MediaQuery.of(context).size.height - 20 - 44 - 48);
+        (MediaQuery.of(context).size.height - 20 - 44 - 49);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[50],
@@ -61,6 +61,7 @@ class TabViewsState extends State<TabViews> {
           Expanded(
             child: GridView.builder(
               padding: EdgeInsets.all(15),
+              physics: ClampingScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
@@ -80,7 +81,7 @@ class TabViewsState extends State<TabViews> {
                   color: Colors.grey[200],
                   child: Center(
                     child: SizedBox(
-                      height: 64,
+                      height: 54,
                       child: IconButton(
                         icon: Icon(
                           Icons.add,

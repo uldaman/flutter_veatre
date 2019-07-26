@@ -184,7 +184,7 @@ class SearchBarState extends State<SearchBar> {
                                     IconButton(
                                       icon: Icon(
                                         Icons.refresh,
-                                        color: Colors.black,
+                                        color: Colors.blue[500],
                                         size: 20,
                                       ),
                                       onPressed: () async {

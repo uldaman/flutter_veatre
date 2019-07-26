@@ -51,6 +51,7 @@ class WalletOperationState extends State<WalletOperation> {
               "Password can't be empty",
             );
           }
+          passwordController.clear();
           Navigator.pop(context);
           setState(() {
             loading = true;
@@ -119,6 +120,7 @@ class WalletOperationState extends State<WalletOperation> {
             });
           }
         }, cancelAction: () async {
+          passwordController.clear();
           FocusScope.of(context).requestFocus(FocusNode());
           Navigator.pop(context);
         });
@@ -158,6 +160,8 @@ class WalletOperationState extends State<WalletOperation> {
               "Password can't be empty",
             );
           }
+          originalPasswordController.clear();
+          newPasswordController.clear();
           Navigator.pop(context);
           setState(() {
             loading = true;
@@ -188,6 +192,8 @@ class WalletOperationState extends State<WalletOperation> {
             });
           }
         }, cancelAction: () async {
+          originalPasswordController.clear();
+          newPasswordController.clear();
           FocusScope.of(context).requestFocus(FocusNode());
           Navigator.pop(context);
         });
@@ -212,6 +218,7 @@ class WalletOperationState extends State<WalletOperation> {
               "Password can't be empty",
             );
           }
+          passwordController.clear();
           Navigator.pop(context);
           setState(() {
             loading = true;
@@ -236,6 +243,7 @@ class WalletOperationState extends State<WalletOperation> {
             });
           }
         }, cancelAction: () async {
+          passwordController.clear();
           FocusScope.of(context).requestFocus(FocusNode());
           Navigator.pop(context);
         });

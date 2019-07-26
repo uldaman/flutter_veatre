@@ -8,11 +8,11 @@ class Account {
 
   Account({this.balance, this.energy, this.hasCode});
 
-  String formatBalance() {
+  String get formatBalance {
     return fixed2Value(balance);
   }
 
-  String formatEnergy() {
+  String get formatEnergy {
     return fixed2Value(energy);
   }
 

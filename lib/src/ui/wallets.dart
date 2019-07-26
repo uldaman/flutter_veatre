@@ -132,7 +132,7 @@ class WalletsState extends State<Wallets> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Text(wallet.account.formatBalance()),
+                    Text(wallet.account.formatBalance),
                     Container(
                       margin: EdgeInsets.only(left: 5, right: 14),
                       child: Text(
@@ -151,7 +151,7 @@ class WalletsState extends State<Wallets> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Text(wallet.account.formatEnergy()),
+                    Text(wallet.account.formatEnergy),
                     Container(
                       margin: EdgeInsets.only(left: 5, right: 5),
                       child: Text(

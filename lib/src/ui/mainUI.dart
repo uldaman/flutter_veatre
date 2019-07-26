@@ -67,17 +67,16 @@ class MainUIState extends State<MainUI>
           switch (index) {
             case 0:
               if (canBack) {
-                await goBack(tabID);
+                return goBack(tabID);
               }
               break;
             case 1:
               if (canForward) {
-                await goForward(tabID);
+                return goForward(tabID);
               }
               break;
             case 2:
-              await reload(tabID);
-              break;
+              return reload(tabID);
             case 3:
               Uint8List captureData = await takeScreenshot(tabID);
               String t = await title;
@@ -91,7 +90,9 @@ class MainUIState extends State<MainUI>
               TabResult tabResult = await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) {
-                  return TabViews();
+                  return TabViews(
+                    id: tabID,
+                  );
                 }),
               );
               if (tabResult != null) {

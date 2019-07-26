@@ -213,7 +213,7 @@ class ManageWalletsState extends State<ManageWallets> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     Text(
-                      wallet.account.formatBalance(),
+                      wallet.account.formatBalance,
                       style: TextStyle(fontSize: 30),
                     ),
                     Container(
@@ -234,7 +234,7 @@ class ManageWalletsState extends State<ManageWallets> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Text(wallet.account.formatEnergy(),
+                    Text(wallet.account.formatEnergy,
                         style: TextStyle(fontSize: 12)),
                     Container(
                       margin: EdgeInsets.only(left: 5, right: 15, top: 2),

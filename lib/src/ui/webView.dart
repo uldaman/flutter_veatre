@@ -4,48 +4,48 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:veatre/common/driver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:veatre/common/driver.dart';
+import 'package:veatre/src/models/certificate.dart';
+import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/ui/signCertificateDialog.dart';
 import 'package:veatre/src/ui/signTxDialog.dart';
-import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/storage/walletStorage.dart';
-import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/searchBar.dart';
 import 'package:veatre/src/ui/apps.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 
 typedef onWebViewChangedCallback = void Function(
     InAppWebViewController controller);
 
-class HeadValueController extends ValueNotifier<Block> {
-  HeadValueController(Block value) : super(value);
+class HeadController extends ValueNotifier<Block> {
+  HeadController(Block value) : super(value);
 }
 
-class GenesisChangedController extends ValueNotifier<Block> {
-  GenesisChangedController(Block value) : super(value);
+class GenesisController extends ValueNotifier<Block> {
+  GenesisController(Block value) : super(value);
 }
 
-class WalletsChangedController extends ValueNotifier<List<String>> {
-  WalletsChangedController(List<String> value) : super(value);
+class WalletsController extends ValueNotifier<List<String>> {
+  WalletsController(List<String> value) : super(value);
 }
 
 class WebView extends StatefulWidget {
   final Key key;
-  final HeadValueController headValueController;
-  final GenesisChangedController genesisChangedController;
-  final WalletsChangedController walletsChangedController;
+  final HeadController headController;
+  final GenesisController genesisController;
+  final WalletsController walletsController;
   final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
-    this.headValueController,
-    this.genesisChangedController,
-    this.walletsChangedController,
+    this.headController,
+    this.genesisController,
+    this.walletsController,
     this.onWebViewChanged,
   }) : super(key: key);
 
@@ -69,28 +69,26 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
-    widget.headValueController.addListener(_handleHeadChanged);
-    widget.genesisChangedController.addListener(_handleGenesisChanged);
-    widget.walletsChangedController.addListener(_handleWalletsChanged);
+    widget.headController.addListener(_handleHeadChanged);
+    widget.genesisController.addListener(_handleGenesisChanged);
+    widget.walletsController.addListener(_handleWalletsChanged);
   }
 
   void _handleHeadChanged() {
     if (controller != null) {
-      controller.injectScriptCode(_headJS(widget.headValueController.value));
+      controller.injectScriptCode(_headJS(widget.headController.value));
     }
   }
 
   void _handleGenesisChanged() {
     if (controller != null) {
-      controller
-          .injectScriptCode(_genesisJS(widget.genesisChangedController.value));
+      controller.injectScriptCode(_genesisJS(widget.genesisController.value));
     }
   }
 
   void _handleWalletsChanged() {
     if (controller != null) {
-      controller
-          .injectScriptCode(_walletsJS(widget.walletsChangedController.value));
+      controller.injectScriptCode(_walletsJS(widget.walletsController.value));
     }
   }
 
@@ -190,9 +188,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           "useShouldOverrideUrlLoading": true,
           "mixedContentMode": "MIXED_CONTENT_ALWAYS_ALLOW",
         },
-        initialJs: _headJS(widget.headValueController.value) +
-            _genesisJS(widget.genesisChangedController.value) +
-            _walletsJS(widget.walletsChangedController.value),
+        initialJs: _headJS(widget.headController.value) +
+            _genesisJS(widget.genesisController.value) +
+            _walletsJS(widget.walletsController.value),
         onWebViewCreated: (InAppWebViewController controller) async {
           setState(() {
             this.controller = controller;
@@ -205,7 +203,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           }
           controller.addJavaScriptHandler("Thor", (arguments) async {
             debugPrint('Thor arguments $arguments');
-            dynamic data = await driver.callMethod(arguments);
+            Driver _driver = await Driver.instance;
+            dynamic data = await _driver.callMethod(arguments);
             debugPrint("Thor response $data");
             return data;
           });

@@ -81,7 +81,8 @@ String bytesToHex(Uint8List data) {
 }
 
 Uint8List hexToBytes(String hexStr) {
-  return hex.decode(hexStr);
+  String h = hexStr.startsWith('0x') ? hexStr.substring(2) : hexStr;
+  return hex.decode(h);
 }
 
 class RandomBridge implements SecureRandom {

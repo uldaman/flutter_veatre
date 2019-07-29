@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bip_key_derivation/keystore.dart';
 import 'package:veatre/main.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 
 class WalletStorage {
   static final storage = new FlutterSecureStorage();
@@ -13,7 +14,8 @@ class WalletStorage {
     List<WalletEntity> walletEntities = [];
     for (var keystoreEntity in allKeystores.entries) {
       String walletName = keystoreEntity.key;
-      if (walletName != mainWalletKey) {
+      if (walletName != mainWalletKey &&
+          walletName != NetworkStorage.networkKey) {
         KeyStore keystore =
             KeyStore.fromJSON(json.decode(keystoreEntity.value));
         walletEntities.add(WalletEntity(name: walletName, keystore: keystore));
@@ -27,7 +29,8 @@ class WalletStorage {
     List<String> wallets = [];
     for (var keystoreEntity in allKeystores.entries) {
       String walletName = keystoreEntity.key;
-      if (walletName != mainWalletKey) {
+      if (walletName != mainWalletKey &&
+          walletName != NetworkStorage.networkKey) {
         KeyStore keystore =
             KeyStore.fromJSON(json.decode(keystoreEntity.value));
         wallets.add("0x${keystore.address}");
@@ -57,7 +60,7 @@ class WalletStorage {
         value: json.encode(walletEntity.encoded),
       );
     }
-    walletsChangedController.value = await wallets;
+    walletsController.value = await wallets;
   }
 
   static Future<void> setMainWallet(WalletEntity walletEntity) async {
@@ -77,12 +80,12 @@ class WalletStorage {
 
   static Future<void> delete(String name) async {
     await storage.delete(key: name);
-    walletsChangedController.value = await wallets;
+    walletsController.value = await wallets;
   }
 
   static Future<void> deleteAll() async {
     await storage.deleteAll();
-    walletsChangedController.value = await wallets;
+    walletsController.value = await wallets;
   }
 }
 

@@ -1,11 +1,5 @@
 import "package:dio/dio.dart";
 
-final testnet = "https://sync-testnet.vechain.org";
-final mainnet = "https://sync-mainnet.vechain.org";
-
-final genesisTime = 1530014400;
-final interval = 10;
-
 class Net {
   static final dio = Dio();
   final String network;

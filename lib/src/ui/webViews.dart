@@ -28,9 +28,9 @@ void createWebView(onWebViewChangedCallback onWebViewChanged) {
       LabeledGlobalKey<WebViewState>('webview$id');
   WebView webView = new WebView(
     key: key,
-    headValueController: headValueController,
-    walletsChangedController: walletsChangedController,
-    genesisChangedController: genesisChangedController,
+    headController: headController,
+    walletsController: walletsController,
+    genesisController: genesisController,
     onWebViewChanged: (controller) async {
       onWebViewChanged(controller);
     },
@@ -160,4 +160,12 @@ Future<Uint8List> takeScreenshot(int id) async {
     return key.currentState.controller.takeScreenshot();
   }
   return null;
+}
+
+Future<void> reloadAll() async {
+  for (LabeledGlobalKey<WebViewState> key in _keys) {
+    if (key.currentState.controller != null) {
+      key.currentState.controller.reload();
+    }
+  }
 }

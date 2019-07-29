@@ -12,30 +12,33 @@ import 'package:veatre/src/ui/importWallet.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/webView.dart';
+import 'package:veatre/src/ui/network.dart';
 
-WalletsChangedController walletsChangedController;
-GenesisChangedController genesisChangedController;
-HeadValueController headValueController;
+WalletsController walletsController;
+GenesisController genesisController;
+HeadController headController;
 Timer _timer;
 
 void main() {
   runZoned(() async {
-    walletsChangedController =
-        WalletsChangedController(await WalletStorage.wallets);
-    genesisChangedController = GenesisChangedController(driver.genesis);
-    Block _currentHead = driver.genesis;
+    walletsController =
+        WalletsController(await WalletStorage.wallets);
+    genesisController = GenesisController(await Driver.genesis);
+    Block _currentHead = await Driver.genesis;
     try {
-      _currentHead = Block.fromJSON(await driver.head);
+      Driver _driver = await Driver.instance;
+      _currentHead = Block.fromJSON(await _driver.head);
     } catch (e) {
       print("network error: $e");
     }
-    headValueController = HeadValueController(_currentHead);
+    headController = HeadController(_currentHead);
     _timer = Timer.periodic(Duration(seconds: 10), (time) async {
       try {
-        Block head = Block.fromJSON(await driver.head);
+        Driver _driver = await Driver.instance;
+        Block head = Block.fromJSON(await _driver.head);
         if (head.number != _currentHead.number) {
           _currentHead = head;
-          headValueController.value = _currentHead;
+          headController.value = _currentHead;
         }
       } catch (e) {
         print("sync block error: $e");
@@ -62,6 +65,7 @@ class AppState extends State<App> {
         Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
         Activities.routeName: (context) => new Activities(),
+        Networks.routeName: (context) => new Networks(),
         CreateWallet.routeName: (context) => new CreateWallet(),
         ImportWallet.routeName: (context) => new ImportWallet(),
       },
@@ -83,10 +87,9 @@ class AppState extends State<App> {
 
   @override
   void dispose() {
-    print("App dispose");
-    headValueController.dispose();
-    walletsChangedController.dispose();
-    genesisChangedController.dispose();
+    headController.dispose();
+    walletsController.dispose();
+    genesisController.dispose();
     _timer.cancel();
     super.dispose();
   }

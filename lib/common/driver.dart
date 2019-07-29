@@ -1,8 +1,7 @@
 import 'dart:core';
 import 'package:veatre/common/net.dart';
 import 'package:veatre/src/models/block.dart';
-
-const bool _isReleaseMode = const bool.fromEnvironment('dart.vm.product');
+import 'package:veatre/src/storage/networkStorage.dart';
 
 Block mainGenesis = Block.fromJSON({
   "number": 0,
@@ -50,21 +49,24 @@ Block testGenesis = Block.fromJSON({
   "transactions": []
 });
 
-class _Driver {
-  static _Driver _singleton;
-  Block genesis = _isReleaseMode ? mainGenesis : testGenesis;
-  final Net _net;
-
-  factory _Driver() {
-    if (_singleton == null) {
-      _singleton = _Driver._internal(
-        _isReleaseMode ? Net(mainnet) : Net(testnet),
-      );
-    }
-    return _singleton;
+class Driver {
+  static Future<Driver> get instance async {
+    final net = await NetworkStorage.net;
+    return Driver(net);
   }
 
-  _Driver._internal(this._net);
+  static Future<Block> get genesis async {
+    String network = await NetworkStorage.network;
+    if (network == NetworkStorage.mainnet) {
+      return mainGenesis;
+    } else if (network == NetworkStorage.testnet) {
+      return testGenesis;
+    }
+    throw 'unexpected network';
+  }
+
+  final Net _net;
+  Driver(this._net);
 
   Future<Map<String, dynamic>> get head async {
     return _net.getBlock();
@@ -87,5 +89,3 @@ class _Driver {
     }
   }
 }
-
-_Driver driver = _Driver();

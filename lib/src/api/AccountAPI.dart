@@ -1,11 +1,10 @@
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/transaction.dart';
-import 'package:veatre/common/net.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 
 class AccountAPI {
-  static final net = Net(testnet);
-
   static Future<Account> get(String address) async {
+    final net = await NetworkStorage.net;
     String addr = address.startsWith('0x') ? address : '0x$address';
     Map<String, dynamic> json = await net.getAccount(addr);
     return Account.fromJSON(json);
@@ -27,6 +26,7 @@ class AccountAPI {
         'data': txMsg.data,
       });
     }
+    final net = await NetworkStorage.net;
     List<dynamic> callResults = await net.explain({
       'clauses': clausesJson,
       'caller': addr,

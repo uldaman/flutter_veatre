@@ -176,36 +176,36 @@ VM error: ${result.vmError}''';
 
   @override
   Widget build(BuildContext context) {
-    return ProgressHUD(
-      child: Scaffold(
-        resizeToAvoidBottomPadding: false,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text('Sign Transaction'),
-          centerTitle: true,
-          leading: IconButton(
+    return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Text('Sign Transaction'),
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.close,
+            size: 25,
+          ),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: <Widget>[
+          IconButton(
             icon: Icon(
-              Icons.close,
+              Icons.more_horiz,
               size: 25,
+              color: Colors.blue,
             ),
             onPressed: () async {
-              Navigator.of(context).pop();
+              await showWallets();
             },
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.more_horiz,
-                size: 25,
-                color: Colors.blue,
-              ),
-              onPressed: () async {
-                await showWallets();
-              },
-            )
-          ],
-        ),
-        body: Column(
+          )
+        ],
+      ),
+      body: ProgressHUD(
+        child: Column(
           children: <Widget>[
             isInsufficient
                 ? Row(
@@ -638,8 +638,8 @@ VM error: ${result.vmError}''';
             )
           ],
         ),
+        isLoading: loading,
       ),
-      isLoading: loading,
     );
   }
 

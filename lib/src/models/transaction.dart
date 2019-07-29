@@ -1,9 +1,8 @@
 import 'dart:typed_data';
-import 'package:pointycastle/export.dart';
-import 'package:veatre/src/models/Crypto.dart';
-import 'package:web3dart/src/utils/rlp.dart' as rlp;
 import 'package:web3dart/crypto.dart';
+import 'package:web3dart/src/utils/rlp.dart' as rlp;
 import 'package:pointycastle/digests/blake2b.dart';
+import 'package:veatre/src/models/Crypto.dart';
 
 final int solo = 0xa4;
 final int testNetwork = 0x27;

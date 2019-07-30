@@ -40,7 +40,7 @@ class NetworksState extends State<Networks> {
     List<Widget> widgets = [];
     widgets.addAll([
       buildCell(
-        'Mainnet',
+        'MainNet',
         isMainnet,
         () async {
           if (!isMainnet) {
@@ -49,7 +49,7 @@ class NetworksState extends State<Networks> {
         },
       ),
       buildCell(
-        'Testnet',
+        'TestNet',
         !isMainnet,
         () async {
           if (isMainnet) {

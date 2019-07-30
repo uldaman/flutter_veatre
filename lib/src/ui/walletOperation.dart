@@ -233,7 +233,6 @@ class WalletOperationState extends State<WalletOperation> {
               wallet.keystore,
               password,
             );
-            print("wallet.name ${wallet.name}");
             await WalletStorage.delete(wallet.name);
             Navigator.popUntil(
                 context, ModalRoute.withName(ManageWallets.routeName));

@@ -24,7 +24,7 @@ class SettingsState extends State<Settings> {
   Future<void> setNet() async {
     bool isMainNet = await NetworkStorage.isMainNet;
     setState(() {
-      _network = isMainNet ? 'Mainnet' : 'Testnet';
+      _network = isMainNet ? 'MainNet' : 'TestNet';
     });
   }
 

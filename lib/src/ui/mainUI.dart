@@ -123,15 +123,10 @@ class MainUIState extends State<MainUI>
                 title: t == "" ? 'New Tab' : t,
                 data: captureData,
               );
-              TabResult tabResult = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) {
-                  return TabViews(
-                    id: currentNet == Network.MainNet ? mainNetID : testNetID,
-                    net: currentNet,
-                  );
-                }),
-              );
+              TabResult tabResult = await _present(TabViews(
+                id: currentNet == Network.MainNet ? mainNetID : testNetID,
+                net: currentNet,
+              ));
               if (tabResult != null) {
                 if (tabResult.stage == TabStage.Created ||
                     tabResult.stage == TabStage.RemovedAll) {
@@ -166,9 +161,7 @@ class MainUIState extends State<MainUI>
               }
               break;
             case 4:
-              dynamic result =
-                  await Navigator.of(context).pushNamed(Settings.routeName);
-              print("result pop $result");
+              await _present(Settings());
               bool isMainNet = await NetworkStorage.isMainNet;
               currentNet = isMainNet ? Network.MainNet : Network.TestNet;
               netPageController.jumpToPage(isMainNet ? 0 : 1);
@@ -246,5 +239,20 @@ class MainUIState extends State<MainUI>
       this.canBack = canBack;
       this.canForward = canForward;
     });
+  }
+
+  Future<dynamic> _present(Widget widget) async {
+    dynamic result = await showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: Duration(milliseconds: 200),
+      pageBuilder: (context, a, b) {
+        return SlideTransition(
+          position: Tween(begin: Offset(0, 1), end: Offset.zero).animate(a),
+          child: widget,
+        );
+      },
+    );
+    return result;
   }
 }

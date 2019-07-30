@@ -9,7 +9,7 @@ final Future<Database> database = (() async {
     join(await getDatabasesPath(), dbName),
     onCreate: (db, version) async {
       await db.execute(
-        '''CREATE TABLE $activityTableName (id INTEGER PRIMARY KEY, hash TEXT, content TEXT, link TEXT, walletName TEXT,type INTEGER,comment TEXT, timestamp INTEGER, status INTEGER);
+        '''CREATE TABLE $activityTableName (id INTEGER PRIMARY KEY, hash TEXT, content TEXT, link TEXT, walletName TEXT,type INTEGER,comment TEXT, timestamp INTEGER, status INTEGER ,net INTEGER);
         ''',
       );
     },

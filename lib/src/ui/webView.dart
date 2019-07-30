@@ -317,7 +317,6 @@ messageLevel: ${consoleMessage.messageLevel}
         },
         shouldOverrideUrlLoading:
             (InAppWebViewController controller, String url) async {
-          print("shouldOverrideUrlLoading $url");
           if (url.startsWith('http')) {
             await controller.loadUrl(url);
           } else {

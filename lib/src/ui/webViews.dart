@@ -193,7 +193,6 @@ Future<void> loadUrl(Network net, int id, String url) async {
 
 Future<Uint8List> takeScreenshot(Network net, int id) async {
   final key = _keyAt(net, id);
-  print("key $key");
   if (key.currentState.isStartSearch ||
       key.currentState.currentURL == 'about:blank') {
     try {

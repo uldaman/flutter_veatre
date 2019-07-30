@@ -1,9 +1,12 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:veatre/src/storage/database.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 
 class ActivityStorage {
   static Future<void> insert(Activity activity) async {
-    final Database db = await database;
+    final db = await database;
+    bool isMainNet = await NetworkStorage.isMainNet;
+    activity.net = isMainNet ? 0 : 1;
     await db.insert(
       activityTableName,
       activity.encoded,
@@ -11,13 +14,13 @@ class ActivityStorage {
     );
   }
 
-  Future<void> update(Activity activity) async {
+  Future<void> update(int id, Map<String, dynamic> values) async {
     final db = await database;
     await db.update(
       activityTableName,
-      activity.encoded,
+      values,
       where: "id = ?",
-      whereArgs: [activity.id],
+      whereArgs: [id],
     );
   }
 
@@ -36,7 +39,7 @@ class ActivityStorage {
     int offset,
     int limit,
   ) async {
-    final Database db = await database;
+    final db = await database;
     List<Map<String, dynamic>> rows = await db.query(
       activityTableName,
       orderBy: 'timestamp desc',
@@ -69,7 +72,7 @@ class Activity {
   String comment;
   int timestamp;
   ActivityStatus status; // 0 pending 1 finished 2 reverted
-
+  int net;
   Activity({
     this.id,
     this.hash,
@@ -80,6 +83,7 @@ class Activity {
     this.comment,
     this.timestamp,
     this.status,
+    this.net,
   });
 
   Map<String, dynamic> get encoded {
@@ -92,6 +96,7 @@ class Activity {
       'comment': comment,
       'timestamp': timestamp,
       'status': status.index,
+      'net': net,
     };
   }
 
@@ -113,6 +118,7 @@ class Activity {
           : parsedJSON['status'] == ActivityStatus.Finished.index
               ? ActivityStatus.Finished
               : ActivityStatus.Reverted,
+      net: parsedJSON['net'],
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -20,18 +21,17 @@ class ManageWallets extends StatefulWidget {
 
 class ManageWalletsState extends State<ManageWallets> {
   List<Wallet> wallets = [];
-
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    WalletStorage.readAll().then((walletEntities) {
-      walletList(walletEntities).then((wallets) {
-        setState(() {
-          this.wallets = wallets;
-        });
-      });
-    }).catchError((err) {
-      print(err);
+  void initState() {
+    super.initState();
+    updateWallets();
+  }
+
+  Future<void> updateWallets() async {
+    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+    List<Wallet> wallets = await walletList(walletEntities);
+    setState(() {
+      this.wallets = wallets;
     });
   }
 
@@ -83,9 +83,10 @@ class ManageWalletsState extends State<ManageWallets> {
                           color: Colors.blue,
                           textColor: Colors.white,
                           child: Text("Create"),
-                          onPressed: () {
-                            Navigator.pushNamed(
+                          onPressed: () async {
+                            await Navigator.pushNamed(
                                 context, CreateWallet.routeName);
+                            await updateWallets();
                           },
                         ),
                       ),
@@ -96,9 +97,11 @@ class ManageWalletsState extends State<ManageWallets> {
                           color: Colors.red,
                           textColor: Colors.white,
                           child: Text("Import"),
-                          onPressed: () {
+                          onPressed: () async {
+                            await updateWallets();
                             Navigator.pushNamed(
                                 context, ImportWallet.routeName);
+                            await updateWallets();
                           },
                         ),
                       )
@@ -246,13 +249,14 @@ class ManageWalletsState extends State<ManageWallets> {
           ),
         ),
         onTap: () async {
-          Navigator.of(context).push(
+          await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => WalletInfo(
                 wallet: wallet,
               ),
             ),
           );
+          await updateWallets();
         },
       ),
     );

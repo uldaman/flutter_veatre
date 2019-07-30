@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/main.dart';
 import 'package:veatre/common/driver.dart';
@@ -17,24 +16,20 @@ class NetworksState extends State<Networks> {
   @override
   void initState() {
     super.initState();
-    NetworkStorage.network.then((network) {
-      if (network == NetworkStorage.mainnet) {
-        setState(() {
-          isMainnet = true;
-        });
-      } else {
-        setState(() {
-          isMainnet = false;
-        });
-      }
+    NetworkStorage.isMainNet.then((isMainNet) {
+      setState(() {
+        isMainnet = isMainNet;
+      });
     });
   }
 
   Future<void> changeNet() async {
     await NetworkStorage.set(isMainNet: !isMainnet);
-    Driver _driver = await Driver.instance;
-    headController.value = Block.fromJSON(await _driver.head);
-    genesisController.value = await Driver.genesis;
+    if (await NetworkStorage.isMainNet) {
+      mainNetHeadController.value = await Driver.head;
+    } else {
+      testNetHeadController.value = await Driver.head;
+    }
     setState(() {
       isMainnet = !isMainnet;
     });

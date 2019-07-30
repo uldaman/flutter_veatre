@@ -3,6 +3,8 @@ import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/driver.dart';
+import 'package:veatre/common/net.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
@@ -14,31 +16,48 @@ import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/webView.dart';
 import 'package:veatre/src/ui/network.dart';
 
-WalletsController walletsController;
-GenesisController genesisController;
-HeadController headController;
+WalletsController mainNetWalletsController;
+WalletsController testNetWalletsController;
+
+HeadController mainNetHeadController;
+HeadController testNetHeadController;
 Timer _timer;
 
 void main() {
   runZoned(() async {
-    walletsController =
-        WalletsController(await WalletStorage.wallets);
-    genesisController = GenesisController(await Driver.genesis);
-    Block _currentHead = await Driver.genesis;
+    mainNetWalletsController =
+        WalletsController(await WalletStorage.wallets(Network.MainNet));
+    testNetWalletsController =
+        WalletsController(await WalletStorage.wallets(Network.TestNet));
+    Block _testNetCurrentHead = testNetGenesis;
+    Block _mainNetCurrentHead = mainNetGenesis;
     try {
-      Driver _driver = await Driver.instance;
-      _currentHead = Block.fromJSON(await _driver.head);
+      Net testNet = Net(NetworkStorage.testnet);
+      Net mainNet = Net(NetworkStorage.mainnet);
+      _mainNetCurrentHead = Block.fromJSON(await mainNet.getBlock());
+      _testNetCurrentHead = Block.fromJSON(await testNet.getBlock());
     } catch (e) {
       print("network error: $e");
     }
-    headController = HeadController(_currentHead);
+    mainNetHeadController = HeadController(_mainNetCurrentHead);
+    testNetHeadController = HeadController(_testNetCurrentHead);
     _timer = Timer.periodic(Duration(seconds: 10), (time) async {
       try {
-        Driver _driver = await Driver.instance;
-        Block head = Block.fromJSON(await _driver.head);
-        if (head.number != _currentHead.number) {
-          _currentHead = head;
-          headController.value = _currentHead;
+        Block head = await Driver.head;
+        if (await NetworkStorage.isMainNet) {
+          if (head.number != _mainNetCurrentHead.number) {
+            print(
+                "_mainNetCurrentHead ${_mainNetCurrentHead.number} head ${head.number}");
+            _mainNetCurrentHead = head;
+            mainNetHeadController.value = _mainNetCurrentHead;
+          }
+        } else {
+          if (head.number != _testNetCurrentHead.number) {
+            print(
+                "_testNetCurrentHead ${_testNetCurrentHead.number} head ${head.number}");
+            _testNetCurrentHead = head;
+            testNetHeadController.value = _testNetCurrentHead;
+          }
         }
       } catch (e) {
         print("sync block error: $e");
@@ -87,9 +106,10 @@ class AppState extends State<App> {
 
   @override
   void dispose() {
-    headController.dispose();
-    walletsController.dispose();
-    genesisController.dispose();
+    testNetHeadController.dispose();
+    mainNetHeadController.dispose();
+    testNetWalletsController.dispose();
+    mainNetWalletsController.dispose();
     _timer.cancel();
     super.dispose();
   }

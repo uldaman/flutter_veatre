@@ -3,7 +3,7 @@ import 'package:veatre/common/net.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 
-Block mainGenesis = Block.fromJSON({
+Block mainNetGenesis = Block.fromJSON({
   "number": 0,
   "id": "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a",
   "size": 170,
@@ -26,7 +26,7 @@ Block mainGenesis = Block.fromJSON({
   "transactions": []
 });
 
-Block testGenesis = Block.fromJSON({
+Block testNetGenesis = Block.fromJSON({
   "number": 0,
   "id": "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127",
   "size": 170,
@@ -50,26 +50,12 @@ Block testGenesis = Block.fromJSON({
 });
 
 class Driver {
-  static Future<Driver> get instance async {
-    final net = await NetworkStorage.net;
-    return Driver(net);
-  }
-
-  static Future<Block> get genesis async {
-    String network = await NetworkStorage.network;
-    if (network == NetworkStorage.mainnet) {
-      return mainGenesis;
-    } else if (network == NetworkStorage.testnet) {
-      return testGenesis;
-    }
-    throw 'unexpected network';
-  }
-
   final Net _net;
   Driver(this._net);
 
-  Future<Map<String, dynamic>> get head async {
-    return _net.getBlock();
+  static Future<Block> get head async {
+    final net = await NetworkStorage.net;
+    return Block.fromJSON(await net.getBlock());
   }
 
   dynamic callMethod(List<dynamic> args) async {

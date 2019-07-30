@@ -5,8 +5,11 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
-import 'package:veatre/main.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/webView.dart';
+import 'package:veatre/common/driver.dart';
+import 'package:veatre/common/net.dart';
+import 'package:veatre/main.dart';
 
 class Snapshot {
   String title;
@@ -18,110 +21,157 @@ class Snapshot {
   });
 }
 
-List<Key> _keys = [];
-List<Snapshot> _snapshots = [];
-List<WebView> webViews = [];
+List<Key> _mainNetKeys = [];
+List<Snapshot> _mainNetSnapshots = [];
+List<WebView> mainNetWebViews = [];
 
-void createWebView(onWebViewChangedCallback onWebViewChanged) {
-  int id = webViews.length;
-  LabeledGlobalKey<WebViewState> key =
-      LabeledGlobalKey<WebViewState>('webview$id');
+List<Key> _testNetKeys = [];
+List<Snapshot> _testNetSnapshots = [];
+List<WebView> testNetWebViews = [];
+void createWebView(Network net, onWebViewChangedCallback onWebViewChanged) {
+  int id =
+      net == Network.MainNet ? mainNetWebViews.length : testNetWebViews.length;
+  LabeledGlobalKey<WebViewState> key = LabeledGlobalKey<WebViewState>(
+      net == Network.MainNet ? 'mainNetWebview$id' : 'testNetWebview$id');
   WebView webView = new WebView(
     key: key,
-    headController: headController,
-    walletsController: walletsController,
-    genesisController: genesisController,
+    genesis: net == Network.MainNet ? mainNetGenesis : testNetGenesis,
+    driver: net == Network.MainNet
+        ? Driver(Net(NetworkStorage.mainnet))
+        : Driver(Net(NetworkStorage.testnet)),
+    headController:
+        net == Network.MainNet ? mainNetHeadController : testNetHeadController,
+    walletsController: net == Network.MainNet
+        ? mainNetWalletsController
+        : testNetWalletsController,
     onWebViewChanged: (controller) async {
       onWebViewChanged(controller);
     },
   );
-  _keys.add(key);
-  _snapshots.add(Snapshot());
-  webViews.add(webView);
+  if (net == Network.MainNet) {
+    _mainNetKeys.add(key);
+    _mainNetSnapshots.add(Snapshot());
+    mainNetWebViews.add(webView);
+  } else {
+    _testNetKeys.add(key);
+    _testNetSnapshots.add(Snapshot());
+    testNetWebViews.add(webView);
+  }
 }
 
 void updateSnapshot(
-  int index, {
+  Network net,
+  int id, {
   Uint8List data,
   String title,
 }) {
-  _snapshots[index] = Snapshot(
-    data: data,
-    title: title,
-  );
+  if (net == Network.MainNet) {
+    _mainNetSnapshots[id] = Snapshot(
+      data: data,
+      title: title,
+    );
+  } else {
+    _testNetSnapshots[id] = Snapshot(
+      data: data,
+      title: title,
+    );
+  }
 }
 
-int get tabshotLen => _snapshots.length;
-
-void removeTab(int id) {
-  _keys.removeAt(id);
-  _snapshots.removeAt(id);
-  webViews.removeAt(id);
+int tabshotLen(Network net) {
+  if (net == Network.MainNet) {
+    return _mainNetSnapshots.length;
+  }
+  return _testNetSnapshots.length;
 }
 
-void removeAllTabs() {
-  _snapshots.clear();
-  webViews.clear();
-  _keys.clear();
+void removeTab(Network net, int id) {
+  if (net == Network.MainNet) {
+    _mainNetKeys.removeAt(id);
+    _mainNetSnapshots.removeAt(id);
+    mainNetWebViews.removeAt(id);
+  } else {
+    _testNetKeys.removeAt(id);
+    _testNetSnapshots.removeAt(id);
+    testNetWebViews.removeAt(id);
+  }
 }
 
-InAppWebViewController _controllerAt(int id) {
-  final key = _keyAt(id);
+void removeAllTabs(Network net) {
+  if (net == Network.MainNet) {
+    _mainNetKeys.clear();
+    _mainNetSnapshots.clear();
+    mainNetWebViews.clear();
+  } else {
+    _testNetSnapshots.clear();
+    testNetWebViews.clear();
+    _testNetKeys.clear();
+  }
+}
+
+InAppWebViewController _controllerAt(Network net, int id) {
+  final key = _keyAt(net, id);
   if (key != null && key.currentState != null) {
     return key.currentState.controller;
   }
   return null;
 }
 
-LabeledGlobalKey<WebViewState> _keyAt(int id) {
-  return _keys[id];
+LabeledGlobalKey<WebViewState> _keyAt(Network net, int id) {
+  if (net == Network.MainNet) {
+    return _mainNetKeys[id];
+  }
+  return _testNetKeys[id];
 }
 
-List<Snapshot> get tabShots {
-  return _snapshots;
+List<Snapshot> snapshots(Network net) {
+  if (net == Network.MainNet) {
+    return _mainNetSnapshots;
+  }
+  return _testNetSnapshots;
 }
 
-Future<String> getTitle(int id) async {
-  final controller = _controllerAt(id);
+Future<String> getTitle(Network net, int id) async {
+  final controller = _controllerAt(net, id);
   if (controller != null) {
     return controller.getTitle();
   }
   return null;
 }
 
-Future<bool> canGoBack(int id) async {
-  final controller = _controllerAt(id);
+Future<bool> canGoBack(Network net, int id) async {
+  final controller = _controllerAt(net, id);
   if (controller != null) {
     return controller.canGoBack();
   }
   return false;
 }
 
-Future<bool> canGoForward(int id) async {
-  final controller = _controllerAt(id);
+Future<bool> canGoForward(Network net, int id) async {
+  final controller = _controllerAt(net, id);
   if (controller != null) {
     return controller.canGoForward();
   }
   return false;
 }
 
-Future<void> goBack(int id) async {
-  final controller = _controllerAt(id);
+Future<void> goBack(Network net, int id) async {
+  final controller = _controllerAt(net, id);
   if (controller != null) {
     return controller.goBack();
   }
 }
 
-Future<void> goForward(int id) async {
-  final controller = _controllerAt(id);
+Future<void> goForward(Network net, int id) async {
+  final controller = _controllerAt(net, id);
   if (controller != null) {
     return controller.goForward();
   }
 }
 
-Future<void> reload(int id) async {
+Future<void> reload(Network net, int id) async {
   try {
-    final controller = _controllerAt(id);
+    final controller = _controllerAt(net, id);
     if (controller != null) {
       return controller.reload();
     }
@@ -130,9 +180,9 @@ Future<void> reload(int id) async {
   }
 }
 
-Future<void> loadUrl(int id, String url) async {
+Future<void> loadUrl(Network net, int id, String url) async {
   try {
-    final controller = _controllerAt(id);
+    final controller = _controllerAt(net, id);
     if (controller != null) {
       return controller.loadUrl(url);
     }
@@ -141,8 +191,9 @@ Future<void> loadUrl(int id, String url) async {
   }
 }
 
-Future<Uint8List> takeScreenshot(int id) async {
-  final key = _keyAt(id);
+Future<Uint8List> takeScreenshot(Network net, int id) async {
+  final key = _keyAt(net, id);
+  print("key $key");
   if (key.currentState.isStartSearch ||
       key.currentState.currentURL == 'about:blank') {
     try {
@@ -160,12 +211,4 @@ Future<Uint8List> takeScreenshot(int id) async {
     return key.currentState.controller.takeScreenshot();
   }
   return null;
-}
-
-Future<void> reloadAll() async {
-  for (LabeledGlobalKey<WebViewState> key in _keys) {
-    if (key.currentState.controller != null) {
-      key.currentState.controller.reload();
-    }
-  }
 }

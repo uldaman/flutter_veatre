@@ -1,6 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:veatre/common/net.dart';
 
+enum Network {
+  MainNet,
+  TestNet,
+}
+
 class NetworkStorage {
   static final testnet = "https://sync-testnet.vechain.org";
   static final mainnet = "https://sync-mainnet.vechain.org";
@@ -36,5 +41,10 @@ class NetworkStorage {
   static Future<Net> get net async {
     String network = await NetworkStorage.network;
     return Net(network);
+  }
+
+  static Future<bool> get isMainNet async {
+    String network = await NetworkStorage.network;
+    return network == NetworkStorage.mainnet;
   }
 }

@@ -6,41 +6,80 @@ import 'package:veatre/src/storage/networkStorage.dart';
 
 class WalletStorage {
   static final storage = new FlutterSecureStorage();
-  static final mainWalletKey =
-      "6026f74a96577f186b25f9a471d79f39"; // md5(MainWallet)
+  static final _mainNetMainWalletKey =
+      "c2a06a2a14f08900c9c03d51e896eb77"; //MD5 ("mainNetMainWalletKey") = c2a06a2a14f08900c9c03d51e896eb77
+  static final _testNeMainWalletKey =
+      "75608f52a2e04dfb14f943d081dd30af"; // MD5 ("testNeMainWalletKey") = 75608f52a2e04dfb14f943d081dd30af
+  static final _testNetWalletPrefix = 'TestNetWallet|';
+  static final _mainNetWalletPrefix = 'MainNetWallet|';
 
   static Future<List<WalletEntity>> readAll() async {
     Map<String, String> allKeystores = await storage.readAll();
+    bool isMainNet = await NetworkStorage.isMainNet;
     List<WalletEntity> walletEntities = [];
-    for (var keystoreEntity in allKeystores.entries) {
-      String walletName = keystoreEntity.key;
-      if (walletName != mainWalletKey &&
-          walletName != NetworkStorage.networkKey) {
-        KeyStore keystore =
-            KeyStore.fromJSON(json.decode(keystoreEntity.value));
-        walletEntities.add(WalletEntity(name: walletName, keystore: keystore));
+    if (isMainNet) {
+      for (var keystoreEntity in allKeystores.entries) {
+        String walletKey = keystoreEntity.key;
+        if (walletKey.startsWith(_mainNetWalletPrefix)) {
+          KeyStore keystore =
+              KeyStore.fromJSON(json.decode(keystoreEntity.value));
+          walletEntities.add(
+            WalletEntity(
+              name: walletKey.substring(_mainNetWalletPrefix.length),
+              keystore: keystore,
+            ),
+          );
+        }
+      }
+    } else {
+      for (var keystoreEntity in allKeystores.entries) {
+        String walletKey = keystoreEntity.key;
+        if (walletKey.startsWith(_testNetWalletPrefix)) {
+          KeyStore keystore =
+              KeyStore.fromJSON(json.decode(keystoreEntity.value));
+          walletEntities.add(
+            WalletEntity(
+              name: walletKey.substring(_testNetWalletPrefix.length),
+              keystore: keystore,
+            ),
+          );
+        }
       }
     }
     return walletEntities;
   }
 
-  static Future<List<String>> get wallets async {
+  static Future<List<String>> wallets(Network network) async {
     Map<String, String> allKeystores = await storage.readAll();
     List<String> wallets = [];
-    for (var keystoreEntity in allKeystores.entries) {
-      String walletName = keystoreEntity.key;
-      if (walletName != mainWalletKey &&
-          walletName != NetworkStorage.networkKey) {
-        KeyStore keystore =
-            KeyStore.fromJSON(json.decode(keystoreEntity.value));
-        wallets.add("0x${keystore.address}");
+    if (network == Network.MainNet) {
+      for (var keystoreEntity in allKeystores.entries) {
+        String walletKey = keystoreEntity.key;
+        if (walletKey.startsWith(_mainNetWalletPrefix)) {
+          KeyStore keystore =
+              KeyStore.fromJSON(json.decode(keystoreEntity.value));
+          wallets.add("0x${keystore.address}");
+        }
+      }
+    } else {
+      for (var keystoreEntity in allKeystores.entries) {
+        String walletKey = keystoreEntity.key;
+        if (walletKey.startsWith(_testNetWalletPrefix)) {
+          KeyStore keystore =
+              KeyStore.fromJSON(json.decode(keystoreEntity.value));
+          wallets.add("0x${keystore.address}");
+        }
       }
     }
     return wallets;
   }
 
   static Future<WalletEntity> read(String name) async {
-    String keystoreString = await storage.read(key: name);
+    bool isMainNet = await NetworkStorage.isMainNet;
+    String keystoreString = await storage.read(
+      key:
+          isMainNet ? _mainNetWalletPrefix + name : _testNetWalletPrefix + name,
+    );
     if (keystoreString == null) {
       return null;
     }
@@ -50,28 +89,45 @@ class WalletStorage {
 
   static Future<void> write(
       {WalletEntity walletEntity, bool isMainWallet = false}) async {
-    await storage.write(
-      key: walletEntity.name,
-      value: json.encode(walletEntity.keystore.encoded),
-    );
-    if (isMainWallet) {
+    if (await NetworkStorage.isMainNet) {
       await storage.write(
-        key: mainWalletKey,
-        value: json.encode(walletEntity.encoded),
+        key: _mainNetWalletPrefix + walletEntity.name,
+        value: json.encode(walletEntity.keystore.encoded),
       );
+      if (isMainWallet) {
+        await storage.write(
+          key: _mainNetMainWalletKey,
+          value: json.encode(walletEntity.encoded),
+        );
+      }
+      mainNetWalletsController.value = await wallets(Network.MainNet);
+    } else {
+      await storage.write(
+        key: _testNetWalletPrefix + walletEntity.name,
+        value: json.encode(walletEntity.keystore.encoded),
+      );
+      if (isMainWallet) {
+        await storage.write(
+          key: _testNeMainWalletKey,
+          value: json.encode(walletEntity.encoded),
+        );
+      }
+      testNetWalletsController.value = await wallets(Network.MainNet);
     }
-    walletsController.value = await wallets;
   }
 
   static Future<void> setMainWallet(WalletEntity walletEntity) async {
+    bool isMainNet = await NetworkStorage.isMainNet;
     await storage.write(
-      key: mainWalletKey,
+      key: isMainNet ? _mainNetMainWalletKey : _testNeMainWalletKey,
       value: json.encode(walletEntity.encoded),
     );
   }
 
   static Future<WalletEntity> getMainWallet() async {
-    String mainWalletString = await storage.read(key: mainWalletKey);
+    bool isMainNet = await NetworkStorage.isMainNet;
+    String mainWalletString = await storage.read(
+        key: isMainNet ? _mainNetMainWalletKey : _testNeMainWalletKey);
     if (mainWalletString == null) {
       return null;
     }
@@ -79,13 +135,14 @@ class WalletStorage {
   }
 
   static Future<void> delete(String name) async {
-    await storage.delete(key: name);
-    walletsController.value = await wallets;
-  }
-
-  static Future<void> deleteAll() async {
-    await storage.deleteAll();
-    walletsController.value = await wallets;
+    bool isMainNet = await NetworkStorage.isMainNet;
+    if (isMainNet) {
+      await storage.delete(key: _mainNetWalletPrefix + name);
+      mainNetWalletsController.value = await wallets(Network.MainNet);
+    } else {
+      await storage.delete(key: _testNetWalletPrefix + name);
+      testNetWalletsController.value = await wallets(Network.TestNet);
+    }
   }
 }
 

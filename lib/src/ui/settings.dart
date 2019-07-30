@@ -22,16 +22,10 @@ class SettingsState extends State<Settings> {
   }
 
   Future<void> setNet() async {
-    String network = await NetworkStorage.network;
-    if (network == NetworkStorage.mainnet) {
-      setState(() {
-        _network = 'Mainnet';
-      });
-    } else {
-      setState(() {
-        _network = 'Testnet';
-      });
-    }
+    bool isMainNet = await NetworkStorage.isMainNet;
+    setState(() {
+      _network = isMainNet ? 'Mainnet' : 'Testnet';
+    });
   }
 
   @override

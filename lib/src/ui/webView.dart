@@ -26,25 +26,23 @@ class HeadController extends ValueNotifier<Block> {
   HeadController(Block value) : super(value);
 }
 
-class GenesisController extends ValueNotifier<Block> {
-  GenesisController(Block value) : super(value);
-}
-
 class WalletsController extends ValueNotifier<List<String>> {
   WalletsController(List<String> value) : super(value);
 }
 
 class WebView extends StatefulWidget {
   final Key key;
+  final Block genesis;
+  final Driver driver;
   final HeadController headController;
-  final GenesisController genesisController;
   final WalletsController walletsController;
   final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
+    this.genesis,
+    this.driver,
     this.headController,
-    this.genesisController,
     this.walletsController,
     this.onWebViewChanged,
   }) : super(key: key);
@@ -70,19 +68,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     widget.headController.addListener(_handleHeadChanged);
-    widget.genesisController.addListener(_handleGenesisChanged);
     widget.walletsController.addListener(_handleWalletsChanged);
   }
 
   void _handleHeadChanged() {
     if (controller != null) {
       controller.injectScriptCode(_headJS(widget.headController.value));
-    }
-  }
-
-  void _handleGenesisChanged() {
-    if (controller != null) {
-      controller.injectScriptCode(_genesisJS(widget.genesisController.value));
     }
   }
 
@@ -189,7 +180,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           "mixedContentMode": "MIXED_CONTENT_ALWAYS_ALLOW",
         },
         initialJs: _headJS(widget.headController.value) +
-            _genesisJS(widget.genesisController.value) +
+            _genesisJS(widget.genesis) +
             _walletsJS(widget.walletsController.value),
         onWebViewCreated: (InAppWebViewController controller) async {
           setState(() {
@@ -203,8 +194,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           }
           controller.addJavaScriptHandler("Thor", (arguments) async {
             debugPrint('Thor arguments $arguments');
-            Driver _driver = await Driver.instance;
-            dynamic data = await _driver.callMethod(arguments);
+            dynamic data = await widget.driver.callMethod(arguments);
             debugPrint("Thor response $data");
             return data;
           });

@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/webViews.dart';
 
-typedef onTabCreatedCallback = void Function();
-typedef onTabSelectedCallback = void Function(int id);
 enum TabStage {
   Created,
   Selected,
@@ -19,7 +18,8 @@ class TabResult {
 
 class TabViews extends StatefulWidget {
   final int id;
-  TabViews({this.id});
+  final Network net;
+  TabViews({this.id, this.net});
 
   @override
   TabViewsState createState() => TabViewsState();
@@ -45,7 +45,7 @@ class TabViewsState extends State<TabViews> {
             ),
             onPressed: () {
               setState(() {
-                removeAllTabs();
+                removeAllTabs(widget.net);
               });
               Navigator.of(context).pop(
                 TabResult(
@@ -68,7 +68,7 @@ class TabViewsState extends State<TabViews> {
                 mainAxisSpacing: 10,
                 childAspectRatio: ratio,
               ),
-              itemCount: tabShots.length,
+              itemCount: snapshots(widget.net).length,
               itemBuilder: (context, index) {
                 return snapshotCard(index);
               },
@@ -131,7 +131,7 @@ class TabViewsState extends State<TabViews> {
                         child: Padding(
                           padding: EdgeInsets.only(left: 40, right: 40),
                           child: Text(
-                            tabShots[index].title ?? '',
+                            snapshots(widget.net)[index].title ?? '',
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -155,9 +155,9 @@ class TabViewsState extends State<TabViews> {
                         ),
                         onPressed: () async {
                           setState(() {
-                            removeTab(index);
+                            removeTab(widget.net, index);
                           });
-                          if (tabshotLen == 0) {
+                          if (snapshots(widget.net).length == 0) {
                             Navigator.of(context)
                                 .pop(TabResult(stage: TabStage.RemovedAll));
                           }
@@ -178,9 +178,9 @@ class TabViewsState extends State<TabViews> {
                     ),
                     image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: tabShots[index].data == null
+                      image: snapshots(widget.net)[index].data == null
                           ? AssetImage('assets/blank.png')
-                          : MemoryImage(tabShots[index].data),
+                          : MemoryImage(snapshots(widget.net)[index].data),
                     ),
                   ),
                 ),

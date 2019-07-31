@@ -46,15 +46,11 @@ void main() {
         Block head = await Driver.head;
         if (await NetworkStorage.isMainNet) {
           if (head.number != _mainNetCurrentHead.number) {
-            print(
-                "_mainNetCurrentHead ${_mainNetCurrentHead.number} head ${head.number}");
             _mainNetCurrentHead = head;
             mainNetHeadController.value = _mainNetCurrentHead;
           }
         } else {
           if (head.number != _testNetCurrentHead.number) {
-            print(
-                "_testNetCurrentHead ${_testNetCurrentHead.number} head ${head.number}");
             _testNetCurrentHead = head;
             testNetHeadController.value = _testNetCurrentHead;
           }

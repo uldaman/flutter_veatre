@@ -124,9 +124,7 @@ VM error: ${result.vmError}''';
         this.vmError = '';
       });
     }
-    setState(() {
-      this.totalGas = widget.options.gas ?? gas;
-    });
+    this.totalGas = widget.options.gas ?? gas;
     BigInt fee = estimateFee();
     setState(() {
       this.estimatedFee = fee;

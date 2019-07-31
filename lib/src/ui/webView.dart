@@ -117,21 +117,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     setState(() {
       isStartSearch = false;
     });
-    setState(() {
-      currentURL = resolveURL(url);
-    });
+    currentURL = resolveURL(url);
     if (currentURL != 'about:blank') {
       updateSearchBar(0, currentURL);
     } else {
-      setState(() {
-        searchBarController.valueWith(
-          progress: 0,
-          icon: Icons.search,
-          defautText: 'Search',
-          shouldHidRefresh: true,
-          submitedText: currentURL,
-        );
-      });
+      searchBarController.valueWith(
+        progress: 0,
+        icon: Icons.search,
+        defautText: 'Search',
+        shouldHidRefresh: true,
+        submitedText: currentURL,
+      );
     }
     if (controller != null) {
       await controller.loadUrl(currentURL);
@@ -183,9 +179,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             _genesisJS(widget.genesis) +
             _walletsJS(widget.walletsController.value),
         onWebViewCreated: (InAppWebViewController controller) async {
-          setState(() {
-            this.controller = controller;
-          });
+          this.controller = controller;
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
@@ -250,41 +244,33 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           });
         },
         onLoadStart: (InAppWebViewController controller, String url) async {
-          setState(() {
-            currentURL = url;
-          });
+          currentURL = url;
           if (currentURL != 'about:blank') {
             updateSearchBar(0, currentURL);
           } else {
-            setState(() {
-              searchBarController.valueWith(
-                progress: 0,
-                icon: Icons.search,
-                defautText: 'Search',
-                shouldHidRefresh: true,
-                submitedText: currentURL,
-              );
-            });
+            searchBarController.valueWith(
+              progress: 0,
+              icon: Icons.search,
+              defautText: 'Search',
+              shouldHidRefresh: true,
+              submitedText: currentURL,
+            );
           }
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
         },
         onLoadStop: (InAppWebViewController controller, String url) async {
-          setState(() {
-            currentURL = url;
-          });
+          currentURL = url;
           if (currentURL != 'about:blank') {
             updateSearchBar(1, currentURL);
           } else {
-            setState(() {
-              searchBarController.valueWith(
-                progress: 0,
-                icon: Icons.search,
-                shouldHidRefresh: true,
-                submitedText: currentURL,
-              );
-            });
+            searchBarController.valueWith(
+              progress: 0,
+              icon: Icons.search,
+              shouldHidRefresh: true,
+              submitedText: currentURL,
+            );
           }
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
@@ -295,14 +281,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (currentURL != 'about:blank') {
             updateSearchBar(progress / 100, currentURL);
           } else {
-            setState(() {
-              searchBarController.valueWith(
-                progress: 0,
-                icon: Icons.search,
-                shouldHidRefresh: true,
-                submitedText: currentURL,
-              );
-            });
+            searchBarController.valueWith(
+              progress: 0,
+              icon: Icons.search,
+              shouldHidRefresh: true,
+              submitedText: currentURL,
+            );
           }
         },
         onConsoleMessage:
@@ -392,14 +376,12 @@ messageLevel: ${consoleMessage.messageLevel}
     } else {
       icon = Icons.lock_open;
     }
-    setState(() {
-      searchBarController.valueWith(
-        progress: progress,
-        icon: icon,
-        defautText: getDomain(uri),
-        submitedText: url,
-      );
-    });
+    searchBarController.valueWith(
+      progress: progress,
+      icon: icon,
+      defautText: getDomain(uri),
+      submitedText: url,
+    );
   }
 
   String getDomain(Uri uri) {

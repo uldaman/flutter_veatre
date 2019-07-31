@@ -74,11 +74,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
     );
     if (selectedWallet != null) {
       setState(() {
-        loading = true;
         this.wallet = selectedWallet;
-      });
-      setState(() {
-        loading = false;
       });
     }
   }

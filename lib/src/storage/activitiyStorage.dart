@@ -39,9 +39,12 @@ class ActivityStorage {
     int offset,
     int limit,
   ) async {
+    bool isMainNet = await NetworkStorage.isMainNet;
     final db = await database;
     List<Map<String, dynamic>> rows = await db.query(
       activityTableName,
+      where: 'net = ?',
+      whereArgs: [isMainNet ? 0 : 1],
       orderBy: 'timestamp desc',
       offset: offset,
       limit: limit,

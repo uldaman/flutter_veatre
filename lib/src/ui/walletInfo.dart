@@ -1,15 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/api/TransactionAPI.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/models/account.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/walletOperation.dart';
 import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/api/accountAPI.dart';
 
 class WalletInfo extends StatefulWidget {
-  final Wallet wallet;
-  WalletInfo({this.wallet});
+  final String walletName;
+  WalletInfo({this.walletName});
 
   @override
   WalletInfoState createState() => WalletInfoState();
@@ -26,28 +30,48 @@ class WalletInfoState extends State<WalletInfo> {
   int limit = 10;
   Wallet wallet;
   List<Transfer> transfers = [];
+  Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      this.wallet = widget.wallet;
+    updateWallet().then((wallet) {
+      setState(() {
+        this.wallet = wallet;
+      });
+      _getMoreData(wallet.keystore.address);
     });
-    _getMoreData(widget.wallet.keystore.address);
     _scrollController.addListener(() async {
       if (!loadMore &&
           transfers.length % limit == 0 &&
           _scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent) {
-        await _getMoreData(wallet.keystore.address);
+        if (wallet != null) {
+          await _getMoreData(wallet.keystore.address);
+        }
       }
     });
+
+    _timer = Timer.periodic(Duration(seconds: 10), (time) async {
+      await updateWallet();
+    });
+  }
+
+  Future<Wallet> updateWallet() async {
+    WalletEntity walletEntity = await WalletStorage.read(widget.walletName);
+    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    return Wallet(
+      account: acc,
+      keystore: walletEntity.keystore,
+      name: walletEntity.name,
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
     _scrollController.dispose();
+    _timer.cancel();
   }
 
   _getMoreData(String address) async {
@@ -96,7 +120,9 @@ class WalletInfoState extends State<WalletInfo> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: <Widget>[
                                     Text(
-                                      wallet.account.formatBalance,
+                                      wallet != null
+                                          ? wallet.account.formatBalance
+                                          : '0',
                                       style: TextStyle(
                                         fontSize: 40,
                                         color: Colors.white,
@@ -126,7 +152,9 @@ class WalletInfoState extends State<WalletInfo> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: <Widget>[
                               Text(
-                                wallet.account.formatEnergy,
+                                wallet != null
+                                    ? wallet.account.formatEnergy
+                                    : '0',
                                 style: TextStyle(
                                   fontSize: 15,
                                   color: Colors.white,
@@ -175,7 +203,7 @@ class WalletInfoState extends State<WalletInfo> {
                           ),
                           Container(
                             child: Text(
-                              wallet.name,
+                              widget.walletName,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 30,
@@ -190,13 +218,15 @@ class WalletInfoState extends State<WalletInfo> {
                               iconSize: 20,
                               color: Colors.white,
                               onPressed: () async {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => WalletOperation(
-                                      wallet: wallet,
+                                if (wallet != null) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => WalletOperation(
+                                        wallet: wallet,
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                }
                               },
                             ),
                           ),
@@ -227,7 +257,8 @@ class WalletInfoState extends State<WalletInfo> {
 
   Widget buildCell(BuildContext context, int index) {
     Transfer transfer = transfers[index];
-    bool isSender = transfer.sender == '0x' + wallet.keystore.address;
+    bool isSender = transfer.sender ==
+        '0x' + (wallet != null ? wallet.keystore.address : '');
     DateTime date = DateTime.fromMillisecondsSinceEpoch(
         transfer.meta.blockTimestamp * 1000);
     Function formatTime = (int time) {

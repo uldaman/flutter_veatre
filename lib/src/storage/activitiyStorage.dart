@@ -14,7 +14,7 @@ class ActivityStorage {
     );
   }
 
-  Future<void> update(int id, Map<String, dynamic> values) async {
+  static Future<void> update(int id, Map<String, dynamic> values) async {
     final db = await database;
     await db.update(
       activityTableName,
@@ -24,14 +24,13 @@ class ActivityStorage {
     );
   }
 
-  static Future<List<Activity>> queryPendings() async {
+  static Future<List<Activity>> queryPendings(bool isMainNet) async {
     final Database db = await database;
     List<Map<String, dynamic>> rows = await db.query(
       activityTableName,
-      where: 'status = ?',
-      whereArgs: [ActivityStatus.Pending.index],
+      where: 'status = ? and net = ?',
+      whereArgs: [ActivityStatus.Pending.index, isMainNet ? 0 : 1],
     );
-    print('rows $rows');
     return List.from(rows.map((row) => Activity.fromJSON(row)));
   }
 
@@ -49,7 +48,18 @@ class ActivityStorage {
       offset: offset,
       limit: limit,
     );
-    print('rows $rows');
+    return List.from(rows.map((row) => Activity.fromJSON(row)));
+  }
+
+  static Future<List<Activity>> queryAll() async {
+    bool isMainNet = await NetworkStorage.isMainNet;
+    final db = await database;
+    List<Map<String, dynamic>> rows = await db.query(
+      activityTableName,
+      where: 'net = ?',
+      whereArgs: [isMainNet ? 0 : 1],
+      orderBy: 'timestamp desc',
+    );
     return List.from(rows.map((row) => Activity.fromJSON(row)));
   }
 }
@@ -62,12 +72,15 @@ enum ActivityType {
 enum ActivityStatus {
   Pending,
   Finished,
+  Expired,
   Reverted,
 }
 
 class Activity {
   int id;
   String hash;
+  int block;
+  int processBlock;
   String content;
   String link;
   String walletName;
@@ -76,9 +89,12 @@ class Activity {
   int timestamp;
   ActivityStatus status; // 0 pending 1 finished 2 reverted
   int net;
+
   Activity({
     this.id,
     this.hash,
+    this.block,
+    this.processBlock,
     this.content,
     this.link,
     this.walletName,
@@ -92,6 +108,8 @@ class Activity {
   Map<String, dynamic> get encoded {
     return {
       'hash': hash,
+      'block': block,
+      'processBlock': processBlock,
       'content': content,
       'link': link,
       'walletName': walletName,
@@ -104,10 +122,11 @@ class Activity {
   }
 
   factory Activity.fromJSON(Map<String, dynamic> parsedJSON) {
-    print("parsedJSON $parsedJSON");
     return Activity(
       id: parsedJSON['id'],
       hash: parsedJSON['hash'],
+      block: parsedJSON['block'],
+      processBlock: parsedJSON['processBlock'],
       content: parsedJSON['content'],
       link: parsedJSON['link'],
       walletName: parsedJSON['walletName'],
@@ -120,7 +139,9 @@ class Activity {
           ? ActivityStatus.Pending
           : parsedJSON['status'] == ActivityStatus.Finished.index
               ? ActivityStatus.Finished
-              : ActivityStatus.Reverted,
+              : parsedJSON['status'] == ActivityStatus.Reverted.index
+                  ? ActivityStatus.Reverted
+                  : ActivityStatus.Expired,
       net: parsedJSON['net'],
     );
   }

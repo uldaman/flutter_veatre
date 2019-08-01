@@ -21,10 +21,19 @@ class WalletOperation extends StatefulWidget {
 }
 
 class WalletOperationState extends State<WalletOperation> {
+  TextEditingController keystoreBackUpController;
   TextEditingController passwordController = TextEditingController();
   TextEditingController originalPasswordController = TextEditingController();
   TextEditingController newPasswordController = TextEditingController();
   bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    keystoreBackUpController = TextEditingController(
+      text: json.encode(widget.wallet.keystore.encoded),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,26 +88,22 @@ class WalletOperationState extends State<WalletOperation> {
                           color: Colors.grey[100],
                           child: Padding(
                             padding: EdgeInsets.all(10),
-                            child: Text(
-                              json.encode(wallet.keystore.encoded),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 44,
-                          child: Center(
-                            child: FlatButton(
-                              child: Text(
-                                'copy',
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await Clipboard.setData(
-                                  new ClipboardData(
-                                    text: json.encode(wallet.keystore.encoded),
-                                  ),
+                            child: TextField(
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 12),
+                              readOnly: true,
+                              enableInteractiveSelection: true,
+                              maxLines: null,
+                              decoration:
+                                  InputDecoration(border: InputBorder.none),
+                              controller: keystoreBackUpController,
+                              onTap: () async {
+                                keystoreBackUpController.selection =
+                                    TextSelection(
+                                  baseOffset: 0,
+                                  extentOffset: json
+                                      .encode(wallet.keystore.encoded)
+                                      .length,
                                 );
                               },
                             ),

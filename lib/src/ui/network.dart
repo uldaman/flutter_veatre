@@ -26,9 +26,9 @@ class NetworksState extends State<Networks> {
   Future<void> changeNet() async {
     await NetworkStorage.set(isMainNet: !isMainnet);
     if (await NetworkStorage.isMainNet) {
-      mainNetHeadController.value = await Driver.head;
+      mainNetHeadController.value = await Driver.head(mainNet);
     } else {
-      testNetHeadController.value = await Driver.head;
+      testNetHeadController.value = await Driver.head(testNet);
     }
     setState(() {
       isMainnet = !isMainnet;

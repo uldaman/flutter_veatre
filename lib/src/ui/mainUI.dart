@@ -146,8 +146,6 @@ class MainUIState extends State<MainUI>
                   }
                 } else if (tabResult.stage == TabStage.Selected) {
                   int selectedID = tabResult.id;
-                  print(
-                      "currentNet $currentNet selectedID $selectedID mainNetID $mainNetID testNetID $testNetID");
                   if (currentNet == Network.MainNet &&
                       selectedID != mainNetID) {
                     mainNetID = selectedID;

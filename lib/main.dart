@@ -3,18 +3,24 @@ import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/driver.dart';
-import 'package:veatre/common/net.dart';
+import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 import 'package:veatre/src/ui/settings.dart';
-import 'package:veatre/src/ui/webView.dart';
 import 'package:veatre/src/ui/network.dart';
+
+class HeadController extends ValueNotifier<Block> {
+  HeadController(Block value) : super(value);
+}
+
+class WalletsController extends ValueNotifier<List<String>> {
+  WalletsController(List<String> value) : super(value);
+}
 
 WalletsController mainNetWalletsController;
 WalletsController testNetWalletsController;
@@ -29,41 +35,74 @@ void main() {
         WalletsController(await WalletStorage.wallets(Network.MainNet));
     testNetWalletsController =
         WalletsController(await WalletStorage.wallets(Network.TestNet));
-    Block _testNetCurrentHead = testNetGenesis;
-    Block _mainNetCurrentHead = mainNetGenesis;
-    try {
-      Net testNet = Net(NetworkStorage.testnet);
-      Net mainNet = Net(NetworkStorage.mainnet);
-      _mainNetCurrentHead = Block.fromJSON(await mainNet.getBlock());
-      _testNetCurrentHead = Block.fromJSON(await testNet.getBlock());
-    } catch (e) {
-      print("network error: $e");
-    }
-    mainNetHeadController = HeadController(_mainNetCurrentHead);
-    testNetHeadController = HeadController(_testNetCurrentHead);
-    _timer = Timer.periodic(Duration(seconds: 10), (time) async {
-      try {
-        Block head = await Driver.head;
-        if (await NetworkStorage.isMainNet) {
-          if (head.number != _mainNetCurrentHead.number) {
-            _mainNetCurrentHead = head;
-            mainNetHeadController.value = _mainNetCurrentHead;
-          }
-        } else {
-          if (head.number != _testNetCurrentHead.number) {
-            _testNetCurrentHead = head;
-            testNetHeadController.value = _testNetCurrentHead;
-          }
-        }
-      } catch (e) {
-        print("sync block error: $e");
-      }
-    });
+    await syncHead();
     runApp(App());
   }, onError: (dynamic err, StackTrace stack) {
     print("unhandled error: $err");
     print("stack: $stack");
   });
+}
+
+Future<void> syncHead() async {
+  Block _testNetCurrentHead = testNetGenesis;
+  Block _mainNetCurrentHead = mainNetGenesis;
+  try {
+    _mainNetCurrentHead = await Driver.head(mainNet);
+    _testNetCurrentHead = await Driver.head(testNet);
+  } catch (e) {
+    print("network error: $e");
+  }
+  mainNetHeadController = HeadController(_mainNetCurrentHead);
+  testNetHeadController = HeadController(_testNetCurrentHead);
+  _timer = Timer.periodic(Duration(seconds: 10), (time) async {
+    try {
+      bool isMainNet = await NetworkStorage.isMainNet;
+      Block head;
+      if (isMainNet) {
+        head = await Driver.head(mainNet);
+        if (head.number != _mainNetCurrentHead.number) {
+          _mainNetCurrentHead = head;
+          mainNetHeadController.value = _mainNetCurrentHead;
+        }
+      } else {
+        head = await Driver.head(testNet);
+        if (head.number != _testNetCurrentHead.number) {
+          _testNetCurrentHead = head;
+          testNetHeadController.value = _testNetCurrentHead;
+        }
+      }
+      await syncActivities(isMainNet, head.number);
+    } catch (e) {
+      print("sync block error: $e");
+    }
+  });
+}
+
+Future<void> syncActivities(bool isMainNet, int headNumber) async {
+  List<Activity> activities = await ActivityStorage.queryPendings(isMainNet);
+  for (Activity activity in activities) {
+    String txID = activity.hash;
+    final net = isMainNet ? mainNet : testNet;
+    Map<String, dynamic> receipt = await net.getReceipt(txID);
+    if (receipt != null) {
+      int processBlock = receipt['meta']['blockNumber'];
+      if (activity.processBlock == null) {
+        await ActivityStorage.update(
+            activity.id, {'processBlock': processBlock});
+      }
+      bool reverted = receipt['reverted'];
+      if (reverted) {
+        await ActivityStorage.update(
+            activity.id, {'status': ActivityStatus.Reverted.index});
+      } else if (headNumber - processBlock >= 12) {
+        await ActivityStorage.update(
+            activity.id, {'status': ActivityStatus.Finished.index});
+      }
+    } else if (headNumber - activity.block >= 30) {
+      await ActivityStorage.update(
+          activity.id, {'status': ActivityStatus.Expired.index});
+    }
+  }
 }
 
 class App extends StatefulWidget {
@@ -79,7 +118,6 @@ class AppState extends State<App> {
         MainUI.routeName: (context) => new MainUI(),
         Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
-        Activities.routeName: (context) => new Activities(),
         Networks.routeName: (context) => new Networks(),
         CreateWallet.routeName: (context) => new CreateWallet(),
         ImportWallet.routeName: (context) => new ImportWallet(),

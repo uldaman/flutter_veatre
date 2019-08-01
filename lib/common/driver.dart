@@ -49,12 +49,14 @@ Block testNetGenesis = Block.fromJSON({
   "transactions": []
 });
 
+final testNet = Net(NetworkStorage.testnet);
+final mainNet = Net(NetworkStorage.mainnet);
+
 class Driver {
   final Net _net;
   Driver(this._net);
 
-  static Future<Block> get head async {
-    final net = await NetworkStorage.net;
+  static Future<Block> head(Net net) async {
     return Block.fromJSON(await net.getBlock());
   }
 

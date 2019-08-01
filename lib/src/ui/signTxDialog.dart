@@ -1,15 +1,13 @@
 import 'dart:typed_data';
 import 'dart:math';
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:veatre/main.dart';
 import 'package:veatre/src/api/accountAPI.dart';
-import 'package:veatre/src/api/blockAPI.dart';
 import 'package:veatre/src/api/transactionAPI.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
-import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
@@ -22,17 +20,17 @@ import 'package:veatre/src/utils/common.dart';
 class SignTxDialog extends StatefulWidget {
   final List<SigningTxMessage> txMessages;
   final SigningTxOptions options;
-
-  SignTxDialog({this.txMessages, this.options});
+  final HeadController headController;
+  SignTxDialog({this.txMessages, this.options, this.headController});
 
   @override
   SignTxDialogState createState() => SignTxDialogState();
 }
 
 class SignTxDialogState extends State<SignTxDialog> {
-  double priority = 0;
   Wallet wallet;
 
+  double priority = 0;
   String vmError = '';
   bool isInsufficient = false;
   int totalGas = 0;
@@ -48,8 +46,17 @@ class SignTxDialogState extends State<SignTxDialog> {
   void initState() {
     super.initState();
     updateSpendValue();
-    void Function(WalletEntity walletEntity) setWallet =
-        (WalletEntity walletEntity) async {
+    updateWallet().whenComplete(() {
+      setState(() {
+        this.loading = false;
+      });
+      widget.headController.addListener(updateWallet);
+    });
+  }
+
+  Future<void> updateWallet() async {
+    if (mounted) {
+      WalletEntity walletEntity = await getWalletEntity(widget.options.signer);
       Account acc = await AccountAPI.get(walletEntity.keystore.address);
       setState(() {
         this.wallet = Wallet(
@@ -59,13 +66,7 @@ class SignTxDialogState extends State<SignTxDialog> {
         );
       });
       await estimateGas(wallet.keystore.address);
-      setState(() {
-        this.loading = false;
-      });
-    };
-    getWalletEntity(widget.options.signer).then((walletEntity) {
-      setWallet(walletEntity);
-    });
+    }
   }
 
   Future<WalletEntity> getWalletEntity(String signer) async {
@@ -140,10 +141,14 @@ VM error: ${result.vmError}''';
     }
   }
 
-  showWallets() async {
+  Future<void> showWallets() async {
     final Wallet selectedWallet = await Navigator.push(
       context,
-      new MaterialPageRoute(builder: (context) => new Wallets()),
+      new MaterialPageRoute(
+        builder: (context) => new Wallets(
+          headController: widget.headController,
+        ),
+      ),
     );
     if (selectedWallet != null) {
       setState(() {
@@ -536,16 +541,6 @@ VM error: ${result.vmError}''';
                                     "Password Invalid",
                                   );
                                 }
-                                Block block;
-                                try {
-                                  block = await BlockAPI.best();
-                                } catch (err) {
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                  return alert(context, Text("Warnning"),
-                                      "network error");
-                                }
                                 int nonce = Random(DateTime.now().millisecond)
                                     .nextInt(1 << 32);
                                 List<Clause> clauses = [];
@@ -553,9 +548,10 @@ VM error: ${result.vmError}''';
                                     in widget.txMessages) {
                                   clauses.add(txMsg.toClause());
                                 }
+                                final head = widget.headController.value;
                                 Transaction tx = Transaction(
-                                  blockRef: BlockRef(number32: block.number),
-                                  expiration: 20,
+                                  blockRef: BlockRef(number32: head.number),
+                                  expiration: 30,
                                   chainTag: testNetwork,
                                   clauses: clauses,
                                   gasPriceCoef: (255 * priority).toInt(),
@@ -574,34 +570,31 @@ VM error: ${result.vmError}''';
                                   );
                                   Map<String, dynamic> result =
                                       await TransactionAPI.send(tx.serialized);
-                                  int timestamp = new DateTime.now()
-                                          .millisecondsSinceEpoch ~/
-                                      1000;
                                   String comment = 'Empty transaction';
-                                  if (widget.options == null) {
-                                    if (widget.txMessages.length > 1) {
-                                      comment = 'Perform a batch of clauses';
-                                    } else if (widget.txMessages.length == 1) {
-                                      SigningTxMessage msg =
-                                          widget.txMessages.first;
-                                      comment =
-                                          msg.comment ?? msg.data.length > 2
-                                              ? 'Make a contract call'
-                                              : 'Transfer VET';
-                                    }
+                                  if (widget.txMessages.length > 1) {
+                                    comment = 'Perform a batch of clauses';
+                                  } else if (widget.txMessages.length == 1) {
+                                    SigningTxMessage msg =
+                                        widget.txMessages.first;
+                                    comment = msg.data.length > 2
+                                        ? 'Make a contract call'
+                                        : 'Transfer VET';
                                   }
                                   await ActivityStorage.insert(
                                     Activity(
                                       hash: result['id'],
+                                      block: head.number,
                                       content: json.encode({
                                         'amount': fixed2Value(spendValue),
                                         'fee': fixed2Value(estimatedFee),
+                                        'gas': totalGas,
+                                        'priority': priority,
                                       }),
                                       link: widget.options.link,
                                       walletName: wallet.name,
                                       type: ActivityType.Transaction,
                                       comment: comment,
-                                      timestamp: timestamp,
+                                      timestamp: head.timestamp,
                                       status: ActivityStatus.Pending,
                                     ),
                                   );

@@ -14,8 +14,8 @@ import 'package:veatre/src/utils/common.dart';
 class GenerateWallet extends StatefulWidget {
   final String walletName;
   final String password;
-  GenerateWallet({this.walletName, this.password});
 
+  GenerateWallet({this.walletName, this.password});
   @override
   GenerateWalletState createState() => GenerateWalletState();
 }

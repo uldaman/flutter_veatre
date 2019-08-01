@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:veatre/main.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 
 class Wallets extends StatefulWidget {
-  static const routeName = '/wallets';
+  final HeadController headController;
+  Wallets({this.headController});
 
   @override
   WalletsState createState() => WalletsState();
@@ -14,25 +16,27 @@ class Wallets extends StatefulWidget {
 
 class WalletsState extends State<Wallets> {
   List<Wallet> wallets = [];
-  bool loading = false;
+  bool loading = true;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    setState(() {
-      loading = true;
-    });
-    WalletStorage.readAll().then((walletEntities) {
-      walletList(walletEntities).then((wallets) {
-        setState(() {
-          this.wallets = wallets;
-          loading = false;
-        });
+  void initState() {
+    super.initState();
+    updateWallets().whenComplete(() {
+      setState(() {
+        loading = false;
       });
-    }).catchError((err) {
-      print(err);
+      widget.headController.addListener(updateWallets);
     });
+  }
+
+  Future<void> updateWallets() async {
+    if (mounted) {
+      List<WalletEntity> walletEntities = await WalletStorage.readAll();
+      List<Wallet> wallets = await walletList(walletEntities);
+      setState(() {
+        this.wallets = wallets;
+      });
+    }
   }
 
   Future<List<Wallet>> walletList(List<WalletEntity> walletEntities) async {

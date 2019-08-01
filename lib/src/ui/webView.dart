@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/common/driver.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/transaction.dart';
@@ -20,7 +20,7 @@ import 'package:veatre/src/ui/apps.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 
 typedef onWebViewChangedCallback = void Function(
-    InAppWebViewController controller);
+    FlutterWebView.WebViewController controller);
 
 class HeadController extends ValueNotifier<Block> {
   HeadController(Block value) : super(value);
@@ -62,7 +62,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     ),
   );
   final GlobalKey captureKey = GlobalKey();
-  InAppWebViewController controller;
+  FlutterWebView.WebViewController controller;
 
   @override
   void initState() {
@@ -73,13 +73,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   void _handleHeadChanged() {
     if (controller != null) {
-      controller.injectScriptCode(_headJS(widget.headController.value));
+      controller.evaluateJavascript(_headJS(widget.headController.value));
     }
   }
 
   void _handleWalletsChanged() {
     if (controller != null) {
-      controller.injectScriptCode(_walletsJS(widget.walletsController.value));
+      controller.evaluateJavascript(_walletsJS(widget.walletsController.value));
     }
   }
 
@@ -167,18 +167,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
       );
 
-  InAppWebView get webView => InAppWebView(
+  FlutterWebView.WebView get webView => FlutterWebView.WebView(
         initialUrl: currentURL,
-        initialOptions: {
-          "domStorageEnabled": true,
-          "databaseEnabled": true,
-          "useShouldOverrideUrlLoading": true,
-          "mixedContentMode": "MIXED_CONTENT_ALWAYS_ALLOW",
-        },
-        initialJs: _headJS(widget.headController.value) +
+        javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
+        injectJavascript: _headJS(widget.headController.value) +
             _genesisJS(widget.genesis) +
             _walletsJS(widget.walletsController.value),
-        onWebViewCreated: (InAppWebViewController controller) async {
+        onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
@@ -186,64 +181,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (currentURL != 'about:blank') {
             updateSearchBar(0, currentURL);
           }
-          controller.addJavaScriptHandler("Thor", (arguments) async {
-            debugPrint('Thor arguments $arguments');
-            dynamic data = await widget.driver.callMethod(arguments);
-            debugPrint("Thor response $data");
-            return data;
-          });
-          controller.addJavaScriptHandler("navigatedInPage", (arguments) async {
-            if (widget.onWebViewChanged != null) {
-              widget.onWebViewChanged(controller);
-            }
-          });
-          controller.addJavaScriptHandler("Vendor", (arguments) async {
-            debugPrint('Vendor arguments $arguments');
-            List<WalletEntity> walletEntities = await WalletStorage.readAll();
-            if (walletEntities.length == 0) {
-              return customAlert(
-                context,
-                title: Text('No wallet available'),
-                content: Text('Create a new wallet?'),
-                confirmAction: () async {
-                  await Navigator.of(context)
-                      .pushNamed(ManageWallets.routeName);
-                  Navigator.pop(context);
-                },
-                cancelAction: () async {
-                  Navigator.pop(context);
-                },
-              );
-            }
-            if (arguments[0] == 'signTx') {
-              List<SigningTxMessage> txMessages = [];
-              for (Map<String, dynamic> txMsg in arguments[1]) {
-                txMessages.add(SigningTxMessage.fromJSON(txMsg));
-              }
-              SigningTxOptions options =
-                  SigningTxOptions.fromJSON(arguments[2], currentURL);
-              return _showSigningDialog(
-                SignTxDialog(
-                  txMessages: txMessages,
-                  options: options,
-                ),
-              );
-            } else if (arguments[0] == 'signCert') {
-              SigningCertMessage certMessage =
-                  SigningCertMessage.fromJSON(arguments[1]);
-              SigningCertOptions options =
-                  SigningCertOptions.fromJSON(arguments[2], currentURL);
-              return _showSigningDialog(
-                SignCertificateDialog(
-                  certMessage: certMessage,
-                  options: options,
-                ),
-              );
-            }
-            throw ArgumentError('unsupported method');
-          });
         },
-        onLoadStart: (InAppWebViewController controller, String url) async {
+        onPageStarted: (String url) {
           currentURL = url;
           if (currentURL != 'about:blank') {
             updateSearchBar(0, currentURL);
@@ -260,7 +199,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             widget.onWebViewChanged(controller);
           }
         },
-        onLoadStop: (InAppWebViewController controller, String url) async {
+        onPageFinished: (String url) {
           currentURL = url;
           if (currentURL != 'about:blank') {
             updateSearchBar(1, currentURL);
@@ -276,10 +215,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             widget.onWebViewChanged(controller);
           }
         },
-        onProgressChanged:
-            (InAppWebViewController controller, int progress) async {
+        onProgressChanged: (double progress) {
           if (currentURL != 'about:blank') {
-            updateSearchBar(progress / 100, currentURL);
+            updateSearchBar(progress, currentURL);
           } else {
             searchBarController.valueWith(
               progress: 0,
@@ -287,24 +225,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               shouldHidRefresh: true,
               submitedText: currentURL,
             );
-          }
-        },
-        onConsoleMessage:
-            (InAppWebViewController controller, ConsoleMessage consoleMessage) {
-          debugPrint("""
-console output:
-sourceURL: ${consoleMessage.sourceURL}
-lineNumber: ${consoleMessage.lineNumber}
-message: ${consoleMessage.message}
-messageLevel: ${consoleMessage.messageLevel}
-                  """);
-        },
-        shouldOverrideUrlLoading:
-            (InAppWebViewController controller, String url) async {
-          if (url.startsWith('http')) {
-            await controller.loadUrl(url);
-          } else {
-            print("unknown url $url");
           }
         },
       );
@@ -412,5 +332,66 @@ messageLevel: ${consoleMessage.messageLevel}
       return Uri.encodeFull(url);
     }
     return Uri.encodeFull("https://cn.bing.com/search?q=$url");
+  }
+
+  List<FlutterWebView.JavascriptChannel> _javascriptChannels() {
+    FlutterWebView.JavascriptChannel thor = FlutterWebView.JavascriptChannel(
+      name: 'Thor',
+      onMessageReceived: (List<dynamic> arguments) async {
+        debugPrint('Thor arguments $arguments');
+        dynamic data = await widget.driver.callMethod(arguments);
+        debugPrint("Thor response $data");
+        return data;
+      },
+    );
+
+    FlutterWebView.JavascriptChannel navigatedInPage =
+        FlutterWebView.JavascriptChannel(
+      name: 'Vendor',
+      onMessageReceived: (List<dynamic> arguments) async {
+        debugPrint('Vendor arguments $arguments');
+        List<WalletEntity> walletEntities = await WalletStorage.readAll();
+        if (walletEntities.length == 0) {
+          return customAlert(
+            context,
+            title: Text('No wallet available'),
+            content: Text('Create a new wallet?'),
+            confirmAction: () async {
+              await Navigator.of(context).pushNamed(ManageWallets.routeName);
+              Navigator.pop(context);
+            },
+            cancelAction: () async {
+              Navigator.pop(context);
+            },
+          );
+        }
+        if (arguments[0] == 'signTx') {
+          List<SigningTxMessage> txMessages = [];
+          for (Map<String, dynamic> txMsg in arguments[1]) {
+            txMessages.add(SigningTxMessage.fromJSON(txMsg));
+          }
+          SigningTxOptions options =
+              SigningTxOptions.fromJSON(arguments[2], currentURL);
+          return _showSigningDialog(
+            SignTxDialog(
+              txMessages: txMessages,
+              options: options,
+            ),
+          );
+        } else if (arguments[0] == 'signCert') {
+          SigningCertMessage certMessage =
+              SigningCertMessage.fromJSON(arguments[1]);
+          SigningCertOptions options =
+              SigningCertOptions.fromJSON(arguments[2], currentURL);
+          return _showSigningDialog(
+            SignCertificateDialog(
+              certMessage: certMessage,
+              options: options,
+            ),
+          );
+        }
+        throw ArgumentError('unsupported method');
+      },
+    );
   }
 }

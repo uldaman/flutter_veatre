@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/webView.dart';
 import 'package:veatre/common/driver.dart';
@@ -109,7 +109,7 @@ void removeAllTabs(Network net) {
   }
 }
 
-InAppWebViewController _controllerAt(Network net, int id) {
+FlutterWebView.WebViewController _controllerAt(Network net, int id) {
   final key = _keyAt(net, id);
   if (key != null && key.currentState != null) {
     return key.currentState.controller;
@@ -134,7 +134,7 @@ List<Snapshot> snapshots(Network net) {
 Future<String> getTitle(Network net, int id) async {
   final controller = _controllerAt(net, id);
   if (controller != null) {
-    return controller.getTitle();
+    return controller.currentTitle();
   }
   return null;
 }

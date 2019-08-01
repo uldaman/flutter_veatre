@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:veatre/main.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
@@ -15,8 +16,9 @@ import 'package:veatre/src/storage/activitiyStorage.dart';
 class SignCertificateDialog extends StatefulWidget {
   final SigningCertMessage certMessage;
   final SigningCertOptions options;
+  final HeadController headController;
 
-  SignCertificateDialog({this.certMessage, this.options});
+  SignCertificateDialog({this.certMessage, this.options, this.headController});
 
   @override
   SignCertificateDialogState createState() => SignCertificateDialogState();
@@ -30,8 +32,17 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   @override
   void initState() {
     super.initState();
-    void Function(WalletEntity walletEntity) setWallet =
-        (WalletEntity walletEntity) async {
+    updateWallet().whenComplete(() {
+      setState(() {
+        this.loading = false;
+      });
+      widget.headController.addListener(updateWallet);
+    });
+  }
+
+  Future<void> updateWallet() async {
+    if (mounted) {
+      WalletEntity walletEntity = await getWalletEntity(widget.options.signer);
       Account acc = await AccountAPI.get(walletEntity.keystore.address);
       setState(() {
         this.wallet = Wallet(
@@ -40,14 +51,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
           name: walletEntity.name,
         );
       });
-      setState(() {
-        this.loading = false;
-      });
-    };
-
-    getWalletEntity(widget.options.signer).then((walletEntity) {
-      setWallet(walletEntity);
-    });
+    }
   }
 
   Future<WalletEntity> getWalletEntity(String signer) async {
@@ -67,10 +71,14 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
     return walletEntities[0];
   }
 
-  showWallets() async {
+  Future<void> showWallets() async {
     final Wallet selectedWallet = await Navigator.push(
       context,
-      new MaterialPageRoute(builder: (context) => new Wallets()),
+      new MaterialPageRoute(
+        builder: (context) => new Wallets(
+          headController: widget.headController,
+        ),
+      ),
     );
     if (selectedWallet != null) {
       setState(() {
@@ -291,9 +299,8 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                   );
                                 }
                                 try {
-                                  int timestamp = new DateTime.now()
-                                          .millisecondsSinceEpoch ~/
-                                      1000;
+                                  int timestamp =
+                                      widget.headController.value.timestamp;
                                   Certificate cert = Certificate(
                                     certMessage: widget.certMessage,
                                     timestamp: timestamp,
@@ -308,6 +315,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                   );
                                   await ActivityStorage.insert(
                                     Activity(
+                                      block: widget.headController.value.number,
                                       content:
                                           json.encode(cert.encoded.encoded),
                                       link: cert.domain,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:veatre/main.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/network.dart';
@@ -35,15 +36,23 @@ class SettingsState extends State<Settings> {
       buildCell(
         FontAwesomeIcons.wallet,
         'Wallets',
-        () {
-          Navigator.of(context).pushNamed(ManageWallets.routeName);
+        () async {
+          await Navigator.of(context).pushNamed(ManageWallets.routeName);
         },
       ),
       buildCell(
         Icons.alarm,
         'Activities',
-        () {
-          Navigator.of(context).pushNamed(Activities.routeName);
+        () async {
+          bool isMainNet = await NetworkStorage.isMainNet;
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Activities(
+                headController:
+                    isMainNet ? mainNetHeadController : testNetHeadController,
+              ),
+            ),
+          );
         },
       ),
       buildCell(

@@ -18,17 +18,10 @@ import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/searchBar.dart';
 import 'package:veatre/src/ui/apps.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
+import 'package:veatre/main.dart';
 
 typedef onWebViewChangedCallback = void Function(
     FlutterWebView.WebViewController controller);
-
-class HeadController extends ValueNotifier<Block> {
-  HeadController(Block value) : super(value);
-}
-
-class WalletsController extends ValueNotifier<List<String>> {
-  WalletsController(List<String> value) : super(value);
-}
 
 class WebView extends StatefulWidget {
   final Key key;
@@ -71,21 +64,16 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     widget.walletsController.addListener(_handleWalletsChanged);
   }
 
-  void _handleHeadChanged() {
+  void _handleHeadChanged() async {
     if (controller != null) {
-      controller.evaluateJavascript(_headJS(widget.headController.value));
+      await controller.evaluateJavascript(_headJS(widget.headController.value));
     }
   }
 
-  void _handleWalletsChanged() {
+  void _handleWalletsChanged() async {
     if (controller != null) {
-      controller.evaluateJavascript(_walletsJS(widget.walletsController.value));
+      await controller.evaluateJavascript(_walletsJS(widget.walletsController.value));
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -376,6 +364,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SignTxDialog(
               txMessages: txMessages,
               options: options,
+	      headController: widget.headController,
             ),
           );
         } else if (arguments[0] == 'signCert') {
@@ -387,6 +376,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SignCertificateDialog(
               certMessage: certMessage,
               options: options,
+	      headController: widget.headController,
             ),
           );
         }

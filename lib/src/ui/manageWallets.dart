@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:veatre/main.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/addressDetail.dart';
@@ -12,27 +15,34 @@ import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 
 class ManageWallets extends StatefulWidget {
-  static const routeName = '/wallets_management';
+  static final routeName = '/wallets';
 
-  ManageWallets() : super();
   @override
   ManageWalletsState createState() => ManageWalletsState();
 }
 
 class ManageWalletsState extends State<ManageWallets> {
   List<Wallet> wallets = [];
+
   @override
   void initState() {
     super.initState();
     updateWallets();
+    NetworkStorage.isMainNet.then((isMainNet) {
+      final headController =
+          isMainNet ? mainNetHeadController : testNetHeadController;
+      headController.addListener(updateWallets);
+    });
   }
 
   Future<void> updateWallets() async {
-    List<WalletEntity> walletEntities = await WalletStorage.readAll();
-    List<Wallet> wallets = await walletList(walletEntities);
-    setState(() {
-      this.wallets = wallets;
-    });
+    if (mounted) {
+      List<WalletEntity> walletEntities = await WalletStorage.readAll();
+      List<Wallet> wallets = await walletList(walletEntities);
+      setState(() {
+        this.wallets = wallets;
+      });
+    }
   }
 
   Future<List<Wallet>> walletList(List<WalletEntity> walletEntities) async {
@@ -252,7 +262,7 @@ class ManageWalletsState extends State<ManageWallets> {
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => WalletInfo(
-                wallet: wallet,
+                walletName: wallet.name,
               ),
             ),
           );

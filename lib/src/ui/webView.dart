@@ -72,7 +72,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   void _handleWalletsChanged() async {
     if (controller != null) {
-      await controller.evaluateJavascript(_walletsJS(widget.walletsController.value));
+      await controller
+          .evaluateJavascript(_walletsJS(widget.walletsController.value));
     }
   }
 
@@ -106,17 +107,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       isStartSearch = false;
     });
     currentURL = resolveURL(url);
-    if (currentURL != 'about:blank') {
-      updateSearchBar(0, currentURL);
-    } else {
-      searchBarController.valueWith(
-        progress: 0,
-        icon: Icons.search,
-        defautText: 'Search',
-        shouldHidRefresh: true,
-        submitedText: currentURL,
-      );
-    }
+    updateSearchBar(0, currentURL);
     if (controller != null) {
       await controller.loadUrl(currentURL);
     }
@@ -133,12 +124,14 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           await _handleLoad(text);
         },
         onCancelInput: () async {
+          searchBarController.valueWith(
+            submitedText: currentURL,
+          );
           setState(() {
             isStartSearch = false;
           });
         },
         onRefresh: () async {
-          print("onRefresh");
           setState(() {
             isStartSearch = false;
           });
@@ -158,9 +151,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   FlutterWebView.WebView get webView => FlutterWebView.WebView(
         initialUrl: currentURL,
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
+        javascriptChannels:
+            Set<FlutterWebView.JavascriptChannel>.of(_javascriptChannels),
         injectJavascript: _headJS(widget.headController.value) +
             _genesisJS(widget.genesis) +
-            _walletsJS(widget.walletsController.value),
+            _walletsJS(widget.walletsController.value) +
+            connexJS,
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
           if (widget.onWebViewChanged != null) {
@@ -172,48 +168,22 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onPageStarted: (String url) {
           currentURL = url;
-          if (currentURL != 'about:blank') {
-            updateSearchBar(0, currentURL);
-          } else {
-            searchBarController.valueWith(
-              progress: 0,
-              icon: Icons.search,
-              defautText: 'Search',
-              shouldHidRefresh: true,
-              submitedText: currentURL,
-            );
-          }
+          updateSearchBar(0, currentURL);
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
         },
         onPageFinished: (String url) {
-          currentURL = url;
-          if (currentURL != 'about:blank') {
-            updateSearchBar(1, currentURL);
-          } else {
-            searchBarController.valueWith(
-              progress: 0,
-              icon: Icons.search,
-              shouldHidRefresh: true,
-              submitedText: currentURL,
-            );
-          }
+          setState(() {
+            currentURL = url;
+          });
+          updateSearchBar(1, currentURL);
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
         },
         onProgressChanged: (double progress) {
-          if (currentURL != 'about:blank') {
-            updateSearchBar(progress, currentURL);
-          } else {
-            searchBarController.valueWith(
-              progress: 0,
-              icon: Icons.search,
-              shouldHidRefresh: true,
-              submitedText: currentURL,
-            );
-          }
+          updateSearchBar(progress, currentURL);
         },
       );
 
@@ -277,25 +247,35 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   void updateSearchBar(double progress, String url) {
-    Uri uri = Uri.parse(url);
-    IconData icon;
-    if (uri.scheme == 'https') {
-      icon = Icons.lock;
+    if (url != 'about:blank') {
+      Uri uri = Uri.parse(url);
+      IconData icon;
+      if (uri.scheme == 'https') {
+        icon = Icons.lock;
+      } else {
+        icon = Icons.lock_open;
+      }
+      searchBarController.valueWith(
+        progress: progress,
+        icon: icon,
+        defautText: getDomain(uri),
+        submitedText: url,
+      );
     } else {
-      icon = Icons.lock_open;
+      searchBarController.valueWith(
+        progress: 0,
+        icon: Icons.search,
+        defautText: 'Search',
+        shouldHidRefresh: true,
+        submitedText: currentURL,
+      );
     }
-    searchBarController.valueWith(
-      progress: progress,
-      icon: icon,
-      defautText: getDomain(uri),
-      submitedText: url,
-    );
   }
 
   String getDomain(Uri uri) {
     String host = uri.host;
     List<String> components = host.split('.');
-    if (components.length < 3) {
+    if (components.length <= 3) {
       return host;
     }
     return "${components[1]}.${components[2]}";
@@ -322,7 +302,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return Uri.encodeFull("https://cn.bing.com/search?q=$url");
   }
 
-  List<FlutterWebView.JavascriptChannel> _javascriptChannels() {
+  List<FlutterWebView.JavascriptChannel> get _javascriptChannels {
     FlutterWebView.JavascriptChannel thor = FlutterWebView.JavascriptChannel(
       name: 'Thor',
       onMessageReceived: (List<dynamic> arguments) async {
@@ -333,8 +313,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       },
     );
 
-    FlutterWebView.JavascriptChannel navigatedInPage =
-        FlutterWebView.JavascriptChannel(
+    FlutterWebView.JavascriptChannel vendor = FlutterWebView.JavascriptChannel(
       name: 'Vendor',
       onMessageReceived: (List<dynamic> arguments) async {
         debugPrint('Vendor arguments $arguments');
@@ -364,7 +343,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SignTxDialog(
               txMessages: txMessages,
               options: options,
-	      headController: widget.headController,
+              headController: widget.headController,
             ),
           );
         } else if (arguments[0] == 'signCert') {
@@ -376,12 +355,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SignCertificateDialog(
               certMessage: certMessage,
               options: options,
-	      headController: widget.headController,
+              headController: widget.headController,
             ),
           );
         }
         throw ArgumentError('unsupported method');
       },
     );
+    return [thor, vendor];
   }
 }

@@ -33,11 +33,11 @@ class SearchBarController extends ValueNotifier<SearchBarValue> {
     bool shouldHidRefresh,
   }) {
     this.value = SearchBarValue(
-      progress: progress,
-      icon: icon,
-      defautText: defautText,
-      submitedText: submitedText,
-      shouldHidRefresh: shouldHidRefresh,
+      progress: progress ?? this.value.progress,
+      icon: icon ?? this.value.icon,
+      defautText: defautText ?? this.value.defautText,
+      submitedText: submitedText ?? this.value.submitedText,
+      shouldHidRefresh: shouldHidRefresh ?? this.value.shouldHidRefresh,
     );
   }
 }
@@ -136,7 +136,7 @@ class SearchBarState extends State<SearchBar> {
         Row(
           children: <Widget>[
             AnimatedContainer(
-              duration: Duration(milliseconds: 100),
+              duration: Duration(milliseconds: 80),
               child: !isTexting
                   ? Container(
                       height: 40,
@@ -163,7 +163,7 @@ class SearchBarState extends State<SearchBar> {
                                       searchBarWidth = fullWidth - 85;
                                     });
                                     await Future.delayed(
-                                        Duration(milliseconds: 120));
+                                        Duration(milliseconds: 100));
                                     setState(() {
                                       isTexting = true;
                                     });

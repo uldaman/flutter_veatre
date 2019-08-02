@@ -36,9 +36,9 @@ class ManageWalletsState extends State<ManageWallets> {
   }
 
   Future<void> updateWallets() async {
+    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+    List<Wallet> wallets = await walletList(walletEntities);
     if (mounted) {
-      List<WalletEntity> walletEntities = await WalletStorage.readAll();
-      List<Wallet> wallets = await walletList(walletEntities);
       setState(() {
         this.wallets = wallets;
       });

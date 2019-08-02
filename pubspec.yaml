@@ -59,6 +59,8 @@ flutter:
   assets:
     - "assets/resource/en-mnemonic-word-list.txt"
     - "assets/blank.png"
+    - "assets/connex.js"
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

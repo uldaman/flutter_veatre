@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:veatre/common/driver.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
@@ -28,9 +29,10 @@ WalletsController testNetWalletsController;
 HeadController mainNetHeadController;
 HeadController testNetHeadController;
 Timer _timer;
-
+String connexJS;
 void main() {
   runZoned(() async {
+    connexJS = await rootBundle.loadString("assets/connex.js");
     mainNetWalletsController =
         WalletsController(await WalletStorage.wallets(Network.MainNet));
     testNetWalletsController =

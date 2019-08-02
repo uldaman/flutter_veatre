@@ -55,9 +55,9 @@ class SignTxDialogState extends State<SignTxDialog> {
   }
 
   Future<void> updateWallet() async {
+    WalletEntity walletEntity = await getWalletEntity(widget.options.signer);
+    Account acc = await AccountAPI.get(walletEntity.keystore.address);
     if (mounted) {
-      WalletEntity walletEntity = await getWalletEntity(widget.options.signer);
-      Account acc = await AccountAPI.get(walletEntity.keystore.address);
       setState(() {
         this.wallet = Wallet(
           account: acc,
@@ -100,43 +100,33 @@ class SignTxDialogState extends State<SignTxDialog> {
     int gas = 0;
     gas += txGas;
     List<CallResult> results = await callTx(addr, widget.options.gas);
-    bool hasVmError = false;
+    String vmErr = '';
     for (CallResult result in results) {
       gas += clauseGas;
       gas += (result.gasUsed.toDouble() * 1.2).toInt();
       if (result.reverted) {
-        hasVmError = true;
         Uint8List data = hexToBytes(result.data);
-        String vmErr = '''Transaction may fail/revert
+        vmErr = '''Transaction may fail/revert
 VM error: ${result.vmError}''';
         if (data.length > 4 + 32) {
           DecodingResult<String> err = StringType().decode(data.buffer, 4 + 32);
           vmErr += '''
           ${err.data}''';
         }
-        setState(() {
-          this.vmError = vmErr;
-        });
         break;
       }
     }
-    if (!hasVmError) {
+    if (mounted) {
       setState(() {
-        this.vmError = '';
+        this.vmError = vmErr;
       });
     }
     this.totalGas = widget.options.gas ?? gas;
     BigInt fee = estimateFee();
-    setState(() {
-      this.estimatedFee = fee;
-    });
-    if (this.wallet.account.energy < fee) {
+    if (mounted) {
       setState(() {
-        this.isInsufficient = true;
-      });
-    } else {
-      setState(() {
-        this.isInsufficient = false;
+        this.estimatedFee = fee;
+        this.isInsufficient = this.wallet.account.energy < fee;
       });
     }
   }
@@ -605,6 +595,7 @@ VM error: ${result.vmError}''';
                                     ),
                                   );
                                 } catch (err) {
+                                  print('send tx err $err');
                                   return alert(context, Text("Error"),
                                       "Send transaction failed");
                                 } finally {

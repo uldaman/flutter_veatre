@@ -26,8 +26,8 @@ class ActivitiesState extends State<Activities> {
   }
 
   void loadActivities() async {
+    List<Activity> activities = await ActivityStorage.queryAll();
     if (mounted) {
-      List<Activity> activities = await ActivityStorage.queryAll();
       setState(() {
         this.activities = activities;
       });

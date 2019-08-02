@@ -41,9 +41,9 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   }
 
   Future<void> updateWallet() async {
+    WalletEntity walletEntity = await getWalletEntity(widget.options.signer);
+    Account acc = await AccountAPI.get(walletEntity.keystore.address);
     if (mounted) {
-      WalletEntity walletEntity = await getWalletEntity(widget.options.signer);
-      Account acc = await AccountAPI.get(walletEntity.keystore.address);
       setState(() {
         this.wallet = Wallet(
           account: acc,

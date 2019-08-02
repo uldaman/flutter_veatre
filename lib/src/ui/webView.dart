@@ -72,7 +72,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   void _handleWalletsChanged() async {
     if (controller != null) {
-      await controller.evaluateJavascript(_walletsJS(widget.walletsController.value));
+      await controller
+          .evaluateJavascript(_walletsJS(widget.walletsController.value));
     }
   }
 
@@ -158,6 +159,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   FlutterWebView.WebView get webView => FlutterWebView.WebView(
         initialUrl: currentURL,
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
+        javascriptChannels: _javascriptChannels().toSet(),
         injectJavascript: _headJS(widget.headController.value) +
             _genesisJS(widget.genesis) +
             _walletsJS(widget.walletsController.value),
@@ -333,8 +335,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       },
     );
 
-    FlutterWebView.JavascriptChannel navigatedInPage =
-        FlutterWebView.JavascriptChannel(
+    FlutterWebView.JavascriptChannel vendor = FlutterWebView.JavascriptChannel(
       name: 'Vendor',
       onMessageReceived: (List<dynamic> arguments) async {
         debugPrint('Vendor arguments $arguments');
@@ -364,7 +365,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SignTxDialog(
               txMessages: txMessages,
               options: options,
-	      headController: widget.headController,
+              headController: widget.headController,
             ),
           );
         } else if (arguments[0] == 'signCert') {
@@ -376,12 +377,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SignCertificateDialog(
               certMessage: certMessage,
               options: options,
-	      headController: widget.headController,
+              headController: widget.headController,
             ),
           );
         }
         throw ArgumentError('unsupported method');
       },
     );
+    return <FlutterWebView.JavascriptChannel>[thor, vendor];
   }
 }

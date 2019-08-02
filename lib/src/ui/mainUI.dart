@@ -41,12 +41,6 @@ class MainUIState extends State<MainUI>
         await updateBackForward();
       });
     }
-    NetworkStorage.isMainNet.then((isMainNet) {
-      setState(() {
-        currentNet = isMainNet ? Network.MainNet : Network.TestNet;
-        netPageController.jumpToPage(isMainNet ? 0 : 1);
-      });
-    });
   }
 
   @override
@@ -71,16 +65,25 @@ class MainUIState extends State<MainUI>
       },
       physics: NeverScrollableScrollPhysics(),
     );
-    PageView pageView = PageView(
-      children: <Widget>[
-        mainNetPageView,
-        testNetPageView,
-      ],
-      physics: NeverScrollableScrollPhysics(),
-      controller: netPageController,
-    );
     return Scaffold(
-      body: pageView,
+      body: FutureBuilder(
+        future: NetworkStorage.isMainNet,
+        builder: (context, shot) {
+          if (shot.hasData) {
+            currentNet = shot.data ? Network.MainNet : Network.TestNet;
+            netPageController = PageController(initialPage: shot.data ? 0 : 1);
+            return PageView(
+              children: <Widget>[
+                mainNetPageView,
+                testNetPageView,
+              ],
+              physics: NeverScrollableScrollPhysics(),
+              controller: netPageController,
+            );
+          }
+          return SizedBox();
+        },
+      ),
       bottomNavigationBar: bottomNavigationBar,
     );
   }

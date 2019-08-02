@@ -83,7 +83,7 @@ class ImportWalletState extends State<ImportWallet> {
                       controller: mnemonicWalletNameController,
                       maxLength: 20,
                       decoration: InputDecoration(
-                        hintText: 'wallet name',
+                        hintText: 'Wallet Name',
                       ),
                     ),
                   ),
@@ -101,7 +101,7 @@ class ImportWalletState extends State<ImportWallet> {
                       controller: mnemonicPasswordController,
                       maxLength: 20,
                       decoration: InputDecoration(
-                        hintText: 'new password',
+                        hintText: 'New Password',
                       ),
                     ),
                   ),
@@ -142,7 +142,7 @@ class ImportWalletState extends State<ImportWallet> {
                       controller: keystoreWalletNameController,
                       maxLength: 20,
                       decoration: InputDecoration(
-                        hintText: 'wallet name',
+                        hintText: 'Wallet Name',
                       ),
                     ),
                   ),
@@ -160,7 +160,7 @@ class ImportWalletState extends State<ImportWallet> {
                       controller: keystorePasswordController,
                       maxLength: 20,
                       decoration: InputDecoration(
-                        hintText: 'keystore password',
+                        hintText: 'Keystore Password',
                       ),
                     ),
                   ),
@@ -183,29 +183,33 @@ class ImportWalletState extends State<ImportWallet> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Container(
-                  child: RaisedButton(
-                    color:
-                        currentPage == 0 ? Colors.lightBlueAccent : Colors.grey,
-                    textColor: Colors.white,
+                SizedBox(
+                  child: FlatButton(
+                    color: currentPage == 0 ? Colors.red : Colors.grey[200],
+                    textColor: currentPage == 0 ? Colors.white : Colors.blue,
                     child: Text('Mnemonic'),
                     onPressed: () {
-                      pageController.jumpTo(0);
+                      pageController.animateToPage(
+                        0,
+                        duration: Duration(milliseconds: 200),
+                        curve: Curves.easeIn,
+                      );
                     },
                   ),
                   width: MediaQuery.of(context).size.width * 0.5,
                   height: 50,
                 ),
-                Container(
-                  child: RaisedButton(
-                    color:
-                        currentPage == 1 ? Colors.lightBlueAccent : Colors.grey,
-                    textColor: Colors.white,
+                SizedBox(
+                  child: FlatButton(
+                    color: currentPage == 1 ? Colors.red : Colors.grey[200],
+                    textColor: currentPage == 1 ? Colors.white : Colors.blue,
                     child: Text('Keystore'),
                     onPressed: () {
-                      setState(() {
-                        pageController.jumpToPage(1);
-                      });
+                      pageController.animateToPage(
+                        1,
+                        duration: Duration(milliseconds: 200),
+                        curve: Curves.easeIn,
+                      );
                     },
                   ),
                   width: MediaQuery.of(context).size.width * 0.5,
@@ -374,7 +378,7 @@ class ImportWalletState extends State<ImportWallet> {
                                 loading = false;
                               });
                               return alert(context, Text('Warnning'),
-                                  "keystore is invalid");
+                                  "Keystore is invalid");
                             }
                             try {
                               await BipKeyDerivation.decryptedByKeystore(
@@ -394,7 +398,7 @@ class ImportWalletState extends State<ImportWallet> {
                                   context,
                                   title: Text('Warnning'),
                                   content: Text(
-                                      'this address has been already existed,would you like to cover it?'),
+                                      'This address has been already existed,would you like to cover it?'),
                                   confirmAction: () async {
                                     await WalletStorage.delete(existed.name);
                                     await WalletStorage.write(
@@ -420,7 +424,7 @@ class ImportWalletState extends State<ImportWallet> {
                                 loading = false;
                               });
                               return alert(context, Text('Warnning'),
-                                  "password is invalid");
+                                  "Password is invalid");
                             }
                             await WalletStorage.write(
                                 walletEntity: WalletEntity(

@@ -108,8 +108,7 @@ class ManageWalletsState extends State<ManageWallets> {
                           textColor: Colors.white,
                           child: Text("Import"),
                           onPressed: () async {
-                            await updateWallets();
-                            Navigator.pushNamed(
+                            await Navigator.pushNamed(
                                 context, ImportWallet.routeName);
                             await updateWallets();
                           },
@@ -266,7 +265,6 @@ class ManageWalletsState extends State<ManageWallets> {
               ),
             ),
           );
-          await updateWallets();
         },
       ),
     );

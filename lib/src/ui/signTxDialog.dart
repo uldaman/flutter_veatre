@@ -595,7 +595,6 @@ VM error: ${result.vmError}''';
                                     ),
                                   );
                                 } catch (err) {
-                                  print('send tx err $err');
                                   return alert(context, Text("Error"),
                                       "Send transaction failed");
                                 } finally {

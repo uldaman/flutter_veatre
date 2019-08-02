@@ -35,10 +35,10 @@ dev_dependencies:
   validators: ^2.0.0
   flutter_secure_storage: ^3.2.1+1
   dio: ^2.1.13
-  flutter_inappbrowser:
+  webview_flutter:
     git:
-      url: git://github.com/uldaman/flutter_inappbrowser.git
-      ref: connex
+      url: git@github.com:uldaman/webview_flutter.git
+      ref: custom
   bip_key_derivation:
     git:
       url: git://github.com/dinn2018/bip_key_derivation.git

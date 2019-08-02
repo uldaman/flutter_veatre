@@ -331,8 +331,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                   setState(() {
                                     loading = false;
                                   });
-                                  return alert(
-                                      context, Text("Error"), "Unkown error");
+                                  return alert(context, Text("Error"), "$err");
                                 } finally {
                                   setState(() {
                                     loading = false;

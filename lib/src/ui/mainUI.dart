@@ -126,10 +126,12 @@ class MainUIState extends State<MainUI>
                 title: t == "" ? 'New Tab' : t,
                 data: captureData,
               );
-              TabResult tabResult = await _present(TabViews(
-                id: currentNet == Network.MainNet ? mainNetID : testNetID,
-                net: currentNet,
-              ));
+              TabResult tabResult = await _present(
+                TabViews(
+                  id: currentNet == Network.MainNet ? mainNetID : testNetID,
+                  net: currentNet,
+                ),
+              );
               if (tabResult != null) {
                 if (tabResult.stage == TabStage.Created ||
                     tabResult.stage == TabStage.RemovedAll) {

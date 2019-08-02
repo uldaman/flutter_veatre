@@ -70,68 +70,41 @@ class ActivitiesState extends State<Activities> {
     int processBlock = activity.processBlock;
     return Container(
       child: Card(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 15, left: 15, right: 15),
-              child: Row(
+        child: Padding(
+          padding: EdgeInsets.only(left: 15, top: 10, right: 15),
+          child: Column(
+            children: <Widget>[
+              Row(
                 children: <Widget>[
                   Expanded(
-                    child: Column(
+                    child: Row(
                       children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Container(
-                                child: Text(
-                                  activity.comment,
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
+                        Card(
+                          color: activity.type == ActivityType.Transaction
+                              ? Colors.blue
+                              : Colors.red,
+                          child: Padding(
+                            padding: EdgeInsets.all(5),
+                            child: Text(
+                              activity.type == ActivityType.Transaction
+                                  ? 'TX'
+                                  : 'CERT',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Row(
-                                children: <Widget>[
-                                  Container(
-                                    margin: EdgeInsets.only(top: 10),
-                                    child: Card(
-                                      color: activity.type ==
-                                              ActivityType.Transaction
-                                          ? Colors.blue
-                                          : Colors.red,
-                                      child: Padding(
-                                        padding: EdgeInsets.all(5),
-                                        child: Text(
-                                          activity.type ==
-                                                  ActivityType.Transaction
-                                              ? 'TX'
-                                              : 'CERT',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 5),
+                          child: Text(
+                            '${activity.comment[0].toUpperCase()}${activity.comment.substring(1)}',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontSize: 16,
                             ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 10, right: 20),
-                              child: Text(
-                                dateString,
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -142,68 +115,101 @@ class ActivitiesState extends State<Activities> {
                           color: Colors.blue,
                           size: 20,
                         )
-                      : activity.status == ActivityStatus.Expired
+                      : processBlock == null
                           ? Icon(
-                              Icons.alarm_off,
-                              color: Colors.grey,
+                              Icons.update,
+                              color: Colors.blue,
                               size: 20,
                             )
-                          : activity.status == ActivityStatus.Reverted
+                          : activity.status == ActivityStatus.Expired
                               ? Icon(
-                                  Icons.close,
+                                  Icons.alarm_off,
                                   color: Colors.grey,
                                   size: 20,
                                 )
-                              : processBlock != null
-                                  ? SizedBox(
-                                      width: 15,
-                                      height: 15,
-                                      child: CircularProgressIndicator(
-                                        backgroundColor: Colors.grey[200],
-                                        value: (widget.headController.value
-                                                    .number -
-                                                processBlock) /
-                                            12,
-                                        strokeWidth: 2,
-                                      ),
+                              : activity.status == ActivityStatus.Reverted
+                                  ? Icon(
+                                      Icons.close,
+                                      color: Colors.grey,
+                                      size: 20,
                                     )
-                                  : Icon(
-                                      Icons.update,
-                                      color: Colors.blue,
-                                      size: 15,
-                                    )
+                                  : widget.headController.value.number -
+                                              processBlock >=
+                                          12
+                                      ? Icon(
+                                          Icons.check_circle_outline,
+                                          color: Colors.blue,
+                                          size: 20,
+                                        )
+                                      : SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            backgroundColor: Colors.grey[200],
+                                            value: (widget.headController.value
+                                                        .number -
+                                                    processBlock) /
+                                                12,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
                 ],
               ),
-            ),
-            Row(
-              children: <Widget>[
-                FlatButton(
-                  onPressed: () async {
-                    WalletEntity walletEntity =
-                        await WalletStorage.read(activity.walletName);
-                    if (walletEntity != null) {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => WalletInfo(
-                            walletName: activity.walletName,
+              Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Row(
+                  children: <Widget>[
+                    GestureDetector(
+                      child: Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(left: 3),
+                            child: Icon(
+                              Icons.featured_play_list,
+                              size: 26,
+                              color: Colors.orange,
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
-                  child: Text(
-                    activity.walletName,
-                    style: TextStyle(
-                      color: Colors.blue,
+                          Padding(
+                            padding: EdgeInsets.only(left: 5),
+                            child: Text(
+                              activity.walletName,
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () async {
+                        WalletEntity walletEntity =
+                            await WalletStorage.read(activity.walletName);
+                        if (walletEntity != null) {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => WalletInfo(
+                                walletName: activity.walletName,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
-                  ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          dateString,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            activity.type == ActivityType.Certificate
-                ? Padding(
-                    padding: EdgeInsets.only(bottom: 15, left: 15, right: 15),
-                    child: Row(
+              ),
+              activity.type == ActivityType.Certificate
+                  ? Row(
                       children: <Widget>[
                         Padding(
                           padding: EdgeInsets.only(right: 10),
@@ -228,13 +234,11 @@ class ActivitiesState extends State<Activities> {
                           ),
                         )
                       ],
-                    ))
-                : Padding(
-                    padding: EdgeInsets.only(bottom: 15, left: 15, right: 15),
-                    child: Column(
+                    )
+                  : Column(
                       children: <Widget>[
                         Padding(
-                          padding: EdgeInsets.only(bottom: 10),
+                          padding: EdgeInsets.only(left: 5, top: 15),
                           child: Row(
                             children: <Widget>[
                               Text(
@@ -264,91 +268,100 @@ class ActivitiesState extends State<Activities> {
                             ],
                           ),
                         ),
-                        Row(
-                          children: <Widget>[
-                            Text(
-                              'Fee',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: <Widget>[
-                                  Text(
-                                    content['fee'],
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(left: 5),
-                                    child: Text(
-                                      'VTHO',
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 10),
+                        Padding(
+                          padding: EdgeInsets.only(left: 5, top: 15),
+                          child: Row(
+                            children: <Widget>[
+                              Text(
+                                'Fee',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: <Widget>[
+                                    Text(
+                                      content['fee'],
+                                      style: TextStyle(color: Colors.black),
                                     ),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 5),
+                                      child: Text(
+                                        'VTHO',
+                                        style: TextStyle(
+                                            color: Colors.grey, fontSize: 10),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 5, top: 15),
+                          child: Row(
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.only(right: 5),
+                                child: Text(
+                                  'TXID',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
                                   ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.only(right: 10),
-                              child: Text(
-                                'TXID',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 12,
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: TextField(
-                                readOnly: true,
-                                enableInteractiveSelection: true,
-                                maxLines: null,
-                                decoration:
-                                    InputDecoration(border: InputBorder.none),
-                                controller:
-                                    TextEditingController(text: activity.hash),
-                                style:
-                                    TextStyle(color: Colors.blue, fontSize: 12),
-                              ),
-                            )
-                          ],
+                              Expanded(
+                                child: TextField(
+                                  readOnly: true,
+                                  enableInteractiveSelection: true,
+                                  maxLines: null,
+                                  decoration:
+                                      InputDecoration(border: InputBorder.none),
+                                  controller: TextEditingController(
+                                      text: activity.hash),
+                                  style: TextStyle(
+                                      color: Colors.blue, fontSize: 12),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                        Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.only(right: 10),
-                              child: Text(
-                                'Link',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 12,
+                        Padding(
+                          padding: EdgeInsets.only(left: 5),
+                          child: Row(
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.only(right: 10),
+                                child: Text(
+                                  'Link',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: TextField(
-                                readOnly: true,
-                                enableInteractiveSelection: true,
-                                maxLines: null,
-                                decoration:
-                                    InputDecoration(border: InputBorder.none),
-                                controller:
-                                    TextEditingController(text: activity.link),
-                                style:
-                                    TextStyle(color: Colors.blue, fontSize: 12),
-                              ),
-                            )
-                          ],
+                              Expanded(
+                                child: TextField(
+                                  readOnly: true,
+                                  enableInteractiveSelection: true,
+                                  maxLines: null,
+                                  decoration:
+                                      InputDecoration(border: InputBorder.none),
+                                  controller: TextEditingController(
+                                      text: activity.link),
+                                  style: TextStyle(
+                                      color: Colors.blue, fontSize: 12),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ],
-                    ),
-                  ),
-          ],
+                    )
+            ],
+          ),
         ),
       ),
     );

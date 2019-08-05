@@ -172,6 +172,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
+          setState(() {
+            isStartSearch = false;
+          });
         },
         onPageFinished: (String url) {
           setState(() {
@@ -181,6 +184,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
+          setState(() {
+            isStartSearch = false;
+          });
         },
         onProgressChanged: (double progress) {
           updateSearchBar(progress, currentURL);

@@ -189,7 +189,8 @@ class ActivitiesState extends State<Activities> {
                           await Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => WalletInfo(
-                                walletName: activity.walletName,
+                                walletEntity: walletEntity,
+                                headController: widget.headController,
                               ),
                             ),
                           );

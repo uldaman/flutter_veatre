@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/main.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
-
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/addressDetail.dart';
 import 'package:veatre/src/ui/createWallet.dart';
@@ -22,7 +21,7 @@ class ManageWallets extends StatefulWidget {
 }
 
 class ManageWalletsState extends State<ManageWallets> {
-  List<Wallet> wallets = [];
+  List<WalletEntity> walletEntities = [];
 
   @override
   void initState() {
@@ -37,10 +36,9 @@ class ManageWalletsState extends State<ManageWallets> {
 
   Future<void> updateWallets() async {
     List<WalletEntity> walletEntities = await WalletStorage.readAll();
-    List<Wallet> wallets = await walletList(walletEntities);
     if (mounted) {
       setState(() {
-        this.wallets = wallets;
+        this.walletEntities = walletEntities;
       });
     }
   }
@@ -77,7 +75,7 @@ class ManageWalletsState extends State<ManageWallets> {
               padding: EdgeInsets.only(bottom: 10),
               physics: ClampingScrollPhysics(),
               itemBuilder: buildWalletCard,
-              itemCount: wallets.length,
+              itemCount: walletEntities.length,
             ),
           ),
           Row(
@@ -125,8 +123,17 @@ class ManageWalletsState extends State<ManageWallets> {
     );
   }
 
+  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
+    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    return Wallet(
+      account: acc,
+      keystore: walletEntity.keystore,
+      name: walletEntity.name,
+    );
+  }
+
   Widget buildWalletCard(BuildContext context, int index) {
-    Wallet wallet = wallets[index];
+    WalletEntity walletEntity = walletEntities[index];
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 200,
@@ -158,7 +165,7 @@ class ManageWalletsState extends State<ManageWallets> {
                         Container(
                           margin: EdgeInsets.only(left: 15, top: 15),
                           child: Text(
-                            wallet.name,
+                            walletEntity.name,
                             style: TextStyle(
                               fontSize: 30,
                               color: Colors.white,
@@ -181,7 +188,7 @@ class ManageWalletsState extends State<ManageWallets> {
                                           begin: Offset(0, 1), end: Offset.zero)
                                       .animate(a),
                                   child: AddressDetail(
-                                    wallet: wallet,
+                                    walletEntity: walletEntity,
                                   ),
                                 );
                               },
@@ -191,9 +198,11 @@ class ManageWalletsState extends State<ManageWallets> {
                             children: <Widget>[
                               Text(
                                 '0x' +
-                                    wallet.keystore.address.substring(0, 8) +
+                                    walletEntity.keystore.address
+                                        .substring(0, 8) +
                                     '...' +
-                                    wallet.keystore.address.substring(32, 40),
+                                    walletEntity.keystore.address
+                                        .substring(32, 40),
                                 style: TextStyle(color: Colors.white),
                               ),
                               Container(
@@ -212,61 +221,82 @@ class ManageWalletsState extends State<ManageWallets> {
                   ],
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(top: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Text(
-                      wallet.account.formatBalance,
-                      style: TextStyle(fontSize: 30),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 5, right: 14, top: 10),
-                      child: Text(
-                        'VET',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 10,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(top: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Text(wallet.account.formatEnergy,
-                        style: TextStyle(fontSize: 12)),
-                    Container(
-                      margin: EdgeInsets.only(left: 5, right: 15, top: 2),
-                      child: Text(
-                        'VTHO',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 8,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
+              FutureBuilder(
+                future: walletFrom(walletEntity),
+                builder: (context, shot) {
+                  if (shot.hasData) {
+                    Wallet wallet = shot.data;
+                    return balance(wallet.account.formatBalance,
+                        wallet.account.formatEnergy);
+                  }
+                  return balance('0', '0');
+                },
+              )
             ],
           ),
         ),
         onTap: () async {
+          bool isMainNet = await NetworkStorage.isMainNet;
+          final headController =
+              isMainNet ? mainNetHeadController : testNetHeadController;
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => WalletInfo(
-                walletName: wallet.name,
+                walletEntity: walletEntity,
+                headController: headController,
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget balance(String balance, String energy) {
+    return Column(
+      children: <Widget>[
+        Container(
+          margin: EdgeInsets.only(top: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                balance,
+                style: TextStyle(fontSize: 30),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 5, right: 14, top: 10),
+                child: Text(
+                  'VET',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 10,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(top: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Text(energy, style: TextStyle(fontSize: 12)),
+              Container(
+                margin: EdgeInsets.only(left: 5, right: 15, top: 2),
+                child: Text(
+                  'VTHO',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 8,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -15,7 +15,8 @@ class Wallets extends StatefulWidget {
 }
 
 class WalletsState extends State<Wallets> {
-  List<Wallet> wallets = [];
+  List<WalletEntity> walletEntities = [];
+
   bool loading = true;
 
   @override
@@ -31,10 +32,9 @@ class WalletsState extends State<Wallets> {
 
   Future<void> updateWallets() async {
     List<WalletEntity> walletEntities = await WalletStorage.readAll();
-    List<Wallet> wallets = await walletList(walletEntities);
     if (mounted) {
       setState(() {
-        this.wallets = wallets;
+        this.walletEntities = walletEntities;
       });
     }
   }
@@ -69,7 +69,7 @@ class WalletsState extends State<Wallets> {
             Expanded(
               child: ListView.builder(
                 itemBuilder: buildWalletCard,
-                itemCount: wallets.length,
+                itemCount: walletEntities.length,
                 physics: ClampingScrollPhysics(),
               ),
             ),
@@ -81,7 +81,7 @@ class WalletsState extends State<Wallets> {
   }
 
   Widget buildWalletCard(BuildContext context, int index) {
-    Wallet wallet = wallets[index];
+    WalletEntity walletEntity = walletEntities[index];
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 170,
@@ -113,7 +113,7 @@ class WalletsState extends State<Wallets> {
                       child: Container(
                         padding: EdgeInsets.all(15),
                         child: Text(
-                          wallet.name,
+                          walletEntity.name,
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -124,58 +124,88 @@ class WalletsState extends State<Wallets> {
                       padding: EdgeInsets.only(left: 15, right: 15),
                       width: MediaQuery.of(context).size.width,
                       child: Text(
-                        '0x' + wallet.keystore.address,
+                        '0x' + walletEntity.keystore.address,
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(top: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Text(wallet.account.formatBalance),
-                    Container(
-                      margin: EdgeInsets.only(left: 5, right: 14),
-                      child: Text(
-                        'VET',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 10,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(top: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Text(wallet.account.formatEnergy),
-                    Container(
-                      margin: EdgeInsets.only(left: 5, right: 5),
-                      child: Text(
-                        'VTHO',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 10,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
+              FutureBuilder(
+                future: walletFrom(walletEntity),
+                builder: (context, shot) {
+                  if (shot.hasData) {
+                    Wallet wallet = shot.data;
+                    return balance(wallet.account.formatBalance,
+                        wallet.account.formatEnergy);
+                  }
+                  return balance('0', '0');
+                },
+              )
             ],
           ),
         ),
         onTap: () async {
-          Navigator.of(context).pop(wallet);
+          Navigator.of(context).pop(walletEntity);
         },
       ),
+    );
+  }
+
+  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
+    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    return Wallet(
+      account: acc,
+      keystore: walletEntity.keystore,
+      name: walletEntity.name,
+    );
+  }
+
+  Widget balance(String balance, String energy) {
+    return Column(
+      children: <Widget>[
+        Container(
+          margin: EdgeInsets.only(top: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                balance,
+                style: TextStyle(fontSize: 30),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 5, right: 14, top: 10),
+                child: Text(
+                  'VET',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 10,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(top: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Text(energy, style: TextStyle(fontSize: 12)),
+              Container(
+                margin: EdgeInsets.only(left: 5, right: 15, top: 2),
+                child: Text(
+                  'VTHO',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 8,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

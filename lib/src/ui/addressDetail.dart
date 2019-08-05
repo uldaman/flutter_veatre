@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:veatre/src/models/account.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 
 class AddressDetail extends StatefulWidget {
-  final Wallet wallet;
-  AddressDetail({this.wallet});
+  final WalletEntity walletEntity;
+  AddressDetail({this.walletEntity});
 
   @override
   AddressDetailState createState() => AddressDetailState();
@@ -18,7 +18,7 @@ class AddressDetailState extends State<AddressDetail> {
 
   @override
   Widget build(BuildContext context) {
-    Wallet wallet = widget.wallet;
+    WalletEntity walletEntity = widget.walletEntity;
     return Scaffold(
       backgroundColor: Colors.amberAccent,
       body: Column(
@@ -77,7 +77,7 @@ class AddressDetailState extends State<AddressDetail> {
                             height: 50,
                             child: Center(
                               child: Text(
-                                wallet.name,
+                                walletEntity.name,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 30,
@@ -94,7 +94,7 @@ class AddressDetailState extends State<AddressDetail> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     Text(
-                                      "0x${wallet.keystore.address}",
+                                      "0x${walletEntity.keystore.address}",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 12,
@@ -112,7 +112,7 @@ class AddressDetailState extends State<AddressDetail> {
                                 ),
                                 onPressed: () async {
                                   await Clipboard.setData(new ClipboardData(
-                                      text: '0x' + wallet.keystore.address));
+                                      text: '0x' + walletEntity.keystore.address));
                                   setState(() {
                                     isCopied = true;
                                   });
@@ -134,7 +134,7 @@ class AddressDetailState extends State<AddressDetail> {
                         width: MediaQuery.of(context).size.width - 30,
                         child: Center(
                           child: new QrImage(
-                            data: '0x' + wallet.keystore.address,
+                            data: '0x' + walletEntity.keystore.address,
                             size: MediaQuery.of(context).size.width - 200,
                           ),
                         ),

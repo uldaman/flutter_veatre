@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:veatre/main.dart';
 import 'package:veatre/src/api/TransactionAPI.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/models/account.dart';
@@ -12,33 +13,27 @@ import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 
 class WalletInfo extends StatefulWidget {
-  final String walletName;
-  WalletInfo({this.walletName});
+  final HeadController headController;
+  final WalletEntity walletEntity;
+
+  WalletInfo({this.headController, this.walletEntity});
 
   @override
   WalletInfoState createState() => WalletInfoState();
 }
 
 class WalletInfoState extends State<WalletInfo> {
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController originalPasswordController = TextEditingController();
-  TextEditingController newPasswordController = TextEditingController();
-
   bool loadMore = false;
   ScrollController _scrollController = new ScrollController();
   int offset = 0;
   int limit = 10;
   Wallet wallet;
   List<Transfer> transfers = [];
-  Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    updateWallet().then((wallet) {
-      setState(() {
-        this.wallet = wallet;
-      });
+    updateWallet().whenComplete(() {
       _getMoreData(wallet.keystore.address);
     });
     _scrollController.addListener(() async {
@@ -51,43 +46,47 @@ class WalletInfoState extends State<WalletInfo> {
         }
       }
     });
-
-    _timer = Timer.periodic(Duration(seconds: 10), (time) async {
-      await updateWallet();
-    });
+    widget.headController.addListener(updateWallet);
   }
 
-  Future<Wallet> updateWallet() async {
-    WalletEntity walletEntity = await WalletStorage.read(widget.walletName);
+  Future<void> updateWallet() async {
+    WalletEntity walletEntity = widget.walletEntity;
     Account acc = await AccountAPI.get(walletEntity.keystore.address);
-    return Wallet(
-      account: acc,
-      keystore: walletEntity.keystore,
-      name: walletEntity.name,
-    );
+    if (mounted) {
+      setState(() {
+        this.wallet = Wallet(
+          account: acc,
+          keystore: walletEntity.keystore,
+          name: walletEntity.name,
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
     _scrollController.dispose();
-    _timer.cancel();
   }
 
   _getMoreData(String address) async {
-    setState(() {
-      loadMore = true;
-    });
+    if (mounted) {
+      setState(() {
+        loadMore = true;
+      });
+    }
     List<Transfer> data = await TransactionAPI.filterTransfers(
       address,
       offset,
       limit,
     );
     offset += limit;
-    setState(() {
-      loadMore = false;
-      transfers.addAll(data);
-    });
+    if (mounted) {
+      setState(() {
+        loadMore = false;
+        transfers.addAll(data);
+      });
+    }
   }
 
   @override
@@ -203,7 +202,7 @@ class WalletInfoState extends State<WalletInfo> {
                           ),
                           Container(
                             child: Text(
-                              widget.walletName,
+                              widget.walletEntity.name,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 30,

@@ -29,7 +29,7 @@ class SignTxDialog extends StatefulWidget {
 
 class SignTxDialogState extends State<SignTxDialog> {
   Wallet wallet;
-
+  WalletEntity walletEntity;
   double priority = 0;
   String vmError = '';
   bool isInsufficient = false;
@@ -45,25 +45,23 @@ class SignTxDialogState extends State<SignTxDialog> {
   @override
   void initState() {
     super.initState();
-    updateSpendValue();
-    updateWallet().whenComplete(() {
-      setState(() {
-        this.loading = false;
+    getWalletEntity(widget.options.signer).then((walletEntity) {
+      this.walletEntity = walletEntity;
+      updateWallet().whenComplete(() {
+        setState(() {
+          this.loading = false;
+        });
+        widget.headController.addListener(updateWallet);
       });
-      widget.headController.addListener(updateWallet);
     });
+    updateSpendValue();
   }
 
   Future<void> updateWallet() async {
-    WalletEntity walletEntity = await getWalletEntity(widget.options.signer);
-    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    Wallet wallet = await walletFrom(walletEntity);
     if (mounted) {
       setState(() {
-        this.wallet = Wallet(
-          account: acc,
-          keystore: walletEntity.keystore,
-          name: walletEntity.name,
-        );
+        this.wallet = wallet;
       });
       await estimateGas(wallet.keystore.address);
     }
@@ -132,7 +130,7 @@ VM error: ${result.vmError}''';
   }
 
   Future<void> showWallets() async {
-    final Wallet selectedWallet = await Navigator.push(
+    final WalletEntity walletEntity = await Navigator.push(
       context,
       new MaterialPageRoute(
         builder: (context) => new Wallets(
@@ -140,16 +138,25 @@ VM error: ${result.vmError}''';
         ),
       ),
     );
-    if (selectedWallet != null) {
+    if (walletEntity != null) {
+      this.walletEntity = walletEntity;
       setState(() {
         loading = true;
-        this.wallet = selectedWallet;
       });
-      await estimateGas(selectedWallet.keystore.address);
+      await updateWallet();
       setState(() {
         loading = false;
       });
     }
+  }
+
+  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
+    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    return Wallet(
+      account: acc,
+      keystore: walletEntity.keystore,
+      name: walletEntity.name,
+    );
   }
 
   BigInt estimateFee() {
@@ -423,7 +430,7 @@ VM error: ${result.vmError}''';
               width: MediaQuery.of(context).size.width,
             ),
             Container(
-              margin: EdgeInsets.all(10),
+              margin: EdgeInsets.only(left: 10, right: 10),
               child: Row(
                 children: <Widget>[
                   Text(

@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
@@ -97,15 +96,6 @@ class WalletOperationState extends State<WalletOperation> {
                               decoration:
                                   InputDecoration(border: InputBorder.none),
                               controller: keystoreBackUpController,
-                              onTap: () async {
-                                keystoreBackUpController.selection =
-                                    TextSelection(
-                                  baseOffset: 0,
-                                  extentOffset: json
-                                      .encode(wallet.keystore.encoded)
-                                      .length,
-                                );
-                              },
                             ),
                           ),
                         ),

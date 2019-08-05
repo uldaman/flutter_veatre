@@ -27,29 +27,28 @@ class SignCertificateDialog extends StatefulWidget {
 class SignCertificateDialogState extends State<SignCertificateDialog> {
   bool loading = true;
   Wallet wallet;
+  WalletEntity walletEntity;
   TextEditingController passwordController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    updateWallet().whenComplete(() {
-      setState(() {
-        this.loading = false;
+    getWalletEntity(widget.options.signer).then((walletEntity) {
+      this.walletEntity = walletEntity;
+      updateWallet().whenComplete(() {
+        setState(() {
+          this.loading = false;
+        });
+        widget.headController.addListener(updateWallet);
       });
-      widget.headController.addListener(updateWallet);
     });
   }
 
   Future<void> updateWallet() async {
-    WalletEntity walletEntity = await getWalletEntity(widget.options.signer);
-    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    Wallet wallet = await walletFrom(walletEntity);
     if (mounted) {
       setState(() {
-        this.wallet = Wallet(
-          account: acc,
-          keystore: walletEntity.keystore,
-          name: walletEntity.name,
-        );
+        this.wallet = wallet;
       });
     }
   }
@@ -72,7 +71,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   }
 
   Future<void> showWallets() async {
-    final Wallet selectedWallet = await Navigator.push(
+    final WalletEntity walletEntity = await Navigator.push(
       context,
       new MaterialPageRoute(
         builder: (context) => new Wallets(
@@ -80,11 +79,19 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
         ),
       ),
     );
-    if (selectedWallet != null) {
-      setState(() {
-        this.wallet = selectedWallet;
-      });
+    if (walletEntity != null) {
+      this.walletEntity = walletEntity;
+      await updateWallet();
     }
+  }
+
+  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
+    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    return Wallet(
+      account: acc,
+      keystore: walletEntity.keystore,
+      name: walletEntity.name,
+    );
   }
 
   @override

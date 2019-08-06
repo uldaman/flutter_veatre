@@ -9,6 +9,7 @@ import 'package:veatre/src/api/transactionAPI.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
 import 'package:veatre/src/models/transaction.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
@@ -28,6 +29,8 @@ class SignTxDialog extends StatefulWidget {
 }
 
 class SignTxDialogState extends State<SignTxDialog> {
+  List<Clause> _clauses = [];
+  int _intrinsicGas = 0;
   Wallet wallet;
   WalletEntity walletEntity;
   double priority = 0;
@@ -38,20 +41,25 @@ class SignTxDialogState extends State<SignTxDialog> {
   BigInt estimatedFee = BigInt.from(0);
   bool loading = true;
   TextEditingController passwordController = TextEditingController();
-
   final txGas = 5000;
   final clauseGas = 16000;
 
   @override
   void initState() {
     super.initState();
+    for (SigningTxMessage txMsg in widget.txMessages) {
+      _clauses.add(txMsg.toClause());
+    }
+    _intrinsicGas = Transaction.intrinsicGas(_clauses);
     getWalletEntity(widget.options.signer).then((walletEntity) {
       this.walletEntity = walletEntity;
       updateWallet().whenComplete(() {
-        setState(() {
-          this.loading = false;
-        });
-        widget.headController.addListener(updateWallet);
+        if (mounted) {
+          setState(() {
+            this.loading = false;
+          });
+          widget.headController.addListener(updateWallet);
+        }
       });
     });
     updateSpendValue();
@@ -95,12 +103,10 @@ class SignTxDialogState extends State<SignTxDialog> {
   }
 
   estimateGas(String addr) async {
-    int gas = 0;
-    gas += txGas;
+    int gas = _intrinsicGas;
     List<CallResult> results = await callTx(addr, widget.options.gas);
     String vmErr = '';
     for (CallResult result in results) {
-      gas += clauseGas;
       gas += (result.gasUsed.toDouble() * 1.2).toInt();
       if (result.reverted) {
         Uint8List data = hexToBytes(result.data);
@@ -540,17 +546,15 @@ VM error: ${result.vmError}''';
                                 }
                                 int nonce = Random(DateTime.now().millisecond)
                                     .nextInt(1 << 32);
-                                List<Clause> clauses = [];
-                                for (SigningTxMessage txMsg
-                                    in widget.txMessages) {
-                                  clauses.add(txMsg.toClause());
-                                }
+                                bool isMainNet = await NetworkStorage.isMainNet;
+                                int chainTag =
+                                    isMainNet ? mainNetwork : testNetwork;
                                 final head = widget.headController.value;
                                 Transaction tx = Transaction(
                                   blockRef: BlockRef(number32: head.number),
                                   expiration: 30,
-                                  chainTag: testNetwork,
-                                  clauses: clauses,
+                                  chainTag: chainTag,
+                                  clauses: _clauses,
                                   gasPriceCoef: (255 * priority).toInt(),
                                   gas: totalGas,
                                   dependsOn:
@@ -601,13 +605,17 @@ VM error: ${result.vmError}''';
                                       signer: '0x' + wallet.keystore.address,
                                     ),
                                   );
-                                } catch (err) {
-                                  return alert(context, Text("Error"),
-                                      "Send transaction failed");
-                                } finally {
                                   setState(() {
                                     loading = false;
                                   });
+                                } catch (err) {
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                  alert(
+                                      context,
+                                      Text("Send transaction failed"),
+                                      "${err.response.data}");
                                 }
                               }, cancelAction: () async {
                                 passwordController.clear();

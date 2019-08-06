@@ -105,6 +105,39 @@ class Transaction {
     }
     return rlp.encode(unserializedParams);
   }
+
+  static int intrinsicGas(List<Clause> clauses) {
+    const txGas = 5000;
+    const clauseGas = 16000;
+    const clauseGasContractCreation = 48000;
+    if (clauses.length == 0) {
+      return txGas + clauseGas;
+    }
+    int sum = txGas;
+    for (Clause clause in clauses) {
+      if (clause.to.length > 0) {
+        sum += clauseGas;
+      } else {
+        sum += clauseGasContractCreation;
+      }
+      sum += dataGas(clause.data);
+    }
+    return sum;
+  }
+
+  static int dataGas(Uint8List data) {
+    const zgas = 4;
+    const nzgas = 68;
+    int sum = 0;
+    for (int i = 0; i < data.length; i++) {
+      if (data[i] == 0) {
+        sum += zgas;
+      } else {
+        sum += nzgas;
+      }
+    }
+    return sum;
+  }
 }
 
 class BlockRef {

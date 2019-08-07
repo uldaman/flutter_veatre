@@ -45,6 +45,7 @@ class WalletOperationState extends State<WalletOperation> {
             content: TextField(
               controller: passwordController,
               maxLength: 20,
+              obscureText: true,
               autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Password',
@@ -131,6 +132,7 @@ class WalletOperationState extends State<WalletOperation> {
                     controller: originalPasswordController,
                     maxLength: 20,
                     autofocus: true,
+                    obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'Original Password',
                     ),
@@ -138,6 +140,7 @@ class WalletOperationState extends State<WalletOperation> {
                   TextField(
                     controller: newPasswordController,
                     maxLength: 20,
+                    obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'New Password',
                     ),
@@ -204,6 +207,7 @@ class WalletOperationState extends State<WalletOperation> {
             content: TextField(
               controller: passwordController,
               maxLength: 20,
+              obscureText: true,
               autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Password',

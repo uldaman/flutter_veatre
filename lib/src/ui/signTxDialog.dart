@@ -507,6 +507,7 @@ VM error: ${result.vmError}''';
                                   content: TextField(
                                     controller: passwordController,
                                     maxLength: 20,
+                                    obscureText: true,
                                     autofocus: true,
                                     decoration: InputDecoration(
                                       hintText: 'Input your password',

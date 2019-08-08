@@ -6,11 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:veatre/src/models/block.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
-import 'package:veatre/common/driver.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/transaction.dart';
-import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/ui/signCertificateDialog.dart';
 import 'package:veatre/src/ui/signTxDialog.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
@@ -18,25 +18,19 @@ import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/searchBar.dart';
 import 'package:veatre/src/ui/apps.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
-import 'package:veatre/main.dart';
+import 'package:veatre/common/globals.dart';
 
 typedef onWebViewChangedCallback = void Function(
     FlutterWebView.WebViewController controller);
 
 class WebView extends StatefulWidget {
   final Key key;
-  final Block genesis;
-  final Driver driver;
-  final HeadController headController;
-  final WalletsController walletsController;
+  final Network network;
   final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
-    this.genesis,
-    this.driver,
-    this.headController,
-    this.walletsController,
+    this.network,
     this.onWebViewChanged,
   }) : super(key: key);
 
@@ -56,26 +50,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   );
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.headController.addListener(_handleHeadChanged);
-    widget.walletsController.addListener(_handleWalletsChanged);
-  }
-
-  void _handleHeadChanged() async {
-    if (controller != null) {
-      await controller.evaluateJavascript(_headJS(widget.headController.value));
-    }
-  }
-
-  void _handleWalletsChanged() async {
-    if (controller != null) {
-      await controller
-          .evaluateJavascript(_walletsJS(widget.walletsController.value));
-    }
-  }
 
   @override
   bool get wantKeepAlive => true;
@@ -153,10 +127,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
         javascriptChannels:
             Set<FlutterWebView.JavascriptChannel>.of(_javascriptChannels),
-        injectJavascript: _headJS(widget.headController.value) +
-            _genesisJS(widget.genesis) +
-            _walletsJS(widget.walletsController.value) +
-            connexJS,
+        injectJavascript: _initialParamsJS + Globals.connexJS,
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
           if (widget.onWebViewChanged != null) {
@@ -211,28 +182,21 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return result.encoded;
   }
 
-  String _walletsJS(List<String> wallets) {
-    String js = 'window.wallets=[';
-    for (String address in wallets) {
-      js += "'$address',";
+  String get _initialParamsJS {
+    final baseURL = Network.MainNet == widget.network
+        ? NetworkStorage.mainnet
+        : NetworkStorage.testnet;
+    final genesis = Globals.genesisFor(widget.network);
+    final initialHead = Globals.headControllerFor(widget.network).value;
+    List<String> initialWallets = Globals.walletsFor(widget.network);
+    String initialWalletsJS = '[';
+    for (String address in initialWallets) {
+      initialWalletsJS += "'$address',";
     }
-    js += "];";
-    return js;
-  }
-
-  String _headJS(Block head) {
-    return '''
-      window.block_head={
-        id: '${head.id}',
-        number:${head.number},
-        timestamp:${head.timestamp},
-        parentID:'${head.parentID}'
-      };''';
-  }
-
-  String _genesisJS(Block genesis) {
-    return '''
-      window.genesis={
+    initialWalletsJS += ']';
+    final js = '''
+    window.baseURL = '$baseURL';
+    window.genesis = {
         number:${genesis.number},
         id:'${genesis.id}',
         size:${genesis.size},
@@ -249,7 +213,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         signer:'${genesis.signer}',
         transactions:${genesis.transactions},
         isTrunk:${genesis.isTrunk}
-      };''';
+    };
+    window.initialWallets = $initialWalletsJS;
+    window.initialHead = {
+        id: '${initialHead.id}',
+        number:${initialHead.number},
+        timestamp:${initialHead.timestamp},
+        parentID:'${initialHead.parentID}'
+    };
+    ''';
+    print('js $js');
+    return js;
   }
 
   void updateSearchBar(double progress, String url) {
@@ -309,20 +283,25 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   List<FlutterWebView.JavascriptChannel> get _javascriptChannels {
-    FlutterWebView.JavascriptChannel thor = FlutterWebView.JavascriptChannel(
-      name: 'Thor',
+    FlutterWebView.JavascriptChannel net = FlutterWebView.JavascriptChannel(
+      name: 'Net',
       onMessageReceived: (List<dynamic> arguments) async {
-        debugPrint('Thor arguments $arguments');
-        dynamic data = await widget.driver.callMethod(arguments);
-        debugPrint("Thor response $data");
-        return data;
+        if (arguments.length > 0) {
+          final net = Globals.netFor(widget.network);
+          dynamic data =
+              await net.http(arguments[0], arguments[1], arguments[2]);
+          return data;
+        }
+        return null;
       },
     );
 
     FlutterWebView.JavascriptChannel vendor = FlutterWebView.JavascriptChannel(
       name: 'Vendor',
       onMessageReceived: (List<dynamic> arguments) async {
-        debugPrint('Vendor arguments $arguments');
+        if (arguments[0] == 'wallets') {
+          return Globals.walletsFor(widget.network);
+        }
         List<WalletEntity> walletEntities = await WalletStorage.readAll();
         if (walletEntities.length == 0) {
           return customAlert(
@@ -333,23 +312,21 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               await Navigator.of(context).pushNamed(ManageWallets.routeName);
               Navigator.pop(context);
             },
-            cancelAction: () async {
-              Navigator.pop(context);
-            },
           );
         }
         if (arguments[0] == 'signTx') {
+          SigningTxOptions options =
+              SigningTxOptions.fromJSON(arguments[2], currentURL);
+          _validate(options.signer);
           List<SigningTxMessage> txMessages = [];
           for (Map<String, dynamic> txMsg in arguments[1]) {
             txMessages.add(SigningTxMessage.fromJSON(txMsg));
           }
-          SigningTxOptions options =
-              SigningTxOptions.fromJSON(arguments[2], currentURL);
           return _showSigningDialog(
             SignTxDialog(
               txMessages: txMessages,
               options: options,
-              headController: widget.headController,
+              headController: Globals.headControllerFor(widget.network),
             ),
           );
         } else if (arguments[0] == 'signCert') {
@@ -357,17 +334,37 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               SigningCertMessage.fromJSON(arguments[1]);
           SigningCertOptions options =
               SigningCertOptions.fromJSON(arguments[2], currentURL);
+          _validate(options.signer);
           return _showSigningDialog(
             SignCertificateDialog(
               certMessage: certMessage,
               options: options,
-              headController: widget.headController,
+              headController: Globals.headControllerFor(widget.network),
             ),
           );
         }
         throw ArgumentError('unsupported method');
       },
     );
-    return [thor, vendor];
+
+    FlutterWebView.JavascriptChannel ticker = FlutterWebView.JavascriptChannel(
+      name: 'Ticker',
+      onMessageReceived: (List<dynamic> arguments) async {
+        print('Ticker head ${arguments[0]['head']} key ${widget.key}');
+        if (arguments.length > 0) {
+          final headController = Globals.headControllerFor(widget.network);
+          headController.value = BlockHead.fromJSON(arguments[0]['head']);
+        }
+        return null;
+      },
+    );
+    return [net, vendor, ticker];
+  }
+
+  void _validate(String signer) {
+    if (signer != null &&
+        !Globals.walletsFor(widget.network).contains(signer)) {
+      throw 'signer does not exist';
+    }
   }
 }

@@ -45,6 +45,7 @@ class WalletOperationState extends State<WalletOperation> {
             content: TextField(
               controller: passwordController,
               maxLength: 20,
+              obscureText: true,
               autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Password',
@@ -117,7 +118,6 @@ class WalletOperationState extends State<WalletOperation> {
         }, cancelAction: () async {
           passwordController.clear();
           FocusScope.of(context).requestFocus(FocusNode());
-          Navigator.pop(context);
         });
       }),
       buildCell("Change password", () async {
@@ -131,6 +131,7 @@ class WalletOperationState extends State<WalletOperation> {
                     controller: originalPasswordController,
                     maxLength: 20,
                     autofocus: true,
+                    obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'Original Password',
                     ),
@@ -138,6 +139,7 @@ class WalletOperationState extends State<WalletOperation> {
                   TextField(
                     controller: newPasswordController,
                     maxLength: 20,
+                    obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'New Password',
                     ),
@@ -195,7 +197,6 @@ class WalletOperationState extends State<WalletOperation> {
           originalPasswordController.clear();
           newPasswordController.clear();
           FocusScope.of(context).requestFocus(FocusNode());
-          Navigator.pop(context);
         });
       }),
       buildCell("Delete wallet", () async {
@@ -204,6 +205,7 @@ class WalletOperationState extends State<WalletOperation> {
             content: TextField(
               controller: passwordController,
               maxLength: 20,
+              obscureText: true,
               autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Password',

@@ -3,7 +3,7 @@ import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:veatre/main.dart';
+import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/addressDetail.dart';
@@ -27,9 +27,8 @@ class ManageWalletsState extends State<ManageWallets> {
   void initState() {
     super.initState();
     updateWallets();
-    NetworkStorage.isMainNet.then((isMainNet) {
-      final headController =
-          isMainNet ? mainNetHeadController : testNetHeadController;
+    NetworkStorage.currentNet.then((currentNet) {
+      final headController = Globals.headControllerFor(currentNet);
       headController.addListener(updateWallets);
     });
   }
@@ -236,9 +235,8 @@ class ManageWalletsState extends State<ManageWallets> {
           ),
         ),
         onTap: () async {
-          bool isMainNet = await NetworkStorage.isMainNet;
-          final headController =
-              isMainNet ? mainNetHeadController : testNetHeadController;
+          Network currentNet = await NetworkStorage.currentNet;
+          final headController = Globals.headControllerFor(currentNet);
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => WalletInfo(

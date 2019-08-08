@@ -100,6 +100,7 @@ class ImportWalletState extends State<ImportWallet> {
                     child: TextField(
                       controller: mnemonicPasswordController,
                       maxLength: 20,
+                      obscureText: true,
                       decoration: InputDecoration(
                         hintText: 'New Password',
                       ),
@@ -159,6 +160,7 @@ class ImportWalletState extends State<ImportWallet> {
                     child: TextField(
                       controller: keystorePasswordController,
                       maxLength: 20,
+                      obscureText: true,
                       decoration: InputDecoration(
                         hintText: 'Keystore Password',
                       ),
@@ -324,9 +326,6 @@ class ImportWalletState extends State<ImportWallet> {
                                         ManageWallets.routeName),
                                   );
                                 },
-                                cancelAction: () async {
-                                  Navigator.pop(context);
-                                },
                               );
                             }
                             await WalletStorage.write(
@@ -413,9 +412,6 @@ class ImportWalletState extends State<ImportWallet> {
                                       ModalRoute.withName(
                                           ManageWallets.routeName),
                                     );
-                                  },
-                                  cancelAction: () async {
-                                    Navigator.pop(context);
                                   },
                                 );
                               }

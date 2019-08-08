@@ -60,4 +60,48 @@ class Block {
       transactions: transactions,
     );
   }
+  get encoded => {
+        "number": number,
+        "id": id,
+        "size": size,
+        "parentID": parentID,
+        "timestamp": timestamp,
+        "gasLimit": gasLimit,
+        "beneficiary": beneficiary,
+        "gasUsed": gasUsed,
+        "totalScore": totalScore,
+        "txsRoot": txsRoot,
+        "txsFeatures": txsFeatures,
+        "stateRoot": stateRoot,
+        "receiptsRoot": receiptsRoot,
+        "signer": signer,
+        "isTrunk": isTrunk,
+        "transactions": transactions
+      };
+}
+
+class BlockHead {
+  String id;
+  int number;
+  int timestamp;
+  String parentID;
+  int txsFeatures;
+
+  BlockHead({
+    this.id,
+    this.number,
+    this.timestamp,
+    this.parentID,
+    this.txsFeatures,
+  });
+
+  factory BlockHead.fromJSON(Map<String, dynamic> parsedJSON) {
+    return BlockHead(
+      id: parsedJSON['id'],
+      number: parsedJSON['number'],
+      timestamp: parsedJSON['timestamp'],
+      parentID: parsedJSON['parentID'],
+      txsFeatures: parsedJSON['txsFeatures'],
+    );
+  }
 }

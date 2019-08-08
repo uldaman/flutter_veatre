@@ -24,12 +24,15 @@ class ActivityStorage {
     );
   }
 
-  static Future<List<Activity>> queryPendings(bool isMainNet) async {
+  static Future<List<Activity>> queryPendings(Network network) async {
     final Database db = await database;
     List<Map<String, dynamic>> rows = await db.query(
       activityTableName,
       where: 'status = ? and net = ?',
-      whereArgs: [ActivityStatus.Pending.index, isMainNet ? 0 : 1],
+      whereArgs: [
+        ActivityStatus.Pending.index,
+        network == Network.MainNet ? 0 : 1
+      ],
     );
     return List.from(rows.map((row) => Activity.fromJSON(row)));
   }

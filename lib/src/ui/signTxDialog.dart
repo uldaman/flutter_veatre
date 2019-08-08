@@ -3,7 +3,7 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:veatre/main.dart';
+import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/api/transactionAPI.dart';
 import 'package:veatre/src/models/account.dart';
@@ -507,6 +507,7 @@ VM error: ${result.vmError}''';
                                   content: TextField(
                                     controller: passwordController,
                                     maxLength: 20,
+                                    obscureText: true,
                                     autofocus: true,
                                     decoration: InputDecoration(
                                       hintText: 'Input your password',
@@ -621,7 +622,6 @@ VM error: ${result.vmError}''';
                                 passwordController.clear();
                                 FocusScope.of(context)
                                     .requestFocus(FocusNode());
-                                Navigator.pop(context);
                               });
                             },
                           ),

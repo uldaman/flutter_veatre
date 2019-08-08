@@ -13,20 +13,6 @@ Future alert(BuildContext context, Widget title, String message) async {
         content: Wrap(
           children: <Widget>[
             Text(message),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: <Widget>[
-            //     FlatButton(
-            //       child: const Text(
-            //         'OK',
-            //         style: TextStyle(color: Colors.blue),
-            //       ),
-            //       onPressed: () async {
-            //         Navigator.pop(context);
-            //       },
-            //     ),
-            //   ],
-            // )
           ],
         ),
       );
@@ -41,6 +27,10 @@ Future customAlert(
   Future<void> Function() confirmAction,
   Future<void> Function() cancelAction,
 }) async {
+  void Function() defauctAction = () {};
+  Future<void> Function() cancel = cancelAction ?? defauctAction;
+  Future<void> Function() ok = confirmAction ?? defauctAction;
+
   return showDialog(
     context: context,
     barrierDismissible: false,
@@ -52,7 +42,10 @@ Future customAlert(
         title: title,
         content: Wrap(
           children: <Widget>[
-            content,
+            Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: content,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -62,7 +55,7 @@ Future customAlert(
                     style: TextStyle(color: Colors.blue),
                   ),
                   onPressed: () async {
-                    await confirmAction();
+                    await ok();
                   },
                 ),
                 FlatButton(
@@ -71,7 +64,8 @@ Future customAlert(
                     style: TextStyle(color: Colors.red),
                   ),
                   onPressed: () async {
-                    await cancelAction();
+                    await cancel();
+                    Navigator.pop(context);
                   },
                 ),
               ],

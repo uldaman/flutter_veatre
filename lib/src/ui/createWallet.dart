@@ -46,6 +46,7 @@ class CreateWalletState extends State<CreateWallet> {
               controller: passwordController,
               maxLength: 20,
               autofocus: true,
+              obscureText: true,
               decoration: InputDecoration(
                 hintText: 'Password',
               ),
@@ -56,6 +57,7 @@ class CreateWalletState extends State<CreateWallet> {
             child: TextField(
               controller: repeatPasswordController,
               maxLength: 20,
+              obscureText: true,
               decoration: InputDecoration(
                 hintText: 'Repeat password',
               ),

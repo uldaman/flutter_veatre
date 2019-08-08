@@ -7,9 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/webView.dart';
-import 'package:veatre/common/driver.dart';
-import 'package:veatre/common/net.dart';
-import 'package:veatre/main.dart';
 
 class Snapshot {
   String title;
@@ -28,27 +25,23 @@ List<WebView> mainNetWebViews = [];
 List<Key> _testNetKeys = [];
 List<Snapshot> _testNetSnapshots = [];
 List<WebView> testNetWebViews = [];
-void createWebView(Network net, onWebViewChangedCallback onWebViewChanged) {
-  int id =
-      net == Network.MainNet ? mainNetWebViews.length : testNetWebViews.length;
+
+void createWebView(Network network, onWebViewChangedCallback onWebViewChanged) {
+  int id = network == Network.MainNet
+      ? mainNetWebViews.length
+      : testNetWebViews.length;
   LabeledGlobalKey<WebViewState> key = LabeledGlobalKey<WebViewState>(
-      net == Network.MainNet ? 'mainNetWebview$id' : 'testNetWebview$id');
+      network == Network.MainNet
+          ? 'mainNetWebview###$id'
+          : 'testNetWebview###$id');
   WebView webView = new WebView(
     key: key,
-    genesis: net == Network.MainNet ? mainNetGenesis : testNetGenesis,
-    driver: net == Network.MainNet
-        ? Driver(Net(NetworkStorage.mainnet))
-        : Driver(Net(NetworkStorage.testnet)),
-    headController:
-        net == Network.MainNet ? mainNetHeadController : testNetHeadController,
-    walletsController: net == Network.MainNet
-        ? mainNetWalletsController
-        : testNetWalletsController,
+    network: network,
     onWebViewChanged: (controller) async {
       onWebViewChanged(controller);
     },
   );
-  if (net == Network.MainNet) {
+  if (network == Network.MainNet) {
     _mainNetKeys.add(key);
     _mainNetSnapshots.add(Snapshot());
     mainNetWebViews.add(webView);

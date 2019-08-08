@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:veatre/main.dart';
+import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
@@ -349,7 +349,6 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                 passwordController.clear();
                                 FocusScope.of(context)
                                     .requestFocus(FocusNode());
-                                Navigator.pop(context);
                               });
                             },
                           ),

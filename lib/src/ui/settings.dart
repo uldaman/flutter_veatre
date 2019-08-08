@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:veatre/main.dart';
+import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/network.dart';
@@ -44,13 +44,10 @@ class SettingsState extends State<Settings> {
         Icons.alarm,
         'Activities',
         () async {
-          bool isMainNet = await NetworkStorage.isMainNet;
+          final headController = await Globals.headControllerForCurrentNet;
           await Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => Activities(
-                headController:
-                    isMainNet ? mainNetHeadController : testNetHeadController,
-              ),
+              builder: (context) => Activities(headController: headController),
             ),
           );
         },

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/walletInfo.dart';
-import 'package:veatre/main.dart';
+import 'package:veatre/common/globals.dart';
 
 class Activities extends StatefulWidget {
   final HeadController headController;
@@ -17,7 +17,6 @@ class Activities extends StatefulWidget {
 
 class ActivitiesState extends State<Activities> {
   List<Activity> activities = [];
-
   @override
   void initState() {
     super.initState();

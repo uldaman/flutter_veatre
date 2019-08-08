@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bip_key_derivation/keystore.dart';
-import 'package:veatre/main.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/common/globals.dart';
 
 class WalletStorage {
   static final storage = new FlutterSecureStorage();
@@ -100,7 +100,7 @@ class WalletStorage {
           value: json.encode(walletEntity.encoded),
         );
       }
-      mainNetWalletsController.value = await wallets(Network.MainNet);
+      Globals.mainNetWallets = await wallets(Network.MainNet);
     } else {
       await storage.write(
         key: _testNetWalletPrefix + walletEntity.name,
@@ -112,7 +112,7 @@ class WalletStorage {
           value: json.encode(walletEntity.encoded),
         );
       }
-      testNetWalletsController.value = await wallets(Network.MainNet);
+      Globals.testNetWallets = await wallets(Network.TestNet);
     }
   }
 
@@ -138,10 +138,10 @@ class WalletStorage {
     bool isMainNet = await NetworkStorage.isMainNet;
     if (isMainNet) {
       await storage.delete(key: _mainNetWalletPrefix + name);
-      mainNetWalletsController.value = await wallets(Network.MainNet);
+      Globals.mainNetWallets = await wallets(Network.MainNet);
     } else {
       await storage.delete(key: _testNetWalletPrefix + name);
-      testNetWalletsController.value = await wallets(Network.TestNet);
+      Globals.testNetWallets = await wallets(Network.TestNet);
     }
   }
 }

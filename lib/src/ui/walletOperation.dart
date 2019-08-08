@@ -118,7 +118,6 @@ class WalletOperationState extends State<WalletOperation> {
         }, cancelAction: () async {
           passwordController.clear();
           FocusScope.of(context).requestFocus(FocusNode());
-          Navigator.pop(context);
         });
       }),
       buildCell("Change password", () async {
@@ -198,7 +197,6 @@ class WalletOperationState extends State<WalletOperation> {
           originalPasswordController.clear();
           newPasswordController.clear();
           FocusScope.of(context).requestFocus(FocusNode());
-          Navigator.pop(context);
         });
       }),
       buildCell("Delete wallet", () async {

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/main.dart';
-import 'package:veatre/common/driver.dart';
 
 class Networks extends StatefulWidget {
   static const routeName = '/networks';
@@ -25,11 +23,6 @@ class NetworksState extends State<Networks> {
 
   Future<void> changeNet() async {
     await NetworkStorage.set(isMainNet: !isMainnet);
-    if (await NetworkStorage.isMainNet) {
-      mainNetHeadController.value = await Driver.head(mainNet);
-    } else {
-      testNetHeadController.value = await Driver.head(testNet);
-    }
     setState(() {
       isMainnet = !isMainnet;
     });

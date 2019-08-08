@@ -125,8 +125,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   FlutterWebView.WebView get webView => FlutterWebView.WebView(
         initialUrl: currentURL,
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
-        javascriptChannels:
-            Set<FlutterWebView.JavascriptChannel>.of(_javascriptChannels),
+        javascriptHandlers:
+            Set<FlutterWebView.JavascriptHandler>.of(_javascriptChannels),
         injectJavascript: _initialParamsJS + Globals.connexJS,
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
@@ -194,7 +194,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       initialWalletsJS += "'$address',";
     }
     initialWalletsJS += ']';
-    final js = '''
+    return '''
     window.baseURL = '$baseURL';
     window.genesis = {
         number:${genesis.number},
@@ -222,8 +222,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         parentID:'${initialHead.parentID}'
     };
     ''';
-    print('js $js');
-    return js;
   }
 
   void updateSearchBar(double progress, String url) {
@@ -282,10 +280,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return Uri.encodeFull("https://cn.bing.com/search?q=$url");
   }
 
-  List<FlutterWebView.JavascriptChannel> get _javascriptChannels {
-    FlutterWebView.JavascriptChannel net = FlutterWebView.JavascriptChannel(
+  List<FlutterWebView.JavascriptHandler> get _javascriptChannels {
+    FlutterWebView.JavascriptHandler net = FlutterWebView.JavascriptHandler(
       name: 'Net',
       onMessageReceived: (List<dynamic> arguments) async {
+        print('Net $arguments');
         if (arguments.length > 0) {
           final net = Globals.netFor(widget.network);
           dynamic data =
@@ -296,7 +295,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       },
     );
 
-    FlutterWebView.JavascriptChannel vendor = FlutterWebView.JavascriptChannel(
+    FlutterWebView.JavascriptHandler vendor = FlutterWebView.JavascriptHandler(
       name: 'Vendor',
       onMessageReceived: (List<dynamic> arguments) async {
         if (arguments[0] == 'wallets') {
@@ -307,7 +306,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           return customAlert(
             context,
             title: Text('No wallet available'),
-            content: Text('Create a new wallet?'),
+            content: Text('Create or import a new wallet?'),
             confirmAction: () async {
               await Navigator.of(context).pushNamed(ManageWallets.routeName);
               Navigator.pop(context);
@@ -347,7 +346,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       },
     );
 
-    FlutterWebView.JavascriptChannel ticker = FlutterWebView.JavascriptChannel(
+    FlutterWebView.JavascriptHandler ticker = FlutterWebView.JavascriptHandler(
       name: 'Ticker',
       onMessageReceived: (List<dynamic> arguments) async {
         print('Ticker head ${arguments[0]['head']} key ${widget.key}');

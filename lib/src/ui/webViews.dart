@@ -31,9 +31,7 @@ void createWebView(Network network, onWebViewChangedCallback onWebViewChanged) {
       ? mainNetWebViews.length
       : testNetWebViews.length;
   LabeledGlobalKey<WebViewState> key = LabeledGlobalKey<WebViewState>(
-      network == Network.MainNet
-          ? 'mainNetWebview###$id'
-          : 'testNetWebview###$id');
+      network == Network.MainNet ? 'mainNetWebview$id' : 'testNetWebview$id');
   WebView webView = new WebView(
     key: key,
     network: network,

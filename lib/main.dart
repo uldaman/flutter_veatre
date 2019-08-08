@@ -20,7 +20,6 @@ Timer _timer;
 void main() {
   runZoned(() async {
     await initialGlobals();
-    // await syncHead();
     runApp(App());
   }, onError: (dynamic err, StackTrace stack) {
     print("unhandled error: $err");
@@ -37,71 +36,6 @@ Future<void> initialGlobals() async {
   Globals.testNetHeadController =
       HeadController(BlockHead.fromJSON(Globals.mainNetGenesis.encoded));
 }
-
-Future<void> syncHead() async {
-  // BlockHead _testNetCurrentHead =
-  //     BlockHead.fromJSON(Globals.testNetGenesis.encoded);
-  // BlockHead _mainNetCurrentHead = Globals.mainNetGenesis.encoded;
-  // try {
-  //   _mainNetCurrentHead = await Net.head(Globals.mainNet);
-  //   _testNetCurrentHead = await Net.head(Globals.testNet);
-  // } catch (e) {
-  //   print("network error: $e");
-  // }
-  Globals.mainNetHeadController =
-      HeadController(BlockHead.fromJSON(Globals.testNetGenesis.encoded));
-  Globals.testNetHeadController =
-      HeadController(BlockHead.fromJSON(Globals.mainNetGenesis.encoded));
-  // _timer = Timer.periodic(Duration(seconds: 10), (time) async {
-  //   try {
-  //     bool isMainNet = await NetworkStorage.isMainNet;
-  //     Block head;
-  //     if (isMainNet) {
-  //       head = await Net.head(Globals.mainNet);
-  //       if (head.number != _mainNetCurrentHead.number) {
-  //         _mainNetCurrentHead = head;
-  //         Globals.mainNetHeadController.value = _mainNetCurrentHead;
-  //       }
-  //     } else {
-  //       head = await Net.head(Globals.testNet);
-  //       if (head.number != _testNetCurrentHead.number) {
-  //         _testNetCurrentHead = head;
-  //         Globals.testNetHeadController.value = _testNetCurrentHead;
-  //       }
-  //     }
-  //     await syncActivities(isMainNet, head.number);
-  //   } catch (e) {
-  //     print("sync block error: $e");
-  //   }
-  // });
-}
-
-// Future<void> syncActivities(bool isMainNet, int headNumber) async {
-//   List<Activity> activities = await ActivityStorage.queryPendings(isMainNet);
-//   for (Activity activity in activities) {
-//     String txID = activity.hash;
-//     final net = isMainNet ? Globals.mainNet : Globals.testNet;
-//     Map<String, dynamic> receipt = await net.getReceipt(txID);
-//     if (receipt != null) {
-//       int processBlock = receipt['meta']['blockNumber'];
-//       if (activity.processBlock == null) {
-//         await ActivityStorage.update(
-//             activity.id, {'processBlock': processBlock});
-//       }
-//       bool reverted = receipt['reverted'];
-//       if (reverted) {
-//         await ActivityStorage.update(
-//             activity.id, {'status': ActivityStatus.Reverted.index});
-//       } else if (headNumber - processBlock >= 12) {
-//         await ActivityStorage.update(
-//             activity.id, {'status': ActivityStatus.Finished.index});
-//       }
-//     } else if (headNumber - activity.block >= 30) {
-//       await ActivityStorage.update(
-//           activity.id, {'status': ActivityStatus.Expired.index});
-//     }
-//   }
-// }
 
 class App extends StatefulWidget {
   @override

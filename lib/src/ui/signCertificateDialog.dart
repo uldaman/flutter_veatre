@@ -7,6 +7,7 @@ import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
 import 'package:veatre/src/api/accountAPI.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/wallets.dart';
 import 'package:veatre/src/ui/alert.dart';
@@ -16,9 +17,13 @@ import 'package:veatre/src/storage/activitiyStorage.dart';
 class SignCertificateDialog extends StatefulWidget {
   final SigningCertMessage certMessage;
   final SigningCertOptions options;
-  final HeadController headController;
+  final Network network;
 
-  SignCertificateDialog({this.certMessage, this.options, this.headController});
+  SignCertificateDialog({
+    this.certMessage,
+    this.options,
+    this.network,
+  });
 
   @override
   SignCertificateDialogState createState() => SignCertificateDialogState();
@@ -39,7 +44,11 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
         setState(() {
           this.loading = false;
         });
-        widget.headController.addListener(updateWallet);
+        Globals.watchBlockHead((blockHeadForNetwork) async {
+          if (blockHeadForNetwork.network == widget.network) {
+            await updateWallet();
+          }
+        });
       });
     });
   }
@@ -55,18 +64,21 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
 
   Future<WalletEntity> getWalletEntity(String signer) async {
     if (signer != null) {
-      List<WalletEntity> walletEntities = await WalletStorage.readAll();
+      List<WalletEntity> walletEntities =
+          await WalletStorage.readAll(widget.network);
       for (WalletEntity walletEntity in walletEntities) {
         if ('0x' + walletEntity.keystore.address == signer) {
           return walletEntity;
         }
       }
     }
-    WalletEntity mianWalletEntity = await WalletStorage.getMainWallet();
+    WalletEntity mianWalletEntity =
+        await WalletStorage.getMainWallet(widget.network);
     if (mianWalletEntity != null) {
       return mianWalletEntity;
     }
-    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+    List<WalletEntity> walletEntities =
+        await WalletStorage.readAll(widget.network);
     return walletEntities[0];
   }
 
@@ -75,7 +87,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
       context,
       new MaterialPageRoute(
         builder: (context) => new Wallets(
-          headController: widget.headController,
+          network: widget.network,
         ),
       ),
     );
@@ -307,8 +319,8 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                   );
                                 }
                                 try {
-                                  int timestamp =
-                                      widget.headController.value.timestamp;
+                                  final head = Globals.head(widget.network);
+                                  int timestamp = head.timestamp;
                                   Certificate cert = Certificate(
                                     certMessage: widget.certMessage,
                                     timestamp: timestamp,
@@ -320,10 +332,11 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                       keystore: wallet.keystore,
                                       name: wallet.name,
                                     ),
+                                    widget.network,
                                   );
                                   await ActivityStorage.insert(
                                     Activity(
-                                      block: widget.headController.value.number,
+                                      block: head.number,
                                       content:
                                           json.encode(cert.encoded.encoded),
                                       link: cert.domain,

@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:bip_key_derivation/keystore.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
@@ -362,7 +363,7 @@ class GenerateWalletState extends State<GenerateWallet> {
                           name: widget.walletName,
                           keystore: keystore,
                         ),
-                        isMainWallet: true,
+                        network: await NetworkStorage.currentNet,
                       );
                       setState(() {
                         this.loading = false;

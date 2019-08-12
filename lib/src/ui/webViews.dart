@@ -18,11 +18,9 @@ class Snapshot {
   });
 }
 
-List<Key> _mainNetKeys = [];
 List<Snapshot> _mainNetSnapshots = [];
 List<WebView> mainNetWebViews = [];
 
-List<Key> _testNetKeys = [];
 List<Snapshot> _testNetSnapshots = [];
 List<WebView> testNetWebViews = [];
 
@@ -40,11 +38,9 @@ void createWebView(Network network, onWebViewChangedCallback onWebViewChanged) {
     },
   );
   if (network == Network.MainNet) {
-    _mainNetKeys.add(key);
     _mainNetSnapshots.add(Snapshot());
     mainNetWebViews.add(webView);
   } else {
-    _testNetKeys.add(key);
     _testNetSnapshots.add(Snapshot());
     testNetWebViews.add(webView);
   }
@@ -78,25 +74,23 @@ int tabshotLen(Network net) {
 
 void removeTab(Network net, int id) {
   if (net == Network.MainNet) {
-    _mainNetKeys.removeAt(id);
-    _mainNetSnapshots.removeAt(id);
     mainNetWebViews.removeAt(id);
+    _mainNetSnapshots.removeAt(id);
   } else {
-    _testNetKeys.removeAt(id);
-    _testNetSnapshots.removeAt(id);
     testNetWebViews.removeAt(id);
+    _testNetSnapshots.removeAt(id);
   }
 }
 
 void removeAllTabs(Network net) {
   if (net == Network.MainNet) {
-    _mainNetKeys.clear();
+    // _mainNetKeys.clear();
     _mainNetSnapshots.clear();
     mainNetWebViews.clear();
   } else {
     _testNetSnapshots.clear();
     testNetWebViews.clear();
-    _testNetKeys.clear();
+    // _testNetKeys.clear();
   }
 }
 
@@ -110,9 +104,9 @@ FlutterWebView.WebViewController _controllerAt(Network net, int id) {
 
 LabeledGlobalKey<WebViewState> _keyAt(Network net, int id) {
   if (net == Network.MainNet) {
-    return _mainNetKeys[id];
+    return mainNetWebViews[id].key;
   }
-  return _testNetKeys[id];
+  return testNetWebViews[id].key;
 }
 
 List<Snapshot> snapshots(Network net) {

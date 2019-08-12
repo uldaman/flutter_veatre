@@ -26,6 +26,13 @@ class TabViews extends StatefulWidget {
 }
 
 class TabViewsState extends State<TabViews> {
+  int selectedTab;
+  @override
+  void initState() {
+    super.initState();
+    selectedTab = widget.id;
+  }
+
   @override
   Widget build(BuildContext context) {
     double ratio = MediaQuery.of(context).size.width /
@@ -34,6 +41,20 @@ class TabViewsState extends State<TabViews> {
       appBar: AppBar(
         backgroundColor: Colors.grey[50],
         title: Text('Tabs'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () async {
+            // if(snapshots(widget.net).length == 0) {
+
+            // }
+            Navigator.of(context).pop(
+              TabResult(
+                id: selectedTab,
+                stage: TabStage.Selected,
+              ),
+            );
+          },
+        ),
         actions: <Widget>[
           FlatButton(
             child: Text(
@@ -113,7 +134,7 @@ class TabViewsState extends State<TabViews> {
             BoxShadow(
               blurRadius: 2,
               offset: Offset(2, 2),
-              color: index == widget.id ? Colors.blue : Colors.black87,
+              color: index == selectedTab ? Colors.blue : Colors.black87,
             )
           ],
           borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -154,6 +175,11 @@ class TabViewsState extends State<TabViews> {
                           size: 15,
                         ),
                         onPressed: () async {
+                          if (index == selectedTab) {
+                            selectedTab = index - 1;
+                          } else if (index < selectedTab) {
+                            selectedTab--;
+                          }
                           setState(() {
                             removeTab(widget.net, index);
                           });

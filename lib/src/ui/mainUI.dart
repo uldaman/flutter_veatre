@@ -18,8 +18,7 @@ class MainUI extends StatefulWidget {
   MainUIState createState() => MainUIState();
 }
 
-class MainUIState extends State<MainUI>
-    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
+class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
   Network currentNet;
   int mainNetID = 0;
   int testNetID = 0;
@@ -52,17 +51,23 @@ class MainUIState extends State<MainUI>
     super.build(context);
     PageView mainNetPageView = PageView.builder(
       controller: mainNetPageController,
+      pageSnapping: true,
       itemCount: mainNetWebViews.length,
       itemBuilder: (context, index) {
-        return mainNetWebViews[index];
+        return KeepAlive(
+          child: mainNetWebViews[index],
+        );
       },
       physics: NeverScrollableScrollPhysics(),
     );
     PageView testNetPageView = PageView.builder(
       controller: testNetPageController,
+      pageSnapping: true,
       itemCount: testNetWebViews.length,
       itemBuilder: (context, index) {
-        return testNetWebViews[index];
+        return KeepAlive(
+          child: testNetWebViews[index],
+        );
       },
       physics: NeverScrollableScrollPhysics(),
     );
@@ -79,6 +84,7 @@ class MainUIState extends State<MainUI>
                 testNetPageView,
               ],
               physics: NeverScrollableScrollPhysics(),
+              pageSnapping: true,
               controller: netPageController,
             );
           }
@@ -258,5 +264,30 @@ class MainUIState extends State<MainUI>
       },
     );
     return result;
+  }
+}
+
+class KeepAlive extends StatefulWidget {
+  final Widget child;
+
+  KeepAlive({this.child});
+
+  @override
+  KeepAliveState createState() {
+    return KeepAliveState();
+  }
+}
+
+class KeepAliveState extends State<KeepAlive>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Container(
+      child: widget.child,
+    );
   }
 }

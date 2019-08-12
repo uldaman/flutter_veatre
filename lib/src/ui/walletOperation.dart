@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:bip_key_derivation/keystore.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
@@ -178,7 +179,7 @@ class WalletOperationState extends State<WalletOperation> {
             await WalletStorage.write(
               walletEntity:
                   WalletEntity(keystore: newKeyStore, name: wallet.name),
-              isMainWallet: true,
+              network: await NetworkStorage.currentNet,
             );
             return alert(
                 context, Text('Success'), 'Password changed successfully');
@@ -230,7 +231,10 @@ class WalletOperationState extends State<WalletOperation> {
               wallet.keystore,
               password,
             );
-            await WalletStorage.delete(wallet.name);
+            await WalletStorage.delete(
+              wallet.name,
+              await NetworkStorage.currentNet,
+            );
             Navigator.popUntil(
                 context, ModalRoute.withName(ManageWallets.routeName));
           } catch (err) {

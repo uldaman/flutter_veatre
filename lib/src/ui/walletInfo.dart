@@ -7,16 +7,17 @@ import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/api/TransactionAPI.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/models/account.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/walletOperation.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 
 class WalletInfo extends StatefulWidget {
-  final HeadController headController;
+  final Network network;
   final WalletEntity walletEntity;
 
-  WalletInfo({this.headController, this.walletEntity});
+  WalletInfo({this.network, this.walletEntity});
 
   @override
   WalletInfoState createState() => WalletInfoState();
@@ -46,7 +47,11 @@ class WalletInfoState extends State<WalletInfo> {
         }
       }
     });
-    widget.headController.addListener(updateWallet);
+    Globals.watchBlockHead((blockHeadForNetwork) async {
+      if (blockHeadForNetwork.network == widget.network) {
+        await updateWallet();
+      }
+    });
   }
 
   Future<void> updateWallet() async {

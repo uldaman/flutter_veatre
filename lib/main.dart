@@ -3,6 +3,7 @@ import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
@@ -14,8 +15,6 @@ import 'package:veatre/src/ui/mainUI.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/network.dart';
 import 'package:veatre/common/globals.dart';
-
-Timer _timer;
 
 void main() {
   runZoned(() async {
@@ -29,12 +28,12 @@ void main() {
 
 Future<void> initialGlobals() async {
   Globals.connexJS = await rootBundle.loadString("assets/connex.js");
+  Globals.mainNetWallets = await WalletStorage.wallets(Network.MainNet);
   Globals.testNetWallets = await WalletStorage.wallets(Network.TestNet);
-  Globals.mainNetWallets = await WalletStorage.wallets(Network.TestNet);
-  Globals.mainNetHeadController =
-      HeadController(BlockHead.fromJSON(Globals.testNetGenesis.encoded));
-  Globals.testNetHeadController =
-      HeadController(BlockHead.fromJSON(Globals.mainNetGenesis.encoded));
+  Globals.setHead(
+      Network.MainNet, BlockHead.fromJSON(Globals.mainNetGenesis.encoded));
+  Globals.setHead(
+      Network.TestNet, BlockHead.fromJSON(Globals.testNetGenesis.encoded));
 }
 
 class App extends StatefulWidget {
@@ -46,16 +45,20 @@ class AppState extends State<App> {
   @override
   void initState() {
     super.initState();
-    Globals.mainNetHeadController.addListener(_syncMainetActivities);
-    Globals.testNetHeadController.addListener(_syncTestNetActivities);
+    Globals.watchBlockHead((blockHeadForNetwork) async {
+      await _syncActivities(
+        blockHeadForNetwork.network,
+        blockHeadForNetwork.blockHead,
+      );
+    });
   }
 
-  Future<void> _syncActivities(Network network) async {
-    int headNumber = Globals.headControllerFor(network).value.number;
+  Future<void> _syncActivities(Network network, BlockHead blockHead) async {
+    int headNumber = blockHead.number;
     List<Activity> activities = await ActivityStorage.queryPendings(network);
     for (Activity activity in activities) {
       String txID = activity.hash;
-      final net = Globals.netFor(network);
+      final net = Globals.net(network);
       Map<String, dynamic> receipt = await net.getReceipt(txID);
       if (receipt != null) {
         int processBlock = receipt['meta']['blockNumber'];
@@ -78,19 +81,20 @@ class AppState extends State<App> {
     }
   }
 
-  Future<void> _syncMainetActivities() async {
-    await _syncActivities(Network.MainNet);
-  }
+  // Future<void> _syncMainetActivities() async {
+  //   await _syncActivities(Network.MainNet);
+  // }
 
-  Future<void> _syncTestNetActivities() async {
-    await _syncActivities(Network.TestNet);
-  }
+  // Future<void> _syncTestNetActivities() async {
+  //   await _syncActivities(Network.TestNet);
+  // }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
         MainUI.routeName: (context) => new MainUI(),
+        // TestUI.routeName: (context) => new TestUI(),
         Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
         Networks.routeName: (context) => new Networks(),
@@ -115,9 +119,7 @@ class AppState extends State<App> {
 
   @override
   void dispose() {
-    Globals.testNetHeadController.dispose();
-    Globals.mainNetHeadController.dispose();
-    _timer.cancel();
+    Globals.destory();
     super.dispose();
   }
 }

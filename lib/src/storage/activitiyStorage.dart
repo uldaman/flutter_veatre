@@ -54,13 +54,12 @@ class ActivityStorage {
     return List.from(rows.map((row) => Activity.fromJSON(row)));
   }
 
-  static Future<List<Activity>> queryAll() async {
-    bool isMainNet = await NetworkStorage.isMainNet;
+  static Future<List<Activity>> queryAll(Network network) async {
     final db = await database;
     List<Map<String, dynamic>> rows = await db.query(
       activityTableName,
       where: 'net = ?',
-      whereArgs: [isMainNet ? 0 : 1],
+      whereArgs: [network == Network.MainNet ? 0 : 1],
       orderBy: 'timestamp desc',
     );
     return List.from(rows.map((row) => Activity.fromJSON(row)));

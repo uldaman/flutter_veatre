@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/generateWallet.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
@@ -93,7 +94,10 @@ class CreateWalletState extends State<CreateWallet> {
                   return alert(
                       context, Text("Warnning"), "Password is inconsistent");
                 }
-                WalletEntity wallet = await WalletStorage.read(walletName);
+                WalletEntity wallet = await WalletStorage.read(
+                  walletName,
+                  await NetworkStorage.currentNet,
+                );
                 if (wallet != null) {
                   return alert(context, Text("Warnning"),
                       "This wallet name has been already existed");

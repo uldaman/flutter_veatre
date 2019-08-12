@@ -1,14 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 
 class Wallets extends StatefulWidget {
-  final HeadController headController;
-  Wallets({this.headController});
+  final Network network;
+
+  Wallets({
+    this.network,
+  });
 
   @override
   WalletsState createState() => WalletsState();
@@ -26,12 +30,18 @@ class WalletsState extends State<Wallets> {
       setState(() {
         loading = false;
       });
-      widget.headController.addListener(updateWallets);
+      Globals.watchBlockHead((blockHeadForNetwork) async {
+        if (blockHeadForNetwork.network == widget.network) {
+          await updateWallets();
+        }
+      });
     });
   }
 
   Future<void> updateWallets() async {
-    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+    print("widget.network ${widget.network}");
+    List<WalletEntity> walletEntities =
+        await WalletStorage.readAll(widget.network);
     if (mounted) {
       setState(() {
         this.walletEntities = walletEntities;

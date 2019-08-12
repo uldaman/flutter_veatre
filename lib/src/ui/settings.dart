@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/network.dart';
@@ -23,9 +22,9 @@ class SettingsState extends State<Settings> {
   }
 
   Future<void> setNet() async {
-    bool isMainNet = await NetworkStorage.isMainNet;
+    final currentNet = await NetworkStorage.currentNet;
     setState(() {
-      _network = isMainNet ? 'MainNet' : 'TestNet';
+      _network = currentNet == Network.MainNet ? 'MainNet' : 'TestNet';
     });
   }
 
@@ -44,10 +43,10 @@ class SettingsState extends State<Settings> {
         Icons.alarm,
         'Activities',
         () async {
-          final headController = await Globals.headControllerForCurrentNet;
+          final network = await NetworkStorage.currentNet;
           await Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => Activities(headController: headController),
+              builder: (context) => Activities(network: network),
             ),
           );
         },

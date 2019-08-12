@@ -21,8 +21,13 @@ import 'package:veatre/src/utils/common.dart';
 class SignTxDialog extends StatefulWidget {
   final List<SigningTxMessage> txMessages;
   final SigningTxOptions options;
-  final HeadController headController;
-  SignTxDialog({this.txMessages, this.options, this.headController});
+  final Network network;
+
+  SignTxDialog({
+    this.txMessages,
+    this.options,
+    this.network,
+  });
 
   @override
   SignTxDialogState createState() => SignTxDialogState();
@@ -58,7 +63,11 @@ class SignTxDialogState extends State<SignTxDialog> {
           setState(() {
             this.loading = false;
           });
-          widget.headController.addListener(updateWallet);
+          Globals.watchBlockHead((blockHeadForNetwork) async {
+            if (blockHeadForNetwork.network == widget.network) {
+              await updateWallet();
+            }
+          });
         }
       });
     });
@@ -77,18 +86,21 @@ class SignTxDialogState extends State<SignTxDialog> {
 
   Future<WalletEntity> getWalletEntity(String signer) async {
     if (signer != null) {
-      List<WalletEntity> walletEntities = await WalletStorage.readAll();
+      List<WalletEntity> walletEntities =
+          await WalletStorage.readAll(widget.network);
       for (WalletEntity walletEntity in walletEntities) {
         if ('0x' + walletEntity.keystore.address == signer) {
           return walletEntity;
         }
       }
     }
-    WalletEntity mianWalletEntity = await WalletStorage.getMainWallet();
+    WalletEntity mianWalletEntity =
+        await WalletStorage.getMainWallet(widget.network);
     if (mianWalletEntity != null) {
       return mianWalletEntity;
     }
-    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+    List<WalletEntity> walletEntities =
+        await WalletStorage.readAll(widget.network);
     return walletEntities[0];
   }
 
@@ -140,7 +152,7 @@ VM error: ${result.vmError}''';
       context,
       new MaterialPageRoute(
         builder: (context) => new Wallets(
-          headController: widget.headController,
+          network: widget.network,
         ),
       ),
     );
@@ -547,10 +559,10 @@ VM error: ${result.vmError}''';
                                 }
                                 int nonce = Random(DateTime.now().millisecond)
                                     .nextInt(1 << 32);
-                                bool isMainNet = await NetworkStorage.isMainNet;
-                                int chainTag =
-                                    isMainNet ? mainNetwork : testNetwork;
-                                final head = widget.headController.value;
+                                int chainTag = widget.network == Network.MainNet
+                                    ? mainNetwork
+                                    : testNetwork;
+                                final head = Globals.head(widget.network);
                                 Transaction tx = Transaction(
                                   blockRef: BlockRef(number32: head.number),
                                   expiration: 30,
@@ -569,6 +581,7 @@ VM error: ${result.vmError}''';
                                       keystore: wallet.keystore,
                                       name: wallet.name,
                                     ),
+                                    widget.network,
                                   );
                                   Map<String, dynamic> result =
                                       await TransactionAPI.send(tx.serialized);

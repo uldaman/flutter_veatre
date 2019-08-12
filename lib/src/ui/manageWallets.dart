@@ -22,19 +22,23 @@ class ManageWallets extends StatefulWidget {
 
 class ManageWalletsState extends State<ManageWallets> {
   List<WalletEntity> walletEntities = [];
-
+  Network network;
   @override
   void initState() {
     super.initState();
-    updateWallets();
     NetworkStorage.currentNet.then((currentNet) {
-      final headController = Globals.headControllerFor(currentNet);
-      headController.addListener(updateWallets);
+      updateWallets(currentNet);
+      this.network = currentNet;
+      Globals.watchBlockHead((blockHeadForNetwork) async {
+        if (blockHeadForNetwork.network == network) {
+          await updateWallets(network);
+        }
+      });
     });
   }
 
-  Future<void> updateWallets() async {
-    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+  Future<void> updateWallets(Network network) async {
+    List<WalletEntity> walletEntities = await WalletStorage.readAll(network);
     if (mounted) {
       setState(() {
         this.walletEntities = walletEntities;
@@ -93,7 +97,7 @@ class ManageWalletsState extends State<ManageWallets> {
                           onPressed: () async {
                             await Navigator.pushNamed(
                                 context, CreateWallet.routeName);
-                            await updateWallets();
+                            await updateWallets(network);
                           },
                         ),
                       ),
@@ -107,7 +111,7 @@ class ManageWalletsState extends State<ManageWallets> {
                           onPressed: () async {
                             await Navigator.pushNamed(
                                 context, ImportWallet.routeName);
-                            await updateWallets();
+                            await updateWallets(network);
                           },
                         ),
                       )
@@ -235,16 +239,15 @@ class ManageWalletsState extends State<ManageWallets> {
           ),
         ),
         onTap: () async {
-          Network currentNet = await NetworkStorage.currentNet;
-          final headController = Globals.headControllerFor(currentNet);
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => WalletInfo(
                 walletEntity: walletEntity,
-                headController: headController,
+                network: network,
               ),
             ),
           );
+          await updateWallets(network);
         },
       ),
     );

@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
@@ -38,10 +39,9 @@ class WebView extends StatefulWidget {
   WebViewState createState() => WebViewState();
 }
 
-class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
-  String currentURL = 'about:blank';
+class WebViewState extends State<WebView> {
   bool isStartSearch = false;
-
+  String currentURL = 'about:blank';
   SearchBarController searchBarController = SearchBarController(
     SearchBarValue(
       shouldHidRefresh: true,
@@ -50,13 +50,23 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   );
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
+  Completer<List<String>> _futureWallets = new Completer();
 
   @override
-  bool get wantKeepAlive => true;
+  void initState() {
+    super.initState();
+    Globals.watchWallets((walletsForNetwork) {
+      print(
+          'wallets changed ${walletsForNetwork.network} ${walletsForNetwork.wallets}');
+      if (walletsForNetwork.network == widget.network &&
+          !_futureWallets.isCompleted) {
+        _futureWallets.complete(walletsForNetwork.wallets);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[50],
@@ -125,8 +135,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   FlutterWebView.WebView get webView => FlutterWebView.WebView(
         initialUrl: currentURL,
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
-        javascriptHandlers:
-            Set<FlutterWebView.JavascriptHandler>.of(_javascriptChannels),
+        javascriptHandlers: _javascriptChannels.toSet(),
         injectJavascript: _initialParamsJS + Globals.connexJS,
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
@@ -186,8 +195,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     final baseURL = Network.MainNet == widget.network
         ? NetworkStorage.mainnet
         : NetworkStorage.testnet;
-    final genesis = Globals.genesisFor(widget.network);
-    final initialHead = Globals.headControllerFor(widget.network).value;
+    final genesis = Globals.genesis(widget.network);
+    final initialHead = Globals.head(widget.network);
     List<String> initialWallets = Globals.walletsFor(widget.network);
     String initialWalletsJS = '[';
     for (String address in initialWallets) {
@@ -284,11 +293,29 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     FlutterWebView.JavascriptHandler net = FlutterWebView.JavascriptHandler(
       name: 'Net',
       onMessageReceived: (List<dynamic> arguments) async {
-        print('Net $arguments');
-        if (arguments.length > 0) {
-          final net = Globals.netFor(widget.network);
+        print('Net key ${widget.key} $arguments');
+        if (arguments.length >= 2) {
+          final net = Globals.net(widget.network);
           dynamic data =
               await net.http(arguments[0], arguments[1], arguments[2]);
+          if (arguments[1] ==
+              (widget.network == Network.MainNet
+                      ? NetworkStorage.mainnet
+                      : NetworkStorage.testnet) +
+                  '/blocks/best') {
+            print("data $data");
+            BlockHead head = Globals.head(widget.network);
+            BlockHead newHead = BlockHead.fromJSON(data);
+            if (newHead.number > head.number) {
+              Globals.setHead(widget.network, newHead);
+              Globals.updateBlockHead(
+                BlockHeadForNetwork(
+                  blockHead: newHead,
+                  network: widget.network,
+                ),
+              );
+            }
+          }
           return data;
         }
         return null;
@@ -299,9 +326,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       name: 'Vendor',
       onMessageReceived: (List<dynamic> arguments) async {
         if (arguments[0] == 'wallets') {
-          return Globals.walletsFor(widget.network);
+          _futureWallets = new Completer();
+          List<String> wallets = await _futureWallets.future;
+          print('wallets ${widget.key}  $wallets');
+          return wallets;
         }
-        List<WalletEntity> walletEntities = await WalletStorage.readAll();
+        List<WalletEntity> walletEntities =
+            await WalletStorage.readAll(widget.network);
         if (walletEntities.length == 0) {
           return customAlert(
             context,
@@ -323,9 +354,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           }
           return _showSigningDialog(
             SignTxDialog(
+              network: widget.network,
               txMessages: txMessages,
               options: options,
-              headController: Globals.headControllerFor(widget.network),
             ),
           );
         } else if (arguments[0] == 'signCert') {
@@ -336,9 +367,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           _validate(options.signer);
           return _showSigningDialog(
             SignCertificateDialog(
+              network: widget.network,
               certMessage: certMessage,
               options: options,
-              headController: Globals.headControllerFor(widget.network),
             ),
           );
         }
@@ -346,18 +377,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       },
     );
 
-    FlutterWebView.JavascriptHandler ticker = FlutterWebView.JavascriptHandler(
-      name: 'Ticker',
-      onMessageReceived: (List<dynamic> arguments) async {
-        print('Ticker head ${arguments[0]['head']} key ${widget.key}');
-        if (arguments.length > 0) {
-          final headController = Globals.headControllerFor(widget.network);
-          headController.value = BlockHead.fromJSON(arguments[0]['head']);
-        }
-        return null;
-      },
-    );
-    return [net, vendor, ticker];
+    return [net, vendor];
   }
 
   void _validate(String signer) {

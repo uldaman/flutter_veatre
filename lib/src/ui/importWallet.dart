@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:bip_key_derivation/keystore.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
@@ -20,6 +21,7 @@ class ImportWallet extends StatefulWidget {
 class ImportWalletState extends State<ImportWallet> {
   int currentPage = 0;
   bool loading = false;
+  Network network;
   TextEditingController mnemonicController = TextEditingController();
   TextEditingController mnemonicWalletNameController = TextEditingController();
   TextEditingController mnemonicPasswordController = TextEditingController();
@@ -27,14 +29,12 @@ class ImportWalletState extends State<ImportWallet> {
   TextEditingController keystoreWalletNameController = TextEditingController();
   TextEditingController keystorePasswordController = TextEditingController();
 
-  Future<WalletEntity> walletExisted(String address) async {
-    List<WalletEntity> walletEntities = await WalletStorage.readAll();
-    for (WalletEntity walletEntity in walletEntities) {
-      if (walletEntity.keystore.address == address) {
-        return walletEntity;
-      }
-    }
-    return null;
+  @override
+  void initState() {
+    super.initState();
+    NetworkStorage.currentNet.then((currentNet) {
+      this.network = currentNet;
+    });
   }
 
   @override
@@ -267,7 +267,10 @@ class ImportWalletState extends State<ImportWallet> {
                                   "Wallet name can't be empty");
                             }
                             WalletEntity walletEntity =
-                                await WalletStorage.read(walletName);
+                                await WalletStorage.read(
+                              walletName,
+                              network,
+                            );
                             if (walletEntity != null) {
                               setState(() {
                                 loading = false;
@@ -312,13 +315,16 @@ class ImportWalletState extends State<ImportWallet> {
                                 content: Text(
                                     'This address has been already existed,would you like to cover it?'),
                                 confirmAction: () async {
-                                  await WalletStorage.delete(existed.name);
+                                  await WalletStorage.delete(
+                                    existed.name,
+                                    network,
+                                  );
                                   await WalletStorage.write(
                                     walletEntity: WalletEntity(
                                       keystore: keystore,
                                       name: walletName,
                                     ),
-                                    isMainWallet: true,
+                                    network: network,
                                   );
                                   Navigator.popUntil(
                                     context,
@@ -333,7 +339,7 @@ class ImportWalletState extends State<ImportWallet> {
                                 name: walletName,
                                 keystore: keystore,
                               ),
-                              isMainWallet: true,
+                              network: network,
                             );
                             setState(() {
                               loading = false;
@@ -360,7 +366,10 @@ class ImportWalletState extends State<ImportWallet> {
                                   "Wallet name can't be empty");
                             }
                             WalletEntity walletEntity =
-                                await WalletStorage.read(walletName);
+                                await WalletStorage.read(
+                              walletName,
+                              network,
+                            );
                             if (walletEntity != null) {
                               setState(() {
                                 loading = false;
@@ -399,13 +408,16 @@ class ImportWalletState extends State<ImportWallet> {
                                   content: Text(
                                       'This address has been already existed,would you like to cover it?'),
                                   confirmAction: () async {
-                                    await WalletStorage.delete(existed.name);
+                                    await WalletStorage.delete(
+                                      existed.name,
+                                      network,
+                                    );
                                     await WalletStorage.write(
                                       walletEntity: WalletEntity(
                                         keystore: keystore,
                                         name: walletName,
                                       ),
-                                      isMainWallet: true,
+                                      network: network,
                                     );
                                     Navigator.popUntil(
                                       context,
@@ -423,11 +435,12 @@ class ImportWalletState extends State<ImportWallet> {
                                   "Password is invalid");
                             }
                             await WalletStorage.write(
-                                walletEntity: WalletEntity(
-                                  name: walletName,
-                                  keystore: keystore,
-                                ),
-                                isMainWallet: true);
+                              walletEntity: WalletEntity(
+                                name: walletName,
+                                keystore: keystore,
+                              ),
+                              network: network,
+                            );
                             setState(() {
                               loading = false;
                             });
@@ -452,5 +465,15 @@ class ImportWalletState extends State<ImportWallet> {
       ),
       isLoading: loading,
     );
+  }
+
+  Future<WalletEntity> walletExisted(String address) async {
+    List<WalletEntity> walletEntities = await WalletStorage.readAll(network);
+    for (WalletEntity walletEntity in walletEntities) {
+      if (walletEntity.keystore.address == address) {
+        return walletEntity;
+      }
+    }
+    return null;
   }
 }

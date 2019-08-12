@@ -1,10 +1,24 @@
 import 'dart:core';
 import 'dart:async';
-
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/common/net.dart';
+
+class WalletsForNetwork {
+  Network network;
+  List<String> wallets;
+
+  WalletsForNetwork({this.network, this.wallets});
+}
+
+class BlockHeadForNetwork {
+  Network network;
+  BlockHead blockHead;
+
+  BlockHeadForNetwork({this.network, this.blockHead});
+}
 
 class Globals {
   static final Block mainNetGenesis = Block.fromJSON({
@@ -56,13 +70,37 @@ class Globals {
   static final testNet = Net(NetworkStorage.testnet);
   static final mainNet = Net(NetworkStorage.mainnet);
 
-  static HeadController mainNetHeadController;
-  static HeadController testNetHeadController;
+  static BlockHead _mainNetHead;
+  static BlockHead _testNetHead;
 
   static List<String> testNetWallets;
   static List<String> mainNetWallets;
 
   static String connexJS;
+
+  static EventBus _eventBus = EventBus();
+
+  static watchWallets(
+      void Function(WalletsForNetwork walletsForNetwork) action) {
+    _eventBus.on<WalletsForNetwork>().listen(action);
+  }
+
+  static updateWallets(WalletsForNetwork walletsForNetwork) {
+    _eventBus.fire(walletsForNetwork);
+  }
+
+  static watchBlockHead(
+      void Function(BlockHeadForNetwork blockHeadForNetwork) action) {
+    _eventBus.on<BlockHeadForNetwork>().listen(action);
+  }
+
+  static updateBlockHead(BlockHeadForNetwork blockHeadForNetwork) {
+    _eventBus.fire(blockHeadForNetwork);
+  }
+
+  static destory() {
+    Globals._eventBus.destroy();
+  }
 
   static List<String> walletsFor(Network network) {
     if (network == Network.MainNet) {
@@ -76,19 +114,29 @@ class Globals {
     return walletsFor(currentNet);
   }
 
-  static Block genesisFor(Network network) {
+  static Block genesis(Network network) {
     if (network == Network.MainNet) {
       return mainNetGenesis;
     }
     return testNetGenesis;
   }
 
-  static Future<Block> get genesisForCurrentNet async {
-    Network currentNet = await NetworkStorage.currentNet;
-    return genesisFor(currentNet);
+  static BlockHead head(Network network) {
+    if (network == Network.MainNet) {
+      return _mainNetHead;
+    }
+    return _testNetHead;
   }
 
-  static Net netFor(Network network) {
+  static setHead(Network network, BlockHead blockHead) {
+    if (network == Network.MainNet) {
+      _mainNetHead = blockHead;
+    } else {
+      _testNetHead = blockHead;
+    }
+  }
+
+  static Net net(Network network) {
     if (network == Network.MainNet) {
       return mainNet;
     }
@@ -97,19 +145,7 @@ class Globals {
 
   static Future<Net> get currentNet async {
     Network currentNet = await NetworkStorage.currentNet;
-    return netFor(currentNet);
-  }
-
-  static Future<HeadController> get headControllerForCurrentNet async {
-    Network currentNet = await NetworkStorage.currentNet;
-    return headControllerFor(currentNet);
-  }
-
-  static HeadController headControllerFor(Network network) {
-    if (network == Network.MainNet) {
-      return mainNetHeadController;
-    }
-    return testNetHeadController;
+    return net(currentNet);
   }
 
   static Timer periodic(

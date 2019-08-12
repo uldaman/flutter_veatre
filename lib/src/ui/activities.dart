@@ -2,14 +2,15 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/walletInfo.dart';
 import 'package:veatre/common/globals.dart';
 
 class Activities extends StatefulWidget {
-  final HeadController headController;
+  final Network network;
 
-  Activities({this.headController});
+  Activities({this.network});
 
   @override
   ActivitiesState createState() => ActivitiesState();
@@ -17,15 +18,20 @@ class Activities extends StatefulWidget {
 
 class ActivitiesState extends State<Activities> {
   List<Activity> activities = [];
+
   @override
   void initState() {
     super.initState();
     loadActivities();
-    widget.headController.addListener(loadActivities);
+    Globals.watchBlockHead((blockHeadForNetwork) async {
+      if (blockHeadForNetwork.network == widget.network) {
+        await loadActivities();
+      }
+    });
   }
 
-  void loadActivities() async {
-    List<Activity> activities = await ActivityStorage.queryAll();
+  Future<void> loadActivities() async {
+    List<Activity> activities = await ActivityStorage.queryAll(widget.network);
     if (mounted) {
       setState(() {
         this.activities = activities;
@@ -132,7 +138,7 @@ class ActivitiesState extends State<Activities> {
                                       color: Colors.grey,
                                       size: 20,
                                     )
-                                  : widget.headController.value.number -
+                                  : Globals.head(widget.network).number -
                                               processBlock >=
                                           12
                                       ? Icon(
@@ -145,7 +151,7 @@ class ActivitiesState extends State<Activities> {
                                           height: 18,
                                           child: CircularProgressIndicator(
                                             backgroundColor: Colors.grey[200],
-                                            value: (widget.headController.value
+                                            value: (Globals.head(widget.network)
                                                         .number -
                                                     processBlock) /
                                                 12,
@@ -182,14 +188,17 @@ class ActivitiesState extends State<Activities> {
                         ],
                       ),
                       onTap: () async {
-                        WalletEntity walletEntity =
-                            await WalletStorage.read(activity.walletName);
+                        WalletEntity walletEntity = await WalletStorage.read(
+                          activity.walletName,
+                          await NetworkStorage.currentNet,
+                        );
+                        Network network = await NetworkStorage.currentNet;
                         if (walletEntity != null) {
                           await Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => WalletInfo(
                                 walletEntity: walletEntity,
-                                headController: widget.headController,
+                                network: network,
                               ),
                             ),
                           );

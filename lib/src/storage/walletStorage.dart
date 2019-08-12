@@ -13,11 +13,10 @@ class WalletStorage {
   static final _testNetWalletPrefix = 'TestNetWallet|';
   static final _mainNetWalletPrefix = 'MainNetWallet|';
 
-  static Future<List<WalletEntity>> readAll() async {
+  static Future<List<WalletEntity>> readAll(Network network) async {
     Map<String, String> allKeystores = await storage.readAll();
-    bool isMainNet = await NetworkStorage.isMainNet;
     List<WalletEntity> walletEntities = [];
-    if (isMainNet) {
+    if (network == Network.MainNet) {
       for (var keystoreEntity in allKeystores.entries) {
         String walletKey = keystoreEntity.key;
         if (walletKey.startsWith(_mainNetWalletPrefix)) {
@@ -74,11 +73,11 @@ class WalletStorage {
     return wallets;
   }
 
-  static Future<WalletEntity> read(String name) async {
-    bool isMainNet = await NetworkStorage.isMainNet;
+  static Future<WalletEntity> read(String name, Network network) async {
     String keystoreString = await storage.read(
-      key:
-          isMainNet ? _mainNetWalletPrefix + name : _testNetWalletPrefix + name,
+      key: network == Network.MainNet
+          ? _mainNetWalletPrefix + name
+          : _testNetWalletPrefix + name,
     );
     if (keystoreString == null) {
       return null;
@@ -88,60 +87,76 @@ class WalletStorage {
   }
 
   static Future<void> write(
-      {WalletEntity walletEntity, bool isMainWallet = false}) async {
-    if (await NetworkStorage.isMainNet) {
+      {WalletEntity walletEntity, Network network}) async {
+    if (network == Network.MainNet) {
       await storage.write(
         key: _mainNetWalletPrefix + walletEntity.name,
         value: json.encode(walletEntity.keystore.encoded),
       );
-      if (isMainWallet) {
-        await storage.write(
-          key: _mainNetMainWalletKey,
-          value: json.encode(walletEntity.encoded),
-        );
-      }
+      await storage.write(
+        key: _mainNetMainWalletKey,
+        value: json.encode(walletEntity.encoded),
+      );
       Globals.mainNetWallets = await wallets(Network.MainNet);
+      Globals.updateWallets(
+          WalletsForNetwork(network: network, wallets: Globals.mainNetWallets));
     } else {
       await storage.write(
         key: _testNetWalletPrefix + walletEntity.name,
         value: json.encode(walletEntity.keystore.encoded),
       );
-      if (isMainWallet) {
-        await storage.write(
-          key: _testNeMainWalletKey,
-          value: json.encode(walletEntity.encoded),
-        );
-      }
+      await storage.write(
+        key: _testNeMainWalletKey,
+        value: json.encode(walletEntity.encoded),
+      );
       Globals.testNetWallets = await wallets(Network.TestNet);
+      Globals.updateWallets(
+          WalletsForNetwork(network: network, wallets: Globals.testNetWallets));
     }
   }
 
-  static Future<void> setMainWallet(WalletEntity walletEntity) async {
-    bool isMainNet = await NetworkStorage.isMainNet;
+  static Future<void> setMainWallet(
+      WalletEntity walletEntity, Network network) async {
     await storage.write(
-      key: isMainNet ? _mainNetMainWalletKey : _testNeMainWalletKey,
+      key: network == Network.MainNet
+          ? _mainNetMainWalletKey
+          : _testNeMainWalletKey,
       value: json.encode(walletEntity.encoded),
     );
   }
 
-  static Future<WalletEntity> getMainWallet() async {
-    bool isMainNet = await NetworkStorage.isMainNet;
+  static Future<WalletEntity> getMainWallet(Network network) async {
     String mainWalletString = await storage.read(
-        key: isMainNet ? _mainNetMainWalletKey : _testNeMainWalletKey);
+      key: network == Network.MainNet
+          ? _mainNetMainWalletKey
+          : _testNeMainWalletKey,
+    );
     if (mainWalletString == null) {
       return null;
     }
+    print("mainWalletString $mainWalletString");
     return WalletEntity.fromJSON(json.decode(mainWalletString));
   }
 
-  static Future<void> delete(String name) async {
-    bool isMainNet = await NetworkStorage.isMainNet;
-    if (isMainNet) {
+  static Future<void> delete(String name, Network network) async {
+    if (network == Network.MainNet) {
       await storage.delete(key: _mainNetWalletPrefix + name);
       Globals.mainNetWallets = await wallets(Network.MainNet);
+      Globals.updateWallets(
+          WalletsForNetwork(network: network, wallets: Globals.mainNetWallets));
     } else {
       await storage.delete(key: _testNetWalletPrefix + name);
       Globals.testNetWallets = await wallets(Network.TestNet);
+      Globals.updateWallets(
+          WalletsForNetwork(network: network, wallets: Globals.testNetWallets));
+    }
+    WalletEntity main = await getMainWallet(network);
+    if (main.name == name) {
+      await storage.delete(
+        key: network == Network.MainNet
+            ? _mainNetMainWalletKey
+            : _testNeMainWalletKey,
+      );
     }
   }
 }

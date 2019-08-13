@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:veatre/common/dapp_list.dart';
+import 'package:veatre/src/models/dapp.dart';
 
-typedef onAppSelectedCallback = Future<void> Function(dynamic app);
+typedef onAppSelectedCallback = Future<void> Function(Dapp app);
 
 class Apps extends StatelessWidget {
+  final List<Dapp> apps;
   final onAppSelectedCallback onAppSelected;
 
-  Apps({Key key, this.onAppSelected}) : super(key: key);
+  Apps({Key key, this.apps, this.onAppSelected}) : super(key: key);
 
   final int crossAxisCount = 4;
   final double crossAxisSpacing = 15;
@@ -37,14 +38,14 @@ class Apps extends StatelessWidget {
                       onAppSelected(apps[index]);
                     }
                   },
-                  child: apps[index]["icon"],
+                  child: Image.network(apps[index].logo),
                 ),
               ),
               Text(
-                apps[index]["title"],
-                style: TextStyle(
-                  color: Colors.brown,
-                ),
+                apps[index].name.length > 12
+                    ? apps[index].name.substring(0, 12)
+                    : apps[index].name,
+                style: TextStyle(color: Colors.brown, fontSize: 10),
               ),
             ],
           );

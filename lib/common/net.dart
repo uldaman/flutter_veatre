@@ -63,7 +63,8 @@ class Net {
     return response.data;
   }
 
-  dynamic http(String method, String path, Map<String, dynamic> params) async {
+  static dynamic http(
+      String method, String path, Map<String, dynamic> params) async {
     if (method == 'GET') {
       Response response = await dio.get(
         path,

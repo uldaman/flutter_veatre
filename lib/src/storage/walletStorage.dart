@@ -98,8 +98,6 @@ class WalletStorage {
         value: json.encode(walletEntity.encoded),
       );
       Globals.mainNetWallets = await wallets(Network.MainNet);
-      Globals.updateWallets(
-          WalletsForNetwork(network: network, wallets: Globals.mainNetWallets));
     } else {
       await storage.write(
         key: _testNetWalletPrefix + walletEntity.name,
@@ -110,8 +108,6 @@ class WalletStorage {
         value: json.encode(walletEntity.encoded),
       );
       Globals.testNetWallets = await wallets(Network.TestNet);
-      Globals.updateWallets(
-          WalletsForNetwork(network: network, wallets: Globals.testNetWallets));
     }
   }
 
@@ -142,13 +138,9 @@ class WalletStorage {
     if (network == Network.MainNet) {
       await storage.delete(key: _mainNetWalletPrefix + name);
       Globals.mainNetWallets = await wallets(Network.MainNet);
-      Globals.updateWallets(
-          WalletsForNetwork(network: network, wallets: Globals.mainNetWallets));
     } else {
       await storage.delete(key: _testNetWalletPrefix + name);
       Globals.testNetWallets = await wallets(Network.TestNet);
-      Globals.updateWallets(
-          WalletsForNetwork(network: network, wallets: Globals.testNetWallets));
     }
     WalletEntity main = await getMainWallet(network);
     if (main.name == name) {

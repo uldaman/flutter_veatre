@@ -6,8 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:veatre/common/net.dart';
+import 'package:veatre/src/api/DappAPI.dart';
 
 import 'package:veatre/src/models/block.dart';
+import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/models/certificate.dart';
@@ -50,19 +53,10 @@ class WebViewState extends State<WebView> {
   );
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
-  Completer<List<String>> _futureWallets = new Completer();
 
   @override
   void initState() {
     super.initState();
-    Globals.watchWallets((walletsForNetwork) {
-      print(
-          'wallets changed ${walletsForNetwork.network} ${walletsForNetwork.wallets}');
-      if (walletsForNetwork.network == widget.network &&
-          !_futureWallets.isCompleted) {
-        _futureWallets.complete(walletsForNetwork.wallets);
-      }
-    });
   }
 
   @override
@@ -125,10 +119,19 @@ class WebViewState extends State<WebView> {
         },
       );
 
-  Widget get appView => Apps(
-        key: LabeledGlobalKey('apps'),
-        onAppSelected: (app) async {
-          await _handleLoad(app['url']);
+  Widget get appView => FutureBuilder(
+        future: DappAPI.list(),
+        builder: (context, shot) {
+          if (shot.hasData) {
+            return Apps(
+              key: LabeledGlobalKey('apps'),
+              apps: shot.data,
+              onAppSelected: (Dapp app) async {
+                await _handleLoad(app.url);
+              },
+            );
+          }
+          return SizedBox();
         },
       );
 
@@ -197,12 +200,6 @@ class WebViewState extends State<WebView> {
         : NetworkStorage.testnet;
     final genesis = Globals.genesis(widget.network);
     final initialHead = Globals.head(widget.network);
-    List<String> initialWallets = Globals.walletsFor(widget.network);
-    String initialWalletsJS = '[';
-    for (String address in initialWallets) {
-      initialWalletsJS += "'$address',";
-    }
-    initialWalletsJS += ']';
     return '''
     window.baseURL = '$baseURL';
     window.genesis = {
@@ -223,7 +220,6 @@ class WebViewState extends State<WebView> {
         transactions:${genesis.transactions},
         isTrunk:${genesis.isTrunk}
     };
-    window.initialWallets = $initialWalletsJS;
     window.initialHead = {
         id: '${initialHead.id}',
         number:${initialHead.number},
@@ -295,22 +291,19 @@ class WebViewState extends State<WebView> {
       onMessageReceived: (List<dynamic> arguments) async {
         print('Net key ${widget.key} $arguments');
         if (arguments.length >= 2) {
-          final net = Globals.net(widget.network);
           dynamic data =
-              await net.http(arguments[0], arguments[1], arguments[2]);
+              await Net.http(arguments[0], arguments[1], arguments[2]);
           if (arguments[1] ==
               (widget.network == Network.MainNet
                       ? NetworkStorage.mainnet
                       : NetworkStorage.testnet) +
                   '/blocks/best') {
-            print("data $data");
             BlockHead head = Globals.head(widget.network);
             BlockHead newHead = BlockHead.fromJSON(data);
             if (newHead.number > head.number) {
-              Globals.setHead(widget.network, newHead);
               Globals.updateBlockHead(
                 BlockHeadForNetwork(
-                  blockHead: newHead,
+                  head: newHead,
                   network: widget.network,
                 ),
               );
@@ -325,58 +318,57 @@ class WebViewState extends State<WebView> {
     FlutterWebView.JavascriptHandler vendor = FlutterWebView.JavascriptHandler(
       name: 'Vendor',
       onMessageReceived: (List<dynamic> arguments) async {
-        if (arguments[0] == 'wallets') {
-          _futureWallets = new Completer();
-          List<String> wallets = await _futureWallets.future;
-          print('wallets ${widget.key}  $wallets');
-          return wallets;
-        }
-        List<WalletEntity> walletEntities =
-            await WalletStorage.readAll(widget.network);
-        if (walletEntities.length == 0) {
-          return customAlert(
-            context,
-            title: Text('No wallet available'),
-            content: Text('Create or import a new wallet?'),
-            confirmAction: () async {
-              await Navigator.of(context).pushNamed(ManageWallets.routeName);
-              Navigator.pop(context);
-            },
-          );
-        }
-        if (arguments[0] == 'signTx') {
-          SigningTxOptions options =
-              SigningTxOptions.fromJSON(arguments[2], currentURL);
-          _validate(options.signer);
-          List<SigningTxMessage> txMessages = [];
-          for (Map<String, dynamic> txMsg in arguments[1]) {
-            txMessages.add(SigningTxMessage.fromJSON(txMsg));
+        if (arguments.length > 0) {
+          if (arguments[0] == 'wallets' && arguments.length == 2) {
+            List<String> wallets = Globals.walletsFor(widget.network);
+            return wallets.contains(arguments[1]);
           }
-          return _showSigningDialog(
-            SignTxDialog(
-              network: widget.network,
-              txMessages: txMessages,
-              options: options,
-            ),
-          );
-        } else if (arguments[0] == 'signCert') {
-          SigningCertMessage certMessage =
-              SigningCertMessage.fromJSON(arguments[1]);
-          SigningCertOptions options =
-              SigningCertOptions.fromJSON(arguments[2], currentURL);
-          _validate(options.signer);
-          return _showSigningDialog(
-            SignCertificateDialog(
-              network: widget.network,
-              certMessage: certMessage,
-              options: options,
-            ),
-          );
+          List<WalletEntity> walletEntities =
+              await WalletStorage.readAll(widget.network);
+          if (walletEntities.length == 0) {
+            return customAlert(
+              context,
+              title: Text('No wallet available'),
+              content: Text('Create or import a new wallet?'),
+              confirmAction: () async {
+                await Navigator.of(context).pushNamed(ManageWallets.routeName);
+                Navigator.pop(context);
+              },
+            );
+          }
+          if (arguments[0] == 'signTx') {
+            SigningTxOptions options =
+                SigningTxOptions.fromJSON(arguments[2], currentURL);
+            _validate(options.signer);
+            List<SigningTxMessage> txMessages = [];
+            for (Map<String, dynamic> txMsg in arguments[1]) {
+              txMessages.add(SigningTxMessage.fromJSON(txMsg));
+            }
+            return _showSigningDialog(
+              SignTxDialog(
+                network: widget.network,
+                txMessages: txMessages,
+                options: options,
+              ),
+            );
+          } else if (arguments[0] == 'signCert') {
+            SigningCertMessage certMessage =
+                SigningCertMessage.fromJSON(arguments[1]);
+            SigningCertOptions options =
+                SigningCertOptions.fromJSON(arguments[2], currentURL);
+            _validate(options.signer);
+            return _showSigningDialog(
+              SignCertificateDialog(
+                network: widget.network,
+                certMessage: certMessage,
+                options: options,
+              ),
+            );
+          }
         }
-        throw ArgumentError('unsupported method');
+        throw 'unsupported method';
       },
     );
-
     return [net, vendor];
   }
 

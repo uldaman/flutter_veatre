@@ -307,10 +307,9 @@ class WebViewState extends State<WebView> {
             BlockHead head = Globals.head(widget.network);
             BlockHead newHead = BlockHead.fromJSON(data);
             if (newHead.number > head.number) {
-              Globals.setHead(widget.network, newHead);
               Globals.updateBlockHead(
                 BlockHeadForNetwork(
-                  blockHead: newHead,
+                  head: newHead,
                   network: widget.network,
                 ),
               );

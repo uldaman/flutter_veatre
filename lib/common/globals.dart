@@ -15,9 +15,9 @@ class WalletsForNetwork {
 
 class BlockHeadForNetwork {
   Network network;
-  BlockHead blockHead;
+  BlockHead head;
 
-  BlockHeadForNetwork({this.network, this.blockHead});
+  BlockHeadForNetwork({this.network, this.head});
 }
 
 class Globals {
@@ -95,6 +95,7 @@ class Globals {
   }
 
   static updateBlockHead(BlockHeadForNetwork blockHeadForNetwork) {
+    Globals.setHead(blockHeadForNetwork);
     _eventBus.fire(blockHeadForNetwork);
   }
 
@@ -128,11 +129,11 @@ class Globals {
     return _testNetHead;
   }
 
-  static setHead(Network network, BlockHead blockHead) {
-    if (network == Network.MainNet) {
-      _mainNetHead = blockHead;
+  static setHead(BlockHeadForNetwork blockHeadForNetwork) {
+    if (blockHeadForNetwork.network == Network.MainNet) {
+      _mainNetHead = blockHeadForNetwork.head;
     } else {
-      _testNetHead = blockHead;
+      _testNetHead = blockHeadForNetwork.head;
     }
   }
 

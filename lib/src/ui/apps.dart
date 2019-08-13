@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:veatre/src/models/dapp.dart';
 
 typedef onAppSelectedCallback = Future<void> Function(Dapp app);
@@ -26,7 +25,6 @@ class Apps extends StatelessWidget {
         ),
         itemCount: apps.length,
         itemBuilder: (context, index) {
-          print(apps[index].logo);
           return Column(
             children: <Widget>[
               SizedBox(

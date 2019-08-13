@@ -1,17 +1,9 @@
 import 'dart:core';
 import 'dart:async';
 import 'package:event_bus/event_bus.dart';
-import 'package:flutter/material.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/common/net.dart';
-
-class WalletsForNetwork {
-  Network network;
-  List<String> wallets;
-
-  WalletsForNetwork({this.network, this.wallets});
-}
 
 class BlockHeadForNetwork {
   Network network;
@@ -80,15 +72,6 @@ class Globals {
 
   static EventBus _eventBus = EventBus();
 
-  static watchWallets(
-      void Function(WalletsForNetwork walletsForNetwork) action) {
-    _eventBus.on<WalletsForNetwork>().listen(action);
-  }
-
-  static updateWallets(WalletsForNetwork walletsForNetwork) {
-    _eventBus.fire(walletsForNetwork);
-  }
-
   static watchBlockHead(
       void Function(BlockHeadForNetwork blockHeadForNetwork) action) {
     _eventBus.on<BlockHeadForNetwork>().listen(action);
@@ -108,11 +91,6 @@ class Globals {
       return mainNetWallets;
     }
     return testNetWallets;
-  }
-
-  static get walletsForCurrentNet async {
-    Network currentNet = await NetworkStorage.currentNet;
-    return walletsFor(currentNet);
   }
 
   static Block genesis(Network network) {
@@ -160,12 +138,4 @@ class Globals {
       },
     );
   }
-}
-
-class HeadController extends ValueNotifier<BlockHead> {
-  HeadController(BlockHead value) : super(value);
-}
-
-class WalletsController extends ValueNotifier<List<String>> {
-  WalletsController(List<String> value) : super(value);
 }

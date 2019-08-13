@@ -6,8 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:veatre/common/net.dart';
+import 'package:veatre/src/api/DappAPI.dart';
 
 import 'package:veatre/src/models/block.dart';
+import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/models/certificate.dart';
@@ -125,10 +128,19 @@ class WebViewState extends State<WebView> {
         },
       );
 
-  Widget get appView => Apps(
-        key: LabeledGlobalKey('apps'),
-        onAppSelected: (app) async {
-          await _handleLoad(app['url']);
+  Widget get appView => FutureBuilder(
+        future: DappAPI.list(),
+        builder: (context, shot) {
+          if (shot.hasData) {
+            return Apps(
+              key: LabeledGlobalKey('apps'),
+              apps: shot.data,
+              onAppSelected: (Dapp app) async {
+                await _handleLoad(app.url);
+              },
+            );
+          }
+          return SizedBox();
         },
       );
 
@@ -295,9 +307,8 @@ class WebViewState extends State<WebView> {
       onMessageReceived: (List<dynamic> arguments) async {
         print('Net key ${widget.key} $arguments');
         if (arguments.length >= 2) {
-          final net = Globals.net(widget.network);
           dynamic data =
-              await net.http(arguments[0], arguments[1], arguments[2]);
+              await Net.http(arguments[0], arguments[1], arguments[2]);
           if (arguments[1] ==
               (widget.network == Network.MainNet
                       ? NetworkStorage.mainnet

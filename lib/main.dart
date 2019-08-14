@@ -30,14 +30,18 @@ Future<void> initialGlobals() async {
   Globals.connexJS = await rootBundle.loadString("assets/connex.js");
   Globals.mainNetWallets = await WalletStorage.wallets(Network.MainNet);
   Globals.testNetWallets = await WalletStorage.wallets(Network.TestNet);
-  Globals.setHead(BlockHeadForNetwork(
-    head: BlockHead.fromJSON(Globals.mainNetGenesis.encoded),
-    network: Network.MainNet,
-  ));
-  Globals.setHead(BlockHeadForNetwork(
-    head: BlockHead.fromJSON(Globals.testNetGenesis.encoded),
-    network: Network.TestNet,
-  ));
+  Globals.setHead(
+    BlockHeadForNetwork(
+      head: BlockHead.fromJSON(Globals.mainNetGenesis.encoded),
+      network: Network.MainNet,
+    ),
+  );
+  Globals.setHead(
+    BlockHeadForNetwork(
+      head: BlockHead.fromJSON(Globals.testNetGenesis.encoded),
+      network: Network.TestNet,
+    ),
+  );
 }
 
 class App extends StatefulWidget {

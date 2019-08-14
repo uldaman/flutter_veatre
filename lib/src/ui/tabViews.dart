@@ -36,35 +36,58 @@ class TabViewsState extends State<TabViews> {
   @override
   Widget build(BuildContext context) {
     double ratio = MediaQuery.of(context).size.width /
-        (MediaQuery.of(context).size.height - 20 - 44 - 49);
+        (MediaQuery.of(context).size.height - 20 - 75 - 49);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[50],
         title: Text('Tabs'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          onPressed: () async {
-            // if(snapshots(widget.net).length == 0) {
-
-            // }
-            Navigator.of(context).pop(
-              TabResult(
-                id: selectedTab,
-                stage: TabStage.Selected,
-              ),
-            );
-          },
+        leading: SizedBox(),
+      ),
+      body: GridView.builder(
+        padding: EdgeInsets.all(15),
+        physics: ClampingScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: ratio,
         ),
-        actions: <Widget>[
-          FlatButton(
-            child: Text(
-              'Close All',
-              style: TextStyle(
-                color: Colors.blue,
-                fontSize: 18,
-              ),
+        itemCount: snapshots(widget.net).length,
+        itemBuilder: (context, index) {
+          return snapshotCard(index);
+        },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.close,
+              color: Colors.blue,
+              size: 30,
             ),
-            onPressed: () {
+            title: SizedBox(),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.add,
+              color: Colors.blue,
+              size: 35,
+            ),
+            title: SizedBox(),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.done,
+              color: Colors.blue,
+              size: 30,
+            ),
+            title: SizedBox(),
+          )
+        ],
+        onTap: (index) async {
+          switch (index) {
+            case 0:
               setState(() {
                 removeAllTabs(widget.net);
               });
@@ -73,56 +96,24 @@ class TabViewsState extends State<TabViews> {
                   stage: TabStage.RemovedAll,
                 ),
               );
-            },
-          )
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.all(15),
-              physics: ClampingScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: ratio,
-              ),
-              itemCount: snapshots(widget.net).length,
-              itemBuilder: (context, index) {
-                return snapshotCard(index);
-              },
-            ),
-          ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  color: Colors.grey[200],
-                  child: Center(
-                    child: SizedBox(
-                      height: 54,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.add,
-                          color: Colors.blue,
-                        ),
-                        onPressed: () async {
-                          Navigator.of(context).pop(
-                            TabResult(
-                              stage: TabStage.Created,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+              break;
+            case 1:
+              Navigator.of(context).pop(
+                TabResult(
+                  stage: TabStage.Created,
                 ),
-              )
-            ],
-          )
-        ],
+              );
+              break;
+            case 2:
+              Navigator.of(context).pop(
+                TabResult(
+                  id: selectedTab,
+                  stage: TabStage.Selected,
+                ),
+              );
+              break;
+          }
+        },
       ),
     );
   }
@@ -143,8 +134,8 @@ class TabViewsState extends State<TabViews> {
           children: <Widget>[
             Stack(
               children: <Widget>[
-                Container(
-                  height: 30,
+                SizedBox(
+                  height: 36,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -164,15 +155,15 @@ class TabViewsState extends State<TabViews> {
                     ],
                   ),
                 ),
-                Container(
-                  height: 30,
+                SizedBox(
+                  height: 36,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
                       IconButton(
                         icon: Icon(
                           Icons.close,
-                          size: 15,
+                          size: 20,
                         ),
                         onPressed: () async {
                           if (index == selectedTab) {
@@ -195,29 +186,32 @@ class TabViewsState extends State<TabViews> {
               ],
             ),
             Expanded(
-              child: GestureDetector(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: snapshots(widget.net)[index].data == null
-                          ? AssetImage('assets/blank.png')
-                          : MemoryImage(snapshots(widget.net)[index].data),
+              child: Padding(
+                padding: EdgeInsets.only(top: 0),
+                child: GestureDetector(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      ),
+                      image: DecorationImage(
+                        fit: BoxFit.fill,
+                        image: snapshots(widget.net)[index].data == null
+                            ? AssetImage('assets/blank.png')
+                            : MemoryImage(snapshots(widget.net)[index].data),
+                      ),
                     ),
                   ),
+                  onTap: () {
+                    Navigator.of(context).pop(
+                      TabResult(
+                        id: index,
+                        stage: TabStage.Selected,
+                      ),
+                    );
+                  },
                 ),
-                onTap: () {
-                  Navigator.of(context).pop(
-                    TabResult(
-                      id: index,
-                      stage: TabStage.Selected,
-                    ),
-                  );
-                },
               ),
             )
           ],

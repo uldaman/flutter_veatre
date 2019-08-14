@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/src/models/dapp.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 typedef onAppSelectedCallback = Future<void> Function(Dapp app);
 
@@ -38,7 +39,17 @@ class Apps extends StatelessWidget {
                       onAppSelected(apps[index]);
                     }
                   },
-                  child: Image.network(apps[index].logo),
+                  child: CachedNetworkImage(
+                    imageUrl: apps[index].logo,
+                    placeholder: (context, url) => SizedBox.fromSize(
+                      size: Size.square(20),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) =>
+                        Image.asset("assets/blank.png"),
+                  ),
                 ),
               ),
               Text(

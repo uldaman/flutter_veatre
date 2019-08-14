@@ -55,11 +55,6 @@ class WebViewState extends State<WebView> {
   FlutterWebView.WebViewController controller;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -121,17 +116,18 @@ class WebViewState extends State<WebView> {
 
   Widget get appView => FutureBuilder(
         future: DappAPI.list(),
+        initialData: Globals.apps,
         builder: (context, shot) {
-          if (shot.hasData) {
-            return Apps(
-              key: LabeledGlobalKey('apps'),
-              apps: shot.data,
-              onAppSelected: (Dapp app) async {
-                await _handleLoad(app.url);
-              },
-            );
+          if (shot.data.length > 0) {
+            Globals.apps = shot.data;
           }
-          return SizedBox();
+          return Apps(
+            key: LabeledGlobalKey('apps'),
+            apps: shot.data,
+            onAppSelected: (Dapp app) async {
+              await _handleLoad(app.url);
+            },
+          );
         },
       );
 
@@ -140,14 +136,22 @@ class WebViewState extends State<WebView> {
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
         javascriptHandlers: _javascriptChannels.toSet(),
         injectJavascript: _initialParamsJS + Globals.connexJS,
+        onURLChanged: (url) {
+          currentURL = url;
+          print("currentURL $currentURL");
+          if (widget.onWebViewChanged != null) {
+            widget.onWebViewChanged(controller);
+          }
+          if (currentURL != 'about:blank') {
+            updateSearchBar(null, currentURL);
+          }
+        },
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
-          if (currentURL != 'about:blank') {
-            updateSearchBar(0, currentURL);
-          }
+          updateSearchBar(0, currentURL);
         },
         onPageStarted: (String url) {
           currentURL = url;
@@ -189,7 +193,7 @@ class WebViewState extends State<WebView> {
       },
     );
     if (result == null) {
-      throw ArgumentError('user cancelled');
+      throw 'user cancelled';
     }
     return result.encoded;
   }

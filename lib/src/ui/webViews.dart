@@ -55,12 +55,12 @@ void updateSnapshot(
   if (net == Network.MainNet) {
     _mainNetSnapshots[id] = Snapshot(
       data: data,
-      title: title,
+      title: title.length > 12 ? title.substring(0, 12) : title,
     );
   } else {
     _testNetSnapshots[id] = Snapshot(
       data: data,
-      title: title,
+      title: title.length > 12 ? title.substring(0, 12) : title,
     );
   }
 }
@@ -84,13 +84,11 @@ void removeTab(Network net, int id) {
 
 void removeAllTabs(Network net) {
   if (net == Network.MainNet) {
-    // _mainNetKeys.clear();
     _mainNetSnapshots.clear();
     mainNetWebViews.clear();
   } else {
     _testNetSnapshots.clear();
     testNetWebViews.clear();
-    // _testNetKeys.clear();
   }
 }
 

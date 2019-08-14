@@ -508,135 +508,147 @@ VM error: ${result.vmError}''';
                         child: Container(
                           height: 50,
                           child: FlatButton(
+                            disabledColor: Colors.grey[400],
                             color: Colors.blue,
                             child: Text(
                               'Confirm',
                               style: TextStyle(color: Colors.white),
                             ),
-                            onPressed: () async {
-                              await customAlert(context,
-                                  title: Text('Sign transaction'),
-                                  content: TextField(
-                                    controller: passwordController,
-                                    maxLength: 20,
-                                    obscureText: true,
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                      hintText: 'Input your password',
-                                    ),
-                                  ), confirmAction: () async {
-                                FocusScope.of(context)
-                                    .requestFocus(FocusNode());
-                                String password = passwordController.text;
-                                if (password.isEmpty) {
-                                  return alert(
-                                    context,
-                                    Text('Warnning'),
-                                    "Password can't be empty",
-                                  );
-                                }
-                                Navigator.pop(context);
-                                passwordController.clear();
-                                setState(() {
-                                  loading = true;
-                                });
-                                Uint8List privateKey;
-                                try {
-                                  privateKey = await BipKeyDerivation
-                                      .decryptedByKeystore(
-                                    wallet.keystore,
-                                    password,
-                                  );
-                                } catch (err) {
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                  return alert(
-                                    context,
-                                    Text('Warnning'),
-                                    "Password Invalid",
-                                  );
-                                }
-                                int nonce = Random(DateTime.now().millisecond)
-                                    .nextInt(1 << 32);
-                                int chainTag = widget.network == Network.MainNet
-                                    ? mainNetwork
-                                    : testNetwork;
-                                final head = Globals.head(widget.network);
-                                Transaction tx = Transaction(
-                                  blockRef: BlockRef(number32: head.number),
-                                  expiration: 30,
-                                  chainTag: chainTag,
-                                  clauses: _clauses,
-                                  gasPriceCoef: (255 * priority).toInt(),
-                                  gas: totalGas,
-                                  dependsOn:
-                                      widget.options.dependsOn ?? Uint8List(0),
-                                  nonce: nonce,
-                                );
-                                tx.sign(privateKey);
-                                try {
-                                  await WalletStorage.setMainWallet(
-                                    WalletEntity(
-                                      keystore: wallet.keystore,
-                                      name: wallet.name,
-                                    ),
-                                    widget.network,
-                                  );
-                                  Map<String, dynamic> result =
-                                      await TransactionAPI.send(tx.serialized);
-                                  String comment = 'Empty transaction';
-                                  if (widget.txMessages.length > 1) {
-                                    comment = 'Perform a batch of clauses';
-                                  } else if (widget.txMessages.length == 1) {
-                                    SigningTxMessage msg =
-                                        widget.txMessages.first;
-                                    comment = msg.data.length > 2
-                                        ? 'Make a contract call'
-                                        : 'Transfer VET';
+                            onPressed: !loading &&
+                                    vmError == '' &&
+                                    !isInsufficient
+                                ? () async {
+                                    await customAlert(context,
+                                        title: Text('Sign transaction'),
+                                        content: TextField(
+                                          controller: passwordController,
+                                          maxLength: 20,
+                                          obscureText: true,
+                                          autofocus: true,
+                                          decoration: InputDecoration(
+                                            hintText: 'Input your password',
+                                          ),
+                                        ), confirmAction: () async {
+                                      FocusScope.of(context)
+                                          .requestFocus(FocusNode());
+                                      String password = passwordController.text;
+                                      if (password.isEmpty) {
+                                        return alert(
+                                          context,
+                                          Text('Warnning'),
+                                          "Password can't be empty",
+                                        );
+                                      }
+                                      Navigator.pop(context);
+                                      passwordController.clear();
+                                      setState(() {
+                                        loading = true;
+                                      });
+                                      Uint8List privateKey;
+                                      try {
+                                        privateKey = await BipKeyDerivation
+                                            .decryptedByKeystore(
+                                          wallet.keystore,
+                                          password,
+                                        );
+                                      } catch (err) {
+                                        setState(() {
+                                          loading = false;
+                                        });
+                                        return alert(
+                                          context,
+                                          Text('Warnning'),
+                                          "Password Invalid",
+                                        );
+                                      }
+                                      int nonce =
+                                          Random(DateTime.now().millisecond)
+                                              .nextInt(1 << 32);
+                                      int chainTag =
+                                          widget.network == Network.MainNet
+                                              ? mainNetwork
+                                              : testNetwork;
+                                      final head = Globals.head(widget.network);
+                                      Transaction tx = Transaction(
+                                        blockRef:
+                                            BlockRef(number32: head.number),
+                                        expiration: 30,
+                                        chainTag: chainTag,
+                                        clauses: _clauses,
+                                        gasPriceCoef: (255 * priority).toInt(),
+                                        gas: totalGas,
+                                        dependsOn: widget.options.dependsOn ??
+                                            Uint8List(0),
+                                        nonce: nonce,
+                                      );
+                                      tx.sign(privateKey);
+                                      try {
+                                        await WalletStorage.setMainWallet(
+                                          WalletEntity(
+                                            keystore: wallet.keystore,
+                                            name: wallet.name,
+                                          ),
+                                          widget.network,
+                                        );
+                                        Map<String, dynamic> result =
+                                            await TransactionAPI.send(
+                                                tx.serialized);
+                                        String comment = 'Empty transaction';
+                                        if (widget.txMessages.length > 1) {
+                                          comment =
+                                              'Perform a batch of clauses';
+                                        } else if (widget.txMessages.length ==
+                                            1) {
+                                          SigningTxMessage msg =
+                                              widget.txMessages.first;
+                                          comment = msg.data.length > 2
+                                              ? 'Make a contract call'
+                                              : 'Transfer VET';
+                                        }
+                                        await ActivityStorage.insert(
+                                          Activity(
+                                            hash: result['id'],
+                                            block: head.number,
+                                            content: json.encode({
+                                              'amount': fixed2Value(spendValue),
+                                              'fee': fixed2Value(estimatedFee),
+                                              'gas': totalGas,
+                                              'priority': priority,
+                                            }),
+                                            link: widget.options.link,
+                                            walletName: wallet.name,
+                                            type: ActivityType.Transaction,
+                                            comment: comment,
+                                            timestamp: head.timestamp,
+                                            status: ActivityStatus.Pending,
+                                          ),
+                                        );
+                                        Navigator.of(context).pop(
+                                          SigningTxResponse(
+                                            txid: result['id'],
+                                            signer:
+                                                '0x' + wallet.keystore.address,
+                                          ),
+                                        );
+                                        setState(() {
+                                          loading = false;
+                                        });
+                                      } catch (err) {
+                                        setState(() {
+                                          loading = false;
+                                        });
+                                        alert(
+                                            context,
+                                            Text("Send transaction failed"),
+                                            "${err.response.data}");
+                                      }
+                                    }, cancelAction: () async {
+                                      passwordController.clear();
+                                      FocusScope.of(context)
+                                          .requestFocus(FocusNode());
+                                    });
                                   }
-                                  await ActivityStorage.insert(
-                                    Activity(
-                                      hash: result['id'],
-                                      block: head.number,
-                                      content: json.encode({
-                                        'amount': fixed2Value(spendValue),
-                                        'fee': fixed2Value(estimatedFee),
-                                        'gas': totalGas,
-                                        'priority': priority,
-                                      }),
-                                      link: widget.options.link,
-                                      walletName: wallet.name,
-                                      type: ActivityType.Transaction,
-                                      comment: comment,
-                                      timestamp: head.timestamp,
-                                      status: ActivityStatus.Pending,
-                                    ),
-                                  );
-                                  Navigator.of(context).pop(
-                                    SigningTxResponse(
-                                      txid: result['id'],
-                                      signer: '0x' + wallet.keystore.address,
-                                    ),
-                                  );
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                } catch (err) {
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                  alert(
-                                      context,
-                                      Text("Send transaction failed"),
-                                      "${err.response.data}");
-                                }
-                              }, cancelAction: () async {
-                                passwordController.clear();
-                                FocusScope.of(context)
-                                    .requestFocus(FocusNode());
-                              });
-                            },
+                                : null,
                           ),
                         ),
                       )

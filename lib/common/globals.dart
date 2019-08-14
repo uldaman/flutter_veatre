@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:async';
 import 'package:event_bus/event_bus.dart';
+import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/common/net.dart';
@@ -58,6 +59,8 @@ class Globals {
     "isTrunk": true,
     "transactions": []
   });
+
+  static List<Dapp> apps = [];
 
   static final testNet = Net(NetworkStorage.testnet);
   static final mainNet = Net(NetworkStorage.mainnet);

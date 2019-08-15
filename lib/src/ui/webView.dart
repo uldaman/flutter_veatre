@@ -42,12 +42,12 @@ class WebView extends StatefulWidget {
   WebViewState createState() => WebViewState();
 }
 
-class WebViewState extends State<WebView> {
+class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   bool isStartSearch = false;
   String currentURL = 'about:blank';
   SearchBarController searchBarController = SearchBarController(
     SearchBarValue(
-      shouldHidRefresh: true,
+      shouldHideRightItem: true,
       icon: Icons.search,
     ),
   );
@@ -55,7 +55,11 @@ class WebViewState extends State<WebView> {
   FlutterWebView.WebViewController controller;
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[50],
@@ -112,18 +116,33 @@ class WebViewState extends State<WebView> {
             await controller.reload();
           }
         },
+        onStop: () async {
+          setState(() {
+            isStartSearch = false;
+          });
+          if (this.controller != null) {
+            await controller.stopLoading();
+          }
+        },
       );
 
   Widget get appView => FutureBuilder(
         future: DappAPI.list(),
         initialData: Globals.apps,
         builder: (context, shot) {
-          if (shot.data.length > 0) {
+          if (shot.hasData) {
             Globals.apps = shot.data;
+            return Apps(
+              key: LabeledGlobalKey('apps'),
+              apps: shot.data,
+              onAppSelected: (Dapp app) async {
+                await _handleLoad(app.url);
+              },
+            );
           }
           return Apps(
             key: LabeledGlobalKey('apps'),
-            apps: shot.data,
+            apps: Globals.apps,
             onAppSelected: (Dapp app) async {
               await _handleLoad(app.url);
             },
@@ -138,7 +157,6 @@ class WebViewState extends State<WebView> {
         injectJavascript: _initialParamsJS + Globals.connexJS,
         onURLChanged: (url) {
           currentURL = url;
-          print("currentURL $currentURL");
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
@@ -247,13 +265,14 @@ class WebViewState extends State<WebView> {
         icon: icon,
         defautText: getDomain(uri),
         submitedText: url,
+        shouldHideRightItem: false,
       );
     } else {
       searchBarController.valueWith(
         progress: 0,
         icon: Icons.search,
         defautText: 'Search',
-        shouldHidRefresh: true,
+        shouldHideRightItem: true,
         submitedText: currentURL,
       );
     }

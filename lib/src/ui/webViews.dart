@@ -29,7 +29,7 @@ void createWebView(Network network, onWebViewChangedCallback onWebViewChanged) {
       ? mainNetWebViews.length
       : testNetWebViews.length;
   LabeledGlobalKey<WebViewState> key = LabeledGlobalKey<WebViewState>(
-      network == Network.MainNet ? 'mainNetWebview$id' : 'testNetWebview$id');
+      network == Network.MainNet ? 'mainNetWebView$id' : 'testNetWebView$id');
   WebView webView = new WebView(
     key: key,
     network: network,
@@ -55,12 +55,12 @@ void updateSnapshot(
   if (net == Network.MainNet) {
     _mainNetSnapshots[id] = Snapshot(
       data: data,
-      title: title.length > 12 ? title.substring(0, 12) : title,
+      title: title.length > 16 ? title.substring(0, 16) : title,
     );
   } else {
     _testNetSnapshots[id] = Snapshot(
       data: data,
-      title: title.length > 12 ? title.substring(0, 12) : title,
+      title: title.length > 16 ? title.substring(0, 16) : title,
     );
   }
 }

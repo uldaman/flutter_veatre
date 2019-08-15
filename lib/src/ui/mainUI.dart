@@ -50,23 +50,17 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
     super.build(context);
     PageView mainNetPageView = PageView.builder(
       controller: mainNetPageController,
-      pageSnapping: true,
       itemCount: mainNetWebViews.length,
       itemBuilder: (context, index) {
-        return KeepAlive(
-          child: mainNetWebViews[index],
-        );
+        return mainNetWebViews[index];
       },
       physics: NeverScrollableScrollPhysics(),
     );
     PageView testNetPageView = PageView.builder(
       controller: testNetPageController,
-      pageSnapping: true,
       itemCount: testNetWebViews.length,
       itemBuilder: (context, index) {
-        return KeepAlive(
-          child: testNetWebViews[index],
-        );
+        return testNetWebViews[index];
       },
       physics: NeverScrollableScrollPhysics(),
     );
@@ -83,7 +77,6 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                 testNetPageView,
               ],
               physics: NeverScrollableScrollPhysics(),
-              pageSnapping: true,
               controller: netPageController,
             );
           }
@@ -147,20 +140,23 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                     });
                   });
                   if (currentNet == Network.MainNet) {
-                    mainNetID = mainNetWebViews.length - 1;
-                    mainNetPageController
-                        .jumpToPage(mainNetWebViews.length - 1);
-                  } else {
+                    if (mainNetID != mainNetWebViews.length - 1) {
+                      mainNetID = mainNetWebViews.length - 1;
+                      mainNetPageController
+                          .jumpToPage(mainNetWebViews.length - 1);
+                    }
+                  } else if (testNetID != testNetWebViews.length - 1) {
                     testNetID = testNetWebViews.length - 1;
                     testNetPageController
                         .jumpToPage(testNetWebViews.length - 1);
                   }
                 } else if (tabResult.stage == TabStage.Selected) {
                   int selectedID = tabResult.id;
-                  if (currentNet == Network.MainNet &&
-                      selectedID != mainNetID) {
-                    mainNetID = selectedID;
-                    mainNetPageController.jumpToPage(selectedID);
+                  if (currentNet == Network.MainNet) {
+                    if (selectedID != mainNetID) {
+                      mainNetID = selectedID;
+                      mainNetPageController.jumpToPage(selectedID);
+                    }
                   } else if (selectedID != testNetID) {
                     testNetID = selectedID;
                     testNetPageController.jumpToPage(selectedID);

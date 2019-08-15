@@ -5,20 +5,20 @@ class SearchBarValue {
   String defautText;
   String submitedText;
   double progress = 0;
-  bool shouldHidRefresh;
+  bool shouldHideRightItem;
 
   SearchBarValue({
     double progress,
     IconData icon,
     String defautText,
     String submitedText,
-    bool shouldHidRefresh,
+    bool shouldHideRightItem,
   }) {
     this.progress = progress ?? 0;
     this.icon = icon;
     this.defautText = defautText ?? 'Search';
     this.submitedText = submitedText ?? '';
-    this.shouldHidRefresh = shouldHidRefresh ?? false;
+    this.shouldHideRightItem = shouldHideRightItem ?? false;
   }
 }
 
@@ -30,14 +30,15 @@ class SearchBarController extends ValueNotifier<SearchBarValue> {
     IconData icon,
     String defautText,
     String submitedText,
-    bool shouldHidRefresh,
+    bool shouldHideRightItem,
   }) {
     this.value = SearchBarValue(
       progress: progress ?? this.value.progress,
       icon: icon ?? this.value.icon,
       defautText: defautText ?? this.value.defautText,
       submitedText: submitedText ?? this.value.submitedText,
-      shouldHidRefresh: shouldHidRefresh ?? this.value.shouldHidRefresh,
+      shouldHideRightItem:
+          shouldHideRightItem ?? this.value.shouldHideRightItem,
     );
   }
 }
@@ -48,6 +49,7 @@ class SearchBar extends StatefulWidget {
   final Future<void> Function() onCancelInput;
   final Future<void> Function() onStartSearch;
   final Future<void> Function() onRefresh;
+  final Future<void> Function() onStop;
 
   SearchBar({
     this.searchBarController,
@@ -55,6 +57,7 @@ class SearchBar extends StatefulWidget {
     this.onCancelInput,
     this.onStartSearch,
     this.onRefresh,
+    this.onStop,
   });
 
   @override
@@ -67,7 +70,7 @@ class SearchBarState extends State<SearchBar> {
   double progress;
   IconData icon;
   String defautText;
-  bool shouldHidRefresh;
+  bool shouldHideRightItem;
   final _focusNode = FocusNode();
   TextEditingController _searchTextEditingController = TextEditingController();
 
@@ -92,7 +95,7 @@ class SearchBarState extends State<SearchBar> {
       progress = value.progress;
       icon = value.icon;
       defautText = value.defautText;
-      shouldHidRefresh = value.shouldHidRefresh;
+      shouldHideRightItem = value.shouldHideRightItem;
       _searchTextEditingController.text = value.submitedText;
       if (value.submitedText != '' && isTexting) {
         isTexting = false;
@@ -176,23 +179,36 @@ class SearchBarState extends State<SearchBar> {
                             ],
                             mainAxisAlignment: MainAxisAlignment.center,
                           ),
-                          shouldHidRefresh
+                          shouldHideRightItem
                               ? SizedBox()
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: <Widget>[
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.refresh,
-                                        color: Colors.blue[500],
-                                        size: 20,
-                                      ),
-                                      onPressed: () async {
-                                        if (widget.onRefresh != null) {
-                                          await widget.onRefresh();
-                                        }
-                                      },
-                                    ),
+                                    !isTexting && progress < 1
+                                        ? IconButton(
+                                            icon: Icon(
+                                              Icons.close,
+                                              color: Colors.grey,
+                                              size: 20,
+                                            ),
+                                            onPressed: () async {
+                                              if (widget.onRefresh != null) {
+                                                await widget.onStop();
+                                              }
+                                            },
+                                          )
+                                        : IconButton(
+                                            icon: Icon(
+                                              Icons.refresh,
+                                              color: Colors.blue[500],
+                                              size: 20,
+                                            ),
+                                            onPressed: () async {
+                                              if (widget.onRefresh != null) {
+                                                await widget.onRefresh();
+                                              }
+                                            },
+                                          ),
                                   ],
                                 )
                         ],

@@ -196,6 +196,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         onProgressChanged: (double progress) {
           updateSearchBar(progress, currentURL);
         },
+        navigationDelegate: (FlutterWebView.NavigationRequest request) {
+          if (request.url.startsWith('http')) {
+            return FlutterWebView.NavigationDecision.navigate;
+          }
+          return FlutterWebView.NavigationDecision.prevent;
+        },
       );
 
   Future<dynamic> _showSigningDialog(Widget siginingDialog) async {

@@ -38,9 +38,11 @@ class NetworkStorage {
     return network;
   }
 
-  static Future<Net> get net async {
-    String network = await NetworkStorage.network;
-    return Net(network);
+  static Future<Net> net(Network network) async {
+    if (network == Network.MainNet) {
+      return Net(NetworkStorage.mainnet);
+    }
+    return Net(NetworkStorage.testnet);
   }
 
   static Future<bool> get isMainNet async {

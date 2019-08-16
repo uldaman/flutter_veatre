@@ -53,6 +53,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   );
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
+  Completer<BlockHead> _head = new Completer();
+
+  @override
+  void initState() {
+    super.initState();
+    Globals.watchBlockHead((blockHeadForNetwork) async {
+      if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
+        _head.complete(blockHeadForNetwork.head);
+      }
+    });
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -223,13 +234,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   String get _initialParamsJS {
-    final baseURL = Network.MainNet == widget.network
-        ? NetworkStorage.mainnet
-        : NetworkStorage.testnet;
     final genesis = Globals.genesis(widget.network);
     final initialHead = Globals.head(widget.network);
     return '''
-    window.baseURL = '$baseURL';
     window.genesis = {
         number:${genesis.number},
         id:'${genesis.id}',
@@ -315,29 +322,26 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   List<FlutterWebView.JavascriptHandler> get _javascriptChannels {
+    FlutterWebView.JavascriptHandler head = FlutterWebView.JavascriptHandler(
+      name: 'Head',
+      onMessageReceived: (List<dynamic> arguments) async {
+        final head = await _head.future;
+        print('Head key ${widget.key} ${head.encoded}');
+        _head = new Completer();
+        return head.encoded;
+      },
+    );
     FlutterWebView.JavascriptHandler net = FlutterWebView.JavascriptHandler(
       name: 'Net',
       onMessageReceived: (List<dynamic> arguments) async {
         print('Net key ${widget.key} $arguments');
-        if (arguments.length >= 2) {
-          dynamic data =
-              await Net.http(arguments[0], arguments[1], arguments[2]);
-          if (arguments[1] ==
-              (widget.network == Network.MainNet
-                      ? NetworkStorage.mainnet
-                      : NetworkStorage.testnet) +
-                  '/blocks/best') {
-            BlockHead head = Globals.head(widget.network);
-            BlockHead newHead = BlockHead.fromJSON(data);
-            if (newHead.number > head.number) {
-              Globals.updateBlockHead(
-                BlockHeadForNetwork(
-                  head: newHead,
-                  network: widget.network,
-                ),
-              );
-            }
-          }
+        if (arguments.length >= 3) {
+          String baseURL = widget.network == Network.MainNet
+              ? NetworkStorage.mainnet
+              : NetworkStorage.testnet;
+          dynamic data = await Net.http(
+              arguments[0], "$baseURL/${arguments[1]}", arguments[2]);
+          print("Net data $data");
           return data;
         }
         return null;
@@ -348,7 +352,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       name: 'Vendor',
       onMessageReceived: (List<dynamic> arguments) async {
         if (arguments.length > 0) {
-          if (arguments[0] == 'wallets' && arguments.length == 2) {
+          if (arguments[0] == 'owned' && arguments.length == 2) {
             List<String> wallets = Globals.walletsFor(widget.network);
             return wallets.contains(arguments[1]);
           }
@@ -398,7 +402,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         throw 'unsupported method';
       },
     );
-    return [net, vendor];
+    return [head, net, vendor];
   }
 
   void _validate(String signer) {

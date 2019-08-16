@@ -169,7 +169,8 @@ VM error: ${result.vmError}''';
   }
 
   Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    Account acc =
+        await AccountAPI.get(walletEntity.keystore.address, widget.network);
     return Wallet(
       account: acc,
       keystore: walletEntity.keystore,
@@ -187,6 +188,7 @@ VM error: ${result.vmError}''';
   Future<List<CallResult>> callTx(String addr, int gas) async {
     return AccountAPI.call(
       widget.txMessages,
+      widget.network,
       caller: addr,
       gas: gas,
     );
@@ -592,7 +594,7 @@ VM error: ${result.vmError}''';
                                         );
                                         Map<String, dynamic> result =
                                             await TransactionAPI.send(
-                                                tx.serialized);
+                                                tx.serialized, widget.network);
                                         String comment = 'Empty transaction';
                                         if (widget.txMessages.length > 1) {
                                           comment =

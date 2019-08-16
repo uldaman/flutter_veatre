@@ -3,6 +3,7 @@ import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:veatre/src/api/BlockAPI.dart';
 
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
@@ -50,23 +51,38 @@ class App extends StatefulWidget {
 }
 
 class AppState extends State<App> {
+  Timer _timer;
+
   @override
   void initState() {
     super.initState();
-    Globals.watchBlockHead((blockHeadForNetwork) async {
-      await _syncActivities(
-        blockHeadForNetwork.network,
-        blockHeadForNetwork.head,
-      );
+    Globals.periodic(10, (timer) async {
+      try {
+        final currentNet = await NetworkStorage.currentNet;
+        final block = await BlockAPI.best(currentNet);
+        final newHead = BlockHead.fromJSON(block.encoded);
+        final head = Globals.head(currentNet);
+        if (head.id != newHead.id && newHead.number > head.number) {
+          final blockHeadForNetwork = BlockHeadForNetwork(
+            head: newHead,
+            network: currentNet,
+          );
+          Globals.updateBlockHead(blockHeadForNetwork);
+          await _syncActivities(blockHeadForNetwork);
+        }
+      } catch (e) {
+        print('sync head error: $e');
+      }
     });
   }
 
-  Future<void> _syncActivities(Network network, BlockHead blockHead) async {
-    int headNumber = blockHead.number;
-    List<Activity> activities = await ActivityStorage.queryPendings(network);
+  Future<void> _syncActivities(BlockHeadForNetwork blockHeadForNetwork) async {
+    int headNumber = blockHeadForNetwork.head.number;
+    List<Activity> activities =
+        await ActivityStorage.queryPendings(blockHeadForNetwork.network);
     for (Activity activity in activities) {
       String txID = activity.hash;
-      final net = Globals.net(network);
+      final net = Globals.net(blockHeadForNetwork.network);
       Map<String, dynamic> receipt = await net.getReceipt(txID);
       if (receipt != null) {
         int processBlock = receipt['meta']['blockNumber'];
@@ -89,20 +105,11 @@ class AppState extends State<App> {
     }
   }
 
-  // Future<void> _syncMainetActivities() async {
-  //   await _syncActivities(Network.MainNet);
-  // }
-
-  // Future<void> _syncTestNetActivities() async {
-  //   await _syncActivities(Network.TestNet);
-  // }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
         MainUI.routeName: (context) => new MainUI(),
-        // TestUI.routeName: (context) => new TestUI(),
         Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
         Networks.routeName: (context) => new Networks(),
@@ -128,6 +135,7 @@ class AppState extends State<App> {
   @override
   void dispose() {
     Globals.destory();
+    _timer.cancel();
     super.dispose();
   }
 }

@@ -139,6 +139,7 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                       await updateBackForward();
                     });
                   });
+                  print("testNetID c $testNetID ${testNetWebViews.length - 1}");
                   if (currentNet == Network.MainNet) {
                     if (mainNetID != mainNetWebViews.length - 1) {
                       mainNetID = mainNetWebViews.length - 1;
@@ -151,13 +152,14 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                         .jumpToPage(testNetWebViews.length - 1);
                   }
                 } else if (tabResult.stage == TabStage.Selected) {
+                  print("testNetID s $testNetID ${tabResult.id}");
                   int selectedID = tabResult.id;
                   if (currentNet == Network.MainNet) {
                     if (selectedID != mainNetID) {
                       mainNetID = selectedID;
                       mainNetPageController.jumpToPage(selectedID);
                     }
-                  } else if (selectedID != testNetID) {
+                  } else if (testNetID != selectedID) {
                     testNetID = selectedID;
                     testNetPageController.jumpToPage(selectedID);
                   }

@@ -46,21 +46,6 @@ class ManageWalletsState extends State<ManageWallets> {
     }
   }
 
-  Future<List<Wallet>> walletList(List<WalletEntity> walletEntities) async {
-    List<Wallet> walltes = [];
-    for (WalletEntity walletEntity in walletEntities) {
-      Account acc = await AccountAPI.get(walletEntity.keystore.address);
-      walltes.add(
-        Wallet(
-          account: acc,
-          keystore: walletEntity.keystore,
-          name: walletEntity.name,
-        ),
-      );
-    }
-    return walltes;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +112,7 @@ class ManageWalletsState extends State<ManageWallets> {
   }
 
   Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    Account acc = await AccountAPI.get(walletEntity.keystore.address, network);
     return Wallet(
       account: acc,
       keystore: walletEntity.keystore,

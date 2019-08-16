@@ -104,4 +104,12 @@ class BlockHead {
       txsFeatures: parsedJSON['txsFeatures'],
     );
   }
+
+  Map<String, dynamic> get encoded => {
+        'id': id,
+        'number': number,
+        'timestamp': timestamp,
+        'parentID': parentID,
+        'txsFeatures': txsFeatures,
+      };
 }

@@ -24,15 +24,21 @@ import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/common/globals.dart';
 
 typedef onWebViewChangedCallback = void Function(
-    FlutterWebView.WebViewController controller);
+  FlutterWebView.WebViewController controller,
+  Network network,
+  int id,
+  String url,
+);
 
 class WebView extends StatefulWidget {
   final Key key;
+  final int id;
   final Network network;
   final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
+    this.id,
     this.network,
     this.onWebViewChanged,
   }) : super(key: key);
@@ -155,7 +161,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         onURLChanged: (url) {
           currentURL = url;
           if (widget.onWebViewChanged != null) {
-            widget.onWebViewChanged(controller);
+            widget.onWebViewChanged(controller, widget.network, widget.id, url);
           }
           if (currentURL != Globals.initialURL) {
             updateSearchBar(null, currentURL);
@@ -164,7 +170,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
           if (widget.onWebViewChanged != null) {
-            widget.onWebViewChanged(controller);
+            widget.onWebViewChanged(
+                controller, widget.network, widget.id, currentURL);
           }
           updateSearchBar(0, currentURL);
         },
@@ -172,7 +179,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           currentURL = url;
           updateSearchBar(0, currentURL);
           if (widget.onWebViewChanged != null) {
-            widget.onWebViewChanged(controller);
+            widget.onWebViewChanged(controller, widget.network, widget.id, url);
           }
           setState(() {
             isStartSearch = false;
@@ -184,7 +191,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           });
           updateSearchBar(1, currentURL);
           if (widget.onWebViewChanged != null) {
-            widget.onWebViewChanged(controller);
+            widget.onWebViewChanged(controller, widget.network, widget.id, url);
           }
           setState(() {
             isStartSearch = false;

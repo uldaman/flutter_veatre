@@ -60,19 +60,21 @@ class CreateBookmarkState extends State<CreateBookmark> {
                 child: SizedBox(
                   height: 60,
                   width: 60,
-                  child: CachedNetworkImage(
-                    fit: BoxFit.fill,
-                    imageUrl: widget.bookmark.favicon,
-                    placeholder: (context, url) => SizedBox.fromSize(
-                      size: Size.square(20),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) {
-                      return Image.asset("assets/blank.png");
-                    },
-                  ),
+                  child: widget.bookmark.favicon != null
+                      ? CachedNetworkImage(
+                          fit: BoxFit.fill,
+                          imageUrl: widget.bookmark.favicon ?? '',
+                          placeholder: (context, url) => SizedBox.fromSize(
+                            size: Size.square(20),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) {
+                            return Image.asset("assets/blank.png");
+                          },
+                        )
+                      : SizedBox(),
                 ),
               ),
               Expanded(
@@ -84,9 +86,11 @@ class CreateBookmarkState extends State<CreateBookmark> {
                           child: Padding(
                             padding: EdgeInsets.only(top: 10, right: 15),
                             child: SizedBox(
-                              height: 50,
+                              height: 60,
                               child: TextField(
                                 autofocus: true,
+                                style: TextStyle(fontSize: 14),
+                                maxLines: 1,
                                 controller: titleEditingController,
                               ),
                             ),
@@ -98,7 +102,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
                       children: <Widget>[
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.only(top: 10, right: 15),
+                            padding: EdgeInsets.only(top: 5, right: 15),
                             child: Text(
                               widget.bookmark.url,
                               textAlign: TextAlign.left,

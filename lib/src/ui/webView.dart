@@ -7,10 +7,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:veatre/common/net.dart';
-import 'package:veatre/src/api/DappAPI.dart';
-
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/dapp.dart';
+import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/models/certificate.dart';
@@ -44,15 +43,27 @@ class WebView extends StatefulWidget {
 
 class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   bool isStartSearch = false;
-  String currentURL = 'about:blank';
+  String currentURL = Globals.initialURL;
   SearchBarController searchBarController = SearchBarController(
     SearchBarValue(
       shouldHideRightItem: true,
+      progress: 0,
       icon: Icons.search,
     ),
   );
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
+  Completer<BlockHead> _head = new Completer();
+
+  @override
+  void initState() {
+    super.initState();
+    Globals.watchBlockHead((blockHeadForNetwork) async {
+      if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
+        _head.complete(blockHeadForNetwork.head);
+      }
+    });
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -70,7 +81,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         child: Stack(
           children: [
             webView,
-            currentURL == 'about:blank' || isStartSearch == true
+            currentURL == Globals.initialURL || isStartSearch == true
                 ? appView
                 : SizedBox(),
           ],
@@ -126,27 +137,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
       );
 
-  Widget get appView => FutureBuilder(
-        future: DappAPI.list(),
-        initialData: Globals.apps,
-        builder: (context, shot) {
-          if (shot.hasData) {
-            Globals.apps = shot.data;
-            return Apps(
-              key: LabeledGlobalKey('apps'),
-              apps: shot.data,
-              onAppSelected: (Dapp app) async {
-                await _handleLoad(app.url);
-              },
-            );
-          }
-          return Apps(
-            key: LabeledGlobalKey('apps'),
-            apps: Globals.apps,
-            onAppSelected: (Dapp app) async {
-              await _handleLoad(app.url);
-            },
-          );
+  Widget get appView => DApps(
+        network: widget.network,
+        onAppSelected: (DApp app) async {
+          await _handleLoad(app.url);
+        },
+        onBookmarkSelected: (Bookmark bookmark) async {
+          await _handleLoad(bookmark.url);
         },
       );
 
@@ -160,7 +157,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller);
           }
-          if (currentURL != 'about:blank') {
+          if (currentURL != Globals.initialURL) {
             updateSearchBar(null, currentURL);
           }
         },
@@ -197,7 +194,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           updateSearchBar(progress, currentURL);
         },
         navigationDelegate: (FlutterWebView.NavigationRequest request) {
-          if (request.url.startsWith('http')) {
+          if (request.url.startsWith('http') ||
+              request.url == Globals.initialURL) {
             return FlutterWebView.NavigationDecision.navigate;
           }
           return FlutterWebView.NavigationDecision.prevent;
@@ -223,13 +221,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   String get _initialParamsJS {
-    final baseURL = Network.MainNet == widget.network
-        ? NetworkStorage.mainnet
-        : NetworkStorage.testnet;
     final genesis = Globals.genesis(widget.network);
     final initialHead = Globals.head(widget.network);
     return '''
-    window.baseURL = '$baseURL';
     window.genesis = {
         number:${genesis.number},
         id:'${genesis.id}',
@@ -258,7 +252,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   void updateSearchBar(double progress, String url) {
-    if (url != 'about:blank') {
+    if (url != Globals.initialURL) {
       Uri uri = Uri.parse(url);
       IconData icon;
       if (uri.scheme == 'https') {
@@ -315,29 +309,23 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   List<FlutterWebView.JavascriptHandler> get _javascriptChannels {
+    FlutterWebView.JavascriptHandler head = FlutterWebView.JavascriptHandler(
+      name: 'Head',
+      onMessageReceived: (List<dynamic> arguments) async {
+        final head = await _head.future;
+        _head = new Completer();
+        return head.encoded;
+      },
+    );
     FlutterWebView.JavascriptHandler net = FlutterWebView.JavascriptHandler(
       name: 'Net',
       onMessageReceived: (List<dynamic> arguments) async {
-        print('Net key ${widget.key} $arguments');
-        if (arguments.length >= 2) {
-          dynamic data =
-              await Net.http(arguments[0], arguments[1], arguments[2]);
-          if (arguments[1] ==
-              (widget.network == Network.MainNet
-                      ? NetworkStorage.mainnet
-                      : NetworkStorage.testnet) +
-                  '/blocks/best') {
-            BlockHead head = Globals.head(widget.network);
-            BlockHead newHead = BlockHead.fromJSON(data);
-            if (newHead.number > head.number) {
-              Globals.updateBlockHead(
-                BlockHeadForNetwork(
-                  head: newHead,
-                  network: widget.network,
-                ),
-              );
-            }
-          }
+        if (arguments.length >= 3) {
+          String baseURL = widget.network == Network.MainNet
+              ? NetworkStorage.mainnet
+              : NetworkStorage.testnet;
+          dynamic data = await Net.http(
+              arguments[0], "$baseURL/${arguments[1]}", arguments[2]);
           return data;
         }
         return null;
@@ -348,7 +336,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       name: 'Vendor',
       onMessageReceived: (List<dynamic> arguments) async {
         if (arguments.length > 0) {
-          if (arguments[0] == 'wallets' && arguments.length == 2) {
+          if (arguments[0] == 'owned' && arguments.length == 2) {
             List<String> wallets = Globals.walletsFor(widget.network);
             return wallets.contains(arguments[1]);
           }
@@ -398,7 +386,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         throw 'unsupported method';
       },
     );
-    return [net, vendor];
+    return [head, net, vendor];
   }
 
   void _validate(String signer) {

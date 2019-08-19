@@ -9,22 +9,24 @@ class Networks extends StatefulWidget {
 }
 
 class NetworksState extends State<Networks> {
-  bool isMainnet = true;
+  Network network = Network.MainNet;
 
   @override
   void initState() {
     super.initState();
-    NetworkStorage.isMainNet.then((isMainNet) {
+    NetworkStorage.currentNet.then((network) {
       setState(() {
-        isMainnet = isMainNet;
+        this.network = network;
       });
     });
   }
 
   Future<void> changeNet() async {
-    await NetworkStorage.set(isMainNet: !isMainnet);
+    final toNetwork =
+        network == Network.MainNet ? Network.TestNet : Network.MainNet;
+    await NetworkStorage.set(toNetwork);
     setState(() {
-      isMainnet = !isMainnet;
+      this.network = toNetwork;
     });
   }
 
@@ -34,18 +36,18 @@ class NetworksState extends State<Networks> {
     widgets.addAll([
       buildCell(
         'MainNet',
-        isMainnet,
+        network == Network.MainNet,
         () async {
-          if (!isMainnet) {
+          if (network == Network.TestNet) {
             await changeNet();
           }
         },
       ),
       buildCell(
         'TestNet',
-        !isMainnet,
+        network == Network.TestNet,
         () async {
-          if (isMainnet) {
+          if (network == Network.MainNet) {
             await changeNet();
           }
         },

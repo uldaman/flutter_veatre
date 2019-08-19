@@ -3,15 +3,16 @@ import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 
 class AccountAPI {
-  static Future<Account> get(String address) async {
-    final net = await NetworkStorage.net;
+  static Future<Account> get(String address, Network network) async {
+    final net = await NetworkStorage.net(network);
     String addr = address.startsWith('0x') ? address : '0x$address';
     Map<String, dynamic> json = await net.getAccount(addr);
     return Account.fromJSON(json);
   }
 
   static Future<List<CallResult>> call(
-    List<SigningTxMessage> txMessages, {
+    List<SigningTxMessage> txMessages,
+    Network network, {
     String caller,
     BigInt gasPrice,
     int gas,
@@ -26,7 +27,7 @@ class AccountAPI {
         'data': txMsg.data,
       });
     }
-    final net = await NetworkStorage.net;
+    final net = await NetworkStorage.net(network);
     List<dynamic> callResults = await net.explain({
       'clauses': clausesJson,
       'caller': addr,

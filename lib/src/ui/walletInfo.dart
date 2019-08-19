@@ -56,7 +56,8 @@ class WalletInfoState extends State<WalletInfo> {
 
   Future<void> updateWallet() async {
     WalletEntity walletEntity = widget.walletEntity;
-    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    Account acc =
+        await AccountAPI.get(walletEntity.keystore.address, widget.network);
     if (mounted) {
       setState(() {
         this.wallet = Wallet(
@@ -84,6 +85,7 @@ class WalletInfoState extends State<WalletInfo> {
       address,
       offset,
       limit,
+      widget.network,
     );
     offset += limit;
     if (mounted) {

@@ -1,16 +1,16 @@
-class Dapp {
+class DApp {
   String name;
   String url;
   String logo;
 
-  Dapp({
+  DApp({
     this.name,
     this.url,
     this.logo,
   });
 
-  factory Dapp.fromJSON(Map<String, dynamic> parsedJSON) {
-    return Dapp(
+  factory DApp.fromJSON(Map<String, dynamic> parsedJSON) {
+    return DApp(
       name: parsedJSON['name'],
       url: parsedJSON['href'],
       logo:

@@ -5,8 +5,6 @@ import 'package:veatre/src/storage/networkStorage.dart';
 class ActivityStorage {
   static Future<void> insert(Activity activity) async {
     final db = await database;
-    bool isMainNet = await NetworkStorage.isMainNet;
-    activity.net = isMainNet ? 0 : 1;
     await db.insert(
       activityTableName,
       activity.encoded,
@@ -33,23 +31,6 @@ class ActivityStorage {
         ActivityStatus.Pending.index,
         network == Network.MainNet ? 0 : 1
       ],
-    );
-    return List.from(rows.map((row) => Activity.fromJSON(row)));
-  }
-
-  static Future<List<Activity>> query(
-    int offset,
-    int limit,
-  ) async {
-    bool isMainNet = await NetworkStorage.isMainNet;
-    final db = await database;
-    List<Map<String, dynamic>> rows = await db.query(
-      activityTableName,
-      where: 'net = ?',
-      whereArgs: [isMainNet ? 0 : 1],
-      orderBy: 'timestamp desc',
-      offset: offset,
-      limit: limit,
     );
     return List.from(rows.map((row) => Activity.fromJSON(row)));
   }

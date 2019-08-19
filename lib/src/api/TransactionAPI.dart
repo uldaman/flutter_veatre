@@ -5,8 +5,9 @@ import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 
 class TransactionAPI {
-  static Future<Map<String, dynamic>> send(Uint8List raw) async {
-    final net = await NetworkStorage.net;
+  static Future<Map<String, dynamic>> send(
+      Uint8List raw, Network network) async {
+    final net = await NetworkStorage.net(network);
     Map<String, dynamic> data =
         await net.senTransaction("0x" + bytesToHex(raw));
     return data;
@@ -16,9 +17,10 @@ class TransactionAPI {
     String address,
     int offset,
     int limit,
+    Network network,
   ) async {
     String addr = address.startsWith('0x') ? address : '0x$address';
-    final net = await NetworkStorage.net;
+    final net = await NetworkStorage.net(network);
     dynamic data = await net.filterTransferLogs({
       "range": {
         "unit": "block",

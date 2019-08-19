@@ -39,7 +39,6 @@ class WalletsState extends State<Wallets> {
   }
 
   Future<void> updateWallets() async {
-    print("widget.network ${widget.network}");
     List<WalletEntity> walletEntities =
         await WalletStorage.readAll(widget.network);
     if (mounted) {
@@ -52,7 +51,8 @@ class WalletsState extends State<Wallets> {
   Future<List<Wallet>> walletList(List<WalletEntity> walletEntities) async {
     List<Wallet> walltes = [];
     for (WalletEntity walletEntity in walletEntities) {
-      Account acc = await AccountAPI.get(walletEntity.keystore.address);
+      Account acc =
+          await AccountAPI.get(walletEntity.keystore.address, widget.network);
       walltes.add(
         Wallet(
           account: acc,
@@ -163,7 +163,8 @@ class WalletsState extends State<Wallets> {
   }
 
   Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    Account acc =
+        await AccountAPI.get(walletEntity.keystore.address, widget.network);
     return Wallet(
       account: acc,
       keystore: walletEntity.keystore,

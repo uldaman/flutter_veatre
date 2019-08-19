@@ -251,7 +251,6 @@ class WalletOperationState extends State<WalletOperation> {
         }, cancelAction: () async {
           passwordController.clear();
           FocusScope.of(context).requestFocus(FocusNode());
-          Navigator.pop(context);
         });
       }),
     ]);

@@ -98,7 +98,8 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   }
 
   Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc = await AccountAPI.get(walletEntity.keystore.address);
+    Account acc =
+        await AccountAPI.get(walletEntity.keystore.address, widget.network);
     return Wallet(
       account: acc,
       keystore: walletEntity.keystore,
@@ -344,6 +345,9 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                       type: ActivityType.Certificate,
                                       comment: cert.certMessage.purpose,
                                       timestamp: timestamp,
+                                      net: widget.network == Network.MainNet
+                                          ? 0
+                                          : 1,
                                       status: ActivityStatus.Finished,
                                     ),
                                   );

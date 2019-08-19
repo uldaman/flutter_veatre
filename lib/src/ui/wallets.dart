@@ -39,7 +39,6 @@ class WalletsState extends State<Wallets> {
   }
 
   Future<void> updateWallets() async {
-    print("widget.network ${widget.network}");
     List<WalletEntity> walletEntities =
         await WalletStorage.readAll(widget.network);
     if (mounted) {

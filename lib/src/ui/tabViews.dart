@@ -52,7 +52,7 @@ class TabViewsState extends State<TabViews> {
           mainAxisSpacing: 10,
           childAspectRatio: ratio,
         ),
-        itemCount: snapshots(widget.net).length,
+        itemCount: WebViews.snapshots(widget.net).length,
         itemBuilder: (context, index) {
           return snapshotCard(index);
         },
@@ -89,7 +89,7 @@ class TabViewsState extends State<TabViews> {
           switch (index) {
             case 0:
               setState(() {
-                removeAllTabs(widget.net);
+                WebViews.removeAllTabs(widget.net);
               });
               Navigator.of(context).pop(
                 TabResult(
@@ -143,8 +143,9 @@ class TabViewsState extends State<TabViews> {
                         child: Padding(
                           padding: EdgeInsets.only(left: 40, right: 40),
                           child: Text(
-                            snapshots(widget.net)[index].title ?? '',
+                            WebViews.snapshots(widget.net)[index].title ?? '',
                             maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.black87,
@@ -172,9 +173,9 @@ class TabViewsState extends State<TabViews> {
                             selectedTab--;
                           }
                           setState(() {
-                            removeTab(widget.net, index);
+                            WebViews.removeTab(widget.net, index);
                           });
-                          if (snapshots(widget.net).length == 0) {
+                          if (WebViews.snapshots(widget.net).length == 0) {
                             Navigator.of(context)
                                 .pop(TabResult(stage: TabStage.RemovedAll));
                           }
@@ -197,9 +198,11 @@ class TabViewsState extends State<TabViews> {
                       ),
                       image: DecorationImage(
                         fit: BoxFit.fill,
-                        image: snapshots(widget.net)[index].data == null
-                            ? AssetImage('assets/blank.png')
-                            : MemoryImage(snapshots(widget.net)[index].data),
+                        image:
+                            WebViews.snapshots(widget.net)[index].data == null
+                                ? AssetImage('assets/blank.png')
+                                : MemoryImage(
+                                    WebViews.snapshots(widget.net)[index].data),
                       ),
                     ),
                   ),

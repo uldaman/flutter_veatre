@@ -12,8 +12,8 @@ class NetworkStorage {
   static final _storage = new FlutterSecureStorage();
   static final networkKey = "91e02cd2b8621d0c05197f645668c5c4"; // md5(network)
 
-  static Future<void> set({bool isMainNet = true}) async {
-    if (isMainNet) {
+  static Future<void> set(Network network) async {
+    if (network == Network.MainNet) {
       await _storage.write(
         key: networkKey,
         value: mainnet,
@@ -43,11 +43,6 @@ class NetworkStorage {
       return Net(NetworkStorage.mainnet);
     }
     return Net(NetworkStorage.testnet);
-  }
-
-  static Future<bool> get isMainNet async {
-    String network = await NetworkStorage.network;
-    return network == NetworkStorage.mainnet;
   }
 
   static Future<Network> get currentNet async {

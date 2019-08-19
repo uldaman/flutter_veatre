@@ -64,9 +64,12 @@ class SearchBar extends StatefulWidget {
   SearchBarState createState() => SearchBarState();
 }
 
-class SearchBarState extends State<SearchBar> {
-  double searchBarWidth = 0;
-  bool isTexting = false;
+class SearchBarState extends State<SearchBar>
+    with SingleTickerProviderStateMixin {
+  AnimationController animationController;
+  Animation<double> animation;
+
+  bool showTextField = false;
   double progress;
   IconData icon;
   String defautText;
@@ -77,6 +80,11 @@ class SearchBarState extends State<SearchBar> {
   @override
   void initState() {
     super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    animation = new Tween(begin: 0.0, end: 30.0).animate(animationController);
     _handleValueChanged();
     widget.searchBarController.addListener(_handleValueChanged);
     _focusNode.addListener(() {
@@ -97,9 +105,9 @@ class SearchBarState extends State<SearchBar> {
       defautText = value.defautText;
       shouldHideRightItem = value.shouldHideRightItem;
       _searchTextEditingController.text = value.submitedText;
-      if (value.submitedText != '' && isTexting) {
-        isTexting = false;
-        searchBarWidth = MediaQuery.of(context).size.width - 35;
+      if (value.submitedText != '' && showTextField) {
+        showTextField = false;
+        animationController.reverse();
       }
     });
   }
@@ -107,15 +115,12 @@ class SearchBarState extends State<SearchBar> {
   @override
   void dispose() {
     widget.searchBarController.removeListener(_handleValueChanged);
+    animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final fullWidth = MediaQuery.of(context).size.width - 35;
-    if (searchBarWidth == 0) {
-      searchBarWidth = fullWidth;
-    }
     TextField searchTextField = TextField(
       style: TextStyle(fontSize: 14),
       controller: _searchTextEditingController,
@@ -124,10 +129,10 @@ class SearchBarState extends State<SearchBar> {
       autofocus: true,
       enableInteractiveSelection: true,
       textInputAction: TextInputAction.go,
-      onSubmitted: (text) {
+      onSubmitted: (text) async {
+        await animationController.reverse();
         setState(() {
-          isTexting = false;
-          searchBarWidth = MediaQuery.of(context).size.width - 35;
+          showTextField = false;
         });
         if (widget.onSubmitted != null) {
           widget.onSubmitted(text);
@@ -138,124 +143,121 @@ class SearchBarState extends State<SearchBar> {
       children: <Widget>[
         Row(
           children: <Widget>[
-            AnimatedContainer(
-              duration: Duration(milliseconds: 80),
-              child: !isTexting
-                  ? Container(
-                      height: 40,
-                      child: Stack(
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: FlatButton(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      icon == null
-                                          ? SizedBox()
-                                          : Icon(
-                                              icon,
-                                              size: 16,
-                                            ),
-                                      Text(defautText),
-                                    ],
+            Expanded(
+              child: Container(
+                child: !showTextField
+                    ? Container(
+                        height: 40,
+                        margin: EdgeInsets.only(right: animation.value),
+                        child: Stack(
+                          children: <Widget>[
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: FlatButton(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        icon == null
+                                            ? SizedBox()
+                                            : Icon(
+                                                icon,
+                                                size: 16,
+                                              ),
+                                        Text(defautText),
+                                      ],
+                                    ),
+                                    onPressed: () async {
+                                      await animationController.forward();
+                                      setState(() {
+                                        showTextField = true;
+                                      });
+                                      if (widget.onStartSearch != null) {
+                                        await widget.onStartSearch();
+                                      }
+                                    },
                                   ),
-                                  onPressed: () async {
-                                    setState(() {
-                                      searchBarWidth = fullWidth - 85;
-                                    });
-                                    await Future.delayed(
-                                        Duration(milliseconds: 100));
-                                    setState(() {
-                                      isTexting = true;
-                                    });
-                                    if (widget.onStartSearch != null) {
-                                      await widget.onStartSearch();
-                                    }
-                                  },
                                 ),
-                              ),
-                            ],
-                            mainAxisAlignment: MainAxisAlignment.center,
+                              ],
+                              mainAxisAlignment: MainAxisAlignment.center,
+                            ),
+                            shouldHideRightItem
+                                ? SizedBox()
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: <Widget>[
+                                      !showTextField && progress < 1
+                                          ? IconButton(
+                                              icon: Icon(
+                                                Icons.close,
+                                                color: Colors.grey,
+                                                size: 20,
+                                              ),
+                                              onPressed: () async {
+                                                if (widget.onRefresh != null) {
+                                                  await widget.onStop();
+                                                }
+                                              },
+                                            )
+                                          : IconButton(
+                                              icon: Icon(
+                                                Icons.refresh,
+                                                color: Colors.blue[500],
+                                                size: 20,
+                                              ),
+                                              onPressed: () async {
+                                                if (widget.onRefresh != null) {
+                                                  await widget.onRefresh();
+                                                }
+                                              },
+                                            ),
+                                    ],
+                                  )
+                          ],
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10),
+                              child: searchTextField,
+                            ),
                           ),
-                          shouldHideRightItem
-                              ? SizedBox()
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: <Widget>[
-                                    !isTexting && progress < 1
-                                        ? IconButton(
-                                            icon: Icon(
-                                              Icons.close,
-                                              color: Colors.grey,
-                                              size: 20,
-                                            ),
-                                            onPressed: () async {
-                                              if (widget.onRefresh != null) {
-                                                await widget.onStop();
-                                              }
-                                            },
-                                          )
-                                        : IconButton(
-                                            icon: Icon(
-                                              Icons.refresh,
-                                              color: Colors.blue[500],
-                                              size: 20,
-                                            ),
-                                            onPressed: () async {
-                                              if (widget.onRefresh != null) {
-                                                await widget.onRefresh();
-                                              }
-                                            },
-                                          ),
-                                  ],
-                                )
+                          IconButton(
+                            icon: Icon(
+                              Icons.cancel,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              _searchTextEditingController.clear();
+                            },
+                          )
                         ],
                       ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: searchTextField,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.cancel,
-                            color: Colors.grey,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            _searchTextEditingController.text = '';
-                          },
-                        )
-                      ],
-                    ),
-              width: searchBarWidth,
-              height: 42,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
+                  ),
                 ),
               ),
             ),
-            !isTexting
+            !showTextField
                 ? SizedBox()
                 : FlatButton(
-                    padding: EdgeInsets.all(0),
                     child: Text(
                       'Cancel',
                       style: TextStyle(color: Colors.blue, fontSize: 12),
                     ),
                     onPressed: () async {
+                      await animationController.reverse();
                       setState(() {
-                        searchBarWidth = MediaQuery.of(context).size.width - 35;
-                        isTexting = false;
+                        showTextField = false;
                       });
                       if (widget.onCancelInput != null) {
                         await widget.onCancelInput();
@@ -264,7 +266,7 @@ class SearchBarState extends State<SearchBar> {
                   ),
           ],
         ),
-        !isTexting && progress < 1 && progress > 0
+        !showTextField && progress < 1 && progress > 0
             ? SizedBox(
                 height: 2,
                 child: Padding(
@@ -278,5 +280,149 @@ class SearchBarState extends State<SearchBar> {
             : SizedBox(),
       ],
     );
+    // return Wrap(
+    //   children: <Widget>[
+    //     Row(
+    //       children: <Widget>[
+    //         AnimatedContainer(
+    //           duration: Duration(milliseconds: 80),
+    //           child: !isTexting
+    //               ? Container(
+    //                   height: 40,
+    //                   child: Stack(
+    //                     children: <Widget>[
+    //                       Row(
+    //                         children: <Widget>[
+    //                           Expanded(
+    //                             child: FlatButton(
+    //                               child: Row(
+    //                                 mainAxisAlignment: MainAxisAlignment.center,
+    //                                 children: <Widget>[
+    //                                   icon == null
+    //                                       ? SizedBox()
+    //                                       : Icon(
+    //                                           icon,
+    //                                           size: 16,
+    //                                         ),
+    //                                   Text(defautText),
+    //                                 ],
+    //                               ),
+    //                               onPressed: () async {
+    //                                 setState(() {
+    //                                   searchBarWidth = fullWidth - 85;
+    //                                 });
+    //                                 await Future.delayed(
+    //                                     Duration(milliseconds: 100));
+    //                                 setState(() {
+    //                                   isTexting = true;
+    //                                 });
+    //                                 if (widget.onStartSearch != null) {
+    //                                   await widget.onStartSearch();
+    //                                 }
+    //                               },
+    //                             ),
+    //                           ),
+    //                         ],
+    //                         mainAxisAlignment: MainAxisAlignment.center,
+    //                       ),
+    //                       shouldHideRightItem
+    //                           ? SizedBox()
+    //                           : Row(
+    //                               mainAxisAlignment: MainAxisAlignment.end,
+    //                               children: <Widget>[
+    //                                 !isTexting && progress < 1
+    //                                     ? IconButton(
+    //                                         icon: Icon(
+    //                                           Icons.close,
+    //                                           color: Colors.grey,
+    //                                           size: 20,
+    //                                         ),
+    //                                         onPressed: () async {
+    //                                           if (widget.onRefresh != null) {
+    //                                             await widget.onStop();
+    //                                           }
+    //                                         },
+    //                                       )
+    //                                     : IconButton(
+    //                                         icon: Icon(
+    //                                           Icons.refresh,
+    //                                           color: Colors.blue[500],
+    //                                           size: 20,
+    //                                         ),
+    //                                         onPressed: () async {
+    //                                           if (widget.onRefresh != null) {
+    //                                             await widget.onRefresh();
+    //                                           }
+    //                                         },
+    //                                       ),
+    //                               ],
+    //                             )
+    //                     ],
+    //                   ),
+    //                 )
+    //               : Row(
+    //                   mainAxisAlignment: MainAxisAlignment.end,
+    //                   children: <Widget>[
+    //                     Expanded(
+    //                       child: Padding(
+    //                         padding: EdgeInsets.only(left: 10),
+    //                         child: searchTextField,
+    //                       ),
+    //                     ),
+    //                     IconButton(
+    //                       icon: Icon(
+    //                         Icons.cancel,
+    //                         color: Colors.grey,
+    //                         size: 20,
+    //                       ),
+    //                       onPressed: () {
+    //                         _searchTextEditingController.clear();
+    //                       },
+    //                     )
+    //                   ],
+    //                 ),
+    //           width: searchBarWidth,
+    //           height: 42,
+    //           decoration: BoxDecoration(
+    //             color: Colors.grey[300],
+    //             borderRadius: BorderRadius.all(
+    //               Radius.circular(10),
+    //             ),
+    //           ),
+    //         ),
+    //         !isTexting
+    //             ? SizedBox()
+    //             : FlatButton(
+    //                 padding: EdgeInsets.all(0),
+    //                 child: Text(
+    //                   'Cancel',
+    //                   style: TextStyle(color: Colors.blue, fontSize: 12),
+    //                 ),
+    //                 onPressed: () async {
+    //                   setState(() {
+    //                     searchBarWidth = MediaQuery.of(context).size.width - 35;
+    //                     isTexting = false;
+    //                   });
+    //                   if (widget.onCancelInput != null) {
+    //                     await widget.onCancelInput();
+    //                   }
+    //                 },
+    //               ),
+    //       ],
+    //     ),
+    //     !isTexting && progress < 1 && progress > 0
+    //         ? SizedBox(
+    //             height: 2,
+    //             child: Padding(
+    //               padding: EdgeInsets.only(left: 8, right: 8),
+    //               child: LinearProgressIndicator(
+    //                 value: progress,
+    //                 backgroundColor: Colors.transparent,
+    //               ),
+    //             ),
+    //           )
+    //         : SizedBox(),
+    //   ],
+    // );
   }
 }

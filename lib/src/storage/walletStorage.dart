@@ -130,7 +130,6 @@ class WalletStorage {
     if (mainWalletString == null) {
       return null;
     }
-    print("mainWalletString $mainWalletString");
     return WalletEntity.fromJSON(json.decode(mainWalletString));
   }
 

@@ -59,8 +59,9 @@ class Globals {
     "isTrunk": true,
     "transactions": []
   });
+  static final initialURL = 'about:blank';
 
-  static List<Dapp> apps = [];
+  static List<DApp> apps = [];
 
   static final testNet = Net(NetworkStorage.testnet);
   static final mainNet = Net(NetworkStorage.mainnet);

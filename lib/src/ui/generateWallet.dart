@@ -80,7 +80,7 @@ class GenerateWalletState extends State<GenerateWallet> {
         };
         pageWaitingWords.add(
           WaitingWord(
-            word: pageWords[j],
+            word: '',
             page: i,
             index: j,
             isSelected: false,
@@ -353,7 +353,7 @@ class GenerateWalletState extends State<GenerateWallet> {
                     if (isVerified) {
                       Uint8List privateKey =
                           await BipKeyDerivation.decryptedByMnemonic(
-                        mnemonics.join(" "),
+                        mnemonics.join(' '),
                         defaultDerivationPath,
                       );
                       KeyStore keystore = await BipKeyDerivation.encrypt(
@@ -375,7 +375,7 @@ class GenerateWalletState extends State<GenerateWallet> {
                         this.loading = false;
                       });
                       await alert(context, Text("Warnning"),
-                          "Mnemonic phase verfied failed");
+                          "Mnemonic phase verified failed");
                     }
                   },
                 ),

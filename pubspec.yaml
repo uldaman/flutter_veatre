@@ -29,6 +29,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   qr_flutter: ^2.0.0
+  sticky_headers:
   font_awesome_flutter: ^8.2.0
   pointycastle: ^1.0.1
   web3dart: 1.0.0-rc.1

@@ -15,6 +15,9 @@ import 'package:veatre/src/storage/networkStorage.dart';
 
 class MainUI extends StatefulWidget {
   static const routeName = '/';
+  final Network network;
+
+  MainUI(this.network);
 
   @override
   MainUIState createState() => MainUIState();
@@ -34,14 +37,19 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
+    currentNet = widget.network;
+    netPageController =
+        PageController(initialPage: currentNet == Network.MainNet ? 0 : 1);
     if (WebViews.mainNetWebViews.length == 0) {
-      WebViews.createWebView(Network.MainNet, (controller) async {
-        await updateBackForward();
+      WebViews.createWebView(Network.MainNet,
+          (controller, network, id, url) async {
+        await updateBackForward(network, id, url);
       });
     }
     if (WebViews.testNetWebViews.length == 0) {
-      WebViews.createWebView(Network.TestNet, (controller) async {
-        await updateBackForward();
+      WebViews.createWebView(Network.TestNet,
+          (controller, network, id, url) async {
+        await updateBackForward(network, id, url);
       });
     }
   }
@@ -69,24 +77,13 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
       physics: NeverScrollableScrollPhysics(),
     );
     return Scaffold(
-      body: FutureBuilder(
-        future: NetworkStorage.currentNet,
-        builder: (context, shot) {
-          if (shot.hasData) {
-            currentNet = shot.data;
-            netPageController = PageController(
-                initialPage: shot.data == NetworkStorage.mainnet ? 0 : 1);
-            return PageView(
-              children: <Widget>[
-                mainNetPageView,
-                testNetPageView,
-              ],
-              physics: NeverScrollableScrollPhysics(),
-              controller: netPageController,
-            );
-          }
-          return SizedBox();
-        },
+      body: PageView(
+        children: <Widget>[
+          mainNetPageView,
+          testNetPageView,
+        ],
+        physics: NeverScrollableScrollPhysics(),
+        controller: netPageController,
       ),
       bottomNavigationBar: bottomNavigationBar,
     );
@@ -137,6 +134,7 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
               }
               break;
             case 3:
+              print('currentID $currentID $currentNet');
               Uint8List captureData =
                   await WebViews.takeScreenshot(currentNet, currentID);
               String t = await title;
@@ -156,8 +154,9 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                 if (tabResult.stage == TabStage.Created ||
                     tabResult.stage == TabStage.RemovedAll) {
                   setState(() {
-                    WebViews.createWebView(currentNet, (controller) async {
-                      await updateBackForward();
+                    WebViews.createWebView(currentNet,
+                        (controller, network, id, url) async {
+                      await updateBackForward(network, id, url);
                     });
                   });
                   if (currentNet == Network.MainNet) {
@@ -179,7 +178,7 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                     testNetPageController.jumpToPage(selectedID);
                   }
                 }
-                await updateBackForward();
+                await updateBackForward(currentNet, currentID, currentURL);
               }
               break;
             case 4:
@@ -187,7 +186,7 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
               currentNet = await NetworkStorage.currentNet;
               netPageController
                   .jumpToPage(currentNet == Network.MainNet ? 0 : 1);
-              await updateBackForward();
+              await updateBackForward(currentNet, currentID, currentURL);
               break;
           }
         },
@@ -248,23 +247,23 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  Future<void> updateBackForward() async {
-    bool canBack = await WebViews.canGoBack(
-      currentNet,
-      currentID,
-    );
-    bool canForward = await WebViews.canGoForward(
-      currentNet,
-      currentID,
-    );
-    currentURL = await WebViews.getURL(
-      currentNet,
-      currentID,
-    );
-    setState(() {
-      this.canBack = canBack;
-      this.canForward = canForward;
-    });
+  Future<void> updateBackForward(Network network, int id, String url) async {
+    if (network == currentNet && id == currentID) {
+      bool canBack = await WebViews.canGoBack(
+        currentNet,
+        currentID,
+      );
+      bool canForward = await WebViews.canGoForward(
+        currentNet,
+        currentID,
+      );
+      print("currentURL $currentURL");
+      setState(() {
+        currentURL = url;
+        this.canBack = canBack;
+        this.canForward = canForward;
+      });
+    }
   }
 
   Future<dynamic> _present(Widget widget) async {

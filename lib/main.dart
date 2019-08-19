@@ -20,7 +20,8 @@ import 'package:veatre/common/globals.dart';
 void main() {
   runZoned(() async {
     await initialGlobals();
-    runApp(App());
+    final currentNet = await NetworkStorage.currentNet;
+    runApp(App(currentNet));
   }, onError: (dynamic err, StackTrace stack) {
     print("unhandled error: $err");
     print("stack: $stack");
@@ -46,6 +47,9 @@ Future<void> initialGlobals() async {
 }
 
 class App extends StatefulWidget {
+  final Network network;
+  App(this.network);
+
   @override
   AppState createState() => AppState();
 }
@@ -109,7 +113,7 @@ class AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
-        MainUI.routeName: (context) => new MainUI(),
+        MainUI.routeName: (context) => new MainUI(widget.network),
         Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
         Networks.routeName: (context) => new Networks(),

@@ -36,9 +36,10 @@ class WebViews {
         network == Network.MainNet ? 'mainNetWebView$id' : 'testNetWebView$id');
     WebView webView = new WebView(
       key: key,
+      id: id,
       network: network,
-      onWebViewChanged: (controller) async {
-        onWebViewChanged(controller);
+      onWebViewChanged: (controller, network, id, url) async {
+        onWebViewChanged(controller, network, id, url);
       },
     );
     if (network == Network.MainNet) {
@@ -148,9 +149,9 @@ class WebViews {
   }
 
   static Future<String> getURL(Network net, int id) async {
-    final controller = _controllerAt(net, id);
-    if (controller != null) {
-      return controller.currentUrl();
+    final key = _keyAt(net, id);
+    if (key != null && key.currentState != null) {
+      return key.currentState.currentURL;
     }
     return null;
   }
@@ -209,7 +210,8 @@ class WebViews {
 
   static Future<Uint8List> takeScreenshot(Network net, int id) async {
     final key = _keyAt(net, id);
-    if (key.currentState.isStartSearch ||
+    if (key.currentState == null ||
+        key.currentState.isStartSearch ||
         key.currentState.currentURL == Globals.initialURL) {
       try {
         RenderRepaintBoundary boundary =

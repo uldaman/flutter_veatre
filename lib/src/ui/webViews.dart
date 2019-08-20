@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/webView.dart';
@@ -127,24 +128,12 @@ class WebViews {
     return null;
   }
 
-  static Future<String> getFavicon(Network net, int id) async {
+  static Future<DocumentMetaData> getMetaData(Network net, int id) async {
     final controller = _controllerAt(net, id);
     if (controller != null) {
       final result =
-          await controller.evaluateJavascript("window.__getFavicon__();");
-      final List<dynamic> favicons = json.decode(result);
-      print("favicons $favicons");
-      Map<String, dynamic> favicon;
-      for (Map<String, dynamic> f in favicons) {
-        if (favicon == null) {
-          favicon = f;
-          continue;
-        }
-        if (favicon['score'] < f['score']) {
-          favicon = f;
-        }
-      }
-      return favicon['href'];
+          await controller.evaluateJavascript("window.__getMetaData__();");
+      return DocumentMetaData.fromJSON(json.decode(result));
     }
     return null;
   }

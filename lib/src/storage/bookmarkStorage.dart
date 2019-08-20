@@ -76,4 +76,29 @@ class Bookmark {
       net: parsedJSON['net'],
     );
   }
+
+  factory Bookmark.fromMeta(Map<String, dynamic> meta, int net) {
+    return Bookmark(
+      url: meta['url'],
+      title: meta['title'],
+      favicon: meta['icon'],
+      net: net,
+    );
+  }
+}
+
+class DocumentMetaData {
+  String url;
+  String title;
+  String icon;
+
+  DocumentMetaData({this.url, this.title, this.icon});
+
+  factory DocumentMetaData.fromJSON(Map<String, dynamic> parsedJSON) {
+    return DocumentMetaData(
+      icon: parsedJSON['icon'],
+      title: parsedJSON['title'],
+      url: parsedJSON['url'],
+    );
+  }
 }

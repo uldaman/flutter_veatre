@@ -133,6 +133,7 @@ class WebViews {
       final result =
           await controller.evaluateJavascript("window.__getFavicon__();");
       final List<dynamic> favicons = json.decode(result);
+      print("favicons $favicons");
       Map<String, dynamic> favicon;
       for (Map<String, dynamic> f in favicons) {
         if (favicon == null) {

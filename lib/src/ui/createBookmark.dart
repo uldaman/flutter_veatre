@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 
 class CreateBookmark extends StatefulWidget {
-  final Bookmark bookmark;
-  CreateBookmark({this.bookmark});
+  final DocumentMetaData documentMetaData;
+  final Network network;
+  CreateBookmark({this.documentMetaData, this.network});
 
   @override
   CreateBookmarkState createState() {
@@ -19,7 +21,8 @@ class CreateBookmarkState extends State<CreateBookmark> {
   @override
   void initState() {
     super.initState();
-    titleEditingController = TextEditingController(text: widget.bookmark.title);
+    titleEditingController =
+        TextEditingController(text: widget.documentMetaData.title);
   }
 
   @override
@@ -34,12 +37,11 @@ class CreateBookmarkState extends State<CreateBookmark> {
           FlatButton(
             child: Text('Save'),
             onPressed: () async {
-              final title = titleEditingController.text;
               Bookmark bookmark = Bookmark(
-                favicon: widget.bookmark.favicon,
-                title: title,
-                url: widget.bookmark.url,
-                net: widget.bookmark.net,
+                favicon: widget.documentMetaData.icon,
+                title: titleEditingController.text,
+                url: widget.documentMetaData.url,
+                net: widget.network == Network.MainNet ? 0 : 1,
               );
               await BookmarkStorage.insert(bookmark);
               Navigator.pop(context);
@@ -60,10 +62,10 @@ class CreateBookmarkState extends State<CreateBookmark> {
                 child: SizedBox(
                   height: 60,
                   width: 60,
-                  child: widget.bookmark.favicon != null
+                  child: widget.documentMetaData.icon != null
                       ? CachedNetworkImage(
                           fit: BoxFit.fill,
-                          imageUrl: widget.bookmark.favicon ?? '',
+                          imageUrl: widget.documentMetaData.icon ?? '',
                           placeholder: (context, url) => SizedBox.fromSize(
                             size: Size.square(20),
                             child: CircularProgressIndicator(
@@ -109,7 +111,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
                           child: Padding(
                             padding: EdgeInsets.only(top: 5, right: 15),
                             child: Text(
-                              widget.bookmark.url,
+                              widget.documentMetaData.url,
                               textAlign: TextAlign.left,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

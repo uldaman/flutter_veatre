@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:veatre/src/ui/createBookmark.dart';
 import 'package:veatre/src/ui/tabViews.dart';
 import 'package:veatre/src/ui/webViews.dart';
@@ -107,31 +106,16 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
             case 2:
               String url = await WebViews.getURL(currentNet, currentID);
               if (url != Globals.initialURL) {
-                String title = await WebViews.getTitle(currentNet, currentID);
-                String favicon =
-                    await WebViews.getFavicon(currentNet, currentID);
-                if (favicon != null) {
-                  Uri uri = Uri.parse(url);
-                  final scheme = uri.scheme;
-                  final host = uri.host;
-                  if (favicon.startsWith('//')) {
-                    favicon = '$scheme:$favicon';
-                  } else if (favicon.startsWith('/')) {
-                    favicon = '$scheme://$host$favicon';
-                  } else if (favicon.startsWith('http')) {
-                    favicon = favicon;
-                  } else {
-                    favicon = '$scheme://$host/$favicon';
-                  }
+                final metaData =
+                    await WebViews.getMetaData(currentNet, currentID);
+                if (metaData != null) {
+                  await _present(
+                    CreateBookmark(
+                      documentMetaData: metaData,
+                      network: currentNet,
+                    ),
+                  );
                 }
-                print("favicon $favicon");
-                Bookmark bookmark = Bookmark(
-                  net: currentNet == Network.MainNet ? 0 : 1,
-                  url: url,
-                  title: title,
-                  favicon: favicon,
-                );
-                await _present(CreateBookmark(bookmark: bookmark));
               }
               break;
             case 3:

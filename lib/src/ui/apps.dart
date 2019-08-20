@@ -113,10 +113,7 @@ class DAppsState extends State<DApps> {
           return Column(
             children: <Widget>[
               SizedBox(
-                width: (MediaQuery.of(context).size.width -
-                        crossAxisCount * crossAxisSpacing -
-                        40) /
-                    crossAxisCount,
+                width: _size,
                 child: FlatButton(
                   onPressed: () async {
                     if (widget.onAppSelected != null) {
@@ -152,6 +149,13 @@ class DAppsState extends State<DApps> {
           );
         },
       );
+
+  double get _size =>
+      (MediaQuery.of(context).size.width -
+          crossAxisCount * crossAxisSpacing -
+          40) /
+      crossAxisCount;
+
   Widget get bookmarkApps => GridView.builder(
         physics: NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -176,16 +180,8 @@ class DAppsState extends State<DApps> {
                           height: 18,
                         ),
                         SizedBox(
-                          width: (MediaQuery.of(context).size.width -
-                                      crossAxisCount * crossAxisSpacing -
-                                      40) /
-                                  crossAxisCount -
-                              36,
-                          height: (MediaQuery.of(context).size.width -
-                                      crossAxisCount * crossAxisSpacing -
-                                      40) /
-                                  crossAxisCount -
-                              36,
+                          width: _size - 36,
+                          height: _size - 36,
                           child: CachedNetworkImage(
                             fit: BoxFit.fill,
                             imageUrl: bookmarks[index].favicon,
@@ -195,8 +191,14 @@ class DAppsState extends State<DApps> {
                                 strokeWidth: 2,
                               ),
                             ),
-                            errorWidget: (context, url, error) =>
-                                Image.asset("assets/blank.png"),
+                            errorWidget: (context, url, error) {
+                              print('CachedNetworkImage error: $error');
+                              return Icon(
+                                Icons.star,
+                                color: Colors.blue,
+                                size: _size - 36,
+                              );
+                            },
                           ),
                         ),
                       ],

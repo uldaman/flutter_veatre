@@ -152,76 +152,110 @@ class SearchBarState extends State<SearchBar>
               builder: (context, child) {
                 return Container(
                   width: animation.value,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(10),
+                    ),
+                  ),
                   child: !showTextField
-                      ? Container(
-                          height: 40,
-                          child: Stack(
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                          child: Wrap(
                             children: <Widget>[
-                              Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    child: FlatButton(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          icon == null
-                                              ? SizedBox()
-                                              : Icon(
-                                                  icon,
-                                                  size: 16,
-                                                ),
-                                          Text(defautText),
-                                        ],
-                                      ),
-                                      onPressed: () async {
-                                        await animationController.forward();
-                                        setState(() {
-                                          showTextField = true;
-                                        });
-                                        if (widget.onStartSearch != null) {
-                                          await widget.onStartSearch();
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ],
-                                mainAxisAlignment: MainAxisAlignment.center,
-                              ),
-                              shouldHideRightItem
-                                  ? SizedBox()
-                                  : Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
+                              Container(
+                                height: 40,
+                                child: Stack(
+                                  children: <Widget>[
+                                    Row(
                                       children: <Widget>[
-                                        !showTextField && progress < 1
-                                            ? IconButton(
-                                                icon: Icon(
-                                                  Icons.close,
-                                                  color: Colors.grey,
-                                                  size: 20,
-                                                ),
-                                                onPressed: () async {
-                                                  if (widget.onRefresh !=
-                                                      null) {
-                                                    await widget.onStop();
-                                                  }
-                                                },
-                                              )
-                                            : IconButton(
-                                                icon: Icon(
-                                                  Icons.refresh,
-                                                  color: Colors.blue[500],
-                                                  size: 20,
-                                                ),
-                                                onPressed: () async {
-                                                  if (widget.onRefresh !=
-                                                      null) {
-                                                    await widget.onRefresh();
-                                                  }
-                                                },
-                                              ),
+                                        Expanded(
+                                          child: FlatButton(
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                icon == null
+                                                    ? SizedBox()
+                                                    : Icon(
+                                                        icon,
+                                                        size: 16,
+                                                      ),
+                                                Text(defautText),
+                                              ],
+                                            ),
+                                            onPressed: () async {
+                                              await animationController
+                                                  .forward();
+                                              setState(() {
+                                                showTextField = true;
+                                              });
+                                              if (widget.onStartSearch !=
+                                                  null) {
+                                                await widget.onStartSearch();
+                                              }
+                                            },
+                                          ),
+                                        ),
                                       ],
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                    ),
+                                    shouldHideRightItem
+                                        ? SizedBox()
+                                        : Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: <Widget>[
+                                              !showTextField && progress < 1
+                                                  ? IconButton(
+                                                      icon: Icon(
+                                                        Icons.close,
+                                                        color: Colors.grey,
+                                                        size: 20,
+                                                      ),
+                                                      onPressed: () async {
+                                                        if (widget.onRefresh !=
+                                                            null) {
+                                                          await widget.onStop();
+                                                        }
+                                                      },
+                                                    )
+                                                  : IconButton(
+                                                      icon: Icon(
+                                                        Icons.refresh,
+                                                        color: Colors.blue[500],
+                                                        size: 20,
+                                                      ),
+                                                      onPressed: () async {
+                                                        if (widget.onRefresh !=
+                                                            null) {
+                                                          await widget
+                                                              .onRefresh();
+                                                        }
+                                                      },
+                                                    ),
+                                            ],
+                                          )
+                                  ],
+                                ),
+                              ),
+                              !showTextField && progress < 1 && progress > 0
+                                  ? SizedBox(
+                                      height: 2,
+                                      child: Padding(
+                                        padding:
+                                            EdgeInsets.only(left: 5, right: 5),
+                                        child: LinearProgressIndicator(
+                                          value: progress,
+                                          backgroundColor: Colors.transparent,
+                                        ),
+                                      ),
                                     )
+                                  : SizedBox(),
                             ],
                           ),
                         )
@@ -246,13 +280,6 @@ class SearchBarState extends State<SearchBar>
                             )
                           ],
                         ),
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
-                  ),
                 );
               },
             ),
@@ -275,18 +302,6 @@ class SearchBarState extends State<SearchBar>
                   ),
           ],
         ),
-        !showTextField && progress < 1 && progress > 0
-            ? SizedBox(
-                height: 2,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 8, right: 8),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    backgroundColor: Colors.transparent,
-                  ),
-                ),
-              )
-            : SizedBox(),
       ],
     );
     // return Wrap(

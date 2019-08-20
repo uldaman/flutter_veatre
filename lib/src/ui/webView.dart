@@ -178,7 +178,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onPageStarted: (String url) {
           currentURL = url;
-          updateSearchBar(0, currentURL);
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller, widget.network, widget.id, url);
           }

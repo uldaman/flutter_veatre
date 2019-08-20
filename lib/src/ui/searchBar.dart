@@ -101,18 +101,19 @@ class SearchBarState extends State<SearchBar>
     });
   }
 
-  void _handleValueChanged() {
+  void _handleValueChanged() async {
     SearchBarValue value = widget.searchBarController.value;
+    setState(() {
+      if (value.submitedText != '' && showTextField) {
+        showTextField = false;
+      }
+    });
     setState(() {
       progress = value.progress;
       icon = value.icon;
       defautText = value.defautText;
       shouldHideRightItem = value.shouldHideRightItem;
       _searchTextEditingController.text = value.submitedText;
-      if (value.submitedText != '' && showTextField) {
-        showTextField = false;
-        animationController.reverse();
-      }
     });
   }
 
@@ -134,10 +135,10 @@ class SearchBarState extends State<SearchBar>
       enableInteractiveSelection: true,
       textInputAction: TextInputAction.go,
       onSubmitted: (text) async {
-        await animationController.reverse();
         setState(() {
           showTextField = false;
         });
+        await animationController.reverse();
         if (widget.onSubmitted != null) {
           widget.onSubmitted(text);
         }

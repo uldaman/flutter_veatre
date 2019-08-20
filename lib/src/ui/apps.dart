@@ -38,8 +38,8 @@ class DAppsState extends State<DApps> {
   @override
   void initState() {
     super.initState();
-    syncApps();
     updateBookmarks();
+    syncApps();
   }
 
   Future<void> syncApps() async {

@@ -71,6 +71,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
                             ),
                           ),
                           errorWidget: (context, url, error) {
+                            print('CachedNetworkImage error: $error');
                             return Image.asset("assets/blank.png");
                           },
                         )

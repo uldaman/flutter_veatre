@@ -141,6 +141,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             await controller.stopLoading();
           }
         },
+        width: MediaQuery.of(context).size.width,
       );
 
   Widget get appView => DApps(

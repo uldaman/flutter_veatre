@@ -119,7 +119,6 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
               }
               break;
             case 3:
-              print('currentID $currentID $currentNet');
               Uint8List captureData =
                   await WebViews.takeScreenshot(currentNet, currentID);
               String t = await title;

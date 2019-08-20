@@ -33,6 +33,8 @@ class DAppsState extends State<DApps> {
   List<Bookmark> bookmarks = [];
   List<DApp> recomendedApps = Globals.apps;
 
+  int editBookmark;
+
   @override
   void initState() {
     super.initState();
@@ -62,30 +64,37 @@ class DAppsState extends State<DApps> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.all(0),
-        children: <Widget>[
-          bookmarks.length > 0
-              ? Padding(
-                  child: Text(
-                    'Bookmarks',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  padding: EdgeInsets.all(15),
-                )
-              : SizedBox(),
-          bookmarks.length > 0 ? bookmarkApps : SizedBox(),
-          recomendedApps.length > 0
-              ? Padding(
-                  child: Text(
-                    'Recomends',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  padding: EdgeInsets.all(15),
-                )
-              : SizedBox(),
-          recomendedApps.length > 0 ? recomendApps : SizedBox(),
-        ],
+      body: GestureDetector(
+        child: ListView(
+          padding: EdgeInsets.all(0),
+          children: <Widget>[
+            bookmarks.length > 0
+                ? Padding(
+                    child: Text(
+                      'Bookmarks',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    padding: EdgeInsets.all(15),
+                  )
+                : SizedBox(),
+            bookmarks.length > 0 ? bookmarkApps : SizedBox(),
+            recomendedApps.length > 0
+                ? Padding(
+                    child: Text(
+                      'Recomends',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    padding: EdgeInsets.all(15),
+                  )
+                : SizedBox(),
+            recomendedApps.length > 0 ? recomendApps : SizedBox(),
+          ],
+        ),
+        onTap: () {
+          setState(() {
+            editBookmark = null;
+          });
+        },
       ),
     );
   }
@@ -151,45 +160,89 @@ class DAppsState extends State<DApps> {
           crossAxisCount: crossAxisCount,
           crossAxisSpacing: crossAxisSpacing,
           mainAxisSpacing: mainAxisSpacing,
+          childAspectRatio: 0.9,
         ),
         itemCount: bookmarks.length,
         itemBuilder: (context, index) {
-          return Column(
-            children: <Widget>[
-              SizedBox(
-                width: (MediaQuery.of(context).size.width -
-                        crossAxisCount * crossAxisSpacing -
-                        40) /
-                    crossAxisCount,
-                child: FlatButton(
-                  onPressed: () async {
-                    if (widget.onBookmarkSelected != null) {
-                      widget.onBookmarkSelected(bookmarks[index]);
-                    }
-                  },
-                  child: CachedNetworkImage(
-                    fit: BoxFit.fill,
-                    imageUrl: bookmarks[index].favicon,
-                    placeholder: (context, url) => SizedBox.fromSize(
-                      size: Size.square(20),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
+          return GestureDetector(
+            child: Column(
+              children: <Widget>[
+                Stack(
+                  overflow: Overflow.visible,
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 18,
+                        ),
+                        SizedBox(
+                          width: (MediaQuery.of(context).size.width -
+                                      crossAxisCount * crossAxisSpacing -
+                                      40) /
+                                  crossAxisCount -
+                              36,
+                          height: (MediaQuery.of(context).size.width -
+                                      crossAxisCount * crossAxisSpacing -
+                                      40) /
+                                  crossAxisCount -
+                              36,
+                          child: CachedNetworkImage(
+                            fit: BoxFit.fill,
+                            imageUrl: bookmarks[index].favicon,
+                            placeholder: (context, url) => SizedBox.fromSize(
+                              size: Size.square(20),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                Image.asset("assets/blank.png"),
+                          ),
+                        ),
+                      ],
                     ),
-                    errorWidget: (context, url, error) =>
-                        Image.asset("assets/blank.png"),
+                    editBookmark != null && editBookmark == bookmarks[index].id
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              IconButton(
+                                icon: Icon(
+                                  Icons.cancel,
+                                  color: Colors.grey[500],
+                                  size: 18,
+                                ),
+                                onPressed: () async {
+                                  await BookmarkStorage.delete(editBookmark);
+                                  editBookmark = null;
+                                  await updateBookmarks();
+                                },
+                              ),
+                            ],
+                          )
+                        : SizedBox()
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text(
+                    bookmarks[index].title ?? '',
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(color: Colors.brown, fontSize: 10),
                   ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 4),
-                child: Text(
-                  bookmarks[index].title ?? '',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.brown, fontSize: 10),
-                ),
-              ),
-            ],
+              ],
+            ),
+            onLongPressStart: (detail) async {
+              setState(() {
+                editBookmark = bookmarks[index].id;
+              });
+            },
+            onTap: () async {
+              if (widget.onBookmarkSelected != null) {
+                widget.onBookmarkSelected(bookmarks[index]);
+              }
+            },
           );
         },
       );

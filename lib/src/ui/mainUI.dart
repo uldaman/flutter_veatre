@@ -112,18 +112,19 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                     await WebViews.getFavicon(currentNet, currentID);
                 if (favicon != null) {
                   Uri uri = Uri.parse(url);
+                  final scheme = uri.scheme;
+                  final host = uri.host;
                   if (favicon.startsWith('//')) {
-                    favicon = 'http:$favicon';
+                    favicon = '$scheme:$favicon';
                   } else if (favicon.startsWith('/')) {
-                    final host = uri.host;
-                    favicon = 'http://$host$favicon';
+                    favicon = '$scheme://$host$favicon';
                   } else if (favicon.startsWith('http')) {
                     favicon = favicon;
                   } else {
-                    final host = uri.host;
-                    favicon = 'http://$host/$favicon';
+                    favicon = '$scheme://$host/$favicon';
                   }
                 }
+                print("favicon $favicon");
                 Bookmark bookmark = Bookmark(
                   net: currentNet == Network.MainNet ? 0 : 1,
                   url: url,
@@ -257,7 +258,6 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
         currentNet,
         currentID,
       );
-      print("currentURL $currentURL");
       setState(() {
         currentURL = url;
         this.canBack = canBack;

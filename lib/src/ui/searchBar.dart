@@ -106,6 +106,7 @@ class SearchBarState extends State<SearchBar>
     setState(() {
       if (value.submitedText != '' && showTextField) {
         showTextField = false;
+        animationController.reverse();
       }
     });
     setState(() {

@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/storage/appearanceStorage.dart';
 
-class Networks extends StatefulWidget {
-  static const routeName = '/networks';
+class Appearances extends StatefulWidget {
+  static const routeName = '/appearances';
 
   @override
-  NetworksState createState() => NetworksState();
+  AppearancesState createState() => AppearancesState();
 }
 
-class NetworksState extends State<Networks> {
-  Network network = Network.MainNet;
+class AppearancesState extends State<Appearances> {
+  Appearance _appearance = Appearance.light;
 
   @override
   void initState() {
     super.initState();
-    NetworkStorage.currentNet.then((network) {
+    AppearanceStorage.appearance.then((appearance) {
       setState(() {
-        this.network = network;
+        _appearance = appearance;
       });
     });
   }
 
-  Future<void> changeNet() async {
-    final toNetwork =
-        network == Network.MainNet ? Network.TestNet : Network.MainNet;
-    await NetworkStorage.set(toNetwork);
+  Future<void> changeTheme() async {
+    final toAppearance =
+        _appearance == Appearance.light ? Appearance.dark : Appearance.light;
+    await AppearanceStorage.set(toAppearance);
     setState(() {
-      this.network = toNetwork;
+      _appearance = toAppearance;
     });
+    Globals.updateAppearance(toAppearance);
   }
 
   @override
@@ -35,20 +37,20 @@ class NetworksState extends State<Networks> {
     List<Widget> widgets = [];
     widgets.addAll([
       buildCell(
-        'MainNet',
-        network == Network.MainNet,
+        'Light',
+        _appearance == Appearance.light,
         () async {
-          if (network == Network.TestNet) {
-            await changeNet();
+          if (_appearance == Appearance.dark) {
+            await changeTheme();
           }
         },
       ),
       buildCell(
-        'TestNet',
-        network == Network.TestNet,
+        'Dark',
+        _appearance == Appearance.dark,
         () async {
-          if (network == Network.MainNet) {
-            await changeNet();
+          if (_appearance == Appearance.light) {
+            await changeTheme();
           }
         },
       ),
@@ -57,7 +59,7 @@ class NetworksState extends State<Networks> {
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text(
-          'Networks',
+          'Theme',
         ),
         centerTitle: true,
       ),

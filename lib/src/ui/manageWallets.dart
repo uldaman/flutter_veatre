@@ -49,9 +49,8 @@ class ManageWalletsState extends State<ManageWallets> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text('Wallets'),
         centerTitle: true,
       ),
@@ -128,8 +127,6 @@ class ManageWalletsState extends State<ManageWallets> {
       child: GestureDetector(
         child: Card(
           margin: EdgeInsets.only(left: 10, right: 10, top: 10),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: Column(
             children: <Widget>[
               Container(

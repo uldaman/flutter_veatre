@@ -56,7 +56,8 @@ class ImportWalletState extends State<ImportWallet> {
               children: <Widget>[
                 Container(
                   padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-                  child: Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(5),
                     child: TextFormField(
                       controller: mnemonicController,
                       decoration: InputDecoration(
@@ -65,6 +66,10 @@ class ImportWalletState extends State<ImportWallet> {
                             'Input your mnemonic phase which is splited by whitespace',
                       ),
                       maxLines: 30,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.body1.color,
+                      ),
                     ),
                   ),
                   height: 120,
@@ -85,6 +90,10 @@ class ImportWalletState extends State<ImportWallet> {
                       decoration: InputDecoration(
                         hintText: 'Wallet Name',
                       ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.body1.color,
+                      ),
                     ),
                   ),
                 )
@@ -104,6 +113,10 @@ class ImportWalletState extends State<ImportWallet> {
                       decoration: InputDecoration(
                         hintText: 'New Password',
                       ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.body1.color,
+                      ),
                     ),
                   ),
                 )
@@ -117,7 +130,8 @@ class ImportWalletState extends State<ImportWallet> {
               children: <Widget>[
                 Container(
                   padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-                  child: Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(5),
                     child: TextFormField(
                       controller: keystoreController,
                       decoration: InputDecoration(
@@ -125,6 +139,10 @@ class ImportWalletState extends State<ImportWallet> {
                         hintText: 'Input your keystore',
                       ),
                       maxLines: 30,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.body1.color,
+                      ),
                     ),
                   ),
                   height: 120,
@@ -145,6 +163,10 @@ class ImportWalletState extends State<ImportWallet> {
                       decoration: InputDecoration(
                         hintText: 'Wallet Name',
                       ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.body1.color,
+                      ),
                     ),
                   ),
                 )
@@ -164,6 +186,10 @@ class ImportWalletState extends State<ImportWallet> {
                       decoration: InputDecoration(
                         hintText: 'Keystore Password',
                       ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.body1.color,
+                      ),
                     ),
                   ),
                 )
@@ -175,9 +201,9 @@ class ImportWalletState extends State<ImportWallet> {
     );
     return ProgressHUD(
       child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
-          backgroundColor: Colors.white,
           title: Text('Import Wallet'),
           centerTitle: true,
         ),
@@ -185,37 +211,53 @@ class ImportWalletState extends State<ImportWallet> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                SizedBox(
-                  child: FlatButton(
-                    color: currentPage == 0 ? Colors.red : Colors.grey[200],
-                    textColor: currentPage == 0 ? Colors.white : Colors.blue,
-                    child: Text('Mnemonic'),
-                    onPressed: () {
-                      pageController.animateToPage(
-                        0,
-                        duration: Duration(milliseconds: 200),
-                        curve: Curves.easeIn,
-                      );
-                    },
+                Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: SizedBox(
+                    child: Card(
+                      clipBehavior: Clip.hardEdge,
+                      margin: EdgeInsets.all(0),
+                      child: FlatButton(
+                        color: currentPage == 0 ? Colors.red : Colors.grey[200],
+                        textColor:
+                            currentPage == 0 ? Colors.white : Colors.blue,
+                        child: Text('Mnemonic'),
+                        onPressed: () {
+                          pageController.animateToPage(
+                            0,
+                            duration: Duration(milliseconds: 200),
+                            curve: Curves.easeIn,
+                          );
+                        },
+                      ),
+                    ),
+                    width: MediaQuery.of(context).size.width * 0.5 - 20,
+                    height: 50,
                   ),
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  height: 50,
                 ),
-                SizedBox(
-                  child: FlatButton(
-                    color: currentPage == 1 ? Colors.red : Colors.grey[200],
-                    textColor: currentPage == 1 ? Colors.white : Colors.blue,
-                    child: Text('Keystore'),
-                    onPressed: () {
-                      pageController.animateToPage(
-                        1,
-                        duration: Duration(milliseconds: 200),
-                        curve: Curves.easeIn,
-                      );
-                    },
+                Padding(
+                  padding: EdgeInsets.only(left: 20),
+                  child: SizedBox(
+                    child: Card(
+                      clipBehavior: Clip.hardEdge,
+                      margin: EdgeInsets.all(0),
+                      child: FlatButton(
+                        color: currentPage == 1 ? Colors.red : Colors.grey[200],
+                        textColor:
+                            currentPage == 1 ? Colors.white : Colors.blue,
+                        child: Text('Keystore'),
+                        onPressed: () {
+                          pageController.animateToPage(
+                            1,
+                            duration: Duration(milliseconds: 200),
+                            curve: Curves.easeIn,
+                          );
+                        },
+                      ),
+                    ),
+                    width: MediaQuery.of(context).size.width * 0.5 - 20,
+                    height: 50,
                   ),
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  height: 50,
                 ),
               ],
             ),

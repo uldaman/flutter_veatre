@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:veatre/common/net.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/dapp.dart';
+import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
@@ -34,12 +35,14 @@ class WebView extends StatefulWidget {
   final Key key;
   final int id;
   final Network network;
+  final Appearance appearance;
   final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
     this.id,
     this.network,
+    this.appearance,
     this.onWebViewChanged,
   }) : super(key: key);
 
@@ -60,13 +63,22 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
   Completer<BlockHead> _head = new Completer();
+  Appearance _appearance;
 
   @override
   void initState() {
     super.initState();
+    _appearance = widget.appearance;
     Globals.watchBlockHead((blockHeadForNetwork) async {
       if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
         _head.complete(blockHeadForNetwork.head);
+      }
+    });
+    Globals.watchAppearance((appearance) async {
+      _appearance = appearance;
+      if (controller != null) {
+        await controller
+            .evaluateJavascript(_darkMode(appearance == Appearance.dark));
       }
     });
   }
@@ -78,8 +90,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Colors.grey[50],
         title: searchBar,
       ),
       body: RepaintBoundary(
@@ -158,7 +170,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         initialUrl: currentURL,
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
         javascriptHandlers: _javascriptChannels.toSet(),
-        injectJavascript: _initialParamsJS + Globals.connexJS,
+        injectJavascript: _initialParamsJS +
+            Globals.connexJS +
+            _darkMode(
+              _appearance == Appearance.dark,
+            ),
         onURLChanged: (url) {
           currentURL = url;
           if (widget.onWebViewChanged != null) {
@@ -176,7 +192,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           }
           updateSearchBar(0, currentURL);
         },
-        onPageStarted: (String url) {
+        onPageStarted: (String url) async {
+          if (controller != null) {
+            await controller
+                .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
+          }
           currentURL = url;
           if (widget.onWebViewChanged != null) {
             widget.onWebViewChanged(controller, widget.network, widget.id, url);
@@ -185,7 +205,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             isStartSearch = false;
           });
         },
-        onPageFinished: (String url) {
+        onPageFinished: (String url) async {
           setState(() {
             currentURL = url;
           });
@@ -256,6 +276,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         parentID:'${initialHead.parentID}'
     };
     ''';
+  }
+
+  String _darkMode(bool enable) {
+    String mode = enable ? 'true' : 'false';
+    return 'window.__NightMode__.setEnabled($mode);';
   }
 
   void updateSearchBar(double progress, String url) {

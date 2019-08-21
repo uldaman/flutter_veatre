@@ -42,8 +42,8 @@ class ActivitiesState extends State<Activities> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text('Activities'),
         centerTitle: true,
       ),
@@ -231,16 +231,7 @@ class ActivitiesState extends State<Activities> {
                           ),
                         ),
                         Expanded(
-                          child: TextField(
-                            readOnly: true,
-                            enableInteractiveSelection: true,
-                            maxLines: null,
-                            decoration:
-                                InputDecoration(border: InputBorder.none),
-                            controller:
-                                TextEditingController(text: activity.link),
-                            style: TextStyle(color: Colors.blue, fontSize: 12),
-                          ),
+                          child: blueText(activity.link),
                         )
                       ],
                     )
@@ -322,17 +313,7 @@ class ActivitiesState extends State<Activities> {
                                 ),
                               ),
                               Expanded(
-                                child: TextField(
-                                  readOnly: true,
-                                  enableInteractiveSelection: true,
-                                  maxLines: null,
-                                  decoration:
-                                      InputDecoration(border: InputBorder.none),
-                                  controller: TextEditingController(
-                                      text: activity.hash),
-                                  style: TextStyle(
-                                      color: Colors.blue, fontSize: 12),
-                                ),
+                                child: blueText(activity.hash),
                               )
                             ],
                           ),
@@ -352,17 +333,7 @@ class ActivitiesState extends State<Activities> {
                                 ),
                               ),
                               Expanded(
-                                child: TextField(
-                                  readOnly: true,
-                                  enableInteractiveSelection: true,
-                                  maxLines: null,
-                                  decoration:
-                                      InputDecoration(border: InputBorder.none),
-                                  controller: TextEditingController(
-                                      text: activity.link),
-                                  style: TextStyle(
-                                      color: Colors.blue, fontSize: 12),
-                                ),
+                                child: blueText(activity.link),
                               )
                             ],
                           ),
@@ -375,4 +346,18 @@ class ActivitiesState extends State<Activities> {
       ),
     );
   }
+
+  TextField blueText(String text) => TextField(
+        autofocus: false,
+        readOnly: true,
+        enableInteractiveSelection: true,
+        maxLines: null,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          enabledBorder: InputBorder.none,
+        ),
+        controller: TextEditingController(text: text),
+        style: TextStyle(color: Colors.blue, fontSize: 12),
+      );
 }

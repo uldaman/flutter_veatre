@@ -26,18 +26,6 @@ class NetworkStorage {
     }
   }
 
-  static Future<String> get network async {
-    String network = await _storage.read(key: networkKey);
-    if (network == null) {
-      await _storage.write(
-        key: networkKey,
-        value: mainnet,
-      );
-      return mainnet;
-    }
-    return network;
-  }
-
   static Future<Net> net(Network network) async {
     if (network == Network.MainNet) {
       return Net(NetworkStorage.mainnet);
@@ -46,7 +34,14 @@ class NetworkStorage {
   }
 
   static Future<Network> get currentNet async {
-    String network = await NetworkStorage.network;
+    String network = await _storage.read(key: networkKey);
+    if (network == null) {
+      await _storage.write(
+        key: networkKey,
+        value: mainnet,
+      );
+      return Network.MainNet;
+    }
     return network == NetworkStorage.mainnet
         ? Network.MainNet
         : Network.TestNet;

@@ -3,16 +3,20 @@ import 'package:flutter/material.dart';
 Future alert(BuildContext context, Widget title, String message) async {
   return showDialog(
     context: context,
-    barrierDismissible: true, // user must tap button for close dialog!
+    barrierDismissible: true,
     builder: (BuildContext context) {
       return AlertDialog(
+        backgroundColor: Theme.of(context).primaryColor,
+        shape: Theme.of(context).cardTheme.shape,
         contentPadding:
             EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 24),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         title: title,
         content: Wrap(
           children: <Widget>[
-            Text(message),
+            Text(
+              message,
+              style: TextStyle(color: Theme.of(context).textTheme.title.color),
+            ),
           ],
         ),
       );
@@ -36,9 +40,10 @@ Future customAlert(
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
+        backgroundColor: Theme.of(context).primaryColor,
         contentPadding:
             EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: Theme.of(context).cardTheme.shape,
         title: title,
         content: Wrap(
           children: <Widget>[

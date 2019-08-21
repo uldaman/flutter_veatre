@@ -5,6 +5,7 @@ import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/common/net.dart';
+import 'package:veatre/src/storage/appearanceStorage.dart';
 
 class BlockHeadForNetwork {
   Network network;
@@ -66,6 +67,8 @@ class Globals {
   static final testNet = Net(NetworkStorage.testnet);
   static final mainNet = Net(NetworkStorage.mainnet);
 
+  static Appearance _appearance;
+
   static BlockHead _mainNetHead;
   static BlockHead _testNetHead;
 
@@ -84,6 +87,21 @@ class Globals {
   static updateBlockHead(BlockHeadForNetwork blockHeadForNetwork) {
     Globals.setHead(blockHeadForNetwork);
     _eventBus.fire(blockHeadForNetwork);
+  }
+
+  static watchAppearance(void Function(Appearance appearance) action) {
+    _eventBus.on<Appearance>().listen(action);
+  }
+
+  static updateAppearance(Appearance appearance) {
+    setAppearance(appearance);
+    _eventBus.fire(appearance);
+  }
+
+  static get appearance => _appearance;
+
+  static setAppearance(Appearance appearance) {
+    _appearance = appearance;
   }
 
   static destory() {

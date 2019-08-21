@@ -128,10 +128,18 @@ class SearchBarState extends State<SearchBar>
   @override
   Widget build(BuildContext context) {
     TextField searchTextField = TextField(
-      style: TextStyle(fontSize: 14),
+      style: TextStyle(
+        fontSize: 14,
+        color: Theme.of(context).textTheme.body1.color,
+      ),
       controller: _searchTextEditingController,
       focusNode: _focusNode,
-      decoration: InputDecoration(border: InputBorder.none, hintText: 'Search'),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        hintText: 'Search',
+      ),
       autofocus: true,
       enableInteractiveSelection: true,
       textInputAction: TextInputAction.go,
@@ -153,136 +161,157 @@ class SearchBarState extends State<SearchBar>
               animation: animation,
               builder: (context, child) {
                 return Container(
-                  width: animation.value,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
+                    width: animation.value,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(10),
+                      ),
                     ),
-                  ),
-                  child: !showTextField
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(10),
-                          ),
-                          child: Wrap(
-                            children: <Widget>[
-                              Container(
-                                height: 40,
-                                child: Stack(
-                                  children: <Widget>[
-                                    Row(
+                    child: Card(
+                      margin: EdgeInsets.all(0),
+                      child: !showTextField
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                              child: Wrap(
+                                children: <Widget>[
+                                  Container(
+                                    height: 40,
+                                    child: Stack(
                                       children: <Widget>[
-                                        Expanded(
-                                          child: FlatButton(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: <Widget>[
-                                                icon == null
-                                                    ? SizedBox()
-                                                    : Icon(
-                                                        icon,
-                                                        size: 16,
+                                        Row(
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: FlatButton(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    icon == null
+                                                        ? SizedBox()
+                                                        : Icon(
+                                                            icon,
+                                                            size: 16,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .iconTheme
+                                                                .color,
+                                                          ),
+                                                    Text(
+                                                      defautText,
+                                                      style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .textTheme
+                                                            .title
+                                                            .color,
+                                                        fontSize: 14,
                                                       ),
-                                                Text(defautText),
-                                              ],
-                                            ),
-                                            onPressed: () async {
-                                              await animationController
-                                                  .forward();
-                                              setState(() {
-                                                showTextField = true;
-                                              });
-                                              if (widget.onStartSearch !=
-                                                  null) {
-                                                await widget.onStartSearch();
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                    ),
-                                    shouldHideRightItem
-                                        ? SizedBox()
-                                        : Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: <Widget>[
-                                              !showTextField && progress < 1
-                                                  ? IconButton(
-                                                      icon: Icon(
-                                                        Icons.close,
-                                                        color: Colors.grey,
-                                                        size: 20,
-                                                      ),
-                                                      onPressed: () async {
-                                                        if (widget.onRefresh !=
-                                                            null) {
-                                                          await widget.onStop();
-                                                        }
-                                                      },
-                                                    )
-                                                  : IconButton(
-                                                      icon: Icon(
-                                                        Icons.refresh,
-                                                        color: Colors.blue[500],
-                                                        size: 20,
-                                                      ),
-                                                      onPressed: () async {
-                                                        if (widget.onRefresh !=
-                                                            null) {
-                                                          await widget
-                                                              .onRefresh();
-                                                        }
-                                                      },
                                                     ),
-                                            ],
-                                          )
-                                  ],
-                                ),
-                              ),
-                              !showTextField && progress < 1 && progress > 0
-                                  ? SizedBox(
-                                      height: 2,
-                                      child: Padding(
-                                        padding:
-                                            EdgeInsets.only(left: 5, right: 5),
-                                        child: LinearProgressIndicator(
-                                          value: progress,
-                                          backgroundColor: Colors.transparent,
+                                                  ],
+                                                ),
+                                                onPressed: () async {
+                                                  await animationController
+                                                      .forward();
+                                                  setState(() {
+                                                    showTextField = true;
+                                                  });
+                                                  if (widget.onStartSearch !=
+                                                      null) {
+                                                    await widget
+                                                        .onStartSearch();
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                         ),
-                                      ),
-                                    )
-                                  : SizedBox(),
-                            ],
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 10),
-                                child: searchTextField,
+                                        shouldHideRightItem
+                                            ? SizedBox()
+                                            : Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: <Widget>[
+                                                  !showTextField && progress < 1
+                                                      ? IconButton(
+                                                          icon: Icon(
+                                                            Icons.close,
+                                                            color: Colors.grey,
+                                                            size: 20,
+                                                          ),
+                                                          onPressed: () async {
+                                                            if (widget
+                                                                    .onRefresh !=
+                                                                null) {
+                                                              await widget
+                                                                  .onStop();
+                                                            }
+                                                          },
+                                                        )
+                                                      : IconButton(
+                                                          icon: Icon(
+                                                            Icons.refresh,
+                                                            color: Colors
+                                                                .blue[500],
+                                                            size: 20,
+                                                          ),
+                                                          onPressed: () async {
+                                                            if (widget
+                                                                    .onRefresh !=
+                                                                null) {
+                                                              await widget
+                                                                  .onRefresh();
+                                                            }
+                                                          },
+                                                        ),
+                                                ],
+                                              )
+                                      ],
+                                    ),
+                                  ),
+                                  !showTextField && progress < 1 && progress > 0
+                                      ? SizedBox(
+                                          height: 4,
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                                left: 5, right: 5),
+                                            child: LinearProgressIndicator(
+                                              value: progress,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                            ),
+                                          ),
+                                        )
+                                      : SizedBox(),
+                                ],
                               ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.cancel,
-                                color: Colors.grey,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                _searchTextEditingController.clear();
-                              },
                             )
-                          ],
-                        ),
-                );
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 10),
+                                    child: searchTextField,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.cancel,
+                                    color: Colors.grey,
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    _searchTextEditingController.clear();
+                                  },
+                                )
+                              ],
+                            ),
+                    ));
               },
             ),
             !showTextField
@@ -290,7 +319,10 @@ class SearchBarState extends State<SearchBar>
                 : FlatButton(
                     child: Text(
                       'Cancel',
-                      style: TextStyle(color: Colors.blue, fontSize: 12),
+                      style: TextStyle(
+                        color: Theme.of(context).accentTextTheme.title.color,
+                        fontSize: 12,
+                      ),
                     ),
                     onPressed: () async {
                       setState(() {
@@ -306,149 +338,5 @@ class SearchBarState extends State<SearchBar>
         ),
       ],
     );
-    // return Wrap(
-    //   children: <Widget>[
-    //     Row(
-    //       children: <Widget>[
-    //         AnimatedContainer(
-    //           duration: Duration(milliseconds: 80),
-    //           child: !isTexting
-    //               ? Container(
-    //                   height: 40,
-    //                   child: Stack(
-    //                     children: <Widget>[
-    //                       Row(
-    //                         children: <Widget>[
-    //                           Expanded(
-    //                             child: FlatButton(
-    //                               child: Row(
-    //                                 mainAxisAlignment: MainAxisAlignment.center,
-    //                                 children: <Widget>[
-    //                                   icon == null
-    //                                       ? SizedBox()
-    //                                       : Icon(
-    //                                           icon,
-    //                                           size: 16,
-    //                                         ),
-    //                                   Text(defautText),
-    //                                 ],
-    //                               ),
-    //                               onPressed: () async {
-    //                                 setState(() {
-    //                                   searchBarWidth = fullWidth - 85;
-    //                                 });
-    //                                 await Future.delayed(
-    //                                     Duration(milliseconds: 100));
-    //                                 setState(() {
-    //                                   isTexting = true;
-    //                                 });
-    //                                 if (widget.onStartSearch != null) {
-    //                                   await widget.onStartSearch();
-    //                                 }
-    //                               },
-    //                             ),
-    //                           ),
-    //                         ],
-    //                         mainAxisAlignment: MainAxisAlignment.center,
-    //                       ),
-    //                       shouldHideRightItem
-    //                           ? SizedBox()
-    //                           : Row(
-    //                               mainAxisAlignment: MainAxisAlignment.end,
-    //                               children: <Widget>[
-    //                                 !isTexting && progress < 1
-    //                                     ? IconButton(
-    //                                         icon: Icon(
-    //                                           Icons.close,
-    //                                           color: Colors.grey,
-    //                                           size: 20,
-    //                                         ),
-    //                                         onPressed: () async {
-    //                                           if (widget.onRefresh != null) {
-    //                                             await widget.onStop();
-    //                                           }
-    //                                         },
-    //                                       )
-    //                                     : IconButton(
-    //                                         icon: Icon(
-    //                                           Icons.refresh,
-    //                                           color: Colors.blue[500],
-    //                                           size: 20,
-    //                                         ),
-    //                                         onPressed: () async {
-    //                                           if (widget.onRefresh != null) {
-    //                                             await widget.onRefresh();
-    //                                           }
-    //                                         },
-    //                                       ),
-    //                               ],
-    //                             )
-    //                     ],
-    //                   ),
-    //                 )
-    //               : Row(
-    //                   mainAxisAlignment: MainAxisAlignment.end,
-    //                   children: <Widget>[
-    //                     Expanded(
-    //                       child: Padding(
-    //                         padding: EdgeInsets.only(left: 10),
-    //                         child: searchTextField,
-    //                       ),
-    //                     ),
-    //                     IconButton(
-    //                       icon: Icon(
-    //                         Icons.cancel,
-    //                         color: Colors.grey,
-    //                         size: 20,
-    //                       ),
-    //                       onPressed: () {
-    //                         _searchTextEditingController.clear();
-    //                       },
-    //                     )
-    //                   ],
-    //                 ),
-    //           width: searchBarWidth,
-    //           height: 42,
-    //           decoration: BoxDecoration(
-    //             color: Colors.grey[300],
-    //             borderRadius: BorderRadius.all(
-    //               Radius.circular(10),
-    //             ),
-    //           ),
-    //         ),
-    //         !isTexting
-    //             ? SizedBox()
-    //             : FlatButton(
-    //                 padding: EdgeInsets.all(0),
-    //                 child: Text(
-    //                   'Cancel',
-    //                   style: TextStyle(color: Colors.blue, fontSize: 12),
-    //                 ),
-    //                 onPressed: () async {
-    //                   setState(() {
-    //                     searchBarWidth = MediaQuery.of(context).size.width - 35;
-    //                     isTexting = false;
-    //                   });
-    //                   if (widget.onCancelInput != null) {
-    //                     await widget.onCancelInput();
-    //                   }
-    //                 },
-    //               ),
-    //       ],
-    //     ),
-    //     !isTexting && progress < 1 && progress > 0
-    //         ? SizedBox(
-    //             height: 2,
-    //             child: Padding(
-    //               padding: EdgeInsets.only(left: 8, right: 8),
-    //               child: LinearProgressIndicator(
-    //                 value: progress,
-    //                 backgroundColor: Colors.transparent,
-    //               ),
-    //             ),
-    //           )
-    //         : SizedBox(),
-    //   ],
-    // );
   }
 }

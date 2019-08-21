@@ -22,9 +22,8 @@ class CreateWalletState extends State<CreateWallet> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text('Create Wallet'),
         centerTitle: true,
       ),
@@ -39,6 +38,10 @@ class CreateWalletState extends State<CreateWallet> {
               decoration: InputDecoration(
                 hintText: 'Wallet Name',
               ),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).textTheme.body1.color,
+              ),
             ),
             padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
           ),
@@ -51,6 +54,10 @@ class CreateWalletState extends State<CreateWallet> {
               decoration: InputDecoration(
                 hintText: 'Password',
               ),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).textTheme.body1.color,
+              ),
             ),
             padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
           ),
@@ -61,6 +68,10 @@ class CreateWalletState extends State<CreateWallet> {
               obscureText: true,
               decoration: InputDecoration(
                 hintText: 'Repeat password',
+              ),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).textTheme.body1.color,
               ),
             ),
             padding: EdgeInsets.fromLTRB(20, 0, 20, 30),

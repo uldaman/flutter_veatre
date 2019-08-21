@@ -38,8 +38,8 @@ class TabViewsState extends State<TabViews> {
     double ratio = MediaQuery.of(context).size.width /
         (MediaQuery.of(context).size.height - 20 - 75 - 49);
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Colors.grey[50],
         title: Text('Tabs'),
         leading: SizedBox(),
       ),
@@ -58,6 +58,7 @@ class TabViewsState extends State<TabViews> {
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Theme.of(context).primaryColor,
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
@@ -165,6 +166,7 @@ class TabViewsState extends State<TabViews> {
                         icon: Icon(
                           Icons.close,
                           size: 20,
+                          color: Colors.black,
                         ),
                         onPressed: () async {
                           if (index == selectedTab) {

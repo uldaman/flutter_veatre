@@ -99,6 +99,7 @@ class WalletInfoState extends State<WalletInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       body: Column(
         children: <Widget>[
           Stack(
@@ -201,7 +202,6 @@ class WalletInfoState extends State<WalletInfo> {
                             child: IconButton(
                               icon: Icon(Icons.arrow_back_ios),
                               iconSize: 25,
-                              color: Colors.white,
                               onPressed: () async {
                                 Navigator.pop(context);
                               },
@@ -211,7 +211,6 @@ class WalletInfoState extends State<WalletInfo> {
                             child: Text(
                               widget.walletEntity.name,
                               style: TextStyle(
-                                color: Colors.white,
                                 fontSize: 30,
                               ),
                             ),
@@ -222,7 +221,6 @@ class WalletInfoState extends State<WalletInfo> {
                             child: IconButton(
                               icon: Icon(FontAwesomeIcons.wrench),
                               iconSize: 20,
-                              color: Colors.white,
                               onPressed: () async {
                                 if (wallet != null) {
                                   Navigator.of(context).push(
@@ -253,7 +251,6 @@ class WalletInfoState extends State<WalletInfo> {
                 itemCount: transfers.length,
                 itemBuilder: buildCell,
               ),
-              color: Colors.grey[100],
             ),
           ),
         ],
@@ -287,8 +284,9 @@ class WalletInfoState extends State<WalletInfo> {
                       child: Text(
                         isSender ? transfer.recipient : transfer.sender,
                         style: TextStyle(
-                          color: isSender ? Colors.black : Colors.blueAccent,
-                          // fontWeight: FontWeight.bold,
+                          color: isSender
+                              ? Theme.of(context).textTheme.title.color
+                              : Colors.blueAccent,
                         ),
                       ),
                     ),
@@ -317,9 +315,12 @@ class WalletInfoState extends State<WalletInfo> {
                             child: Text(
                               "${isSender ? '-' : '+'}${fixed2Value(amount)}",
                               style: TextStyle(
-                                color:
-                                    isSender ? Colors.black : Colors.blueAccent,
-                                fontWeight: FontWeight.bold,
+                                color: isSender
+                                    ? Theme.of(context)
+                                        .accentTextTheme
+                                        .title
+                                        .color
+                                    : Colors.blueAccent,
                               ),
                             ),
                           ),

@@ -20,7 +20,7 @@ class AddressDetailState extends State<AddressDetail> {
   Widget build(BuildContext context) {
     WalletEntity walletEntity = widget.walletEntity;
     return Scaffold(
-      backgroundColor: Colors.amberAccent,
+      backgroundColor: Theme.of(context).primaryColor,
       body: Column(
         children: <Widget>[
           Padding(
@@ -32,7 +32,6 @@ class AddressDetailState extends State<AddressDetail> {
                   child: IconButton(
                     icon: Icon(
                       Icons.close,
-                      color: Colors.black,
                       size: 25,
                     ),
                     onPressed: () {
@@ -112,7 +111,8 @@ class AddressDetailState extends State<AddressDetail> {
                                 ),
                                 onPressed: () async {
                                   await Clipboard.setData(new ClipboardData(
-                                      text: '0x' + walletEntity.keystore.address));
+                                      text: '0x' +
+                                          walletEntity.keystore.address));
                                   setState(() {
                                     isCopied = true;
                                   });
@@ -147,6 +147,11 @@ class AddressDetailState extends State<AddressDetail> {
                               height: 40,
                               child: Center(
                                 child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                    side: BorderSide.none,
+                                  ),
                                   color: Colors.grey[200],
                                   child: Container(
                                     child: Text(

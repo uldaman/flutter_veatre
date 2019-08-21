@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:veatre/src/api/BlockAPI.dart';
 
 import 'package:veatre/src/storage/activitiyStorage.dart';
+import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/models/block.dart';
+import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
@@ -20,8 +22,10 @@ import 'package:veatre/common/globals.dart';
 void main() {
   runZoned(() async {
     await initialGlobals();
-    final currentNet = await NetworkStorage.currentNet;
-    runApp(App(currentNet));
+    runApp(App(
+      network: await NetworkStorage.currentNet,
+      appearance: await AppearanceStorage.appearance,
+    ));
   }, onError: (dynamic err, StackTrace stack) {
     print("unhandled error: $err");
     print("stack: $stack");
@@ -44,11 +48,14 @@ Future<void> initialGlobals() async {
       network: Network.TestNet,
     ),
   );
+  Globals.setAppearance(await AppearanceStorage.appearance);
 }
 
 class App extends StatefulWidget {
   final Network network;
-  App(this.network);
+  final Appearance appearance;
+
+  App({@required this.network, @required this.appearance});
 
   @override
   AppState createState() => AppState();
@@ -56,10 +63,12 @@ class App extends StatefulWidget {
 
 class AppState extends State<App> {
   Timer _timer;
+  Appearance _appearance;
 
   @override
   void initState() {
     super.initState();
+    _appearance = widget.appearance;
     Globals.periodic(10, (timer) async {
       try {
         final currentNet = await NetworkStorage.currentNet;
@@ -77,6 +86,11 @@ class AppState extends State<App> {
       } catch (e) {
         print('sync head error: $e');
       }
+    });
+    Globals.watchAppearance((appearance) {
+      setState(() {
+        _appearance = appearance;
+      });
     });
   }
 
@@ -113,28 +127,115 @@ class AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
-        MainUI.routeName: (context) => new MainUI(widget.network),
+        MainUI.routeName: (context) => new MainUI(
+              network: widget.network,
+              appearance: _appearance,
+            ),
         Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
         Networks.routeName: (context) => new Networks(),
+        Appearances.routeName: (context) => new Appearances(),
         CreateWallet.routeName: (context) => new CreateWallet(),
         ImportWallet.routeName: (context) => new ImportWallet(),
       },
-      theme: ThemeData(
+      theme: _appearance == Appearance.light ? lightTheme : darkTheme,
+    );
+  }
+
+  ThemeData get lightTheme => ThemeData(
         primarySwatch: Colors.blue,
-        primaryColorBrightness: Brightness.light,
-        primaryColor: Colors.blue,
+        primaryColor: Colors.white,
+        accentColor: Colors.blue,
+        brightness: Brightness.light,
         primaryIconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black),
+        accentTextTheme: TextTheme(
+          title: TextStyle(color: Colors.grey[500], fontFamily: "Aveny"),
+        ),
         primaryTextTheme: TextTheme(
           title: TextStyle(color: Colors.black, fontFamily: "Aveny"),
         ),
-        textTheme: TextTheme(title: TextStyle(color: Colors.black)),
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(),
+        cardTheme: CardTheme(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
         ),
-      ),
-    );
-  }
+        textTheme: TextTheme(
+          title: TextStyle(color: Colors.black),
+          display1: TextStyle(color: Colors.grey[500]),
+          body1: TextStyle(color: Colors.black),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue, width: 1.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue, width: 1.0),
+          ),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white, width: 1.0),
+          ),
+          hintStyle: TextStyle(color: Colors.white),
+        ),
+      );
+
+  ThemeData get darkTheme => ThemeData(
+        primarySwatch: Colors.blue,
+        primaryColor: Colors.black,
+        accentColor: Colors.blue,
+        brightness: Brightness.dark,
+        primaryIconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: Colors.white),
+        accentTextTheme: TextTheme(
+          title: TextStyle(color: Colors.grey[500], fontFamily: "Aveny"),
+        ),
+        primaryTextTheme: TextTheme(
+          title: TextStyle(color: Colors.white, fontFamily: "Aveny"),
+        ),
+        cardTheme: CardTheme(
+          color: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            side: BorderSide(color: Colors.grey[800], width: 1),
+          ),
+        ),
+        textTheme: TextTheme(
+          title: TextStyle(color: Colors.white),
+          display1: TextStyle(color: Colors.grey[500]),
+          body1: TextStyle(color: Colors.white),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue, width: 1.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue, width: 1.0),
+          ),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white, width: 1.0),
+          ),
+          hintStyle: TextStyle(color: Colors.white),
+        ),
+      );
 
   @override
   void dispose() {

@@ -110,9 +110,9 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text('Sign Certificate'),
         centerTitle: true,
         leading: IconButton(
@@ -129,7 +129,6 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
             icon: Icon(
               Icons.more_horiz,
               size: 25,
-              color: Colors.blue,
             ),
             onPressed: () async {
               await showWallets();
@@ -144,8 +143,6 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
               child: Container(
                 child: Card(
                   margin: EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
                   child: Column(
                     children: <Widget>[
                       Container(
@@ -253,7 +250,6 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                       child: Padding(
                         padding: EdgeInsets.all(8),
                         child: Card(
-                          color: Colors.grey[100],
                           child: Container(
                             margin: EdgeInsets.all(10),
                             child: Text(
@@ -285,6 +281,13 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                     autofocus: true,
                                     decoration: InputDecoration(
                                       hintText: 'Input your password',
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .body1
+                                          .color,
                                     ),
                                   ), confirmAction: () async {
                                 FocusScope.of(context)

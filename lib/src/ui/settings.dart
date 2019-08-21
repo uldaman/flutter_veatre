@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:veatre/src/storage/appearanceStorage.dart';
+import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/network.dart';
@@ -13,18 +15,27 @@ class Settings extends StatefulWidget {
 }
 
 class SettingsState extends State<Settings> {
-  String _network = '';
+  Network _network = Network.MainNet;
+  Appearance _appearance = Appearance.light;
 
   @override
   void initState() {
     super.initState();
-    setNet();
+    initNet();
+    initAppearance();
   }
 
-  Future<void> setNet() async {
-    final currentNet = await NetworkStorage.currentNet;
+  Future<void> initNet() async {
+    final net = await NetworkStorage.currentNet;
     setState(() {
-      _network = currentNet == Network.MainNet ? 'MainNet' : 'TestNet';
+      _network = net;
+    });
+  }
+
+  Future<void> initAppearance() async {
+    final appearance = await AppearanceStorage.appearance;
+    setState(() {
+      _appearance = appearance;
     });
   }
 
@@ -35,6 +46,7 @@ class SettingsState extends State<Settings> {
       buildCell(
         FontAwesomeIcons.wallet,
         'Wallets',
+        '',
         () async {
           await Navigator.of(context).pushNamed(ManageWallets.routeName);
         },
@@ -42,6 +54,7 @@ class SettingsState extends State<Settings> {
       buildCell(
         Icons.alarm,
         'Activities',
+        '',
         () async {
           final network = await NetworkStorage.currentNet;
           await Navigator.of(context).push(
@@ -54,25 +67,37 @@ class SettingsState extends State<Settings> {
       buildCell(
         Icons.network_check,
         'Network',
+        _network == Network.MainNet ? 'MainNet' : 'TestNet',
         () async {
           await Navigator.of(context).pushNamed(Networks.routeName);
-          await setNet();
+          await initNet();
+        },
+      ),
+      buildCell(
+        Icons.network_check,
+        'Theme',
+        _appearance == Appearance.light ? 'Light' : 'Dark',
+        () async {
+          await Navigator.of(context).pushNamed(Appearances.routeName);
+          await initAppearance();
         },
       ),
     ]);
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text('Settings'),
         centerTitle: true,
       ),
       body: ListView(
+        padding: EdgeInsets.only(top: 10),
         children: widgets,
       ),
     );
   }
 
-  Widget buildCell(IconData icon, String title, Function() onTap) {
+  Widget buildCell(
+      IconData icon, String title, String subTitle, Function() onTap) {
     return Container(
       child: GestureDetector(
         onTap: onTap,
@@ -84,14 +109,17 @@ class SettingsState extends State<Settings> {
                 child: Icon(
                   icon,
                   size: 20,
-                  color: Colors.lightBlue[200],
+                  color: Theme.of(context).iconTheme.color,
                 ),
               ),
               Container(
                 margin: EdgeInsets.only(left: 15),
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 18, color: Colors.black54),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.title.color,
+                    fontSize: 18,
+                  ),
                 ),
               ),
               Expanded(
@@ -100,7 +128,7 @@ class SettingsState extends State<Settings> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      title == 'Network' ? Text(_network) : SizedBox(),
+                      subTitle == '' ? SizedBox() : Text(subTitle),
                       Icon(
                         FontAwesomeIcons.angleRight,
                         size: 20,

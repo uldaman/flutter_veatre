@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/ui/createBookmark.dart';
 import 'package:veatre/src/ui/tabViews.dart';
 import 'package:veatre/src/ui/webViews.dart';
@@ -15,8 +16,10 @@ import 'package:veatre/src/storage/networkStorage.dart';
 class MainUI extends StatefulWidget {
   static const routeName = '/';
   final Network network;
+  final Appearance appearance;
 
-  MainUI(this.network);
+  MainUI({Key key, @required this.network, @required this.appearance})
+      : super(key: key);
 
   @override
   MainUIState createState() => MainUIState();
@@ -24,6 +27,7 @@ class MainUI extends StatefulWidget {
 
 class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
   Network currentNet;
+  Appearance appearance;
   int mainNetID = 0;
   int testNetID = 0;
   bool canBack = false;
@@ -37,16 +41,17 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     currentNet = widget.network;
+    appearance = widget.appearance;
     netPageController =
         PageController(initialPage: currentNet == Network.MainNet ? 0 : 1);
     if (WebViews.mainNetWebViews.length == 0) {
-      WebViews.createWebView(Network.MainNet,
+      WebViews.createWebView(Network.MainNet, appearance,
           (controller, network, id, url) async {
         await updateBackForward(network, id, url);
       });
     }
     if (WebViews.testNetWebViews.length == 0) {
-      WebViews.createWebView(Network.TestNet,
+      WebViews.createWebView(Network.TestNet, appearance,
           (controller, network, id, url) async {
         await updateBackForward(network, id, url);
       });
@@ -76,6 +81,7 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
       physics: NeverScrollableScrollPhysics(),
     );
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       body: PageView(
         children: <Widget>[
           mainNetPageView,
@@ -90,6 +96,7 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
 
   BottomNavigationBar get bottomNavigationBar => BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        backgroundColor: Theme.of(context).primaryColor,
         items: bottomNavigationBarItems,
         onTap: (index) async {
           switch (index) {
@@ -138,7 +145,7 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                 if (tabResult.stage == TabStage.Created ||
                     tabResult.stage == TabStage.RemovedAll) {
                   setState(() {
-                    WebViews.createWebView(currentNet,
+                    WebViews.createWebView(currentNet, appearance,
                         (controller, network, id, url) async {
                       await updateBackForward(network, id, url);
                     });
@@ -162,14 +169,17 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
                     testNetPageController.jumpToPage(selectedID);
                   }
                 }
+                currentURL = await WebViews.getURL(currentNet, currentID);
                 await updateBackForward(currentNet, currentID, currentURL);
               }
               break;
             case 4:
               await _present(Settings());
+              appearance = await AppearanceStorage.appearance;
               currentNet = await NetworkStorage.currentNet;
               netPageController
                   .jumpToPage(currentNet == Network.MainNet ? 0 : 1);
+              currentURL = await WebViews.getURL(currentNet, currentID);
               await updateBackForward(currentNet, currentID, currentURL);
               break;
           }

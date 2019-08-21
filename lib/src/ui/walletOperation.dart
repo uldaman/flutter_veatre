@@ -51,6 +51,7 @@ class WalletOperationState extends State<WalletOperation> {
               decoration: InputDecoration(
                 hintText: 'Password',
               ),
+              style: Theme.of(context).textTheme.body1,
             ), confirmAction: () async {
           FocusScope.of(context).requestFocus(FocusNode());
           String password = passwordController.text;
@@ -80,23 +81,24 @@ class WalletOperationState extends State<WalletOperation> {
                 builder: (context) {
                   return AlertDialog(
                     contentPadding: EdgeInsets.all(12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    shape: Theme.of(context).cardTheme.shape,
                     title: Text('Keystore'),
                     content: Wrap(
                       children: <Widget>[
                         Card(
-                          color: Colors.grey[100],
                           child: Padding(
                             padding: EdgeInsets.all(10),
                             child: TextField(
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 12),
+                              style: Theme.of(context).textTheme.body1,
                               readOnly: true,
                               enableInteractiveSelection: true,
                               maxLines: null,
-                              decoration:
-                                  InputDecoration(border: InputBorder.none),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
                               controller: keystoreBackUpController,
                             ),
                           ),
@@ -136,6 +138,7 @@ class WalletOperationState extends State<WalletOperation> {
                     decoration: InputDecoration(
                       hintText: 'Original Password',
                     ),
+                    style: Theme.of(context).textTheme.body1,
                   ),
                   TextField(
                     controller: newPasswordController,
@@ -144,6 +147,7 @@ class WalletOperationState extends State<WalletOperation> {
                     decoration: InputDecoration(
                       hintText: 'New Password',
                     ),
+                    style: Theme.of(context).textTheme.body1,
                   ),
                 ],
               ),
@@ -211,6 +215,7 @@ class WalletOperationState extends State<WalletOperation> {
               decoration: InputDecoration(
                 hintText: 'Password',
               ),
+              style: Theme.of(context).textTheme.body1,
             ), confirmAction: () async {
           FocusScope.of(context).requestFocus(FocusNode());
           String password = passwordController.text;
@@ -255,14 +260,13 @@ class WalletOperationState extends State<WalletOperation> {
       }),
     ]);
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text('Operation'),
         centerTitle: true,
       ),
       body: ProgressHUD(
         child: Container(
-          color: Colors.grey[100],
           child: ListView(
             padding: EdgeInsets.only(top: 8),
             children: widgets,
@@ -286,7 +290,9 @@ class WalletOperationState extends State<WalletOperation> {
                 margin: EdgeInsets.only(left: 20),
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 18, color: Colors.black),
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
                 ),
               ),
               Expanded(

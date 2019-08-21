@@ -64,6 +64,7 @@ class DAppsState extends State<DApps> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       body: GestureDetector(
         child: ListView(
           padding: EdgeInsets.all(0),
@@ -72,7 +73,7 @@ class DAppsState extends State<DApps> {
                 ? Padding(
                     child: Text(
                       'Bookmarks',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: Theme.of(context).accentTextTheme.title,
                     ),
                     padding: EdgeInsets.all(15),
                   )
@@ -82,7 +83,7 @@ class DAppsState extends State<DApps> {
                 ? Padding(
                     child: Text(
                       'Recomends',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: Theme.of(context).accentTextTheme.title,
                     ),
                     padding: EdgeInsets.all(15),
                   )
@@ -120,20 +121,7 @@ class DAppsState extends State<DApps> {
                       widget.onAppSelected(recomendedApps[index]);
                     }
                   },
-                  child: CachedNetworkImage(
-                    fit: BoxFit.fill,
-                    imageUrl: recomendedApps[index].logo,
-                    placeholder: (context, url) => SizedBox.fromSize(
-                      size: Size.square(20),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) {
-                      print("CachedNetworkImage error: $error");
-                      return Image.asset("assets/blank.png");
-                    },
-                  ),
+                  child: image(recomendedApps[index].logo),
                 ),
               ),
               Padding(
@@ -142,7 +130,10 @@ class DAppsState extends State<DApps> {
                   recomendedApps[index].name ?? '',
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: TextStyle(color: Colors.brown, fontSize: 10),
+                  style: TextStyle(
+                    color: Theme.of(context).accentTextTheme.title.color,
+                    fontSize: 10,
+                  ),
                 ),
               ),
             ],
@@ -182,24 +173,7 @@ class DAppsState extends State<DApps> {
                         SizedBox(
                           width: _size - 36,
                           height: _size - 36,
-                          child: CachedNetworkImage(
-                            fit: BoxFit.fill,
-                            imageUrl: bookmarks[index].favicon,
-                            placeholder: (context, url) => SizedBox.fromSize(
-                              size: Size.square(20),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            ),
-                            errorWidget: (context, url, error) {
-                              print('CachedNetworkImage error: $error');
-                              return Icon(
-                                Icons.star,
-                                color: Colors.blue,
-                                size: _size - 36,
-                              );
-                            },
-                          ),
+                          child: image(bookmarks[index].favicon),
                         ),
                       ],
                     ),
@@ -230,7 +204,10 @@ class DAppsState extends State<DApps> {
                     bookmarks[index].title ?? '',
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
-                    style: TextStyle(color: Colors.brown, fontSize: 10),
+                    style: TextStyle(
+                      color: Theme.of(context).accentTextTheme.title.color,
+                      fontSize: 10,
+                    ),
                   ),
                 ),
               ],
@@ -245,6 +222,25 @@ class DAppsState extends State<DApps> {
                 widget.onBookmarkSelected(bookmarks[index]);
               }
             },
+          );
+        },
+      );
+
+  CachedNetworkImage image(String url) => CachedNetworkImage(
+        fit: BoxFit.fill,
+        imageUrl: url,
+        placeholder: (context, url) => SizedBox.fromSize(
+          size: Size.square(20),
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          ),
+        ),
+        errorWidget: (context, url, error) {
+          print('CachedNetworkImage error: $error');
+          return Icon(
+            Icons.star,
+            color: Colors.blue,
+            size: _size - 36,
           );
         },
       );

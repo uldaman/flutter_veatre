@@ -197,9 +197,9 @@ VM error: ${result.vmError}''';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text('Sign Transaction'),
         centerTitle: true,
         leading: IconButton(
@@ -216,7 +216,6 @@ VM error: ${result.vmError}''';
             icon: Icon(
               Icons.more_horiz,
               size: 25,
-              color: Colors.blue,
             ),
             onPressed: () async {
               await showWallets();
@@ -289,8 +288,6 @@ VM error: ${result.vmError}''';
               child: Container(
                 child: Card(
                   margin: EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
                   child: Column(
                     children: <Widget>[
                       Container(
@@ -318,9 +315,6 @@ VM error: ${result.vmError}''';
                                 padding: EdgeInsets.all(15),
                                 child: Text(
                                   wallet == null ? '' : wallet.name,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                  ),
                                 ),
                               ),
                             ),
@@ -331,7 +325,6 @@ VM error: ${result.vmError}''';
                                 wallet == null
                                     ? ''
                                     : '0x' + wallet.keystore.address,
-                                style: TextStyle(color: Colors.white),
                               ),
                             ),
                           ],
@@ -350,9 +343,13 @@ VM error: ${result.vmError}''';
                               child: Text(
                                 'VET',
                                 style: TextStyle(
-                                  color: Colors.grey,
+                                  color: Theme.of(context)
+                                      .accentTextTheme
+                                      .title
+                                      .color,
                                   fontSize: 10,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             )
                           ],
@@ -371,7 +368,10 @@ VM error: ${result.vmError}''';
                               child: Text(
                                 'VTHO',
                                 style: TextStyle(
-                                  color: Colors.grey,
+                                  color: Theme.of(context)
+                                      .accentTextTheme
+                                      .title
+                                      .color,
                                   fontSize: 10,
                                 ),
                               ),
@@ -395,7 +395,9 @@ VM error: ${result.vmError}''';
                 children: <Widget>[
                   Text(
                     'Spend value',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: Theme.of(context).accentTextTheme.title.color,
+                    ),
                   ),
                   Expanded(
                     child: Row(
@@ -403,13 +405,17 @@ VM error: ${result.vmError}''';
                       children: <Widget>[
                         Text(
                           "${fixed2Value(spendValue)}",
-                          style: TextStyle(color: Colors.black),
                         ),
                         Container(
                           margin: EdgeInsets.only(left: 5, right: 9),
                           child: Text(
                             'VET',
-                            style: TextStyle(color: Colors.grey, fontSize: 10),
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .accentTextTheme
+                                    .title
+                                    .color,
+                                fontSize: 10),
                           ),
                         ),
                       ],
@@ -425,7 +431,9 @@ VM error: ${result.vmError}''';
                 children: <Widget>[
                   Text(
                     'Estimated fee',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: Theme.of(context).accentTextTheme.title.color,
+                    ),
                   ),
                   Expanded(
                     child: Row(
@@ -433,13 +441,17 @@ VM error: ${result.vmError}''';
                       children: <Widget>[
                         Text(
                           "${fixed2Value(estimatedFee)}",
-                          style: TextStyle(color: Colors.black),
                         ),
                         Container(
                           margin: EdgeInsets.only(left: 5),
                           child: Text(
                             'VTHO',
-                            style: TextStyle(color: Colors.grey, fontSize: 10),
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .accentTextTheme
+                                    .title
+                                    .color,
+                                fontSize: 10),
                           ),
                         ),
                       ],
@@ -455,7 +467,9 @@ VM error: ${result.vmError}''';
                 children: <Widget>[
                   Text(
                     'Accelaration',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: Theme.of(context).accentTextTheme.title.color,
+                    ),
                   ),
                   Expanded(
                     child: Row(
@@ -529,6 +543,13 @@ VM error: ${result.vmError}''';
                                           autofocus: true,
                                           decoration: InputDecoration(
                                             hintText: 'Input your password',
+                                          ),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Theme.of(context)
+                                                .textTheme
+                                                .body1
+                                                .color,
                                           ),
                                         ), confirmAction: () async {
                                       FocusScope.of(context)
@@ -685,7 +706,7 @@ VM error: ${result.vmError}''';
                   child: Text(
                     'To',
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: Theme.of(context).accentTextTheme.title.color,
                     ),
                   ),
                 ),
@@ -705,7 +726,7 @@ VM error: ${result.vmError}''';
                   child: Text(
                     'Value',
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: Theme.of(context).accentTextTheme.title.color,
                     ),
                   ),
                 ),
@@ -720,7 +741,12 @@ VM error: ${result.vmError}''';
                           margin: EdgeInsets.only(left: 5),
                           child: Text(
                             'VET',
-                            style: TextStyle(color: Colors.grey, fontSize: 10),
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .accentTextTheme
+                                    .title
+                                    .color,
+                                fontSize: 10),
                           ),
                         ),
                       ],
@@ -737,7 +763,7 @@ VM error: ${result.vmError}''';
                   child: Text(
                     'Inpu data',
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: Theme.of(context).accentTextTheme.title.color,
                     ),
                   ),
                 ),
@@ -757,7 +783,7 @@ VM error: ${result.vmError}''';
                   child: Text(
                     'Comment',
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: Theme.of(context).accentTextTheme.title.color,
                     ),
                   ),
                 ),

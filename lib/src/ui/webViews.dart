@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/storage/networkStorage.dart';
@@ -28,8 +29,8 @@ class WebViews {
   static List<Snapshot> _testNetSnapshots = [];
   static List<WebView> testNetWebViews = [];
 
-  static void createWebView(
-      Network network, onWebViewChangedCallback onWebViewChanged) {
+  static void createWebView(Network network, Appearance appearance,
+      onWebViewChangedCallback onWebViewChanged) {
     int id = network == Network.MainNet
         ? mainNetWebViews.length
         : testNetWebViews.length;
@@ -39,6 +40,7 @@ class WebViews {
       key: key,
       id: id,
       network: network,
+      appearance: appearance,
       onWebViewChanged: (controller, network, id, url) async {
         onWebViewChanged(controller, network, id, url);
       },

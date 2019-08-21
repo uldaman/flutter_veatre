@@ -28,14 +28,18 @@ class CreateBookmarkState extends State<CreateBookmark> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[180],
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text('Bookmark'),
         centerTitle: true,
         actions: <Widget>[
           FlatButton(
-            child: Text('Save'),
+            child: Text(
+              'Save',
+              style: TextStyle(
+                color: Theme.of(context).textTheme.body1.color,
+              ),
+            ),
             onPressed: () async {
               Bookmark bookmark = Bookmark(
                 favicon: widget.documentMetaData.icon,
@@ -49,8 +53,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
           )
         ],
       ),
-      body: Container(
-        color: Colors.white,
+      body: Card(
         margin: EdgeInsets.only(top: 20),
         child: SizedBox(
           height: 100,
@@ -92,11 +95,15 @@ class CreateBookmarkState extends State<CreateBookmark> {
                         Expanded(
                           child: Padding(
                             padding: EdgeInsets.only(top: 10, right: 15),
-                            child: SizedBox(
+                            child: Container(
                               height: 60,
                               child: TextField(
                                 autofocus: true,
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color:
+                                      Theme.of(context).textTheme.body1.color,
+                                ),
                                 maxLines: 1,
                                 controller: titleEditingController,
                               ),

@@ -237,8 +237,8 @@ class GenerateWalletState extends State<GenerateWallet> {
     );
     return ProgressHUD(
       child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
           title: Text('Generate Mnemonic'),
           centerTitle: true,
         ),
@@ -248,7 +248,6 @@ class GenerateWalletState extends State<GenerateWallet> {
               Container(
                 margin: EdgeInsets.all(10),
                 child: Card(
-                  color: Colors.grey[100],
                   child: Container(
                     margin: EdgeInsets.all(10),
                     child: Text(
@@ -259,7 +258,6 @@ class GenerateWalletState extends State<GenerateWallet> {
               Container(
                 margin: EdgeInsets.all(10),
                 child: Card(
-                  color: Colors.grey[100],
                   child: Column(
                     children: buildWordCard(),
                   ),

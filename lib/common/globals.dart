@@ -1,11 +1,45 @@
 import 'dart:core';
 import 'dart:async';
-import 'package:event_bus/event_bus.dart';
-import 'package:veatre/src/models/dapp.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/src/models/block.dart';
+import 'package:flutter/material.dart';
 import 'package:veatre/common/net.dart';
+import 'package:veatre/src/models/dapp.dart';
+import 'package:veatre/src/models/block.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
+
+enum TabStage {
+  Created,
+  Selected,
+  Removed,
+}
+
+class TabControllerValue {
+  int id;
+  TabStage stage;
+  Network network;
+
+  TabControllerValue({
+    this.id,
+    this.stage,
+    this.network,
+  });
+}
+
+class TabController extends ValueNotifier<TabControllerValue> {
+  TabController(TabControllerValue value) : super(value);
+}
+
+class AppearanceController extends ValueNotifier<Appearance> {
+  AppearanceController(Appearance value) : super(value);
+}
+
+class NetworkController extends ValueNotifier<Network> {
+  NetworkController(Network value) : super(value);
+}
+
+class BlockHeadController extends ValueNotifier<BlockHeadForNetwork> {
+  BlockHeadController(BlockHeadForNetwork value) : super(value);
+}
 
 class BlockHeadForNetwork {
   Network network;
@@ -60,14 +94,13 @@ class Globals {
     "isTrunk": true,
     "transactions": []
   });
+
   static final initialURL = 'about:blank';
 
   static List<DApp> apps = [];
 
   static final testNet = Net(NetworkStorage.testnet);
   static final mainNet = Net(NetworkStorage.mainnet);
-
-  static Appearance _appearance;
 
   static BlockHead _mainNetHead;
   static BlockHead _testNetHead;
@@ -77,36 +110,74 @@ class Globals {
 
   static String connexJS;
 
-  static EventBus _eventBus = EventBus();
+  static TabController _tabController = TabController(TabControllerValue());
 
-  static watchBlockHead(
-      void Function(BlockHeadForNetwork blockHeadForNetwork) action) {
-    _eventBus.on<BlockHeadForNetwork>().listen(action);
+  static AppearanceController _appearanceController =
+      AppearanceController(Appearance.light);
+
+  static NetworkController _networkController =
+      NetworkController(Network.MainNet);
+
+  static BlockHeadController _blockHeadController =
+      BlockHeadController(BlockHeadForNetwork());
+
+  static void addTabHandler(void Function() handler) {
+    _tabController.addListener(handler);
   }
 
-  static updateBlockHead(BlockHeadForNetwork blockHeadForNetwork) {
+  static void updateTabValue(TabControllerValue tabControllerValue) {
+    _tabController.value = tabControllerValue;
+  }
+
+  static void removeTabHandler(void Function() handler) {
+    _tabController.removeListener(handler);
+  }
+
+  static TabControllerValue get tabControllerValue => _tabController.value;
+
+  static void addAppearanceHandler(void Function() handler) {
+    _appearanceController.addListener(handler);
+  }
+
+  static void updateAppearance(Appearance appearance) {
+    _appearanceController.value = appearance;
+  }
+
+  static void removeAppearanceHandler(void Function() handler) {
+    _appearanceController.removeListener(handler);
+  }
+
+  static Appearance get appearance => _appearanceController.value;
+
+  static void addBlockHeadHandler(void Function() handler) {
+    _blockHeadController.addListener(handler);
+  }
+
+  static void updateBlockHead(BlockHeadForNetwork blockHeadForNetwork) {
     Globals.setHead(blockHeadForNetwork);
-    _eventBus.fire(blockHeadForNetwork);
+    _blockHeadController.value = blockHeadForNetwork;
   }
 
-  static watchAppearance(void Function(Appearance appearance) action) {
-    _eventBus.on<Appearance>().listen(action);
+  static void removeBlockHeadHandler(void Function() handler) {
+    _blockHeadController.removeListener(handler);
   }
 
-  static updateAppearance(Appearance appearance) {
-    setAppearance(appearance);
-    _eventBus.fire(appearance);
+  static BlockHeadForNetwork get blockHeadForNetwork =>
+      _blockHeadController.value;
+
+  static void addNetworkHandler(void Function() handler) {
+    _networkController.addListener(handler);
   }
 
-  static get appearance => _appearance;
-
-  static setAppearance(Appearance appearance) {
-    _appearance = appearance;
+  static void updateNetwork(Network network) {
+    _networkController.value = network;
   }
 
-  static destory() {
-    Globals._eventBus.destroy();
+  static void removeNetworkHandler(void Function() handler) {
+    _networkController.removeListener(handler);
   }
+
+  static Network get network => _networkController.value;
 
   static List<String> walletsFor(Network network) {
     if (network == Network.MainNet) {
@@ -129,7 +200,7 @@ class Globals {
     return _testNetHead;
   }
 
-  static setHead(BlockHeadForNetwork blockHeadForNetwork) {
+  static void setHead(BlockHeadForNetwork blockHeadForNetwork) {
     if (blockHeadForNetwork.network == Network.MainNet) {
       _mainNetHead = blockHeadForNetwork.head;
     } else {
@@ -145,8 +216,8 @@ class Globals {
   }
 
   static Future<Net> get currentNet async {
-    Network currentNet = await NetworkStorage.currentNet;
-    return net(currentNet);
+    Network network = await NetworkStorage.network;
+    return net(network);
   }
 
   static Timer periodic(
@@ -159,5 +230,11 @@ class Globals {
         await action(timer);
       },
     );
+  }
+
+  static void destroy() {
+    _tabController.dispose();
+    _appearanceController.dispose();
+    _blockHeadController.dispose();
   }
 }

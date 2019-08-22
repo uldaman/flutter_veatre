@@ -23,18 +23,21 @@ class ManageWallets extends StatefulWidget {
 class ManageWalletsState extends State<ManageWallets> {
   List<WalletEntity> walletEntities = [];
   Network network;
+
   @override
   void initState() {
     super.initState();
-    NetworkStorage.currentNet.then((currentNet) {
-      updateWallets(currentNet);
-      this.network = currentNet;
-      Globals.watchBlockHead((blockHeadForNetwork) async {
-        if (blockHeadForNetwork.network == network) {
-          await updateWallets(network);
-        }
-      });
+    NetworkStorage.network.then((network) {
+      updateWallets(network);
+      this.network = network;
+      Globals.addBlockHeadHandler(_handleHeadChanged);
     });
+  }
+
+  void _handleHeadChanged() async {
+    if (Globals.blockHeadForNetwork.network == network) {
+      await updateWallets(network);
+    }
   }
 
   Future<void> updateWallets(Network network) async {
@@ -44,6 +47,12 @@ class ManageWalletsState extends State<ManageWallets> {
         this.walletEntities = walletEntities;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    Globals.removeBlockHeadHandler(_handleHeadChanged);
+    super.dispose();
   }
 
   @override

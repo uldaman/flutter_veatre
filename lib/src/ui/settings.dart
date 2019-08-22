@@ -26,7 +26,7 @@ class SettingsState extends State<Settings> {
   }
 
   Future<void> initNet() async {
-    final net = await NetworkStorage.currentNet;
+    final net = await NetworkStorage.network;
     setState(() {
       _network = net;
     });
@@ -56,7 +56,7 @@ class SettingsState extends State<Settings> {
         'Activities',
         '',
         () async {
-          final network = await NetworkStorage.currentNet;
+          final network = await NetworkStorage.network;
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => Activities(network: network),

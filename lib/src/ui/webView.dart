@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:core';
+import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -12,6 +15,10 @@ import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/src/ui/createBookmark.dart';
+import 'package:veatre/src/ui/settings.dart';
+import 'package:veatre/src/ui/tabViews.dart';
+import 'package:veatre/src/ui/webViews.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/transaction.dart';
@@ -36,13 +43,15 @@ class WebView extends StatefulWidget {
   final int id;
   final Network network;
   final Appearance appearance;
+  final String initialURL;
   final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
     this.id,
-    this.network,
-    this.appearance,
+    @required this.network,
+    @required this.appearance,
+    @required this.initialURL,
     this.onWebViewChanged,
   }) : super(key: key);
 
@@ -51,8 +60,16 @@ class WebView extends StatefulWidget {
 }
 
 class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
+  bool canBack = false;
+  bool canForward = false;
   bool isStartSearch = false;
-  String currentURL = Globals.initialURL;
+  String _currentURL;
+  final GlobalKey captureKey = GlobalKey();
+  FlutterWebView.WebViewController controller;
+  Completer<BlockHead> _head = new Completer();
+  Appearance _appearance;
+  int _id;
+
   SearchBarController searchBarController = SearchBarController(
     SearchBarValue(
       shouldHideRightItem: true,
@@ -60,27 +77,51 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       icon: Icons.search,
     ),
   );
-  final GlobalKey captureKey = GlobalKey();
-  FlutterWebView.WebViewController controller;
-  Completer<BlockHead> _head = new Completer();
-  Appearance _appearance;
 
   @override
   void initState() {
     super.initState();
+    _id = widget.id;
+    _currentURL = widget.initialURL;
     _appearance = widget.appearance;
-    Globals.watchBlockHead((blockHeadForNetwork) async {
-      if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
-        _head.complete(blockHeadForNetwork.head);
-      }
+    Globals.addBlockHeadHandler(_handleHeadChanged);
+    Globals.addAppearanceHandler(_handleAppearanceChanged);
+    Globals.addTabHandler(_handleTabChanged);
+  }
+
+  void _handleHeadChanged() async {
+    final blockHeadForNetwork = Globals.blockHeadForNetwork;
+    if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
+      _head.complete(blockHeadForNetwork.head);
+    }
+  }
+
+  void _handleAppearanceChanged() async {
+    setState(() {
+      _appearance = Globals.appearance;
     });
-    Globals.watchAppearance((appearance) async {
-      _appearance = appearance;
-      if (controller != null) {
-        await controller
-            .evaluateJavascript(_darkMode(appearance == Appearance.dark));
-      }
-    });
+    if (controller != null) {
+      await controller
+          .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
+    }
+  }
+
+  void _handleTabChanged() {
+    final tabControllerValue = Globals.tabControllerValue;
+    if (tabControllerValue.network == widget.network &&
+        tabControllerValue.stage == TabStage.Removed &&
+        tabControllerValue.id < _id) {
+      _id--;
+    }
+  }
+
+  @override
+  void dispose() {
+    print('dispose');
+    Globals.removeBlockHeadHandler(_handleHeadChanged);
+    Globals.removeAppearanceHandler(_handleAppearanceChanged);
+    Globals.removeTabHandler(_handleTabChanged);
+    super.dispose();
   }
 
   @override
@@ -99,12 +140,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         child: Stack(
           children: [
             webView,
-            currentURL == Globals.initialURL || isStartSearch == true
+            _currentURL == Globals.initialURL || isStartSearch == true
                 ? appView
                 : SizedBox(),
           ],
         ),
       ),
+      bottomNavigationBar: bottomNavigationBar,
     );
   }
 
@@ -112,14 +154,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     setState(() {
       isStartSearch = false;
     });
-    currentURL = resolveURL(url);
-    updateSearchBar(0, currentURL);
     if (controller != null) {
-      await controller.loadUrl(currentURL);
+      await controller.loadUrl(resolveURL(url));
     }
   }
 
   Widget get searchBar => SearchBar(
+        context,
         searchBarController: searchBarController,
         onStartSearch: () async {
           setState(() {
@@ -131,7 +172,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onCancelInput: () async {
           searchBarController.valueWith(
-            submitedText: currentURL,
+            submitedText: _currentURL,
           );
           setState(() {
             isStartSearch = false;
@@ -153,7 +194,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             await controller.stopLoading();
           }
         },
-        width: MediaQuery.of(context).size.width,
       );
 
   Widget get appView => DApps(
@@ -167,7 +207,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       );
 
   FlutterWebView.WebView get webView => FlutterWebView.WebView(
-        initialUrl: currentURL,
+        initialUrl: widget.initialURL,
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
         javascriptHandlers: _javascriptChannels.toSet(),
         injectJavascript: _initialParamsJS +
@@ -175,50 +215,45 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             _darkMode(
               _appearance == Appearance.dark,
             ),
-        onURLChanged: (url) {
-          currentURL = url;
-          if (widget.onWebViewChanged != null) {
-            widget.onWebViewChanged(controller, widget.network, widget.id, url);
-          }
-          if (currentURL != Globals.initialURL) {
-            updateSearchBar(null, currentURL);
+        onURLChanged: (url) async {
+          await updateBackForwad();
+          _currentURL = url;
+          if (_currentURL != Globals.initialURL) {
+            updateSearchBar(null, url);
           }
         },
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
-          if (widget.onWebViewChanged != null) {
-            widget.onWebViewChanged(
-                controller, widget.network, widget.id, currentURL);
-          }
-          updateSearchBar(0, currentURL);
+          updateSearchBar(0, _currentURL);
         },
         onPageStarted: (String url) async {
           if (controller != null) {
-            await controller
-                .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
-          }
-          currentURL = url;
-          if (widget.onWebViewChanged != null) {
-            widget.onWebViewChanged(controller, widget.network, widget.id, url);
+            await updateBackForwad();
+            updateSearchBar(null, url);
+            // print('onPageStarted _appearance $_appearance');
+            // await controller
+            // .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
           }
           setState(() {
+            _currentURL = url;
             isStartSearch = false;
           });
         },
         onPageFinished: (String url) async {
-          setState(() {
-            currentURL = url;
-          });
-          updateSearchBar(1, currentURL);
-          if (widget.onWebViewChanged != null) {
-            widget.onWebViewChanged(controller, widget.network, widget.id, url);
+          if (controller != null) {
+            await updateBackForwad();
+            print('onPageFinished _appearance $_appearance');
+            await controller
+                .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
           }
+          updateSearchBar(1, url);
           setState(() {
+            _currentURL = url;
             isStartSearch = false;
           });
         },
         onProgressChanged: (double progress) {
-          updateSearchBar(progress, currentURL);
+          updateSearchBar(progress, _currentURL);
         },
         navigationDelegate: (FlutterWebView.NavigationRequest request) {
           if (request.url.startsWith('http') ||
@@ -283,6 +318,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return 'window.__NightMode__.setEnabled($mode);';
   }
 
+  Future<void> updateBackForwad() async {
+    if (controller != null) {
+      bool canBack = await controller.canGoBack();
+      bool canForward = await controller.canGoForward();
+      setState(() {
+        this.canBack = canBack;
+        this.canForward = canForward;
+      });
+    }
+  }
+
   void updateSearchBar(double progress, String url) {
     if (url != Globals.initialURL) {
       Uri uri = Uri.parse(url);
@@ -305,7 +351,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         icon: Icons.search,
         defautText: 'Search',
         shouldHideRightItem: true,
-        submitedText: currentURL,
+        submitedText: _currentURL,
       );
     }
   }
@@ -387,7 +433,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           }
           if (arguments[0] == 'signTx') {
             SigningTxOptions options =
-                SigningTxOptions.fromJSON(arguments[2], currentURL);
+                SigningTxOptions.fromJSON(arguments[2], _currentURL);
             _validate(options.signer);
             List<SigningTxMessage> txMessages = [];
             for (Map<String, dynamic> txMsg in arguments[1]) {
@@ -404,7 +450,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SigningCertMessage certMessage =
                 SigningCertMessage.fromJSON(arguments[1]);
             SigningCertOptions options =
-                SigningCertOptions.fromJSON(arguments[2], currentURL);
+                SigningCertOptions.fromJSON(arguments[2], _currentURL);
             _validate(options.signer);
             return _showSigningDialog(
               SignCertificateDialog(
@@ -426,5 +472,169 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         !Globals.walletsFor(widget.network).contains(signer)) {
       throw 'signer does not exist';
     }
+  }
+
+  BottomNavigationBar get bottomNavigationBar => BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Theme.of(context).primaryColor,
+        items: bottomNavigationBarItems,
+        onTap: (index) async {
+          switch (index) {
+            case 0:
+              if (canBack && controller != null) {
+                return controller.goBack();
+              }
+              break;
+            case 1:
+              if (canForward && controller != null) {
+                return controller.goForward();
+              }
+              break;
+            case 2:
+              if (_currentURL != Globals.initialURL) {
+                final meta = await metaData;
+                if (meta != null) {
+                  await _present(
+                    CreateBookmark(
+                      documentMetaData: meta,
+                      network: widget.network,
+                    ),
+                  );
+                }
+              }
+              break;
+            case 3:
+              Uint8List captureData = await takeScreenshot();
+              String t = await title;
+              WebViews.updateSnapshot(
+                widget.network,
+                _id,
+                title: t == "" ? 'New Tab' : t,
+                data: captureData,
+              );
+              await _present(
+                TabViews(
+                  id: _id,
+                  network: widget.network,
+                  appearance: _appearance,
+                ),
+              );
+              // if (tabResult != null) {
+              //   if (tabResult.stage == TabStage.Created ||
+              //       tabResult.stage == TabStage.RemovedAll) {
+              //     int tab = WebViews.newWebView(
+              //       network: widget.network,
+              //       appearance: _appearance,
+              //     );
+              //     Globals.updateTab(tab);
+              //   } else if (tabResult.stage == TabStage.Selected) {
+              //     Globals.updateTab(tabResult.id);
+              //   }
+              // }
+              break;
+            case 4:
+              await _present(Settings());
+              break;
+          }
+        },
+      );
+
+  BottomNavigationBarItem bottomNavigationBarItem(
+    IconData iconData,
+    Color color,
+    double size,
+  ) {
+    Widget nullWidget = SizedBox(height: 0);
+    return BottomNavigationBarItem(
+      icon: Icon(
+        iconData,
+        size: size,
+        color: color,
+      ),
+      title: nullWidget,
+    );
+  }
+
+  List<BottomNavigationBarItem> get bottomNavigationBarItems {
+    Color active = Colors.blue;
+    Color inactive = Colors.grey[300];
+    return [
+      bottomNavigationBarItem(
+        Icons.arrow_back_ios,
+        canBack ? active : inactive,
+        30,
+      ),
+      bottomNavigationBarItem(
+        Icons.arrow_forward_ios,
+        canForward ? active : inactive,
+        30,
+      ),
+      bottomNavigationBarItem(
+        Icons.star_border,
+        _currentURL != Globals.initialURL ? active : inactive,
+        40,
+      ),
+      bottomNavigationBarItem(
+        Icons.filter_none,
+        active,
+        30,
+      ),
+      bottomNavigationBarItem(
+        Icons.more_horiz,
+        active,
+        30,
+      ),
+    ];
+  }
+
+  Future<DocumentMetaData> get metaData async {
+    if (controller != null) {
+      final result =
+          await controller.evaluateJavascript("window.__getMetaData__();");
+      return DocumentMetaData.fromJSON(json.decode(result));
+    }
+    return null;
+  }
+
+  Future<Uint8List> takeScreenshot() async {
+    print("takeScreenshot controller $controller");
+    if (isStartSearch || _currentURL == Globals.initialURL) {
+      try {
+        RenderRepaintBoundary boundary =
+            captureKey.currentContext.findRenderObject();
+        var image = await boundary.toImage(pixelRatio: 1.0);
+        ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
+        Uint8List bytes = byteData.buffer.asUint8List();
+        return bytes;
+      } catch (e) {
+        print("takeScreenshot error: $e");
+        return null;
+      }
+    } else if (controller != null) {
+      return controller.takeScreenshot();
+    }
+    return null;
+  }
+
+  Future<String> get title async {
+    if (controller != null) {
+      return controller.currentTitle();
+    }
+    return null;
+  }
+
+  Future<dynamic> _present(Widget widget) async {
+    dynamic result = await showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: Duration(milliseconds: 200),
+      pageBuilder: (context, a, b) {
+        return SlideTransition(
+          position: Tween(begin: Offset(0, 1), end: Offset.zero).animate(a),
+          child: widget,
+        );
+      },
+    );
+    return result;
   }
 }

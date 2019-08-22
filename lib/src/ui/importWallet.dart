@@ -32,8 +32,8 @@ class ImportWalletState extends State<ImportWallet> {
   @override
   void initState() {
     super.initState();
-    NetworkStorage.currentNet.then((currentNet) {
-      this.network = currentNet;
+    NetworkStorage.network.then((network) {
+      this.network = network;
     });
   }
 

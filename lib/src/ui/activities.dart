@@ -23,11 +23,13 @@ class ActivitiesState extends State<Activities> {
   void initState() {
     super.initState();
     loadActivities();
-    Globals.watchBlockHead((blockHeadForNetwork) async {
-      if (blockHeadForNetwork.network == widget.network) {
-        await loadActivities();
-      }
-    });
+    Globals.addBlockHeadHandler(_handleHeadChanged);
+  }
+
+  void _handleHeadChanged() async {
+    if (Globals.blockHeadForNetwork.network == widget.network) {
+      await loadActivities();
+    }
   }
 
   Future<void> loadActivities() async {
@@ -37,6 +39,12 @@ class ActivitiesState extends State<Activities> {
         this.activities = activities;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    Globals.removeBlockHeadHandler(_handleHeadChanged);
   }
 
   @override
@@ -190,9 +198,9 @@ class ActivitiesState extends State<Activities> {
                       onTap: () async {
                         WalletEntity walletEntity = await WalletStorage.read(
                           activity.walletName,
-                          await NetworkStorage.currentNet,
+                          await NetworkStorage.network,
                         );
-                        Network network = await NetworkStorage.currentNet;
+                        Network network = await NetworkStorage.network;
                         if (walletEntity != null) {
                           await Navigator.of(context).push(
                             MaterialPageRoute(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 
 class Networks extends StatefulWidget {
@@ -14,7 +15,7 @@ class NetworksState extends State<Networks> {
   @override
   void initState() {
     super.initState();
-    NetworkStorage.currentNet.then((network) {
+    NetworkStorage.network.then((network) {
       setState(() {
         this.network = network;
       });
@@ -28,6 +29,7 @@ class NetworksState extends State<Networks> {
     setState(() {
       this.network = toNetwork;
     });
+    Globals.updateNetwork(toNetwork);
   }
 
   @override

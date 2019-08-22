@@ -183,7 +183,7 @@ class WalletOperationState extends State<WalletOperation> {
             await WalletStorage.write(
               walletEntity:
                   WalletEntity(keystore: newKeyStore, name: wallet.name),
-              network: await NetworkStorage.currentNet,
+              network: await NetworkStorage.network,
             );
             return alert(
                 context, Text('Success'), 'Password changed successfully');
@@ -238,7 +238,7 @@ class WalletOperationState extends State<WalletOperation> {
             );
             await WalletStorage.delete(
               wallet.name,
-              await NetworkStorage.currentNet,
+              await NetworkStorage.network,
             );
             Navigator.popUntil(
                 context, ModalRoute.withName(ManageWallets.routeName));

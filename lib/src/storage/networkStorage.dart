@@ -33,7 +33,7 @@ class NetworkStorage {
     return Net(NetworkStorage.testnet);
   }
 
-  static Future<Network> get currentNet async {
+  static Future<Network> get network async {
     String network = await _storage.read(key: networkKey);
     if (network == null) {
       await _storage.write(

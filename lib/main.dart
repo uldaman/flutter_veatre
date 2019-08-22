@@ -4,12 +4,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:veatre/src/api/BlockAPI.dart';
-
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
-import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/createWallet.dart';
@@ -17,15 +15,13 @@ import 'package:veatre/src/ui/importWallet.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/network.dart';
+import 'package:veatre/src/models/block.dart';
 import 'package:veatre/common/globals.dart';
 
 void main() {
   runZoned(() async {
     await initialGlobals();
-    runApp(App(
-      network: await NetworkStorage.currentNet,
-      appearance: await AppearanceStorage.appearance,
-    ));
+    runApp(App());
   }, onError: (dynamic err, StackTrace stack) {
     print("unhandled error: $err");
     print("stack: $stack");
@@ -48,14 +44,12 @@ Future<void> initialGlobals() async {
       network: Network.TestNet,
     ),
   );
-  Globals.setAppearance(await AppearanceStorage.appearance);
+  Globals.updateAppearance(await AppearanceStorage.appearance);
+  Globals.updateNetwork(await NetworkStorage.network);
 }
 
 class App extends StatefulWidget {
-  final Network network;
-  final Appearance appearance;
-
-  App({@required this.network, @required this.appearance});
+  App();
 
   @override
   AppState createState() => AppState();
@@ -63,22 +57,22 @@ class App extends StatefulWidget {
 
 class AppState extends State<App> {
   Timer _timer;
-  Appearance _appearance;
+  Appearance _appearance = Globals.appearance;
 
   @override
   void initState() {
     super.initState();
-    _appearance = widget.appearance;
+    Globals.addAppearanceHandler(_handleAppearanceChanged);
     Globals.periodic(10, (timer) async {
       try {
-        final currentNet = await NetworkStorage.currentNet;
-        final block = await BlockAPI.best(currentNet);
+        final network = await NetworkStorage.network;
+        final block = await BlockAPI.best(network);
         final newHead = BlockHead.fromJSON(block.encoded);
-        final head = Globals.head(currentNet);
+        final head = Globals.head(network);
         if (head.id != newHead.id && newHead.number > head.number) {
           final blockHeadForNetwork = BlockHeadForNetwork(
             head: newHead,
-            network: currentNet,
+            network: network,
           );
           Globals.updateBlockHead(blockHeadForNetwork);
           await _syncActivities(blockHeadForNetwork);
@@ -87,10 +81,11 @@ class AppState extends State<App> {
         print('sync head error: $e');
       }
     });
-    Globals.watchAppearance((appearance) {
-      setState(() {
-        _appearance = appearance;
-      });
+  }
+
+  void _handleAppearanceChanged() {
+    setState(() {
+      _appearance = Globals.appearance;
     });
   }
 
@@ -127,10 +122,7 @@ class AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
-        MainUI.routeName: (context) => new MainUI(
-              network: widget.network,
-              appearance: _appearance,
-            ),
+        MainUI.routeName: (context) => new MainUI(),
         Settings.routeName: (context) => new Settings(),
         ManageWallets.routeName: (context) => new ManageWallets(),
         Networks.routeName: (context) => new Networks(),
@@ -239,7 +231,7 @@ class AppState extends State<App> {
 
   @override
   void dispose() {
-    Globals.destory();
+    Globals.destroy();
     _timer.cancel();
     super.dispose();
   }

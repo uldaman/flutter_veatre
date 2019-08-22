@@ -361,7 +361,7 @@ class GenerateWalletState extends State<GenerateWallet> {
                           name: widget.walletName,
                           keystore: keystore,
                         ),
-                        network: await NetworkStorage.currentNet,
+                        network: await NetworkStorage.network,
                       );
                       setState(() {
                         this.loading = false;

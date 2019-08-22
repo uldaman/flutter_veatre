@@ -63,15 +63,23 @@ class SignTxDialogState extends State<SignTxDialog> {
           setState(() {
             this.loading = false;
           });
-          Globals.watchBlockHead((blockHeadForNetwork) async {
-            if (blockHeadForNetwork.network == widget.network) {
-              await updateWallet();
-            }
-          });
+          Globals.addBlockHeadHandler(_handleHeadChanged);
         }
       });
     });
     updateSpendValue();
+  }
+
+  void _handleHeadChanged() async {
+    if (Globals.blockHeadForNetwork.network == widget.network) {
+      await updateWallet();
+    }
+  }
+
+  @override
+  void dispose() {
+    Globals.removeBlockHeadHandler(_handleHeadChanged);
+    super.dispose();
   }
 
   Future<void> updateWallet() async {

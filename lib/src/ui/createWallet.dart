@@ -107,7 +107,7 @@ class CreateWalletState extends State<CreateWallet> {
                 }
                 WalletEntity wallet = await WalletStorage.read(
                   walletName,
-                  await NetworkStorage.currentNet,
+                  await NetworkStorage.network,
                 );
                 if (wallet != null) {
                   return alert(context, Text("Warnning"),

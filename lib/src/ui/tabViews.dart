@@ -1,25 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/webViews.dart';
 
-enum TabStage {
-  Created,
-  Selected,
-  RemovedAll,
-}
-
-class TabResult {
-  int id;
-  TabStage stage;
-
-  TabResult({this.id, this.stage});
-}
-
 class TabViews extends StatefulWidget {
   final int id;
-  final Network net;
-  TabViews({this.id, this.net});
+  final Network network;
+  final Appearance appearance;
+  TabViews({
+    this.id,
+    this.network,
+    this.appearance,
+  });
 
   @override
   TabViewsState createState() => TabViewsState();
@@ -52,7 +46,7 @@ class TabViewsState extends State<TabViews> {
           mainAxisSpacing: 10,
           childAspectRatio: ratio,
         ),
-        itemCount: WebViews.snapshots(widget.net).length,
+        itemCount: WebViews.snapshots(widget.network).length,
         itemBuilder: (context, index) {
           return snapshotCard(index);
         },
@@ -90,28 +84,30 @@ class TabViewsState extends State<TabViews> {
           switch (index) {
             case 0:
               setState(() {
-                WebViews.removeAllTabs(widget.net);
+                WebViews.removeAllTabs(widget.network);
               });
-              Navigator.of(context).pop(
-                TabResult(
-                  stage: TabStage.RemovedAll,
-                ),
+              WebViews.newWebView(
+                network: widget.network,
+                appearance: widget.appearance,
               );
+              Navigator.of(context).pop();
               break;
             case 1:
-              Navigator.of(context).pop(
-                TabResult(
-                  stage: TabStage.Created,
-                ),
+              WebViews.newWebView(
+                network: widget.network,
+                appearance: widget.appearance,
               );
+              Navigator.of(context).pop();
               break;
             case 2:
-              Navigator.of(context).pop(
-                TabResult(
+              Globals.updateTabValue(
+                TabControllerValue(
                   id: selectedTab,
+                  network: widget.network,
                   stage: TabStage.Selected,
                 ),
               );
+              Navigator.of(context).pop();
               break;
           }
         },
@@ -144,7 +140,8 @@ class TabViewsState extends State<TabViews> {
                         child: Padding(
                           padding: EdgeInsets.only(left: 40, right: 40),
                           child: Text(
-                            WebViews.snapshots(widget.net)[index].title ?? '',
+                            WebViews.snapshots(widget.network)[index].title ??
+                                '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
@@ -175,11 +172,21 @@ class TabViewsState extends State<TabViews> {
                             selectedTab--;
                           }
                           setState(() {
-                            WebViews.removeTab(widget.net, index);
+                            WebViews.removeTab(widget.network, index);
                           });
-                          if (WebViews.snapshots(widget.net).length == 0) {
-                            Navigator.of(context)
-                                .pop(TabResult(stage: TabStage.RemovedAll));
+                          Globals.updateTabValue(
+                            TabControllerValue(
+                              id: index,
+                              network: widget.network,
+                              stage: TabStage.Removed,
+                            ),
+                          );
+                          if (WebViews.snapshots(widget.network).length == 0) {
+                            WebViews.newWebView(
+                              network: widget.network,
+                              appearance: widget.appearance,
+                            );
+                            Navigator.of(context).pop();
                           }
                         },
                       )
@@ -200,21 +207,23 @@ class TabViewsState extends State<TabViews> {
                       ),
                       image: DecorationImage(
                         fit: BoxFit.fill,
-                        image:
-                            WebViews.snapshots(widget.net)[index].data == null
-                                ? AssetImage('assets/blank.png')
-                                : MemoryImage(
-                                    WebViews.snapshots(widget.net)[index].data),
+                        image: WebViews.snapshots(widget.network)[index].data ==
+                                null
+                            ? AssetImage('assets/blank.png')
+                            : MemoryImage(
+                                WebViews.snapshots(widget.network)[index].data),
                       ),
                     ),
                   ),
                   onTap: () {
-                    Navigator.of(context).pop(
-                      TabResult(
+                    Globals.updateTabValue(
+                      TabControllerValue(
                         id: index,
+                        network: widget.network,
                         stage: TabStage.Selected,
                       ),
                     );
+                    Navigator.of(context).pop();
                   },
                 ),
               ),

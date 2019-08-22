@@ -47,11 +47,13 @@ class WalletInfoState extends State<WalletInfo> {
         }
       }
     });
-    Globals.watchBlockHead((blockHeadForNetwork) async {
-      if (blockHeadForNetwork.network == widget.network) {
-        await updateWallet();
-      }
-    });
+    Globals.addBlockHeadHandler(_handleHeadChanged);
+  }
+
+  void _handleHeadChanged() async {
+    if (Globals.blockHeadForNetwork.network == widget.network) {
+      await updateWallet();
+    }
   }
 
   Future<void> updateWallet() async {
@@ -72,6 +74,7 @@ class WalletInfoState extends State<WalletInfo> {
   @override
   void dispose() {
     super.dispose();
+    Globals.removeBlockHeadHandler(_handleHeadChanged);
     _scrollController.dispose();
   }
 

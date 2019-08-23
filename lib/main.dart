@@ -177,7 +177,7 @@ class AppState extends State<App> {
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white, width: 1.0),
           ),
-          hintStyle: TextStyle(color: Colors.white),
+          hintStyle: TextStyle(color: Colors.grey[500]),
         ),
       );
 

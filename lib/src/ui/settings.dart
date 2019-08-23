@@ -74,7 +74,7 @@ class SettingsState extends State<Settings> {
         },
       ),
       buildCell(
-        Icons.network_check,
+        Icons.face,
         'Theme',
         _appearance == Appearance.light ? 'Light' : 'Dark',
         () async {

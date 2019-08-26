@@ -401,7 +401,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       onMessageReceived: (List<dynamic> arguments) async {
         if (arguments.length > 0) {
           if (arguments[0] == 'owned' && arguments.length == 2) {
-            List<String> wallets = Globals.walletsFor(widget.network);
+            List<String> wallets = await WalletStorage.wallets(widget.network);
+            print('wallets $wallets');
             return wallets.contains(arguments[1]);
           }
           List<WalletEntity> walletEntities =
@@ -420,7 +421,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (arguments[0] == 'signTx') {
             SigningTxOptions options =
                 SigningTxOptions.fromJSON(arguments[2], _currentURL);
-            _validate(options.signer);
+            await _validate(options.signer);
             List<SigningTxMessage> txMessages = [];
             for (Map<String, dynamic> txMsg in arguments[1]) {
               txMessages.add(SigningTxMessage.fromJSON(txMsg));
@@ -437,7 +438,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 SigningCertMessage.fromJSON(arguments[1]);
             SigningCertOptions options =
                 SigningCertOptions.fromJSON(arguments[2], _currentURL);
-            _validate(options.signer);
+            await _validate(options.signer);
             return _showSigningDialog(
               SignCertificateDialog(
                 network: widget.network,
@@ -453,9 +454,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return [head, net, vendor];
   }
 
-  void _validate(String signer) {
-    if (signer != null &&
-        !Globals.walletsFor(widget.network).contains(signer)) {
+  Future<void> _validate(String signer) async {
+    List<String> wallets = await WalletStorage.wallets(widget.network);
+    if (signer != null && !wallets.contains(signer)) {
       throw 'signer does not exist';
     }
   }

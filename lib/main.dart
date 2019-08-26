@@ -7,7 +7,6 @@ import 'package:veatre/src/api/BlockAPI.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/createWallet.dart';
@@ -30,8 +29,6 @@ void main() {
 
 Future<void> initialGlobals() async {
   Globals.connexJS = await rootBundle.loadString("assets/connex.js");
-  Globals.mainNetWallets = await WalletStorage.wallets(Network.MainNet);
-  Globals.testNetWallets = await WalletStorage.wallets(Network.TestNet);
   Globals.setHead(
     BlockHeadForNetwork(
       head: BlockHead.fromJSON(Globals.mainNetGenesis.encoded),

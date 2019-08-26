@@ -26,7 +26,7 @@ class ActivityStorage {
     final Database db = await database;
     List<Map<String, dynamic>> rows = await db.query(
       activityTableName,
-      where: 'status = ? and net = ?',
+      where: 'status = ? and network = ?',
       whereArgs: [
         ActivityStatus.Pending.index,
         network == Network.MainNet ? 0 : 1
@@ -39,7 +39,7 @@ class ActivityStorage {
     final db = await database;
     List<Map<String, dynamic>> rows = await db.query(
       activityTableName,
-      where: 'net = ?',
+      where: 'network = ?',
       whereArgs: [network == Network.MainNet ? 0 : 1],
       orderBy: 'timestamp desc',
     );
@@ -71,7 +71,7 @@ class Activity {
   String comment;
   int timestamp;
   ActivityStatus status; // 0 pending 1 finished 2 reverted
-  int net;
+  Network network;
 
   Activity({
     this.id,
@@ -85,7 +85,7 @@ class Activity {
     this.comment,
     this.timestamp,
     this.status,
-    this.net,
+    this.network,
   });
 
   Map<String, dynamic> get encoded {
@@ -100,7 +100,7 @@ class Activity {
       'comment': comment,
       'timestamp': timestamp,
       'status': status.index,
-      'net': net,
+      'network': network == Network.MainNet ? 0 : 1,
     };
   }
 
@@ -125,7 +125,7 @@ class Activity {
               : parsedJSON['status'] == ActivityStatus.Reverted.index
                   ? ActivityStatus.Reverted
                   : ActivityStatus.Expired,
-      net: parsedJSON['net'],
+      network: parsedJSON['network'] == 0 ? Network.MainNet : Network.TestNet,
     );
   }
 }

@@ -35,7 +35,6 @@ dev_dependencies:
   web3dart: 1.0.0-rc.1
   fixnum: ^0.10.9
   validators: ^2.0.0
-  flutter_secure_storage: ^3.2.1+1
   dio: ^2.1.13
   webview_flutter:
     git:

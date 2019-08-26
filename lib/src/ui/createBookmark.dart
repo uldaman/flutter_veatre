@@ -28,6 +28,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Bookmark'),
@@ -45,7 +46,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
                 favicon: widget.documentMetaData.icon,
                 title: titleEditingController.text,
                 url: widget.documentMetaData.url,
-                net: widget.network == Network.MainNet ? 0 : 1,
+                network: widget.network,
               );
               await BookmarkStorage.insert(bookmark);
               Navigator.pop(context);

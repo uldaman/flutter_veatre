@@ -49,8 +49,6 @@ Future<void> initialGlobals() async {
 }
 
 class App extends StatefulWidget {
-  App();
-
   @override
   AppState createState() => AppState();
 }

@@ -360,8 +360,8 @@ class GenerateWalletState extends State<GenerateWallet> {
                         walletEntity: WalletEntity(
                           name: widget.walletName,
                           keystore: keystore,
+                          network: await NetworkStorage.network,
                         ),
-                        network: await NetworkStorage.network,
                       );
                       setState(() {
                         this.loading = false;

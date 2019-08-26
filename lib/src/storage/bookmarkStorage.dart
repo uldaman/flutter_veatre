@@ -35,7 +35,7 @@ class BookmarkStorage {
     final db = await database;
     List<Map<String, dynamic>> rows = await db.query(
       bookmarkTableName,
-      where: 'net = ?',
+      where: 'network = ?',
       whereArgs: [network == Network.MainNet ? 0 : 1],
       orderBy: 'id desc',
     );
@@ -48,14 +48,14 @@ class Bookmark {
   String url;
   String title;
   String favicon;
-  int net;
+  Network network;
 
   Bookmark({
     this.id,
     this.url,
     this.title,
     this.favicon,
-    this.net,
+    this.network,
   });
 
   Map<String, dynamic> get encoded {
@@ -63,7 +63,7 @@ class Bookmark {
       'url': url ?? '',
       'title': title ?? '',
       'favicon': favicon ?? '',
-      'net': net,
+      'network': network == Network.MainNet ? 0 : 1,
     };
   }
 
@@ -73,16 +73,16 @@ class Bookmark {
       url: parsedJSON['url'],
       title: parsedJSON['title'],
       favicon: parsedJSON['favicon'],
-      net: parsedJSON['net'],
+      network: parsedJSON['network'] == 0 ? Network.MainNet : Network.TestNet,
     );
   }
 
-  factory Bookmark.fromMeta(Map<String, dynamic> meta, int net) {
+  factory Bookmark.fromMeta(Map<String, dynamic> meta, Network network) {
     return Bookmark(
       url: meta['url'],
       title: meta['title'],
       favicon: meta['icon'],
-      net: net,
+      network: network,
     );
   }
 }

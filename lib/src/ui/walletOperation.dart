@@ -7,37 +7,26 @@ import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:bip_key_derivation/keystore.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
-import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 
 class WalletOperation extends StatefulWidget {
-  final Wallet wallet;
-  WalletOperation({this.wallet});
+  final WalletEntity walletEntity;
+  WalletOperation({this.walletEntity});
 
   @override
   WalletOperationState createState() => WalletOperationState();
 }
 
 class WalletOperationState extends State<WalletOperation> {
-  TextEditingController keystoreBackUpController;
   TextEditingController passwordController = TextEditingController();
   TextEditingController originalPasswordController = TextEditingController();
   TextEditingController newPasswordController = TextEditingController();
   bool loading = false;
 
   @override
-  void initState() {
-    super.initState();
-    keystoreBackUpController = TextEditingController(
-      text: json.encode(widget.wallet.keystore.encoded),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    Wallet wallet = widget.wallet;
     List<Widget> widgets = [];
     widgets.addAll([
       buildCell("Backup wallet", () async {
@@ -68,8 +57,10 @@ class WalletOperationState extends State<WalletOperation> {
             loading = true;
           });
           try {
+            WalletEntity walletEntity = await WalletStorage.read(
+                widget.walletEntity.name, widget.walletEntity.network);
             await BipKeyDerivation.decryptedByKeystore(
-              wallet.keystore,
+              walletEntity.keystore,
               password,
             );
             setState(() {
@@ -99,7 +90,9 @@ class WalletOperationState extends State<WalletOperation> {
                                 enabledBorder: InputBorder.none,
                                 focusedBorder: InputBorder.none,
                               ),
-                              controller: keystoreBackUpController,
+                              controller: TextEditingController(
+                                  text: json
+                                      .encode(walletEntity.keystore.encoded)),
                             ),
                           ),
                         ),
@@ -174,18 +167,22 @@ class WalletOperationState extends State<WalletOperation> {
             loading = true;
           });
           try {
+            WalletEntity walletEntity = await WalletStorage.read(
+                widget.walletEntity.name, widget.walletEntity.network);
             Uint8List privateKey = await BipKeyDerivation.decryptedByKeystore(
-              wallet.keystore,
+              walletEntity.keystore,
               originalPassword,
             );
             KeyStore newKeyStore =
                 await BipKeyDerivation.encrypt(privateKey, newPassword);
             await WalletStorage.write(
-              walletEntity:
-                  WalletEntity(keystore: newKeyStore, name: wallet.name),
-              network: await NetworkStorage.network,
+              walletEntity: WalletEntity(
+                keystore: newKeyStore,
+                name: walletEntity.name,
+                network: await NetworkStorage.network,
+              ),
             );
-            return alert(
+            await alert(
                 context, Text('Success'), 'Password changed successfully');
           } catch (err) {
             return alert(
@@ -232,12 +229,14 @@ class WalletOperationState extends State<WalletOperation> {
             loading = true;
           });
           try {
+            WalletEntity walletEntity = await WalletStorage.read(
+                widget.walletEntity.name, widget.walletEntity.network);
             await BipKeyDerivation.decryptedByKeystore(
-              wallet.keystore,
+              walletEntity.keystore,
               password,
             );
             await WalletStorage.delete(
-              wallet.name,
+              walletEntity.name,
               await NetworkStorage.network,
             );
             Navigator.popUntil(

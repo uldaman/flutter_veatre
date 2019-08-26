@@ -1,167 +1,143 @@
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bip_key_derivation/keystore.dart';
+import 'package:veatre/src/storage/database.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/common/globals.dart';
 
 class WalletStorage {
-  static final storage = new FlutterSecureStorage();
-  static final _mainNetMainWalletKey =
-      "c2a06a2a14f08900c9c03d51e896eb77"; //MD5 ("mainNetMainWalletKey") = c2a06a2a14f08900c9c03d51e896eb77
-  static final _testNeMainWalletKey =
-      "75608f52a2e04dfb14f943d081dd30af"; // MD5 ("testNeMainWalletKey") = 75608f52a2e04dfb14f943d081dd30af
-  static final _testNetWalletPrefix = 'TestNetWallet|';
-  static final _mainNetWalletPrefix = 'MainNetWallet|';
-
   static Future<List<WalletEntity>> readAll(Network network) async {
-    Map<String, String> allKeystores = await storage.readAll();
-    List<WalletEntity> walletEntities = [];
-    if (network == Network.MainNet) {
-      for (var keystoreEntity in allKeystores.entries) {
-        String walletKey = keystoreEntity.key;
-        if (walletKey.startsWith(_mainNetWalletPrefix)) {
-          KeyStore keystore =
-              KeyStore.fromJSON(json.decode(keystoreEntity.value));
-          walletEntities.add(
-            WalletEntity(
-              name: walletKey.substring(_mainNetWalletPrefix.length),
-              keystore: keystore,
-            ),
-          );
-        }
-      }
-    } else {
-      for (var keystoreEntity in allKeystores.entries) {
-        String walletKey = keystoreEntity.key;
-        if (walletKey.startsWith(_testNetWalletPrefix)) {
-          KeyStore keystore =
-              KeyStore.fromJSON(json.decode(keystoreEntity.value));
-          walletEntities.add(
-            WalletEntity(
-              name: walletKey.substring(_testNetWalletPrefix.length),
-              keystore: keystore,
-            ),
-          );
-        }
-      }
-    }
-    return walletEntities;
+    final db = await database;
+    List<Map<String, dynamic>> rows = await db.query(
+      walletTableName,
+      where: 'network = ?',
+      whereArgs: [network == Network.MainNet ? 0 : 1],
+      orderBy: 'id desc',
+    );
+    return List.from(rows.map((row) => WalletEntity.fromJSON(row)));
   }
 
   static Future<List<String>> wallets(Network network) async {
-    Map<String, String> allKeystores = await storage.readAll();
-    List<String> wallets = [];
-    if (network == Network.MainNet) {
-      for (var keystoreEntity in allKeystores.entries) {
-        String walletKey = keystoreEntity.key;
-        if (walletKey.startsWith(_mainNetWalletPrefix)) {
-          KeyStore keystore =
-              KeyStore.fromJSON(json.decode(keystoreEntity.value));
-          wallets.add("0x${keystore.address}");
-        }
-      }
-    } else {
-      for (var keystoreEntity in allKeystores.entries) {
-        String walletKey = keystoreEntity.key;
-        if (walletKey.startsWith(_testNetWalletPrefix)) {
-          KeyStore keystore =
-              KeyStore.fromJSON(json.decode(keystoreEntity.value));
-          wallets.add("0x${keystore.address}");
-        }
-      }
-    }
-    return wallets;
+    final db = await database;
+    List<Map<String, dynamic>> rows = await db.query(
+      walletTableName,
+      where: 'network = ?',
+      whereArgs: [network == Network.MainNet ? 0 : 1],
+      orderBy: 'id desc',
+    );
+    return List.from(
+        rows.map((row) => '0x${WalletEntity.fromJSON(row).keystore.address}'));
   }
 
   static Future<WalletEntity> read(String name, Network network) async {
-    String keystoreString = await storage.read(
-      key: network == Network.MainNet
-          ? _mainNetWalletPrefix + name
-          : _testNetWalletPrefix + name,
+    final db = await database;
+    List<Map<String, dynamic>> rows = await db.query(
+      walletTableName,
+      where: 'name = ? and network = ?',
+      whereArgs: [name, network == Network.MainNet ? 0 : 1],
+      orderBy: 'id desc',
     );
-    if (keystoreString == null) {
+    if (rows.length == 0) {
       return null;
     }
-    KeyStore keystore = KeyStore.fromJSON(json.decode(keystoreString));
-    return WalletEntity(name: name, keystore: keystore);
+    return WalletEntity.fromJSON(rows.first);
   }
 
-  static Future<void> write(
-      {WalletEntity walletEntity, Network network}) async {
-    if (network == Network.MainNet) {
-      await storage.write(
-        key: _mainNetWalletPrefix + walletEntity.name,
-        value: json.encode(walletEntity.keystore.encoded),
-      );
-      await storage.write(
-        key: _mainNetMainWalletKey,
-        value: json.encode(walletEntity.encoded),
-      );
-      Globals.mainNetWallets = await wallets(Network.MainNet);
-    } else {
-      await storage.write(
-        key: _testNetWalletPrefix + walletEntity.name,
-        value: json.encode(walletEntity.keystore.encoded),
-      );
-      await storage.write(
-        key: _testNeMainWalletKey,
-        value: json.encode(walletEntity.encoded),
-      );
-      Globals.testNetWallets = await wallets(Network.TestNet);
+  static Future<void> write({WalletEntity walletEntity}) async {
+    final db = await database;
+    List<Map<String, dynamic>> rows = await db.query(
+      walletTableName,
+      where: 'name = ? and network = ?',
+      whereArgs: [
+        walletEntity.name,
+        walletEntity.network == Network.MainNet ? 0 : 1
+      ],
+      orderBy: 'id desc',
+    );
+    if (rows.length == 0) {
+      return db.insert(walletTableName, walletEntity.encoded);
     }
+    return db.update(
+      walletTableName,
+      walletEntity.encoded,
+      where: 'name = ? and network = ?',
+      whereArgs: [
+        walletEntity.name,
+        walletEntity.network == Network.MainNet ? 0 : 1,
+      ],
+    );
   }
 
   static Future<void> setMainWallet(
       WalletEntity walletEntity, Network network) async {
-    await storage.write(
-      key: network == Network.MainNet
-          ? _mainNetMainWalletKey
-          : _testNeMainWalletKey,
-      value: json.encode(walletEntity.encoded),
+    final db = await database;
+    await db.update(
+      walletTableName,
+      {'isMain': 1},
+      where: 'isMain != ? and network = ?',
+      whereArgs: [
+        1,
+        network == Network.MainNet ? 0 : 1,
+      ],
+    );
+    walletEntity.isMain = true;
+    return db.update(
+      walletTableName,
+      walletEntity.encoded,
+      where: 'name = ?',
+      whereArgs: [
+        walletEntity.name,
+      ],
     );
   }
 
   static Future<WalletEntity> getMainWallet(Network network) async {
-    String mainWalletString = await storage.read(
-      key: network == Network.MainNet
-          ? _mainNetMainWalletKey
-          : _testNeMainWalletKey,
+    final db = await database;
+    List<Map<String, dynamic>> rows = await db.query(
+      walletTableName,
+      where: 'isMain = ? and network = ?',
+      whereArgs: [
+        0,
+        network == Network.MainNet ? 0 : 1,
+      ],
+      orderBy: 'id desc',
     );
-    if (mainWalletString == null) {
+    if (rows.length == 0) {
       return null;
     }
-    return WalletEntity.fromJSON(json.decode(mainWalletString));
+    return WalletEntity.fromJSON(rows.first);
   }
 
   static Future<void> delete(String name, Network network) async {
-    if (network == Network.MainNet) {
-      await storage.delete(key: _mainNetWalletPrefix + name);
-      Globals.mainNetWallets = await wallets(Network.MainNet);
-    } else {
-      await storage.delete(key: _testNetWalletPrefix + name);
-      Globals.testNetWallets = await wallets(Network.TestNet);
-    }
-    WalletEntity main = await getMainWallet(network);
-    if (main.name == name) {
-      await storage.delete(
-        key: network == Network.MainNet
-            ? _mainNetMainWalletKey
-            : _testNeMainWalletKey,
-      );
-    }
+    final db = await database;
+    await db.delete(
+      walletTableName,
+      where: 'name = ? and network = ?',
+      whereArgs: [
+        name,
+        network == Network.MainNet ? 0 : 1,
+      ],
+    );
   }
 }
 
 class WalletEntity {
   String name;
   KeyStore keystore;
+  bool isMain;
+  Network network;
 
-  WalletEntity({this.name, this.keystore});
+  WalletEntity({
+    this.name,
+    this.keystore,
+    this.isMain = false,
+    this.network,
+  });
 
   Map<String, dynamic> get encoded {
     return {
-      'name': this.name,
-      'keystore': this.keystore.encoded,
+      'name': name,
+      'keystore': json.encode(keystore.encoded),
+      'isMain': isMain ? 0 : 1,
+      'network': network == Network.MainNet ? 0 : 1,
     };
   }
 
@@ -169,8 +145,10 @@ class WalletEntity {
     return WalletEntity(
       name: parsedJson['name'],
       keystore: KeyStore.fromJSON(
-        parsedJson['keystore'],
+        json.decode(parsedJson['keystore']),
       ),
+      isMain: parsedJson['isMain'] == 0 ? true : false,
+      network: parsedJson['network'] == 0 ? Network.MainNet : Network.TestNet,
     );
   }
 }

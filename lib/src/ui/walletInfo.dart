@@ -229,7 +229,7 @@ class WalletInfoState extends State<WalletInfo> {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (context) => WalletOperation(
-                                        wallet: wallet,
+                                        walletEntity: widget.walletEntity,
                                       ),
                                     ),
                                   );

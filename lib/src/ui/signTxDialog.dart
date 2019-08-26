@@ -651,10 +651,7 @@ VM error: ${result.vmError}''';
                                             type: ActivityType.Transaction,
                                             comment: comment,
                                             timestamp: head.timestamp,
-                                            net: widget.network ==
-                                                    Network.MainNet
-                                                ? 0
-                                                : 1,
+                                            network: widget.network,
                                             status: ActivityStatus.Pending,
                                           ),
                                         );

@@ -356,9 +356,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                                       type: ActivityType.Certificate,
                                       comment: cert.certMessage.purpose,
                                       timestamp: timestamp,
-                                      net: widget.network == Network.MainNet
-                                          ? 0
-                                          : 1,
+                                      network: widget.network,
                                       status: ActivityStatus.Finished,
                                     ),
                                   );

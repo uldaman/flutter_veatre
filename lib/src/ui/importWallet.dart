@@ -212,7 +212,7 @@ class ImportWalletState extends State<ImportWallet> {
             Row(
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(left: 10),
+                  padding: EdgeInsets.only(left: 10, top: 15),
                   child: SizedBox(
                     child: Card(
                       clipBehavior: Clip.hardEdge,
@@ -236,7 +236,7 @@ class ImportWalletState extends State<ImportWallet> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(left: 20),
+                  padding: EdgeInsets.only(left: 20, top: 15),
                   child: SizedBox(
                     child: Card(
                       clipBehavior: Clip.hardEdge,
@@ -365,8 +365,8 @@ class ImportWalletState extends State<ImportWallet> {
                                     walletEntity: WalletEntity(
                                       keystore: keystore,
                                       name: walletName,
+                                      network: network,
                                     ),
-                                    network: network,
                                   );
                                   Navigator.popUntil(
                                     context,
@@ -380,8 +380,8 @@ class ImportWalletState extends State<ImportWallet> {
                               walletEntity: WalletEntity(
                                 name: walletName,
                                 keystore: keystore,
+                                network: network,
                               ),
-                              network: network,
                             );
                             setState(() {
                               loading = false;
@@ -458,8 +458,8 @@ class ImportWalletState extends State<ImportWallet> {
                                       walletEntity: WalletEntity(
                                         keystore: keystore,
                                         name: walletName,
+                                        network: network,
                                       ),
-                                      network: network,
                                     );
                                     Navigator.popUntil(
                                       context,
@@ -480,8 +480,8 @@ class ImportWalletState extends State<ImportWallet> {
                               walletEntity: WalletEntity(
                                 name: walletName,
                                 keystore: keystore,
+                                network: network,
                               ),
-                              network: network,
                             );
                             setState(() {
                               loading = false;

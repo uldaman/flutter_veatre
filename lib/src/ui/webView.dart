@@ -117,7 +117,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   @override
   void dispose() {
-    print('dispose');
     Globals.removeBlockHeadHandler(_handleHeadChanged);
     Globals.removeAppearanceHandler(_handleAppearanceChanged);
     Globals.removeTabHandler(_handleTabChanged);
@@ -242,7 +241,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         onPageFinished: (String url) async {
           if (controller != null) {
             await updateBackForwad();
-            print('onPageFinished _appearance $_appearance');
             await controller
                 .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
           }
@@ -597,7 +595,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   Future<Uint8List> takeScreenshot() async {
-    print("takeScreenshot controller $controller");
     if (isStartSearch || _currentURL == Globals.initialURL) {
       try {
         RenderRepaintBoundary boundary =

@@ -31,20 +31,12 @@ import 'package:veatre/src/ui/apps.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/common/globals.dart';
 
-typedef onWebViewChangedCallback = void Function(
-  FlutterWebView.WebViewController controller,
-  Network network,
-  int id,
-  String url,
-);
-
 class WebView extends StatefulWidget {
   final Key key;
   final int id;
   final Network network;
   final Appearance appearance;
   final String initialURL;
-  final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
@@ -52,7 +44,6 @@ class WebView extends StatefulWidget {
     @required this.network,
     @required this.appearance,
     @required this.initialURL,
-    this.onWebViewChanged,
   }) : super(key: key);
 
   @override
@@ -229,9 +220,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (controller != null) {
             await updateBackForwad();
             updateSearchBar(null, url);
-            // print('onPageStarted _appearance $_appearance');
-            // await controller
-            // .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
           }
           setState(() {
             _currentURL = url;

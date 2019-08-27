@@ -402,7 +402,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         if (arguments.length > 0) {
           if (arguments[0] == 'owned' && arguments.length == 2) {
             List<String> wallets = await WalletStorage.wallets(widget.network);
-            print('wallets $wallets');
             return wallets.contains(arguments[1]);
           }
           List<WalletEntity> walletEntities =
@@ -506,18 +505,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                   appearance: _appearance,
                 ),
               );
-              // if (tabResult != null) {
-              //   if (tabResult.stage == TabStage.Created ||
-              //       tabResult.stage == TabStage.RemovedAll) {
-              //     int tab = WebViews.newWebView(
-              //       network: widget.network,
-              //       appearance: _appearance,
-              //     );
-              //     Globals.updateTab(tab);
-              //   } else if (tabResult.stage == TabStage.Selected) {
-              //     Globals.updateTab(tabResult.id);
-              //   }
-              // }
               break;
             case 4:
               await _present(Settings());

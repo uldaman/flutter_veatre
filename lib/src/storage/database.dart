@@ -16,7 +16,7 @@ final Future<Database> database = (() async {
         ''',
       );
       await db.execute(
-        '''CREATE TABLE IF NOT EXISTS $walletTableName (id INTEGER PRIMARY KEY, name TEXT UNIQUE, keystore TEXT, isMain INTEGER, network INTEGER);
+        '''CREATE TABLE IF NOT EXISTS $walletTableName (id INTEGER PRIMARY KEY, name TEXT, keystore TEXT, isMain INTEGER, network INTEGER);
         ''',
       );
       await db.execute(

@@ -23,7 +23,6 @@ class WalletStorage {
       whereArgs: [network == Network.MainNet ? 0 : 1],
       orderBy: 'id desc',
     );
-    print('wallets $rows');
     return List.from(
         rows.map((row) => '0x${WalletEntity.fromJSON(row).keystore.address}'));
   }

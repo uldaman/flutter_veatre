@@ -117,7 +117,7 @@ class TabViewsState extends State<TabViews> {
 
   Widget snapshotCard(int index) => Container(
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: Theme.of(context).primaryColor,
           boxShadow: [
             BoxShadow(
               blurRadius: 2,
@@ -145,9 +145,6 @@ class TabViewsState extends State<TabViews> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.black87,
-                            ),
                           ),
                         ),
                       ),
@@ -163,7 +160,6 @@ class TabViewsState extends State<TabViews> {
                         icon: Icon(
                           Icons.close,
                           size: 20,
-                          color: Colors.black,
                         ),
                         onPressed: () async {
                           if (index == selectedTab) {

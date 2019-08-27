@@ -105,9 +105,6 @@ class Globals {
   static BlockHead _mainNetHead;
   static BlockHead _testNetHead;
 
-  static List<String> testNetWallets;
-  static List<String> mainNetWallets;
-
   static String connexJS;
 
   static TabController _tabController = TabController(TabControllerValue());
@@ -178,13 +175,6 @@ class Globals {
   }
 
   static Network get network => _networkController.value;
-
-  static List<String> walletsFor(Network network) {
-    if (network == Network.MainNet) {
-      return mainNetWallets;
-    }
-    return testNetWallets;
-  }
 
   static Block genesis(Network network) {
     if (network == Network.MainNet) {

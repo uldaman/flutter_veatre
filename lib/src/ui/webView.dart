@@ -31,20 +31,12 @@ import 'package:veatre/src/ui/apps.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/common/globals.dart';
 
-typedef onWebViewChangedCallback = void Function(
-  FlutterWebView.WebViewController controller,
-  Network network,
-  int id,
-  String url,
-);
-
 class WebView extends StatefulWidget {
   final Key key;
   final int id;
   final Network network;
   final Appearance appearance;
   final String initialURL;
-  final onWebViewChangedCallback onWebViewChanged;
 
   WebView({
     this.key,
@@ -52,7 +44,6 @@ class WebView extends StatefulWidget {
     @required this.network,
     @required this.appearance,
     @required this.initialURL,
-    this.onWebViewChanged,
   }) : super(key: key);
 
   @override
@@ -229,9 +220,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (controller != null) {
             await updateBackForwad();
             updateSearchBar(null, url);
-            // print('onPageStarted _appearance $_appearance');
-            // await controller
-            // .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
           }
           setState(() {
             _currentURL = url;
@@ -413,7 +401,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       onMessageReceived: (List<dynamic> arguments) async {
         if (arguments.length > 0) {
           if (arguments[0] == 'owned' && arguments.length == 2) {
-            List<String> wallets = Globals.walletsFor(widget.network);
+            List<String> wallets = await WalletStorage.wallets(widget.network);
             return wallets.contains(arguments[1]);
           }
           List<WalletEntity> walletEntities =
@@ -432,7 +420,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (arguments[0] == 'signTx') {
             SigningTxOptions options =
                 SigningTxOptions.fromJSON(arguments[2], _currentURL);
-            _validate(options.signer);
+            await _validate(options.signer);
             List<SigningTxMessage> txMessages = [];
             for (Map<String, dynamic> txMsg in arguments[1]) {
               txMessages.add(SigningTxMessage.fromJSON(txMsg));
@@ -449,7 +437,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 SigningCertMessage.fromJSON(arguments[1]);
             SigningCertOptions options =
                 SigningCertOptions.fromJSON(arguments[2], _currentURL);
-            _validate(options.signer);
+            await _validate(options.signer);
             return _showSigningDialog(
               SignCertificateDialog(
                 network: widget.network,
@@ -465,9 +453,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return [head, net, vendor];
   }
 
-  void _validate(String signer) {
-    if (signer != null &&
-        !Globals.walletsFor(widget.network).contains(signer)) {
+  Future<void> _validate(String signer) async {
+    List<String> wallets = await WalletStorage.wallets(widget.network);
+    if (signer != null && !wallets.contains(signer)) {
       throw 'signer does not exist';
     }
   }
@@ -517,18 +505,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                   appearance: _appearance,
                 ),
               );
-              // if (tabResult != null) {
-              //   if (tabResult.stage == TabStage.Created ||
-              //       tabResult.stage == TabStage.RemovedAll) {
-              //     int tab = WebViews.newWebView(
-              //       network: widget.network,
-              //       appearance: _appearance,
-              //     );
-              //     Globals.updateTab(tab);
-              //   } else if (tabResult.stage == TabStage.Selected) {
-              //     Globals.updateTab(tabResult.id);
-              //   }
-              // }
               break;
             case 4:
               await _present(Settings());

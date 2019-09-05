@@ -59,7 +59,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   FlutterWebView.WebViewController controller;
   Completer<BlockHead> _head = new Completer();
   Appearance _appearance;
-  int _id;
+  int id;
 
   SearchBarController searchBarController = SearchBarController(
     SearchBarValue(
@@ -72,7 +72,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
-    _id = widget.id;
+    id = widget.id;
     _currentURL = widget.initialURL;
     _appearance = widget.appearance;
     Globals.addBlockHeadHandler(_handleHeadChanged);
@@ -97,12 +97,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void _handleTabChanged() {
+  void _handleTabChanged() async {
     final tabControllerValue = Globals.tabControllerValue;
     if (tabControllerValue.network == widget.network &&
-        tabControllerValue.stage == TabStage.Removed &&
-        tabControllerValue.id < _id) {
-      _id--;
+        ((tabControllerValue.stage == TabStage.Removed &&
+                tabControllerValue.id == widget.id) ||
+            tabControllerValue.stage == TabStage.RemoveAll)) {
+      await controller.loadHTMLString("", null);
     }
   }
 
@@ -309,34 +310,35 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       bool canBack = await controller.canGoBack();
       bool canForward = await controller.canGoForward();
       setState(() {
-        this.canBack = canBack;
+        this.canBack = canBack && _currentURL != Globals.initialURL;
         this.canForward = canForward;
       });
     }
   }
 
   void updateSearchBar(double progress, String url) {
+    Uri uri = Uri.parse(url);
     if (url != Globals.initialURL) {
-      Uri uri = Uri.parse(url);
       IconData icon;
-      if (uri.scheme == 'https') {
+      if (uri.scheme.startsWith('https')) {
         icon = Icons.lock;
       } else {
         icon = Icons.lock_open;
       }
+      String domain = getDomain(uri);
       searchBarController.valueWith(
         progress: progress,
         icon: icon,
-        defautText: getDomain(uri),
+        defautText: domain == "" ? "Search" : domain,
         submitedText: url,
-        shouldHideRightItem: false,
+        shouldHideRightItem: !uri.scheme.startsWith("http"),
       );
     } else {
       searchBarController.valueWith(
         progress: 0,
         icon: Icons.search,
         defautText: 'Search',
-        shouldHideRightItem: true,
+        shouldHideRightItem: !uri.scheme.startsWith("http"),
         submitedText: _currentURL,
       );
     }
@@ -365,10 +367,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     if (domainRegExp.hasMatch(url)) {
       return "http://$url";
     }
-    Uri uri = Uri.parse(url);
-    if (uri.hasScheme) {
-      return Uri.encodeFull(url);
-    }
+    // Uri uri = Uri.parse(url);
+    // if (uri.hasScheme) {
+    //   return Uri.encodeFull(url);
+    // }
     return Uri.encodeFull("https://cn.bing.com/search?q=$url");
   }
 
@@ -492,15 +494,15 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             case 3:
               Uint8List captureData = await takeScreenshot();
               String t = await title;
-              WebViews.updateSnapshot(
+              WebViews.newSnapshot(
                 widget.network,
-                _id,
+                id,
                 title: t == "" ? 'New Tab' : t,
                 data: captureData,
               );
               await _present(
                 TabViews(
-                  id: _id,
+                  id: id,
                   network: widget.network,
                   appearance: _appearance,
                 ),

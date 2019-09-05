@@ -9,6 +9,7 @@ class TabViews extends StatefulWidget {
   final int id;
   final Network network;
   final Appearance appearance;
+
   TabViews({
     this.id,
     this.network,
@@ -21,10 +22,13 @@ class TabViews extends StatefulWidget {
 
 class TabViewsState extends State<TabViews> {
   int selectedTab;
+  List<Snapshot> snapshots;
+
   @override
   void initState() {
     super.initState();
     selectedTab = widget.id;
+    snapshots = WebViews.snapshots(widget.network);
   }
 
   @override
@@ -37,194 +41,194 @@ class TabViewsState extends State<TabViews> {
         title: Text('Tabs'),
         leading: SizedBox(),
       ),
-      body: GridView.builder(
-        padding: EdgeInsets.all(15),
-        physics: ClampingScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: ratio,
-        ),
-        itemCount: WebViews.snapshots(widget.network).length,
-        itemBuilder: (context, index) {
-          return snapshotCard(index);
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.close,
-              color: Colors.blue,
-              size: 30,
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: GridView.builder(
+              padding: EdgeInsets.all(15),
+              physics: ClampingScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: ratio,
+              ),
+              itemCount: snapshots.length,
+              itemBuilder: (context, index) {
+                return snapshotCard(index);
+              },
             ),
-            title: SizedBox(),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.add,
-              color: Colors.blue,
-              size: 35,
-            ),
-            title: SizedBox(),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.done,
-              color: Colors.blue,
-              size: 30,
-            ),
-            title: SizedBox(),
-          )
-        ],
-        onTap: (index) async {
-          switch (index) {
-            case 0:
-              setState(() {
-                WebViews.removeAllTabs(widget.network);
-              });
-              WebViews.newWebView(
-                network: widget.network,
-                appearance: widget.appearance,
-              );
-              Navigator.of(context).pop();
-              break;
-            case 1:
-              WebViews.newWebView(
-                network: widget.network,
-                appearance: widget.appearance,
-              );
-              Navigator.of(context).pop();
-              break;
-            case 2:
-              Globals.updateTabValue(
-                TabControllerValue(
-                  id: selectedTab,
-                  network: widget.network,
-                  stage: TabStage.Selected,
-                ),
-              );
-              Navigator.of(context).pop();
-              break;
-          }
-        },
-      ),
-    );
-  }
-
-  Widget snapshotCard(int index) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 2,
-              offset: Offset(2, 2),
-              color: index == selectedTab ? Colors.blue : Colors.black87,
-            )
-          ],
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
-        child: Column(
-          children: <Widget>[
-            Stack(
+          Container(
+            margin: EdgeInsets.only(bottom: 20),
+            color: Theme.of(context).primaryColor,
+            height: 60,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                SizedBox(
-                  height: 36,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 40, right: 40),
-                          child: Text(
-                            WebViews.snapshots(widget.network)[index].title ??
-                                '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ],
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: Colors.blue,
+                    size: 30,
                   ),
+                  onPressed: () {
+                    WebViews.removeAll(widget.network);
+                    setState(() {
+                      snapshots = WebViews.snapshots(widget.network);
+                    });
+                    WebViews.create(widget.network);
+                    Navigator.of(context).pop();
+                  },
                 ),
-                SizedBox(
-                  height: 36,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      IconButton(
+                WebViews.canCreateMore(widget.network)
+                    ? IconButton(
                         icon: Icon(
-                          Icons.close,
-                          size: 20,
+                          Icons.add,
+                          color: Colors.blue,
+                          size: 35,
                         ),
-                        onPressed: () async {
-                          if (index == selectedTab) {
-                            selectedTab = index - 1;
-                          } else if (index < selectedTab) {
-                            selectedTab--;
-                          }
-                          setState(() {
-                            WebViews.removeTab(widget.network, index);
-                          });
-                          Globals.updateTabValue(
-                            TabControllerValue(
-                              id: index,
-                              network: widget.network,
-                              stage: TabStage.Removed,
-                            ),
-                          );
-                          if (WebViews.snapshots(widget.network).length == 0) {
-                            WebViews.newWebView(
-                              network: widget.network,
-                              appearance: widget.appearance,
-                            );
-                            Navigator.of(context).pop();
-                          }
+                        onPressed: () {
+                          WebViews.create(widget.network);
+                          Navigator.of(context).pop();
                         },
                       )
-                    ],
+                    : SizedBox(),
+                IconButton(
+                  icon: Icon(
+                    Icons.done,
+                    color: Colors.blue,
+                    size: 35,
                   ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(top: 0),
-                child: GestureDetector(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                      ),
-                      image: DecorationImage(
-                        fit: BoxFit.fill,
-                        image: WebViews.snapshots(widget.network)[index].data ==
-                                null
-                            ? AssetImage('assets/blank.png')
-                            : MemoryImage(
-                                WebViews.snapshots(widget.network)[index].data),
-                      ),
-                    ),
-                  ),
-                  onTap: () {
+                  onPressed: () {
                     Globals.updateTabValue(
                       TabControllerValue(
-                        id: index,
+                        id: selectedTab,
                         network: widget.network,
                         stage: TabStage.Selected,
                       ),
                     );
                     Navigator.of(context).pop();
                   },
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget snapshotCard(int index) {
+    Snapshot snapshot = snapshots[index];
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 2,
+            offset: Offset(2, 2),
+            color: snapshot.id == selectedTab ? Colors.blue : Colors.black87,
+          )
+        ],
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
+      child: Column(
+        children: <Widget>[
+          Stack(
+            children: <Widget>[
+              SizedBox(
+                height: 36,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 40, right: 40),
+                        child: Text(
+                          snapshot.title ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            )
-          ],
-        ),
-      );
+              SizedBox(
+                height: 36,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        size: 20,
+                      ),
+                      onPressed: () async {
+                        if (snapshots.length == 1) {
+                          WebViews.remove(widget.network, snapshot.id);
+                          WebViews.create(widget.network);
+                          Navigator.of(context).pop();
+                          return;
+                        }
+                        WebViews.remove(widget.network, snapshot.id);
+                        setState(() {
+                          snapshots = WebViews.snapshots(widget.network);
+                        });
+                        if (index == 0) {
+                          selectedTab = snapshots[index + 1].id;
+                        } else if (selectedTab == snapshot.id) {
+                          selectedTab = snapshots[index - 1].id;
+                        }
+                        Globals.updateTabValue(
+                          TabControllerValue(
+                            id: snapshot.id,
+                            network: widget.network,
+                            stage: TabStage.Removed,
+                          ),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(top: 0),
+              child: GestureDetector(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                    image: DecorationImage(
+                      fit: BoxFit.fill,
+                      image: snapshot.data == null
+                          ? AssetImage('assets/blank.png')
+                          : MemoryImage(snapshot.data),
+                    ),
+                  ),
+                ),
+                onTap: () {
+                  Globals.updateTabValue(
+                    TabControllerValue(
+                      id: snapshot.id,
+                      network: widget.network,
+                      stage: TabStage.Selected,
+                    ),
+                  );
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }

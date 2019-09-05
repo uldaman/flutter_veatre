@@ -26,21 +26,9 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
+    WebViews.initialWebViews(appearance: appearance);
     netPageController =
         PageController(initialPage: network == Network.MainNet ? 0 : 1);
-    if (WebViews.mainNetWebViews.length == 0) {
-      WebViews.newWebView(
-        network: Network.MainNet,
-        appearance: appearance,
-      );
-    }
-    if (WebViews.testNetWebViews.length == 0) {
-      WebViews.newWebView(
-        network: Network.TestNet,
-        appearance: appearance,
-      );
-    }
-
     Globals.addNetworkHandler(_hanleNetworkChanged);
     Globals.addTabHandler(_handleTabChanged);
   }
@@ -80,19 +68,19 @@ class MainUIState extends State<MainUI> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    PageView mainNetPageView = PageView.builder(
-      controller: mainNetPageController,
-      itemCount: WebViews.mainNetWebViews.length,
-      itemBuilder: (context, index) {
-        return WebViews.mainNetWebViews[index];
-      },
-      physics: NeverScrollableScrollPhysics(),
-    );
     PageView testNetPageView = PageView.builder(
       controller: testNetPageController,
       itemCount: WebViews.testNetWebViews.length,
       itemBuilder: (context, index) {
         return WebViews.testNetWebViews[index];
+      },
+      physics: NeverScrollableScrollPhysics(),
+    );
+    PageView mainNetPageView = PageView.builder(
+      controller: mainNetPageController,
+      itemCount: WebViews.mainNetWebViews.length,
+      itemBuilder: (context, index) {
+        return WebViews.mainNetWebViews[index];
       },
       physics: NeverScrollableScrollPhysics(),
     );

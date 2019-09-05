@@ -8,56 +8,131 @@ import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/webView.dart';
 
 class Snapshot {
+  int id;
   String title;
   Uint8List data;
 
   Snapshot({
+    this.id,
     this.title,
     this.data,
   });
 }
 
 class WebViews {
-  static List<Snapshot> _mainNetSnapshots = [];
+  static Map<int, Snapshot> _mainNetSnapshots = {};
   static List<WebView> mainNetWebViews = [];
 
-  static List<Snapshot> _testNetSnapshots = [];
+  static Map<int, Snapshot> _testNetSnapshots = {};
   static List<WebView> testNetWebViews = [];
 
-  static newWebView({
-    @required Network network,
+  static final maxTabLen = 10;
+  static List<int> _activeMainNetPages = [];
+  static List<int> _inactiveMainNetPages = [];
+
+  static List<int> _activeTestNetPages = [];
+  static List<int> _inactiveTestNetPages = [];
+
+  static initialWebViews({
     @required Appearance appearance,
-    String initialURL,
   }) {
-    int id = network == Network.MainNet
-        ? mainNetWebViews.length
-        : testNetWebViews.length;
-    LabeledGlobalKey<WebViewState> key = LabeledGlobalKey<WebViewState>(
-        network == Network.MainNet ? 'mainNetWebView$id' : 'testNetWebView$id');
-    WebView webView = new WebView(
-      key: key,
-      id: id,
-      network: network,
-      initialURL: initialURL ?? Globals.initialURL,
-      appearance: appearance,
-    );
+    for (int id = 0; id < maxTabLen; id++) {
+      GlobalObjectKey<WebViewState> mainNetkey =
+          GlobalObjectKey<WebViewState>('mainNetWebView$id');
+      WebView mainNetWebView = new WebView(
+        key: mainNetkey,
+        id: id,
+        network: Network.MainNet,
+        initialURL: Globals.initialURL,
+        appearance: appearance,
+      );
+      if (id != 0) {
+        _inactiveMainNetPages.add(id);
+      } else {
+        _activeMainNetPages.add(id);
+      }
+      mainNetWebViews.add(mainNetWebView);
+      GlobalObjectKey<WebViewState> testNetkey =
+          GlobalObjectKey<WebViewState>('testNetWebView$id');
+      WebView testNetWebView = new WebView(
+        key: testNetkey,
+        id: id,
+        network: Network.TestNet,
+        initialURL: Globals.initialURL,
+        appearance: appearance,
+      );
+      if (id != 0) {
+        _inactiveTestNetPages.add(id);
+      } else {
+        _activeTestNetPages.add(id);
+      }
+      testNetWebViews.add(testNetWebView);
+    }
+  }
+
+  static void remove(
+    Network network,
+    int id,
+  ) {
     if (network == Network.MainNet) {
-      _mainNetSnapshots.add(Snapshot());
-      mainNetWebViews.add(webView);
+      _activeMainNetPages.remove(id);
+      _inactiveMainNetPages.add(id);
+      _mainNetSnapshots.remove(id);
     } else {
-      _testNetSnapshots.add(Snapshot());
-      testNetWebViews.add(webView);
+      _activeTestNetPages.remove(id);
+      _inactiveTestNetPages.add(id);
+      _testNetSnapshots.remove(id);
     }
     Globals.updateTabValue(
       TabControllerValue(
         id: id,
         network: network,
-        stage: TabStage.Created,
+        stage: TabStage.Removed,
       ),
     );
   }
 
-  static void updateSnapshot(
+  static void create(
+    Network network,
+  ) {
+    if (network == Network.MainNet) {
+      if (_activeMainNetPages.length < maxTabLen) {
+        int firstInactiveID = _inactiveMainNetPages.first;
+        _activeMainNetPages.add(firstInactiveID);
+        _inactiveMainNetPages.remove(firstInactiveID);
+        Globals.updateTabValue(
+          TabControllerValue(
+            id: firstInactiveID,
+            network: network,
+            stage: TabStage.Created,
+          ),
+        );
+      }
+    } else {
+      if (_activeTestNetPages.length < maxTabLen) {
+        int firstInactiveID = _inactiveTestNetPages.first;
+        _activeTestNetPages.add(firstInactiveID);
+        _inactiveTestNetPages.remove(firstInactiveID);
+        Globals.updateTabValue(
+          TabControllerValue(
+            id: firstInactiveID,
+            network: network,
+            stage: TabStage.Created,
+          ),
+        );
+      }
+    }
+  }
+
+  static bool canCreateMore(Network network) {
+    if (network == Network.MainNet) {
+      return _activeMainNetPages.length < maxTabLen;
+    } else {
+      return _activeTestNetPages.length < maxTabLen;
+    }
+  }
+
+  static void newSnapshot(
     Network net,
     int id, {
     Uint8List data,
@@ -65,12 +140,14 @@ class WebViews {
   }) {
     if (net == Network.MainNet) {
       _mainNetSnapshots[id] = Snapshot(
-        data: data,
+        id: id,
+        data: Uint8List.fromList(data),
         title: title,
       );
     } else {
       _testNetSnapshots[id] = Snapshot(
-        data: data,
+        id: id,
+        data: Uint8List.fromList(data),
         title: title,
       );
     }
@@ -83,30 +160,35 @@ class WebViews {
     return _testNetSnapshots.length;
   }
 
-  static void removeTab(Network net, int id) {
-    if (net == Network.MainNet) {
-      mainNetWebViews.removeAt(id);
-      _mainNetSnapshots.removeAt(id);
-    } else {
-      testNetWebViews.removeAt(id);
-      _testNetSnapshots.removeAt(id);
-    }
-  }
-
-  static void removeAllTabs(Network net) {
-    if (net == Network.MainNet) {
+  static void removeAll(Network network) {
+    if (network == Network.MainNet) {
       _mainNetSnapshots.clear();
-      mainNetWebViews.clear();
+      _activeMainNetPages.clear();
+      _inactiveMainNetPages.clear();
+      for (int id = 0; id < maxTabLen; id++) {
+        _inactiveMainNetPages.add(id);
+      }
     } else {
       _testNetSnapshots.clear();
-      testNetWebViews.clear();
+      _activeTestNetPages.clear();
+      _inactiveTestNetPages.clear();
+      for (int id = 0; id < maxTabLen; id++) {
+        _inactiveTestNetPages.add(id);
+      }
     }
+    Globals.updateTabValue(
+      TabControllerValue(
+        id: 0,
+        network: network,
+        stage: TabStage.RemoveAll,
+      ),
+    );
   }
 
   static List<Snapshot> snapshots(Network net) {
     if (net == Network.MainNet) {
-      return _mainNetSnapshots;
+      return List.from(_mainNetSnapshots.values);
     }
-    return _testNetSnapshots;
+    return List.from(_testNetSnapshots.values);
   }
 }

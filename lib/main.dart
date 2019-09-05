@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:veatre/src/api/BlockAPI.dart';
+import 'package:veatre/src/api/DappAPI.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
@@ -19,6 +20,7 @@ import 'package:veatre/common/globals.dart';
 
 void main() {
   runZoned(() async {
+    WidgetsFlutterBinding.ensureInitialized();
     await initialGlobals();
     runApp(App());
   }, onError: (dynamic err, StackTrace stack) {
@@ -28,6 +30,7 @@ void main() {
 }
 
 Future<void> initialGlobals() async {
+  Globals.apps = await DAppAPI.list();
   Globals.connexJS = await rootBundle.loadString("assets/connex.js");
   Globals.setHead(
     BlockHeadForNetwork(

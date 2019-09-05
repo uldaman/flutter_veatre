@@ -43,11 +43,12 @@ class DAppsState extends State<DApps> {
   }
 
   Future<void> syncApps() async {
-    List<DApp> apps = await DAppAPI.list();
-    Globals.apps = apps;
+    if (Globals.apps.length == 0) {
+      Globals.apps = await DAppAPI.list();
+    }
     if (mounted) {
       setState(() {
-        recomendedApps = apps;
+        recomendedApps = Globals.apps;
       });
     }
   }
@@ -225,7 +226,6 @@ class DAppsState extends State<DApps> {
           );
         },
       );
-
   CachedNetworkImage image(String url) => CachedNetworkImage(
         fit: BoxFit.fill,
         imageUrl: url,

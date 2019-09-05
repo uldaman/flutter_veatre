@@ -11,6 +11,7 @@ enum TabStage {
   Created,
   Selected,
   Removed,
+  RemoveAll,
 }
 
 class TabControllerValue {

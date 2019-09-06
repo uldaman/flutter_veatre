@@ -9,11 +9,13 @@ class TabViews extends StatefulWidget {
   final int id;
   final Network network;
   final Appearance appearance;
+  final double ratio;
 
   TabViews({
     this.id,
     this.network,
     this.appearance,
+    this.ratio,
   });
 
   @override
@@ -33,8 +35,6 @@ class TabViewsState extends State<TabViews> {
 
   @override
   Widget build(BuildContext context) {
-    double ratio = MediaQuery.of(context).size.width /
-        (MediaQuery.of(context).size.height - 20 - 75 - 49);
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
@@ -51,7 +51,7 @@ class TabViewsState extends State<TabViews> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: ratio,
+                childAspectRatio: widget.ratio,
               ),
               itemCount: snapshots.length,
               itemBuilder: (context, index) {
@@ -207,7 +207,8 @@ class TabViewsState extends State<TabViews> {
                       bottomRight: Radius.circular(10),
                     ),
                     image: DecorationImage(
-                      fit: BoxFit.fill,
+                      alignment: Alignment.topCenter,
+                      fit: BoxFit.fitWidth,
                       image: snapshot.data == null
                           ? AssetImage('assets/blank.png')
                           : MemoryImage(snapshot.data),

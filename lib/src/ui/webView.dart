@@ -60,7 +60,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Completer<BlockHead> _head = new Completer();
   Appearance _appearance;
   int id;
-
   SearchBarController searchBarController = SearchBarController(
     SearchBarValue(
       shouldHideRightItem: true,
@@ -354,24 +353,21 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   String resolveURL(String url) {
-    RegExp urlRegExp = RegExp(
-        r"^(?=^.{3,255}$)(http(s)?:\/\/)?(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*([\?&]\w+=\w*)*$");
-    if (urlRegExp.hasMatch(url)) {
-      if (url.startsWith("http")) {
-        return Uri.encodeFull(url);
-      }
-      return Uri.encodeFull("http://$url");
-    }
     RegExp domainRegExp = RegExp(
         r"^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$");
     if (domainRegExp.hasMatch(url)) {
       return "http://$url";
     }
-    // Uri uri = Uri.parse(url);
-    // if (uri.hasScheme) {
-    //   return Uri.encodeFull(url);
-    // }
-    return Uri.encodeFull("https://cn.bing.com/search?q=$url");
+    try {
+      Uri uri = Uri.parse(url);
+      if (uri.scheme.startsWith('http')) {
+        print("uri.toString() ${uri.toString()}");
+        return uri.toString();
+      }
+      return Uri.encodeFull("https://cn.bing.com/search?q=$url");
+    } catch (e) {
+      return Uri.encodeFull("https://cn.bing.com/search?q=$url");
+    }
   }
 
   List<FlutterWebView.JavascriptHandler> get _javascriptChannels {
@@ -500,9 +496,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 title: t == "" ? 'New Tab' : t,
                 data: captureData,
               );
+              final size = captureKey.currentContext.size;
               await _present(
                 TabViews(
                   id: id,
+                  ratio: size.width / size.height,
                   network: widget.network,
                   appearance: _appearance,
                 ),

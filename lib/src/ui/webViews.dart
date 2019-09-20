@@ -128,7 +128,7 @@ class WebViews {
           ),
         );
       } else {
-        int id = _testNetSnapshots.values.first.id;
+        int id = _mainNetSnapshots.values.first.id;
         int time = _mainNetSnapshots.values.first.timestamp;
         for (var entry in _mainNetSnapshots.entries) {
           Snapshot snapshot = entry.value;

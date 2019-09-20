@@ -46,8 +46,6 @@ class SignTxDialogState extends State<SignTxDialog> {
   BigInt estimatedFee = BigInt.from(0);
   bool loading = true;
   TextEditingController passwordController = TextEditingController();
-  final txGas = 5000;
-  final clauseGas = 16000;
 
   @override
   void initState() {
@@ -83,7 +81,7 @@ class SignTxDialogState extends State<SignTxDialog> {
   }
 
   Future<void> updateWallet() async {
-    Wallet wallet = await walletFrom(walletEntity);
+    Wallet wallet = await Wallet.from(walletEntity, widget.network);
     if (mounted) {
       setState(() {
         this.wallet = wallet;
@@ -174,16 +172,6 @@ VM error: ${result.vmError}''';
         loading = false;
       });
     }
-  }
-
-  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc =
-        await AccountAPI.get(walletEntity.keystore.address, widget.network);
-    return Wallet(
-      account: acc,
-      keystore: walletEntity.keystore,
-      name: walletEntity.name,
-    );
   }
 
   BigInt estimateFee() {

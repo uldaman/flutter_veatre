@@ -9,6 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:veatre/src/utils/common.dart';
+import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/common/net.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/dapp.dart';
@@ -19,7 +21,6 @@ import 'package:veatre/src/ui/createBookmark.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/tabViews.dart';
 import 'package:veatre/src/ui/webViews.dart';
-import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/ui/signCertificateDialog.dart';
@@ -67,11 +68,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       icon: Icons.search,
     ),
   );
+  String key;
 
   @override
   void initState() {
     super.initState();
     id = widget.id;
+    key = randomHex(32);
     _currentURL = widget.initialURL;
     _appearance = widget.appearance;
     Globals.addBlockHeadHandler(_handleHeadChanged);
@@ -97,12 +100,20 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   void _handleTabChanged() async {
-    final tabControllerValue = Globals.tabControllerValue;
-    if (tabControllerValue.network == widget.network &&
-        ((tabControllerValue.stage == TabStage.Removed &&
-                tabControllerValue.id == widget.id) ||
-            tabControllerValue.stage == TabStage.RemoveAll)) {
-      await controller.loadHTMLString("", null);
+    final tabValue = Globals.tabValue;
+    if (tabValue.network == widget.network) {
+      key = tabValue.tabKey;
+      if (tabValue.stage == TabStage.RemoveAll) {
+        await controller.loadHTMLString("", null);
+      }
+      if (tabValue.id == widget.id) {
+        if (tabValue.stage == TabStage.Removed ||
+            tabValue.stage == TabStage.Coverred) {
+          await controller.loadHTMLString("", null);
+        } else if (tabValue.stage == TabStage.SelectedInAlive) {
+          await controller.loadUrl(tabValue.url);
+        }
+      }
     }
   }
 
@@ -361,7 +372,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     try {
       Uri uri = Uri.parse(url);
       if (uri.scheme.startsWith('http')) {
-        print("uri.toString() ${uri.toString()}");
         return uri.toString();
       }
       return Uri.encodeFull("https://cn.bing.com/search?q=$url");
@@ -490,16 +500,20 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             case 3:
               Uint8List captureData = await takeScreenshot();
               String t = await title;
-              WebViews.newSnapshot(
+              WebViews.updateSnapshot(
                 widget.network,
                 id,
+                key,
                 title: t == "" ? 'New Tab' : t,
                 data: captureData,
+                url: _currentURL,
               );
               final size = captureKey.currentContext.size;
               await _present(
                 TabViews(
                   id: id,
+                  currentTabKey: key,
+                  url: _currentURL,
                   ratio: size.width / size.height,
                   network: widget.network,
                   appearance: _appearance,

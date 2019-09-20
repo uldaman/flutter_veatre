@@ -6,7 +6,6 @@ import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
-import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/progressHUD.dart';
 import 'package:veatre/src/ui/wallets.dart';
@@ -62,7 +61,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   }
 
   Future<void> updateWallet() async {
-    Wallet wallet = await walletFrom(walletEntity);
+    Wallet wallet = await Wallet.from(walletEntity, widget.network);
     if (mounted) {
       setState(() {
         this.wallet = wallet;
@@ -103,16 +102,6 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
       this.walletEntity = walletEntity;
       await updateWallet();
     }
-  }
-
-  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc =
-        await AccountAPI.get(walletEntity.keystore.address, widget.network);
-    return Wallet(
-      account: acc,
-      keystore: walletEntity.keystore,
-      name: walletEntity.name,
-    );
   }
 
   @override

@@ -1,4 +1,7 @@
 import 'package:bip_key_derivation/keystore.dart';
+import 'package:veatre/src/api/AccountAPI.dart';
+import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/utils/common.dart';
 
 class Account {
@@ -35,4 +38,26 @@ class Wallet {
   String name;
 
   Wallet({this.account, this.keystore, this.name});
+
+  static Future<Wallet> from(WalletEntity walletEntity, Network network) async {
+    try {
+      Account acc =
+          await AccountAPI.get(walletEntity.keystore.address, network);
+      return Wallet(
+        account: acc,
+        keystore: walletEntity.keystore,
+        name: walletEntity.name,
+      );
+    } catch (e) {
+      return Wallet(
+        account: Account(
+          balance: BigInt.from(0),
+          energy: BigInt.from(0),
+          hasCode: false,
+        ),
+        keystore: walletEntity.keystore,
+        name: walletEntity.name,
+      );
+    }
+  }
 }

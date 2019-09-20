@@ -56,7 +56,6 @@ class App extends StatefulWidget {
 class AppState extends State<App> {
   Timer _timer;
   Appearance _appearance = Globals.appearance;
-
   @override
   void initState() {
     super.initState();

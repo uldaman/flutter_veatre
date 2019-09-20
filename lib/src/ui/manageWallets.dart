@@ -11,7 +11,6 @@ import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
 import 'package:veatre/src/ui/walletInfo.dart';
 import 'package:veatre/src/models/account.dart';
-import 'package:veatre/src/api/accountAPI.dart';
 
 class ManageWallets extends StatefulWidget {
   static final routeName = '/wallets';
@@ -119,15 +118,6 @@ class ManageWalletsState extends State<ManageWallets> {
     );
   }
 
-  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc = await AccountAPI.get(walletEntity.keystore.address, network);
-    return Wallet(
-      account: acc,
-      keystore: walletEntity.keystore,
-      name: walletEntity.name,
-    );
-  }
-
   Widget buildWalletCard(BuildContext context, int index) {
     WalletEntity walletEntity = walletEntities[index];
     return Container(
@@ -216,7 +206,7 @@ class ManageWalletsState extends State<ManageWallets> {
                 ),
               ),
               FutureBuilder(
-                future: walletFrom(walletEntity),
+                future: Wallet.from(walletEntity, network),
                 builder: (context, shot) {
                   if (shot.hasData) {
                     Wallet wallet = shot.data;

@@ -148,7 +148,7 @@ class WalletsState extends State<Wallets> {
                 ),
               ),
               FutureBuilder(
-                future: walletFrom(walletEntity),
+                future: Wallet.from(walletEntity, widget.network),
                 builder: (context, shot) {
                   if (shot.hasData) {
                     Wallet wallet = shot.data;
@@ -165,16 +165,6 @@ class WalletsState extends State<Wallets> {
           Navigator.of(context).pop(walletEntity);
         },
       ),
-    );
-  }
-
-  Future<Wallet> walletFrom(WalletEntity walletEntity) async {
-    Account acc =
-        await AccountAPI.get(walletEntity.keystore.address, widget.network);
-    return Wallet(
-      account: acc,
-      keystore: walletEntity.keystore,
-      name: walletEntity.name,
     );
   }
 

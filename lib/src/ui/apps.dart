@@ -44,7 +44,11 @@ class DAppsState extends State<DApps> {
 
   Future<void> syncApps() async {
     if (Globals.apps.length == 0) {
-      Globals.apps = await DAppAPI.list();
+      try {
+        Globals.apps = await DAppAPI.list();
+      } catch (e) {
+        print("syncApps error: $e");
+      }
     }
     if (mounted) {
       setState(() {

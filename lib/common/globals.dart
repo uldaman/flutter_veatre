@@ -9,20 +9,26 @@ import 'package:veatre/src/storage/appearanceStorage.dart';
 
 enum TabStage {
   Created,
-  Selected,
+  Coverred,
+  SelectedAlive,
+  SelectedInAlive,
   Removed,
   RemoveAll,
 }
 
 class TabControllerValue {
   int id;
+  String tabKey;
   TabStage stage;
   Network network;
+  String url;
 
   TabControllerValue({
     this.id,
+    this.tabKey,
     this.stage,
     this.network,
+    this.url,
   });
 }
 
@@ -131,7 +137,7 @@ class Globals {
     _tabController.removeListener(handler);
   }
 
-  static TabControllerValue get tabControllerValue => _tabController.value;
+  static TabControllerValue get tabValue => _tabController.value;
 
   static void addAppearanceHandler(void Function() handler) {
     _appearanceController.addListener(handler);

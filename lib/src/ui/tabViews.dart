@@ -4,18 +4,23 @@ import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/ui/webViews.dart';
+import 'package:veatre/src/utils/common.dart';
 
 class TabViews extends StatefulWidget {
   final int id;
   final Network network;
   final Appearance appearance;
   final double ratio;
+  final String url;
+  final String currentTabKey;
 
   TabViews({
     this.id,
     this.network,
     this.appearance,
     this.ratio,
+    this.url,
+    this.currentTabKey,
   });
 
   @override
@@ -23,14 +28,19 @@ class TabViews extends StatefulWidget {
 }
 
 class TabViewsState extends State<TabViews> {
-  int selectedTab;
   List<Snapshot> snapshots;
+  int selectedTab;
+  bool isSelectedTabAlive = true;
+  String url;
+  String selectedTabKey;
 
   @override
   void initState() {
     super.initState();
     selectedTab = widget.id;
+    url = widget.url;
     snapshots = WebViews.snapshots(widget.network);
+    selectedTabKey = widget.currentTabKey;
   }
 
   @override
@@ -77,23 +87,21 @@ class TabViewsState extends State<TabViews> {
                     setState(() {
                       snapshots = WebViews.snapshots(widget.network);
                     });
-                    WebViews.create(widget.network);
+                    WebViews.create(widget.network, randomHex(32));
                     Navigator.of(context).pop();
                   },
                 ),
-                WebViews.canCreateMore(widget.network)
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.add,
-                          color: Colors.blue,
-                          size: 35,
-                        ),
-                        onPressed: () {
-                          WebViews.create(widget.network);
-                          Navigator.of(context).pop();
-                        },
-                      )
-                    : SizedBox(),
+                IconButton(
+                  icon: Icon(
+                    Icons.add,
+                    color: Colors.blue,
+                    size: 35,
+                  ),
+                  onPressed: () {
+                    WebViews.create(widget.network, randomHex(32));
+                    Navigator.of(context).pop();
+                  },
+                ),
                 IconButton(
                   icon: Icon(
                     Icons.done,
@@ -104,8 +112,12 @@ class TabViewsState extends State<TabViews> {
                     Globals.updateTabValue(
                       TabControllerValue(
                         id: selectedTab,
+                        url: url,
                         network: widget.network,
-                        stage: TabStage.Selected,
+                        stage: isSelectedTabAlive
+                            ? TabStage.SelectedAlive
+                            : TabStage.SelectedInAlive,
+                        tabKey: selectedTabKey,
                       ),
                     );
                     Navigator.of(context).pop();
@@ -128,7 +140,8 @@ class TabViewsState extends State<TabViews> {
           BoxShadow(
             blurRadius: 2,
             offset: Offset(2, 2),
-            color: snapshot.id == selectedTab ? Colors.blue : Colors.black87,
+            color:
+                selectedTabKey == snapshot.key ? Colors.blue : Colors.black87,
           )
         ],
         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -167,28 +180,41 @@ class TabViewsState extends State<TabViews> {
                         size: 20,
                       ),
                       onPressed: () async {
+                        WebViews.removeSnapshot(widget.network, snapshot.key);
                         if (snapshots.length == 1) {
-                          WebViews.remove(widget.network, snapshot.id);
-                          WebViews.create(widget.network);
+                          WebViews.removeWebview(widget.network, snapshot.id);
+                          WebViews.create(widget.network, randomHex(32));
                           Navigator.of(context).pop();
                           return;
                         }
-                        WebViews.remove(widget.network, snapshot.id);
+                        if (snapshot.isAlive) {
+                          WebViews.removeWebview(widget.network, snapshot.id);
+                        }
                         setState(() {
                           snapshots = WebViews.snapshots(widget.network);
                         });
                         if (index == 0) {
                           selectedTab = snapshots[index + 1].id;
+                          isSelectedTabAlive = snapshots[index + 1].isAlive;
+                          url = snapshots[index + 1].url;
+                          selectedTabKey = snapshots[index + 1].key;
                         } else if (selectedTab == snapshot.id) {
                           selectedTab = snapshots[index - 1].id;
+                          isSelectedTabAlive = snapshots[index - 1].isAlive;
+                          url = snapshots[index - 1].url;
+                          selectedTabKey = snapshots[index - 1].key;
                         }
-                        Globals.updateTabValue(
-                          TabControllerValue(
-                            id: snapshot.id,
-                            network: widget.network,
-                            stage: TabStage.Removed,
-                          ),
-                        );
+                        if (snapshot.isAlive) {
+                          Globals.updateTabValue(
+                            TabControllerValue(
+                              id: snapshot.id,
+                              url: url,
+                              network: widget.network,
+                              stage: TabStage.Removed,
+                              tabKey: selectedTabKey,
+                            ),
+                          );
+                        }
                       },
                     )
                   ],
@@ -215,12 +241,16 @@ class TabViewsState extends State<TabViews> {
                     ),
                   ),
                 ),
-                onTap: () {
+                onTapUp: (tap) {
                   Globals.updateTabValue(
                     TabControllerValue(
                       id: snapshot.id,
                       network: widget.network,
-                      stage: TabStage.Selected,
+                      url: snapshot.url,
+                      stage: snapshot.isAlive
+                          ? TabStage.SelectedAlive
+                          : TabStage.SelectedInAlive,
+                      tabKey: snapshot.key,
                     ),
                   );
                   Navigator.of(context).pop();

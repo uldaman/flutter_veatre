@@ -9,24 +9,33 @@ import 'package:veatre/src/ui/webView.dart';
 
 class Snapshot {
   int id;
+  String key;
   String title;
   Uint8List data;
+  String url;
+  int timestamp;
+  bool isAlive;
 
   Snapshot({
     this.id,
+    this.key,
     this.title,
     this.data,
+    this.url,
+    this.timestamp,
+    this.isAlive = true,
   });
 }
 
 class WebViews {
-  static Map<int, Snapshot> _mainNetSnapshots = {};
+  static Map<String, Snapshot> _mainNetSnapshots = {};
   static List<WebView> mainNetWebViews = [];
 
-  static Map<int, Snapshot> _testNetSnapshots = {};
+  static Map<String, Snapshot> _testNetSnapshots = {};
   static List<WebView> testNetWebViews = [];
 
-  static final maxTabLen = 10;
+  static final maxTabLen = 4;
+
   static List<int> _activeMainNetPages = [];
   static List<int> _inactiveMainNetPages = [];
 
@@ -70,18 +79,27 @@ class WebViews {
     }
   }
 
-  static void remove(
+  static void removeSnapshot(
+    Network network,
+    String key,
+  ) {
+    if (network == Network.MainNet) {
+      _mainNetSnapshots.remove(key);
+    } else {
+      _testNetSnapshots.remove(key);
+    }
+  }
+
+  static void removeWebview(
     Network network,
     int id,
   ) {
     if (network == Network.MainNet) {
       _activeMainNetPages.remove(id);
       _inactiveMainNetPages.add(id);
-      _mainNetSnapshots.remove(id);
     } else {
       _activeTestNetPages.remove(id);
       _inactiveTestNetPages.add(id);
-      _testNetSnapshots.remove(id);
     }
     Globals.updateTabValue(
       TabControllerValue(
@@ -94,6 +112,7 @@ class WebViews {
 
   static void create(
     Network network,
+    String key,
   ) {
     if (network == Network.MainNet) {
       if (_activeMainNetPages.length < maxTabLen) {
@@ -105,6 +124,25 @@ class WebViews {
             id: firstInactiveID,
             network: network,
             stage: TabStage.Created,
+            tabKey: key,
+          ),
+        );
+      } else {
+        int id = _testNetSnapshots.values.first.id;
+        int time = _mainNetSnapshots.values.first.timestamp;
+        for (var entry in _mainNetSnapshots.entries) {
+          Snapshot snapshot = entry.value;
+          if (time > snapshot.timestamp) {
+            time = snapshot.timestamp;
+            id = snapshot.id;
+          }
+        }
+        Globals.updateTabValue(
+          TabControllerValue(
+            id: id,
+            network: network,
+            stage: TabStage.Coverred,
+            tabKey: key,
           ),
         );
       }
@@ -118,46 +156,65 @@ class WebViews {
             id: firstInactiveID,
             network: network,
             stage: TabStage.Created,
+            tabKey: key,
+          ),
+        );
+      } else {
+        int id = _testNetSnapshots.values.first.id;
+        int time = _testNetSnapshots.values.first.timestamp;
+        for (var entry in _testNetSnapshots.entries) {
+          Snapshot snapshot = entry.value;
+          if (time > snapshot.timestamp) {
+            time = snapshot.timestamp;
+            id = snapshot.id;
+          }
+        }
+        Globals.updateTabValue(
+          TabControllerValue(
+            id: id,
+            network: network,
+            stage: TabStage.Coverred,
+            tabKey: key,
           ),
         );
       }
     }
   }
 
-  static bool canCreateMore(Network network) {
-    if (network == Network.MainNet) {
-      return _activeMainNetPages.length < maxTabLen;
-    } else {
-      return _activeTestNetPages.length < maxTabLen;
-    }
-  }
-
-  static void newSnapshot(
+  static void updateSnapshot(
     Network net,
-    int id, {
+    int id,
+    String key, {
     Uint8List data,
     String title,
+    String url,
   }) {
+    Snapshot _snapshot = Snapshot(
+      id: id,
+      key: key,
+      data: Uint8List.fromList(data),
+      title: title,
+      url: url,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      isAlive: true,
+    );
     if (net == Network.MainNet) {
-      _mainNetSnapshots[id] = Snapshot(
-        id: id,
-        data: Uint8List.fromList(data),
-        title: title,
-      );
+      for (var entry in _mainNetSnapshots.entries) {
+        Snapshot snapshot = entry.value;
+        if (snapshot.id == id) {
+          _mainNetSnapshots[snapshot.key].isAlive = false;
+        }
+      }
+      _mainNetSnapshots[key] = _snapshot;
     } else {
-      _testNetSnapshots[id] = Snapshot(
-        id: id,
-        data: Uint8List.fromList(data),
-        title: title,
-      );
+      for (var entry in _testNetSnapshots.entries) {
+        Snapshot snapshot = entry.value;
+        if (snapshot.id == id) {
+          _testNetSnapshots[snapshot.key].isAlive = false;
+        }
+      }
+      _testNetSnapshots[key] = _snapshot;
     }
-  }
-
-  static int tabshotLen(Network net) {
-    if (net == Network.MainNet) {
-      return _mainNetSnapshots.length;
-    }
-    return _testNetSnapshots.length;
   }
 
   static void removeAll(Network network) {

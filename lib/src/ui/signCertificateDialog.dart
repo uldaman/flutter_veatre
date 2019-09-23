@@ -108,7 +108,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Sign Certificate'),
         centerTitle: true,

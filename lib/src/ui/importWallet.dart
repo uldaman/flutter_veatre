@@ -202,7 +202,7 @@ class ImportWalletState extends State<ImportWallet> {
     return ProgressHUD(
       child: Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text('Import Wallet'),
           centerTitle: true,

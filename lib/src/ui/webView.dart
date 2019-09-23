@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/common/net.dart';
@@ -69,6 +70,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     ),
   );
   String key;
+  bool isKeyboardVisible = false;
 
   @override
   void initState() {
@@ -80,6 +82,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     Globals.addBlockHeadHandler(_handleHeadChanged);
     Globals.addAppearanceHandler(_handleAppearanceChanged);
     Globals.addTabHandler(_handleTabChanged);
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) {
+        setState(() {
+          this.isKeyboardVisible = visible;
+        });
+      },
+    );
   }
 
   void _handleHeadChanged() async {
@@ -132,6 +141,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      extendBody: true,
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: searchBar,
@@ -147,7 +157,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           ],
         ),
       ),
-      bottomNavigationBar: bottomNavigationBar,
+      bottomNavigationBar: isKeyboardVisible ? SizedBox() : bottomNavigationBar,
     );
   }
 
@@ -420,6 +430,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               title: Text('No wallet available'),
               content: Text('Create or import a new wallet?'),
               confirmAction: () async {
+                await NetworkStorage.set(widget.network);
                 await Navigator.of(context).pushNamed(ManageWallets.routeName);
                 Navigator.pop(context);
               },
@@ -521,6 +532,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               );
               break;
             case 4:
+              await NetworkStorage.set(widget.network);
               await _present(Settings());
               break;
           }

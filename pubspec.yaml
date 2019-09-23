@@ -36,6 +36,7 @@ dev_dependencies:
   fixnum: ^0.10.9
   validators: ^2.0.0
   dio: ^2.1.13
+  keyboard_visibility:
   webview_flutter:
     git:
       url: git@github.com:uldaman/webview_flutter.git

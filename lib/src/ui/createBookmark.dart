@@ -28,7 +28,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Bookmark'),

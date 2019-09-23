@@ -356,12 +356,14 @@ class GenerateWalletState extends State<GenerateWallet> {
                       );
                       KeyStore keystore = await BipKeyDerivation.encrypt(
                           privateKey, widget.password);
+                      WalletEntity entity = WalletEntity(
+                        isMain: true,
+                        name: widget.walletName,
+                        keystore: keystore,
+                        network: await NetworkStorage.network,
+                      );
                       await WalletStorage.write(
-                        walletEntity: WalletEntity(
-                          name: widget.walletName,
-                          keystore: keystore,
-                          network: await NetworkStorage.network,
-                        ),
+                        walletEntity: entity,
                       );
                       setState(() {
                         this.loading = false;

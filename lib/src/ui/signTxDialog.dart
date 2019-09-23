@@ -193,8 +193,8 @@ VM error: ${result.vmError}''';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).primaryColor,
-      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Text('Sign Transaction'),
         centerTitle: true,

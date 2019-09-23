@@ -29,6 +29,8 @@ class NetworkStorage {
       configTableName,
       limit: 1,
     );
-    return rows.first['network'] == 0 ? Network.MainNet : Network.TestNet;
+    Network network =
+        rows.first['network'] == 0 ? Network.MainNet : Network.TestNet;
+    return network;
   }
 }

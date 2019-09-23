@@ -430,7 +430,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               title: Text('No wallet available'),
               content: Text('Create or import a new wallet?'),
               confirmAction: () async {
-                await NetworkStorage.set(widget.network);
                 await Navigator.of(context).pushNamed(ManageWallets.routeName);
                 Navigator.pop(context);
               },
@@ -532,7 +531,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               );
               break;
             case 4:
-              await NetworkStorage.set(widget.network);
               await _present(Settings());
               break;
           }

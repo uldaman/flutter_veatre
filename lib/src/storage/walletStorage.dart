@@ -81,10 +81,11 @@ class WalletStorage {
     walletEntity.isMain = true;
     return db.update(
       walletTableName,
-      walletEntity.encoded,
-      where: 'name = ?',
+      {'isMain': 0},
+      where: 'name = ? and network = ?',
       whereArgs: [
         walletEntity.name,
+        network == Network.MainNet ? 0 : 1,
       ],
     );
   }

@@ -34,7 +34,7 @@ class WebViews {
   static Map<String, Snapshot> _testNetSnapshots = {};
   static List<WebView> testNetWebViews = [];
 
-  static final maxTabLen = 4;
+  static final maxTabLen = 10;
 
   static List<int> _activeMainNetPages = [];
   static List<int> _inactiveMainNetPages = [];

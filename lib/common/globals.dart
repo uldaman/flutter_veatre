@@ -8,6 +8,7 @@ import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 
 enum TabStage {
+  ClearFocus,
   Created,
   Coverred,
   SelectedAlive,

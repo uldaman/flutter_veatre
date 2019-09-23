@@ -14,7 +14,7 @@ import 'package:veatre/src/models/account.dart';
 
 class ManageWallets extends StatefulWidget {
   static final routeName = '/wallets';
-
+  
   @override
   ManageWalletsState createState() => ManageWalletsState();
 }

@@ -22,7 +22,7 @@ class CreateWalletState extends State<CreateWallet> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Create Wallet'),

@@ -141,7 +141,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      extendBody: true,
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: searchBar,

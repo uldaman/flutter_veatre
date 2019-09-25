@@ -40,6 +40,13 @@ class DAppsState extends State<DApps> {
     super.initState();
     updateBookmarks();
     syncApps();
+    Globals.addBookmarkHandler(_handleBookmark);
+  }
+
+  Future<void> _handleBookmark() async {
+    if (mounted && Globals.bookmark.network == widget.network) {
+      await updateBookmarks();
+    }
   }
 
   Future<void> syncApps() async {
@@ -49,11 +56,11 @@ class DAppsState extends State<DApps> {
       } catch (e) {
         print("syncApps error: $e");
       }
-    }
-    if (mounted) {
-      setState(() {
-        recomendedApps = Globals.apps;
-      });
+      if (mounted) {
+        setState(() {
+          recomendedApps = Globals.apps;
+        });
+      }
     }
   }
 
@@ -248,4 +255,10 @@ class DAppsState extends State<DApps> {
           );
         },
       );
+
+  @override
+  void dispose() {
+    super.dispose();
+    Globals.removeBookmarkHandler(_handleBookmark);
+  }
 }

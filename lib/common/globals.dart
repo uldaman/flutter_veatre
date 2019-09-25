@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:veatre/common/net.dart';
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/block.dart';
+import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 
@@ -47,6 +48,10 @@ class NetworkController extends ValueNotifier<Network> {
 
 class BlockHeadController extends ValueNotifier<BlockHeadForNetwork> {
   BlockHeadController(BlockHeadForNetwork value) : super(value);
+}
+
+class BookmarkController extends ValueNotifier<Bookmark> {
+  BookmarkController(Bookmark value) : super(value);
 }
 
 class BlockHeadForNetwork {
@@ -126,6 +131,9 @@ class Globals {
   static BlockHeadController _blockHeadController =
       BlockHeadController(BlockHeadForNetwork());
 
+  static BookmarkController _bookmarkController =
+      BookmarkController(Bookmark());
+
   static void addTabHandler(void Function() handler) {
     _tabController.addListener(handler);
   }
@@ -184,6 +192,20 @@ class Globals {
 
   static Network get network => _networkController.value;
 
+  static Bookmark get bookmark => _bookmarkController.value;
+
+  static void addBookmarkHandler(void Function() handler) {
+    _bookmarkController.addListener(handler);
+  }
+
+  static void updateBookmark(Bookmark bookmark) {
+    _bookmarkController.value = bookmark;
+  }
+
+  static void removeBookmarkHandler(void Function() handler) {
+    _bookmarkController.removeListener(handler);
+  }
+
   static Block genesis(Network network) {
     if (network == Network.MainNet) {
       return mainNetGenesis;
@@ -213,11 +235,6 @@ class Globals {
     return testNet;
   }
 
-  static Future<Net> get currentNet async {
-    Network network = await NetworkStorage.network;
-    return net(network);
-  }
-
   static Timer periodic(
     int seconds,
     Future<void> Function(Timer timer) action,
@@ -234,5 +251,6 @@ class Globals {
     _tabController.dispose();
     _appearanceController.dispose();
     _blockHeadController.dispose();
+    _networkController.dispose();
   }
 }

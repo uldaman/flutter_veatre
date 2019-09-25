@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
@@ -49,6 +50,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
                 network: widget.network,
               );
               await BookmarkStorage.insert(bookmark);
+              Globals.updateBookmark(bookmark);
               Navigator.pop(context);
             },
           )

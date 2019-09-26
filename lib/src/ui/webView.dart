@@ -8,13 +8,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
+import 'package:veatre/common/globals.dart';
 import 'package:veatre/common/net.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/dapp.dart';
+import 'package:veatre/src/models/certificate.dart';
+import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
@@ -22,8 +28,6 @@ import 'package:veatre/src/ui/createBookmark.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/tabViews.dart';
 import 'package:veatre/src/ui/webViews.dart';
-import 'package:veatre/src/models/certificate.dart';
-import 'package:veatre/src/models/transaction.dart';
 import 'package:veatre/src/ui/signCertificateDialog.dart';
 import 'package:veatre/src/ui/signTxDialog.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
@@ -31,7 +35,6 @@ import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/ui/searchBar.dart';
 import 'package:veatre/src/ui/apps.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
-import 'package:veatre/common/globals.dart';
 
 class WebView extends StatefulWidget {
   final Key key;
@@ -41,8 +44,8 @@ class WebView extends StatefulWidget {
   final String initialURL;
 
   WebView({
-    this.key,
-    this.id,
+    @required this.key,
+    @required this.id,
     @required this.network,
     @required this.appearance,
     @required this.initialURL,
@@ -53,24 +56,31 @@ class WebView extends StatefulWidget {
 }
 
 class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
+  String key;
+  bool isKeyboardVisible = false;
+  int bookmarkID;
   bool canBack = false;
   bool canForward = false;
   bool isStartSearch = false;
+  int id;
+  double progress = 0;
+  bool canBookmarked = false;
   String _currentURL;
+  Appearance _appearance;
+
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
   Completer<BlockHead> _head = new Completer();
-  Appearance _appearance;
-  int id;
   SearchBarController searchBarController = SearchBarController(
     SearchBarValue(
-      shouldHideRightItem: true,
-      progress: 0,
-      icon: Icons.search,
+      shouldCancelInput: true,
+      rightView: null,
+      leftView: Icon(
+        Icons.search,
+        size: 20,
+      ),
     ),
   );
-  String key;
-  bool isKeyboardVisible = false;
 
   @override
   void initState() {
@@ -115,7 +125,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       if (tabValue.stage == TabStage.RemoveAll) {
         await controller.loadHTMLString("", null);
       }
-      if (tabValue.id == widget.id) {
+      if (tabValue.id == id) {
         if (tabValue.stage == TabStage.Removed ||
             tabValue.stage == TabStage.Coverred) {
           await controller.loadHTMLString("", null);
@@ -123,6 +133,19 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           await controller.loadUrl(tabValue.url);
         }
       }
+    }
+  }
+
+  Future<void> updateBookmarkID(String url) async {
+    Bookmark bookmark = await BookmarkStorage.queryByURL(widget.network, url);
+    if (bookmark != null) {
+      setState(() {
+        bookmarkID = bookmark.id;
+      });
+    } else {
+      setState(() {
+        bookmarkID = null;
+      });
     }
   }
 
@@ -143,18 +166,99 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
+        actions: <Widget>[
+          isStartSearch
+              ? FlatButton(
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Theme.of(context).accentTextTheme.title.color,
+                      fontSize: 12,
+                    ),
+                  ),
+                  onPressed: () async {
+                    searchBarController.valueWith(
+                      shouldCancelInput: true,
+                    );
+                    setState(() {
+                      isStartSearch = false;
+                    });
+                  },
+                )
+              : Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(left: 5),
+                      child: IconButton(
+                        icon: Icon(
+                          bookmarkID == null
+                              ? Icons.bookmark_border
+                              : Icons.bookmark,
+                          size: 20,
+                        ),
+                        disabledColor: Colors.grey[500],
+                        color: Colors.grey,
+                        onPressed: _currentURL == Globals.initialURL
+                            ? null
+                            : bookmarkID == null
+                                ? () async {
+                                    final meta = await metaData;
+                                    if (meta != null) {
+                                      await _present(
+                                        CreateBookmark(
+                                          documentMetaData: meta,
+                                          network: widget.network,
+                                        ),
+                                      );
+                                      await updateBookmarkID(_currentURL);
+                                    }
+                                  }
+                                : () async {
+                                    await BookmarkStorage.delete(bookmarkID);
+                                    await updateBookmarkID(_currentURL);
+                                  },
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.settings,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () async {
+                        await _present(Settings());
+                      },
+                    ),
+                  ],
+                ),
+        ],
         title: searchBar,
       ),
-      body: RepaintBoundary(
-        key: captureKey,
-        child: Stack(
-          children: [
-            webView,
-            _currentURL == Globals.initialURL || isStartSearch == true
-                ? appView
-                : SizedBox(),
-          ],
-        ),
+      body: Column(
+        children: <Widget>[
+          !isStartSearch && progress < 1 && progress > 0
+              ? SizedBox(
+                  height: 2,
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.transparent,
+                  ),
+                )
+              : SizedBox(),
+          Expanded(
+            child: RepaintBoundary(
+              key: captureKey,
+              child: Stack(
+                children: [
+                  webView,
+                  _currentURL == Globals.initialURL || isStartSearch == true
+                      ? appView
+                      : SizedBox(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: isKeyboardVisible ? SizedBox() : bottomNavigationBar,
     );
@@ -180,36 +284,19 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         onSubmitted: (text) async {
           await _handleLoad(text);
         },
-        onCancelInput: () async {
-          searchBarController.valueWith(
-            submitedText: _currentURL,
-          );
-          setState(() {
-            isStartSearch = false;
-          });
-        },
-        onRefresh: () async {
-          setState(() {
-            isStartSearch = false;
-          });
-          if (this.controller != null) {
-            await controller.reload();
-          }
-        },
-        onStop: () async {
-          setState(() {
-            isStartSearch = false;
-          });
-          if (this.controller != null) {
-            await controller.stopLoading();
-          }
-        },
       );
 
   Widget get appView => DApps(
         network: widget.network,
         onAppSelected: (DApp app) async {
           await _handleLoad(app.url);
+        },
+        onBookmarkLongPressed: (Bookmark bookmark) async {
+          await showCupertinoModalPopup(
+              context: context,
+              builder: (context) {
+                return actionSheet(bookmark);
+              });
         },
         onBookmarkSelected: (Bookmark bookmark) async {
           await _handleLoad(bookmark.url);
@@ -229,17 +316,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           await updateBackForwad();
           _currentURL = url;
           if (_currentURL != Globals.initialURL) {
-            updateSearchBar(null, url);
+            updateSearchBar(url, progress);
           }
         },
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
-          updateSearchBar(0, _currentURL);
+          updateSearchBar(_currentURL, progress);
         },
         onPageStarted: (String url) async {
           if (controller != null) {
             await updateBackForwad();
-            updateSearchBar(null, url);
+            updateSearchBar(url, 0);
           }
           setState(() {
             _currentURL = url;
@@ -248,18 +335,23 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onPageFinished: (String url) async {
           if (controller != null) {
+            await updateBookmarkID(url);
             await updateBackForwad();
             await controller
                 .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
           }
-          updateSearchBar(1, url);
+          updateSearchBar(url, 1);
           setState(() {
             _currentURL = url;
+            progress = 1;
             isStartSearch = false;
           });
         },
         onProgressChanged: (double progress) {
-          updateSearchBar(progress, _currentURL);
+          updateSearchBar(_currentURL, progress);
+          setState(() {
+            this.progress = progress;
+          });
         },
         navigationDelegate: (FlutterWebView.NavigationRequest request) {
           if (request.url.startsWith('http') ||
@@ -335,7 +427,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void updateSearchBar(double progress, String url) {
+  void updateSearchBar(String url, double progress) {
     Uri uri = Uri.parse(url);
     if (url != Globals.initialURL) {
       IconData icon;
@@ -346,18 +438,50 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       }
       String domain = getDomain(uri);
       searchBarController.valueWith(
-        progress: progress,
-        icon: icon,
+        leftView: Icon(
+          icon,
+          color: Theme.of(context).primaryIconTheme.color,
+          size: 20,
+        ),
         defautText: domain == "" ? "Search" : domain,
         submitedText: url,
-        shouldHideRightItem: !uri.scheme.startsWith("http"),
+        rightView: !uri.scheme.startsWith("http")
+            ? null
+            : !isStartSearch && progress == 1
+                ? IconButton(
+                    icon: Icon(
+                      Icons.refresh,
+                      color: Theme.of(context).accentTextTheme.title.color,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      setState(() {
+                        isStartSearch = false;
+                      });
+                      await controller.reload();
+                    })
+                : IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: Theme.of(context).accentTextTheme.title.color,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      setState(() {
+                        isStartSearch = false;
+                      });
+                      await controller.stopLoading();
+                    }),
       );
     } else {
       searchBarController.valueWith(
-        progress: 0,
-        icon: Icons.search,
+        leftView: Icon(
+          Icons.search,
+          color: Theme.of(context).accentTextTheme.title.color,
+          size: 20,
+        ),
         defautText: 'Search',
-        shouldHideRightItem: !uri.scheme.startsWith("http"),
+        rightView: null,
         submitedText: _currentURL,
       );
     }
@@ -494,19 +618,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               }
               break;
             case 2:
-              if (_currentURL != Globals.initialURL) {
-                final meta = await metaData;
-                if (meta != null) {
-                  await _present(
-                    CreateBookmark(
-                      documentMetaData: meta,
-                      network: widget.network,
-                    ),
-                  );
-                }
-              }
-              break;
-            case 3:
               Uint8List captureData = await takeScreenshot();
               String t = await title;
               WebViews.updateSnapshot(
@@ -529,8 +640,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 ),
               );
               break;
+            case 3:
+              await _present(Activities(network: widget.network));
+              break;
             case 4:
-              await _present(Settings());
+              await _present(ManageWallets());
               break;
           }
         },
@@ -567,17 +681,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         30,
       ),
       bottomNavigationBarItem(
-        Icons.star_border,
-        _currentURL != Globals.initialURL ? active : inactive,
-        40,
-      ),
-      bottomNavigationBarItem(
         Icons.filter_none,
         active,
         30,
       ),
       bottomNavigationBarItem(
-        Icons.more_horiz,
+        FontAwesomeIcons.arrowAltCircleUp,
+        active,
+        30,
+      ),
+      bottomNavigationBarItem(
+        FontAwesomeIcons.wallet,
         active,
         30,
       ),
@@ -632,5 +746,88 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       },
     );
     return result;
+  }
+
+  Widget sheet(Widget child) {
+    return Container(
+      alignment: Alignment.center,
+      child: child,
+      height: 45,
+    );
+  }
+
+  CupertinoActionSheet actionSheet(Bookmark bookmark) {
+    return CupertinoActionSheet(
+      title: sheet(
+        Text(
+          bookmark.url,
+          style: Theme.of(context).accentTextTheme.title,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      actions: <Widget>[
+        sheet(
+          FlatButton(
+            child: Text(
+              'Copy URL',
+              style: TextStyle(color: Colors.blue, fontSize: 20),
+            ),
+            onPressed: () async {
+              await Clipboard.setData(new ClipboardData(text: bookmark.url));
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        sheet(
+          FlatButton(
+            child: Text(
+              'Edit',
+              style: TextStyle(color: Colors.blue, fontSize: 20),
+            ),
+            onPressed: () async {
+              await _present(
+                CreateBookmark(
+                  eidtBookmarkID: bookmark.id,
+                  documentMetaData: DocumentMetaData(
+                    icon: bookmark.favicon,
+                    title: bookmark.title,
+                    url: bookmark.url,
+                  ),
+                  network: widget.network,
+                ),
+              );
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        sheet(
+          FlatButton(
+            child: Text(
+              'Remove',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 20,
+              ),
+            ),
+            onPressed: () async {
+              await BookmarkStorage.delete(bookmark.id);
+              Globals.updateBookmark(bookmark);
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      ],
+      cancelButton: sheet(
+        FlatButton(
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: Colors.blue, fontSize: 20),
+          ),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+    );
   }
 }

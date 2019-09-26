@@ -6,9 +6,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 
 class CreateBookmark extends StatefulWidget {
+  final int eidtBookmarkID;
   final DocumentMetaData documentMetaData;
   final Network network;
-  CreateBookmark({this.documentMetaData, this.network});
+  CreateBookmark({this.documentMetaData, this.network, this.eidtBookmarkID});
 
   @override
   CreateBookmarkState createState() {
@@ -49,7 +50,12 @@ class CreateBookmarkState extends State<CreateBookmark> {
                 url: widget.documentMetaData.url,
                 network: widget.network,
               );
-              await BookmarkStorage.insert(bookmark);
+              if (widget.eidtBookmarkID != null) {
+                await BookmarkStorage.update(
+                    widget.eidtBookmarkID, bookmark.encoded);
+              } else {
+                await BookmarkStorage.insert(bookmark);
+              }
               Globals.updateBookmark(bookmark);
               Navigator.pop(context);
             },

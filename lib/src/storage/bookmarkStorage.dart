@@ -41,6 +41,20 @@ class BookmarkStorage {
     );
     return List.from(rows.map((row) => Bookmark.fromJSON(row)));
   }
+
+  static Future<Bookmark> queryByURL(Network network, String url) async {
+    final db = await database;
+    List<Map<String, dynamic>> rows = await db.query(
+      bookmarkTableName,
+      where: 'network = ? and url = ?',
+      whereArgs: [network == Network.MainNet ? 0 : 1, url],
+      orderBy: 'id desc',
+    );
+    if (rows.length == 0) {
+      return null;
+    }
+    return Bookmark.fromJSON(rows.first);
+  }
 }
 
 class Bookmark {

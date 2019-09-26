@@ -440,7 +440,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       searchBarController.valueWith(
         leftView: Icon(
           icon,
-          color: Theme.of(context).primaryIconTheme.color,
           size: 20,
         ),
         defautText: domain == "" ? "Search" : domain,
@@ -451,7 +450,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 ? IconButton(
                     icon: Icon(
                       Icons.refresh,
-                      color: Theme.of(context).accentTextTheme.title.color,
                       size: 20,
                     ),
                     onPressed: () async {
@@ -463,7 +461,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 : IconButton(
                     icon: Icon(
                       Icons.close,
-                      color: Theme.of(context).accentTextTheme.title.color,
                       size: 20,
                     ),
                     onPressed: () async {
@@ -477,7 +474,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       searchBarController.valueWith(
         leftView: Icon(
           Icons.search,
-          color: Theme.of(context).accentTextTheme.title.color,
           size: 20,
         ),
         defautText: 'Search',

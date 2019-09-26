@@ -34,7 +34,7 @@ class SearchBarController extends ValueNotifier<SearchBarValue> {
   }) {
     this.value = SearchBarValue(
       leftView: leftView ?? this.value.leftView,
-      rightView: rightView ?? this.value.rightView,
+      rightView: rightView,
       defautText: defautText ?? this.value.defautText,
       submitedText: submitedText ?? this.value.submitedText,
       shouldCancelInput: shouldCancelInput ?? this.value.shouldCancelInput,

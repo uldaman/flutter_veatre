@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/storage/appearanceStorage.dart';
 import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/network.dart';
 import 'package:veatre/src/storage/networkStorage.dart';
 
@@ -49,19 +48,6 @@ class SettingsState extends State<Settings> {
         '',
         () async {
           await Navigator.of(context).pushNamed(ManageWallets.routeName);
-        },
-      ),
-      buildCell(
-        Icons.alarm,
-        'Activities',
-        '',
-        () async {
-          final network = await NetworkStorage.network;
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => Activities(network: network),
-            ),
-          );
         },
       ),
       buildCell(

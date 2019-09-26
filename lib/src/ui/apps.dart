@@ -8,16 +8,20 @@ import 'package:veatre/src/storage/networkStorage.dart';
 
 typedef onAppSelectedCallback = Future<void> Function(DApp app);
 typedef onBookmarkSelectedCallback = Future<void> Function(Bookmark bookmark);
+typedef onBookmarkLongPressedCallback = Future<void> Function(
+    Bookmark bookmark);
 
 class DApps extends StatefulWidget {
   final Network network;
   final onAppSelectedCallback onAppSelected;
   final onBookmarkSelectedCallback onBookmarkSelected;
+  final onBookmarkLongPressedCallback onBookmarkLongPressed;
 
   DApps({
     this.network,
     this.onAppSelected,
     this.onBookmarkSelected,
+    this.onBookmarkLongPressed,
   });
 
   @override
@@ -32,8 +36,6 @@ class DAppsState extends State<DApps> {
   final double mainAxisSpacing = 15;
   List<Bookmark> bookmarks = [];
   List<DApp> recomendedApps = Globals.apps;
-
-  int editBookmark;
 
   @override
   void initState() {
@@ -77,37 +79,30 @@ class DAppsState extends State<DApps> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      body: GestureDetector(
-        child: ListView(
-          padding: EdgeInsets.all(0),
-          children: <Widget>[
-            bookmarks.length > 0
-                ? Padding(
-                    child: Text(
-                      'Bookmarks',
-                      style: Theme.of(context).accentTextTheme.title,
-                    ),
-                    padding: EdgeInsets.all(15),
-                  )
-                : SizedBox(),
-            bookmarks.length > 0 ? bookmarkApps : SizedBox(),
-            recomendedApps.length > 0
-                ? Padding(
-                    child: Text(
-                      'Recomends',
-                      style: Theme.of(context).accentTextTheme.title,
-                    ),
-                    padding: EdgeInsets.all(15),
-                  )
-                : SizedBox(),
-            recomendedApps.length > 0 ? recomendApps : SizedBox(),
-          ],
-        ),
-        onTap: () {
-          setState(() {
-            editBookmark = null;
-          });
-        },
+      body: ListView(
+        padding: EdgeInsets.all(0),
+        children: <Widget>[
+          bookmarks.length > 0
+              ? Padding(
+                  child: Text(
+                    'Bookmarks',
+                    style: Theme.of(context).accentTextTheme.title,
+                  ),
+                  padding: EdgeInsets.all(15),
+                )
+              : SizedBox(),
+          bookmarks.length > 0 ? bookmarkApps : SizedBox(),
+          recomendedApps.length > 0
+              ? Padding(
+                  child: Text(
+                    'Recomends',
+                    style: Theme.of(context).accentTextTheme.title,
+                  ),
+                  padding: EdgeInsets.all(15),
+                )
+              : SizedBox(),
+          recomendedApps.length > 0 ? recomendApps : SizedBox(),
+        ],
       ),
     );
   }
@@ -189,25 +184,6 @@ class DAppsState extends State<DApps> {
                         ),
                       ],
                     ),
-                    editBookmark != null && editBookmark == bookmarks[index].id
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: <Widget>[
-                              IconButton(
-                                icon: Icon(
-                                  Icons.cancel,
-                                  color: Colors.grey[500],
-                                  size: 18,
-                                ),
-                                onPressed: () async {
-                                  await BookmarkStorage.delete(editBookmark);
-                                  editBookmark = null;
-                                  await updateBookmarks();
-                                },
-                              ),
-                            ],
-                          )
-                        : SizedBox()
                   ],
                 ),
                 Padding(
@@ -225,11 +201,11 @@ class DAppsState extends State<DApps> {
               ],
             ),
             onLongPressStart: (detail) async {
-              setState(() {
-                editBookmark = bookmarks[index].id;
-              });
+              if (widget.onBookmarkLongPressed != null) {
+                widget.onBookmarkLongPressed(bookmarks[index]);
+              }
             },
-            onTap: () async {
+            onTapUp: (detail) async {
               if (widget.onBookmarkSelected != null) {
                 widget.onBookmarkSelected(bookmarks[index]);
               }

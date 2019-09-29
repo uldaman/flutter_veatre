@@ -14,10 +14,9 @@ class ModalElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double contextWidth = MediaQuery.of(context).size.width;
     List<Widget> _children = [
-      SizedBox(
-        width: contextWidth * 0.25,
+      Expanded(
+        flex: 4,
         child: Text(
           prefix,
           style: TextStyle(
@@ -27,29 +26,36 @@ class ModalElement extends StatelessWidget {
       ),
     ];
     if (content != null) {
-      _children.add(Expanded(child: content));
+      _children.add(
+        Expanded(
+          flex: 9,
+          child: content,
+        ),
+      );
     }
     if (onExpand != null) {
       _children.add(
-        SizedBox(
-          width: contextWidth * 0.05,
-          child: Icon(
-            Icons.arrow_forward_ios,
-            color: Theme.of(context).accentTextTheme.title.color,
-            size: 15,
+        Expanded(
+          flex: 1,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Theme.of(context).accentTextTheme.title.color,
+                size: 15,
+              ),
+            ],
           ),
         ),
       );
     } else {
       _children.add(
-        SizedBox(width: contextWidth * 0.05),
+        Spacer(flex: 1),
       );
     }
-    return SizedBox(
-      // height: 50,
-      child: Row(
-        children: _children,
-      ),
+    return Row(
+      children: _children,
     );
   }
 }

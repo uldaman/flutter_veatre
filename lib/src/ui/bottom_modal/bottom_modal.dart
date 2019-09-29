@@ -49,7 +49,7 @@ class BottomModal extends StatelessWidget {
       _children.add(_buildDivider());
     });
     if (bottomActionButton != null) {
-      _children.add(_buildBottomActionButton(context));
+      _children.add(_buildBottomActionButton());
     }
     return _children;
   }
@@ -65,13 +65,25 @@ class BottomModal extends StatelessWidget {
   }
 
   Widget _buildSlider(BuildContext context) {
-    return Container(
-      width: _widthOfContext(context) * 0.2,
-      height: 3,
-      decoration: ShapeDecoration(
-        shape: StadiumBorder(),
-        color: Theme.of(context).accentTextTheme.title.color,
-      ),
+    return Row(
+      children: <Widget>[
+        Spacer(
+          flex: 3,
+        ),
+        Expanded(
+          flex: 2,
+          child: Container(
+            height: 3,
+            decoration: ShapeDecoration(
+              shape: StadiumBorder(),
+              color: Theme.of(context).accentTextTheme.title.color,
+            ),
+          ),
+        ),
+        Spacer(
+          flex: 3,
+        ),
+      ],
     );
   }
 
@@ -100,21 +112,23 @@ class BottomModal extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomActionButton(BuildContext context) {
+  Widget _buildBottomActionButton() {
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          SizedBox(
-            width: _widthOfContext(context),
-            height: 50,
-            child: bottomActionButton,
-          ),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: SizedBox(
+                  height: 50,
+                  child: bottomActionButton,
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );
   }
-
-  double _widthOfContext(BuildContext context) =>
-      MediaQuery.of(context).size.width;
 }

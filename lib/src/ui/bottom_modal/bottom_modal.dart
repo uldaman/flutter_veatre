@@ -6,12 +6,12 @@ class BottomModal extends StatelessWidget {
     Key key,
     @required this.title,
     this.bottomActionButton,
-    this.elements = const <Widget>[],
+    this.content,
   }) : super(key: key);
 
   final String title;
   final Widget bottomActionButton;
-  final List<Widget> elements;
+  final Widget content;
   final double _screenPercentage = 0.8;
 
   @override
@@ -31,7 +31,6 @@ class BottomModal extends StatelessWidget {
           ),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: _buildChildren(context),
         ),
       ),
@@ -44,10 +43,11 @@ class BottomModal extends StatelessWidget {
     _children.add(SizedBox(height: 18));
     _children.add(_buildTitle(context));
     _children.add(_buildDivider());
-    elements.forEach((element) {
-      _children.add(element);
-      _children.add(_buildDivider());
-    });
+    if (content != null) {
+      _children.add(Expanded(child: content));
+    } else {
+      _children.add(Spacer());
+    }
     if (bottomActionButton != null) {
       _children.add(_buildBottomActionButton());
     }
@@ -113,22 +113,15 @@ class BottomModal extends StatelessWidget {
   }
 
   Widget _buildBottomActionButton() {
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: SizedBox(
-                  height: 50,
-                  child: bottomActionButton,
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: SizedBox(
+            height: 50,
+            child: bottomActionButton,
+          ),
+        ),
+      ],
     );
   }
 }

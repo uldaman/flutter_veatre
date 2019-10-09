@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ModalElement extends StatelessWidget {
-  ModalElement({
+class RowElement extends StatelessWidget {
+  RowElement({
     Key key,
     this.prefix = '',
     this.content,
@@ -15,8 +15,8 @@ class ModalElement extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> _children = [
-      Expanded(
-        flex: 4,
+      SizedBox(
+        width: 88,
         child: Text(
           prefix,
           style: TextStyle(
@@ -28,22 +28,24 @@ class ModalElement extends StatelessWidget {
     if (content != null) {
       _children.add(
         Expanded(
-          flex: 9,
           child: content,
         ),
       );
     }
     if (onExpand != null) {
       _children.add(
-        Expanded(
-          flex: 1,
+        SizedBox(
+          width: 25,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Theme.of(context).accentTextTheme.title.color,
-                size: 15,
+              GestureDetector(
+                onTap: onExpand,
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Theme.of(context).accentTextTheme.title.color,
+                  size: 15,
+                ),
               ),
             ],
           ),
@@ -51,7 +53,7 @@ class ModalElement extends StatelessWidget {
       );
     } else {
       _children.add(
-        Spacer(flex: 1),
+        SizedBox(width: 25),
       );
     }
     return Row(

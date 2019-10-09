@@ -27,15 +27,13 @@ class WalletCard extends StatelessWidget {
     return Row(
       children: <Widget>[
         Expanded(
-          flex: 20,
           child: Text(
             value,
             textAlign: TextAlign.end,
           ),
         ),
-        Spacer(flex: 1),
-        Expanded(
-          flex: 4,
+        SizedBox(
+          width: 40,
           child: Text(
             suffix,
             textAlign: TextAlign.end,

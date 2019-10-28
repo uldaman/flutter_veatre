@@ -1,14 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/appearanceStorage.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/src/ui/webViews.dart';
 import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/storage/configStorage.dart';
+import 'package:veatre/src/ui/webViews.dart';
 
 class TabViews extends StatefulWidget {
   final int id;
-  final Network network;
   final Appearance appearance;
   final double ratio;
   final String url;
@@ -16,7 +14,6 @@ class TabViews extends StatefulWidget {
 
   TabViews({
     this.id,
-    this.network,
     this.appearance,
     this.ratio,
     this.url,
@@ -39,7 +36,7 @@ class TabViewsState extends State<TabViews> {
     super.initState();
     selectedTab = widget.id;
     url = widget.url;
-    snapshots = WebViews.snapshots(widget.network);
+    snapshots = WebViews.snapshots(Globals.network);
     selectedTabKey = widget.currentTabKey;
   }
 
@@ -47,12 +44,11 @@ class TabViewsState extends State<TabViews> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
-        title: Text('Tabs'),
-        leading: SizedBox(),
-      ),
       body: Column(
         children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(top: 44),
+          ),
           Expanded(
             child: GridView.builder(
               padding: EdgeInsets.all(15),
@@ -76,18 +72,14 @@ class TabViewsState extends State<TabViews> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                IconButton(
-                  icon: Icon(
-                    Icons.close,
-                    color: Colors.blue,
-                    size: 30,
-                  ),
+                FlatButton(
+                  child: Text('Close All'),
                   onPressed: () {
-                    WebViews.removeAll(widget.network);
+                    WebViews.removeAll(Globals.network);
                     setState(() {
-                      snapshots = WebViews.snapshots(widget.network);
+                      snapshots = WebViews.snapshots(Globals.network);
                     });
-                    WebViews.create(widget.network, randomHex(32));
+                    WebViews.create(Globals.network, randomHex(32));
                     Navigator.of(context).pop();
                   },
                 ),
@@ -98,22 +90,18 @@ class TabViewsState extends State<TabViews> {
                     size: 35,
                   ),
                   onPressed: () {
-                    WebViews.create(widget.network, randomHex(32));
+                    WebViews.create(Globals.network, randomHex(32));
                     Navigator.of(context).pop();
                   },
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.done,
-                    color: Colors.blue,
-                    size: 35,
-                  ),
+                FlatButton(
+                  child: Text('Done'),
                   onPressed: () {
                     Globals.updateTabValue(
                       TabControllerValue(
                         id: selectedTab,
                         url: url,
-                        network: widget.network,
+                        network: Globals.network,
                         stage: isSelectedTabAlive
                             ? TabStage.SelectedAlive
                             : TabStage.SelectedInAlive,
@@ -180,18 +168,18 @@ class TabViewsState extends State<TabViews> {
                         size: 20,
                       ),
                       onPressed: () async {
-                        WebViews.removeSnapshot(widget.network, snapshot.key);
+                        WebViews.removeSnapshot(Globals.network, snapshot.key);
                         if (snapshots.length == 1) {
-                          WebViews.removeWebview(widget.network, snapshot.id);
-                          WebViews.create(widget.network, randomHex(32));
+                          WebViews.removeWebview(Globals.network, snapshot.id);
+                          WebViews.create(Globals.network, randomHex(32));
                           Navigator.of(context).pop();
                           return;
                         }
                         if (snapshot.isAlive) {
-                          WebViews.removeWebview(widget.network, snapshot.id);
+                          WebViews.removeWebview(Globals.network, snapshot.id);
                         }
                         setState(() {
-                          snapshots = WebViews.snapshots(widget.network);
+                          snapshots = WebViews.snapshots(Globals.network);
                         });
                         if (index == 0) {
                           selectedTab = snapshots[index + 1].id;
@@ -209,7 +197,7 @@ class TabViewsState extends State<TabViews> {
                             TabControllerValue(
                               id: snapshot.id,
                               url: url,
-                              network: widget.network,
+                              network: Globals.network,
                               stage: TabStage.Removed,
                               tabKey: selectedTabKey,
                             ),
@@ -245,7 +233,7 @@ class TabViewsState extends State<TabViews> {
                   Globals.updateTabValue(
                     TabControllerValue(
                       id: snapshot.id,
-                      network: widget.network,
+                      network: Globals.network,
                       url: snapshot.url,
                       stage: snapshot.isAlive
                           ? TabStage.SelectedAlive

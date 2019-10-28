@@ -3,25 +3,21 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/account.dart';
-import 'package:bip_key_derivation/bip_key_derivation.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/src/ui/progressHUD.dart';
-import 'package:veatre/src/ui/wallets.dart';
-import 'package:veatre/src/ui/alert.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
+import 'package:veatre/src/ui/wallets.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
 
 class SignCertificateDialog extends StatefulWidget {
   final SigningCertMessage certMessage;
   final SigningCertOptions options;
-  final Network network;
 
   SignCertificateDialog({
     this.certMessage,
     this.options,
-    this.network,
   });
 
   @override
@@ -33,13 +29,14 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   Wallet wallet;
   WalletEntity walletEntity;
   TextEditingController passwordController = TextEditingController();
+  Account account;
 
   @override
   void initState() {
     super.initState();
     getWalletEntity(widget.options.signer).then((walletEntity) {
       this.walletEntity = walletEntity;
-      updateWallet().whenComplete(() {
+      updateWallet(walletEntity).whenComplete(() {
         setState(() {
           this.loading = false;
         });
@@ -49,8 +46,8 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
   }
 
   void _handleHeadChanged() async {
-    if (Globals.blockHeadForNetwork.network == widget.network) {
-      await updateWallet();
+    if (Globals.blockHeadForNetwork.network == Globals.network) {
+      await updateWallet(walletEntity);
     }
   }
 
@@ -60,32 +57,33 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
     super.dispose();
   }
 
-  Future<void> updateWallet() async {
-    Wallet wallet = await Wallet.from(walletEntity, widget.network);
-    if (mounted) {
-      setState(() {
-        this.wallet = wallet;
-      });
+  Future<void> updateWallet(WalletEntity walletEntity) async {
+    try {
+      Account account = await AccountAPI.get(walletEntity.address);
+      if (mounted) {
+        setState(() {
+          this.wallet = Wallet(account: account, entity: walletEntity);
+        });
+      }
+    } catch (e) {
+      print('updateWallet error: $e ');
     }
   }
 
   Future<WalletEntity> getWalletEntity(String signer) async {
     if (signer != null) {
-      List<WalletEntity> walletEntities =
-          await WalletStorage.readAll(widget.network);
+      List<WalletEntity> walletEntities = await WalletStorage.readAll();
       for (WalletEntity walletEntity in walletEntities) {
-        if ('0x' + walletEntity.keystore.address == signer) {
+        if ('0x' + walletEntity.address == signer) {
           return walletEntity;
         }
       }
     }
-    WalletEntity mianWalletEntity =
-        await WalletStorage.getMainWallet(widget.network);
+    WalletEntity mianWalletEntity = await WalletStorage.getMainWallet();
     if (mianWalletEntity != null) {
       return mianWalletEntity;
     }
-    List<WalletEntity> walletEntities =
-        await WalletStorage.readAll(widget.network);
+    List<WalletEntity> walletEntities = await WalletStorage.readAll();
     return walletEntities[0];
   }
 
@@ -93,14 +91,12 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
     final WalletEntity walletEntity = await Navigator.push(
       context,
       new MaterialPageRoute(
-        builder: (context) => new Wallets(
-          network: widget.network,
-        ),
+        builder: (context) => new Wallets(),
       ),
     );
     if (walletEntity != null) {
       this.walletEntity = walletEntity;
-      await updateWallet();
+      await updateWallet(walletEntity);
     }
   }
 
@@ -166,7 +162,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                               child: Container(
                                 padding: EdgeInsets.all(15),
                                 child: Text(
-                                  wallet == null ? '' : wallet.name,
+                                  walletEntity?.name ?? '--',
                                   style: TextStyle(
                                     color: Colors.white,
                                   ),
@@ -177,9 +173,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                               padding: EdgeInsets.only(left: 15, right: 15),
                               width: MediaQuery.of(context).size.width,
                               child: Text(
-                                wallet == null
-                                    ? ''
-                                    : '0x' + wallet.keystore.address,
+                                '0x' + (walletEntity?.address ?? ''),
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
@@ -191,9 +185,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
-                            Text(wallet == null
-                                ? '0'
-                                : wallet.account.formatBalance),
+                            Text(wallet?.account?.formatBalance ?? '--'),
                             Container(
                               margin: EdgeInsets.only(left: 5, right: 14),
                               child: Text(
@@ -212,9 +204,7 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
-                            Text(wallet == null
-                                ? '0'
-                                : wallet.account.formatEnergy),
+                            Text(wallet?.account?.formatEnergy ?? '--'),
                             Container(
                               margin: EdgeInsets.only(left: 5, right: 5),
                               child: Text(
@@ -269,102 +259,42 @@ class SignCertificateDialogState extends State<SignCertificateDialog> {
                               style: TextStyle(color: Colors.white),
                             ),
                             onPressed: () async {
-                              await customAlert(context,
-                                  title: Text('Sign Certificate'),
-                                  content: TextField(
-                                    controller: passwordController,
-                                    maxLength: 20,
-                                    obscureText: true,
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                      hintText: 'Input your password',
-                                    ),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .body1
-                                          .color,
-                                    ),
-                                  ), confirmAction: () async {
-                                FocusScope.of(context)
-                                    .requestFocus(FocusNode());
-                                String password = passwordController.text;
-                                if (password.isEmpty) {
-                                  return alert(
-                                    context,
-                                    Text('Warnning'),
-                                    "Password can't be empty",
-                                  );
-                                }
-                                passwordController.clear();
-                                Navigator.pop(context);
-                                setState(() {
-                                  loading = true;
-                                });
-                                Uint8List privateKey;
-                                try {
-                                  privateKey = await BipKeyDerivation
-                                      .decryptedByKeystore(
-                                    wallet.keystore,
-                                    password,
-                                  );
-                                } catch (err) {
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                  return alert(
-                                    context,
-                                    Text('Warnning'),
-                                    "Password Invalid",
-                                  );
-                                }
-                                try {
-                                  final head = Globals.head(widget.network);
-                                  int timestamp = head.timestamp;
-                                  Certificate cert = Certificate(
-                                    certMessage: widget.certMessage,
+                              Uint8List privateKey = await walletEntity
+                                  .decryptPrivateKey(Globals.masterPasscodes);
+                              try {
+                                final head = Globals.head();
+                                int timestamp = head.timestamp;
+                                Certificate cert = Certificate(
+                                  certMessage: widget.certMessage,
+                                  timestamp: timestamp,
+                                  domain: widget.options.link,
+                                );
+                                cert.sign(privateKey);
+                                await WalletStorage.setMainWallet(walletEntity);
+                                await ActivityStorage.insert(
+                                  Activity(
+                                    block: head.number,
+                                    content: json.encode(cert.unserialized),
+                                    link: cert.domain,
+                                    address: walletEntity.address,
+                                    type: ActivityType.Certificate,
+                                    comment: 'Certification',
                                     timestamp: timestamp,
-                                    domain: widget.options.link,
-                                  );
-                                  cert.sign(privateKey);
-                                  await WalletStorage.setMainWallet(
-                                    WalletEntity(
-                                      keystore: wallet.keystore,
-                                      name: wallet.name,
-                                    ),
-                                    widget.network,
-                                  );
-                                  await ActivityStorage.insert(
-                                    Activity(
-                                      block: head.number,
-                                      content:
-                                          json.encode(cert.encoded.encoded),
-                                      link: cert.domain,
-                                      walletName: wallet.name,
-                                      type: ActivityType.Certificate,
-                                      comment: cert.certMessage.purpose,
-                                      timestamp: timestamp,
-                                      network: widget.network,
-                                      status: ActivityStatus.Finished,
-                                    ),
-                                  );
-                                  Navigator.of(context).pop(cert.encoded);
-                                } catch (err) {
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                  return alert(context, Text("Error"), "$err");
-                                } finally {
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                }
-                              }, cancelAction: () async {
-                                passwordController.clear();
-                                FocusScope.of(context)
-                                    .requestFocus(FocusNode());
-                              });
+                                    network: Globals.network,
+                                    status: ActivityStatus.Finished,
+                                  ),
+                                );
+                                Navigator.of(context).pop(cert.response);
+                              } catch (err) {
+                                setState(() {
+                                  loading = false;
+                                });
+                                return alert(context, Text("Error"), "$err");
+                              } finally {
+                                setState(() {
+                                  loading = false;
+                                });
+                              }
                             },
                           ),
                         ),

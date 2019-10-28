@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:convert/convert.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:pointycastle/api.dart';
-import 'package:convert/convert.dart';
+import 'package:bip_key_derivation/bip_key_derivation.dart';
 
 String zero2(word) {
   if (word.length == 1)
@@ -83,6 +84,33 @@ String bytesToHex(Uint8List data) {
 Uint8List hexToBytes(String hexStr) {
   String h = hexStr.startsWith('0x') ? hexStr.substring(2) : hexStr;
   return hex.decode(h);
+}
+
+Future<String> addressFrom(String mnemonic) async {
+  Uint8List privateKey = await BipKeyDerivation.decryptedByMnemonic(
+      mnemonic, defaultDerivationPath);
+  Uint8List publicKey = await BipKeyDerivation.privateToPublic(privateKey);
+  final addr = await BipKeyDerivation.publicToAddress(publicKey);
+  return bytesToHex(addr);
+}
+
+String formatNum(String num) {
+  List<String> splitNum = num.split('.');
+  List<String> v = splitNum.first.split('');
+  for (int i = splitNum.first.length - 1, index = 0; i >= 0; i--, index++) {
+    if (index % 3 == 0 && index != 0) v[i] = v[i] + ',';
+  }
+  String s = v.join('');
+  if (splitNum.length > 1) {
+    s += '.${splitNum[1]}';
+  }
+  return s;
+}
+
+String shotHex(String hex) {
+  return (hex == null || hex.length < 8)
+      ? '0x'
+      : '0x${hex.substring(0, 4)}...${hex.substring(hex.length - 4, hex.length)}';
 }
 
 class RandomBridge implements SecureRandom {

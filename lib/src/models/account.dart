@@ -1,8 +1,19 @@
-import 'package:bip_key_derivation/keystore.dart';
-import 'package:veatre/src/api/AccountAPI.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/src/storage/walletStorage.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:bip_key_derivation/bip_key_derivation.dart';
+import 'package:veatre/src/models/crypto.dart';
 import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/storage/configStorage.dart';
+
+class Wallet {
+  WalletEntity entity;
+  Account account;
+
+  Wallet({
+    this.entity,
+    this.account,
+  });
+}
 
 class Account {
   final BigInt balance;
@@ -12,11 +23,11 @@ class Account {
   Account({this.balance, this.energy, this.hasCode});
 
   String get formatBalance {
-    return fixed2Value(balance);
+    return formatNum(fixed2Value(balance));
   }
 
   String get formatEnergy {
-    return fixed2Value(energy);
+    return formatNum(fixed2Value(energy));
   }
 
   factory Account.fromJSON(Map<String, dynamic> parsedJson) {
@@ -32,32 +43,63 @@ class Account {
   }
 }
 
-class Wallet {
-  Account account;
-  KeyStore keystore;
+class WalletEntity {
   String name;
+  String address;
+  String mnemonicCipher;
+  String iv;
+  bool isMain;
+  bool hasBackup;
+  Network network;
 
-  Wallet({this.account, this.keystore, this.name});
+  WalletEntity({
+    this.name,
+    this.address,
+    this.mnemonicCipher,
+    this.iv,
+    this.isMain = false,
+    this.hasBackup = false,
+    this.network,
+  });
 
-  static Future<Wallet> from(WalletEntity walletEntity, Network network) async {
-    try {
-      Account acc =
-          await AccountAPI.get(walletEntity.keystore.address, network);
-      return Wallet(
-        account: acc,
-        keystore: walletEntity.keystore,
-        name: walletEntity.name,
-      );
-    } catch (e) {
-      return Wallet(
-        account: Account(
-          balance: BigInt.from(0),
-          energy: BigInt.from(0),
-          hasCode: false,
-        ),
-        keystore: walletEntity.keystore,
-        name: walletEntity.name,
-      );
-    }
+  Map<String, dynamic> get encoded {
+    return {
+      'name': name,
+      'address': address,
+      'mnemonicCipher': mnemonicCipher,
+      'iv': iv,
+      'isMain': isMain ? 0 : 1,
+      'hasBackup': hasBackup ? 0 : 1,
+      'network': network == Network.MainNet ? 0 : 1,
+    };
   }
+
+  factory WalletEntity.fromJSON(Map<String, dynamic> parsedJson) {
+    return WalletEntity(
+      name: parsedJson['name'],
+      address: parsedJson['address'],
+      mnemonicCipher: parsedJson['mnemonicCipher'],
+      iv: parsedJson['iv'],
+      hasBackup: parsedJson['hasBackup'] == 0,
+      isMain: parsedJson['isMain'] == 0,
+      network: parsedJson['network'] == 0 ? Network.MainNet : Network.TestNet,
+    );
+  }
+
+  Future<Uint8List> decryptPrivateKey(
+    String passcodes,
+  ) async {
+    Uint8List mnemonicData = AESCipher.decrypt(
+      utf8.encode(passcodes),
+      hexToBytes(mnemonicCipher),
+      hexToBytes(iv),
+    );
+    String mnemonic = utf8.decode(mnemonicData);
+    return BipKeyDerivation.decryptedByMnemonic(
+      mnemonic,
+      defaultDerivationPath,
+    );
+  }
+
+  // static String get zeroAddress => '0x0000000000000000000000000000000000000000';
 }

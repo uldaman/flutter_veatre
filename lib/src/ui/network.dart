@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 
 class Networks extends StatefulWidget {
   static const routeName = '/networks';
@@ -15,7 +15,7 @@ class NetworksState extends State<Networks> {
   @override
   void initState() {
     super.initState();
-    NetworkStorage.network.then((network) {
+    Config.network.then((network) {
       setState(() {
         this.network = network;
       });
@@ -25,7 +25,7 @@ class NetworksState extends State<Networks> {
   Future<void> changeNet() async {
     final toNetwork =
         network == Network.MainNet ? Network.TestNet : Network.MainNet;
-    await NetworkStorage.set(toNetwork);
+    await Config.setNetwork(toNetwork);
     setState(() {
       this.network = toNetwork;
     });
@@ -81,7 +81,7 @@ class NetworksState extends State<Networks> {
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 17,
                     color: Theme.of(context).textTheme.body1.color,
                   ),
                 ),

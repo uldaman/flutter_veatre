@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
 
 class CreateBookmark extends StatefulWidget {
   final int eidtBookmarkID;
   final DocumentMetaData documentMetaData;
-  final Network network;
-  CreateBookmark({this.documentMetaData, this.network, this.eidtBookmarkID});
+  CreateBookmark({this.documentMetaData, this.eidtBookmarkID});
 
   @override
   CreateBookmarkState createState() {
@@ -48,7 +46,6 @@ class CreateBookmarkState extends State<CreateBookmark> {
                 favicon: widget.documentMetaData.icon,
                 title: titleEditingController.text,
                 url: widget.documentMetaData.url,
-                network: widget.network,
               );
               if (widget.eidtBookmarkID != null) {
                 await BookmarkStorage.update(

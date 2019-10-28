@@ -1,13 +1,16 @@
 import 'dart:typed_data';
 
+import 'package:veatre/common/globals.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:veatre/src/models/transaction.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 
 class TransactionAPI {
   static Future<Map<String, dynamic>> send(
-      Uint8List raw, Network network) async {
-    final net = await NetworkStorage.net(network);
+    Uint8List raw, {
+    Network network,
+  }) async {
+    final net = Config.net(network: network ?? Globals.network);
     Map<String, dynamic> data =
         await net.senTransaction("0x" + bytesToHex(raw));
     return data;
@@ -16,11 +19,11 @@ class TransactionAPI {
   static Future<List<Transfer>> filterTransfers(
     String address,
     int offset,
-    int limit,
+    int limit, {
     Network network,
-  ) async {
+  }) async {
     String addr = address.startsWith('0x') ? address : '0x$address';
-    final net = await NetworkStorage.net(network);
+    final net = Config.net(network: network ?? Globals.network);
     dynamic data = await net.filterTransferLogs({
       "range": {
         "unit": "block",

@@ -3,34 +3,36 @@ import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/api/BlockAPI.dart';
-import 'package:veatre/src/api/DappAPI.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
-import 'package:veatre/src/storage/appearanceStorage.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/src/ui/apperance.dart';
-import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/ui/createWallet.dart';
-import 'package:veatre/src/ui/importWallet.dart';
+import 'package:veatre/src/storage/configStorage.dart';
+import 'package:veatre/src/storage/database.dart';
 import 'package:veatre/src/ui/mainUI.dart';
+import 'package:veatre/src/ui/apperance.dart';
+import 'package:veatre/src/ui/passwordGeneration.dart';
+import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/network.dart';
-import 'package:veatre/src/models/block.dart';
-import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/ui/unlock.dart';
 
 void main() {
   runZoned(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await initialGlobals();
-    runApp(App());
+    await init();
+    String passwordHash = await Config.passwordHash;
+    runApp(App(
+      hasPasscodes: passwordHash != null,
+    ));
   }, onError: (dynamic err, StackTrace stack) {
     print("unhandled error: $err");
     print("stack: $stack");
   });
 }
 
-Future<void> initialGlobals() async {
-  Globals.apps = await DAppAPI.list();
+Future<void> init() async {
+  await Storage.open;
   Globals.connexJS = await rootBundle.loadString("assets/connex.js");
   Globals.setHead(
     BlockHeadForNetwork(
@@ -44,11 +46,14 @@ Future<void> initialGlobals() async {
       network: Network.TestNet,
     ),
   );
-  Globals.updateAppearance(await AppearanceStorage.appearance);
-  Globals.updateNetwork(await NetworkStorage.network);
+  Globals.updateAppearance(await Config.appearance);
+  Globals.updateNetwork(await Config.network);
 }
 
 class App extends StatefulWidget {
+  final bool hasPasscodes;
+  App({@required this.hasPasscodes});
+
   @override
   AppState createState() => AppState();
 }
@@ -62,17 +67,17 @@ class AppState extends State<App> {
     Globals.addAppearanceHandler(_handleAppearanceChanged);
     Globals.periodic(10, (timer) async {
       try {
-        final network = await NetworkStorage.network;
-        final block = await BlockAPI.best(network);
+        final network = Globals.network;
+        final block = await BlockAPI.best();
         final newHead = BlockHead.fromJSON(block.encoded);
-        final head = Globals.head(network);
+        final head = Globals.head();
         if (head.id != newHead.id && newHead.number > head.number) {
-          final blockHeadForNetwork = BlockHeadForNetwork(
+          BlockHeadForNetwork blockHeadForNetwork = BlockHeadForNetwork(
             head: newHead,
             network: network,
           );
-          Globals.updateBlockHead(blockHeadForNetwork);
           await _syncActivities(blockHeadForNetwork);
+          Globals.updateBlockHead(blockHeadForNetwork);
         }
       } catch (e) {
         print('sync head error: $e');
@@ -88,29 +93,35 @@ class AppState extends State<App> {
 
   Future<void> _syncActivities(BlockHeadForNetwork blockHeadForNetwork) async {
     int headNumber = blockHeadForNetwork.head.number;
-    List<Activity> activities =
-        await ActivityStorage.queryPendings(blockHeadForNetwork.network);
+    List<Activity> activities = await ActivityStorage.queryPendings(
+        network: blockHeadForNetwork.network);
     for (Activity activity in activities) {
-      String txID = activity.hash;
-      final net = Globals.net(blockHeadForNetwork.network);
-      Map<String, dynamic> receipt = await net.getReceipt(txID);
-      if (receipt != null) {
-        int processBlock = receipt['meta']['blockNumber'];
-        if (activity.processBlock == null) {
+      if (activity.type == ActivityType.Transaction) {
+        String txID = activity.hash;
+        final net = Config.net(network: blockHeadForNetwork.network);
+        Map<String, dynamic> receipt = await net.getReceipt(txID);
+        if (receipt != null) {
+          int processBlock = receipt['meta']['blockNumber'];
+          if (activity.processBlock == null) {
+            await ActivityStorage.update(activity.id, {
+              'processBlock': processBlock,
+              'status': ActivityStatus.Confirming.index,
+            });
+          }
+          bool reverted = receipt['reverted'];
+          if (reverted) {
+            await ActivityStorage.update(activity.id, {
+              'status': ActivityStatus.Reverted.index,
+            });
+          } else if (headNumber - processBlock >= 12) {
+            await ActivityStorage.update(activity.id, {
+              'status': ActivityStatus.Finished.index,
+            });
+          }
+        } else if (headNumber - activity.block >= 18) {
           await ActivityStorage.update(
-              activity.id, {'processBlock': processBlock});
+              activity.id, {'status': ActivityStatus.Expired.index});
         }
-        bool reverted = receipt['reverted'];
-        if (reverted) {
-          await ActivityStorage.update(
-              activity.id, {'status': ActivityStatus.Reverted.index});
-        } else if (headNumber - processBlock >= 12) {
-          await ActivityStorage.update(
-              activity.id, {'status': ActivityStatus.Finished.index});
-        }
-      } else if (headNumber - activity.block >= 30) {
-        await ActivityStorage.update(
-            activity.id, {'status': ActivityStatus.Expired.index});
       }
     }
   }
@@ -119,17 +130,23 @@ class AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
-        MainUI.routeName: (context) => new MainUI(),
+        MainUI.routeName: (context) => mainUI,
+        ManageWallets.routeName: (context) => manageWallets,
         Settings.routeName: (context) => new Settings(),
-        ManageWallets.routeName: (context) => new ManageWallets(),
         Networks.routeName: (context) => new Networks(),
         Appearances.routeName: (context) => new Appearances(),
-        CreateWallet.routeName: (context) => new CreateWallet(),
-        ImportWallet.routeName: (context) => new ImportWallet(),
       },
       theme: _appearance == Appearance.light ? lightTheme : darkTheme,
+      home: !widget.hasPasscodes
+          ? PasswordGeneration()
+          : Unlock(
+              everLaunched: false,
+            ),
     );
   }
+
+  MainUI get mainUI => MainUI();
+  ManageWallets get manageWallets => ManageWallets();
 
   ThemeData get lightTheme => ThemeData(
         primarySwatch: Colors.blue,
@@ -142,7 +159,11 @@ class AppState extends State<App> {
           title: TextStyle(color: Colors.grey[500], fontFamily: "Aveny"),
         ),
         primaryTextTheme: TextTheme(
-          title: TextStyle(color: Colors.black, fontFamily: "Aveny"),
+          title: TextStyle(
+            color: Colors.black,
+            fontFamily: "Aveny",
+            fontSize: 17,
+          ),
         ),
         cardTheme: CardTheme(
           color: Colors.white,
@@ -189,7 +210,11 @@ class AppState extends State<App> {
           title: TextStyle(color: Colors.grey[500], fontFamily: "Aveny"),
         ),
         primaryTextTheme: TextTheme(
-          title: TextStyle(color: Colors.white, fontFamily: "Aveny"),
+          title: TextStyle(
+            color: Colors.white,
+            fontFamily: "Aveny",
+            fontSize: 17,
+          ),
         ),
         cardTheme: CardTheme(
           color: Colors.black,

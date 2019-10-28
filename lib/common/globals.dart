@@ -1,12 +1,10 @@
 import 'dart:core';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:veatre/common/net.dart';
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
-import 'package:veatre/src/storage/appearanceStorage.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 
 enum TabStage {
   ClearFocus,
@@ -62,6 +60,8 @@ class BlockHeadForNetwork {
 }
 
 class Globals {
+  static String _masterPasscodes = '';
+
   static final Block mainNetGenesis = Block.fromJSON({
     "number": 0,
     "id": "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a",
@@ -111,9 +111,6 @@ class Globals {
   static final initialURL = 'about:blank';
 
   static List<DApp> apps = [];
-
-  static final testNet = Net(NetworkStorage.testnet);
-  static final mainNet = Net(NetworkStorage.mainnet);
 
   static BlockHead _mainNetHead;
   static BlockHead _testNetHead;
@@ -206,14 +203,17 @@ class Globals {
     _bookmarkController.removeListener(handler);
   }
 
-  static Block genesis(Network network) {
-    if (network == Network.MainNet) {
+  static Block get genesis {
+    if (Globals.network == Network.MainNet) {
       return mainNetGenesis;
     }
     return testNetGenesis;
   }
 
-  static BlockHead head(Network network) {
+  static BlockHead head({Network network}) {
+    if (network == null) {
+      network = Globals.network;
+    }
     if (network == Network.MainNet) {
       return _mainNetHead;
     }
@@ -228,13 +228,6 @@ class Globals {
     }
   }
 
-  static Net net(Network network) {
-    if (network == Network.MainNet) {
-      return mainNet;
-    }
-    return testNet;
-  }
-
   static Timer periodic(
     int seconds,
     Future<void> Function(Timer timer) action,
@@ -245,6 +238,18 @@ class Globals {
         await action(timer);
       },
     );
+  }
+
+  static void updateMasterPasscodes(String passcodes) {
+    _masterPasscodes = passcodes;
+  }
+
+  static void clearMasterPasscodes() {
+    _masterPasscodes = '';
+  }
+
+  static String get masterPasscodes {
+    return _masterPasscodes;
   }
 
   static void destroy() {

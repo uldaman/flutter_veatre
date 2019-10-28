@@ -12,44 +12,46 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:veatre/src/ui/activities.dart';
-import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/ui/signCertificate.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
-import 'package:veatre/common/globals.dart';
 import 'package:veatre/common/net.dart';
+import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/transaction.dart';
-import 'package:veatre/src/storage/appearanceStorage.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/src/storage/activitiyStorage.dart';
+import 'package:veatre/src/storage/walletStorage.dart';
+import 'package:veatre/src/ui/activities.dart';
+import 'package:veatre/src/ui/createOrImportWallet.dart';
+import 'package:veatre/src/ui/mainUI.dart';
+import 'package:veatre/src/ui/transition.dart';
 import 'package:veatre/src/ui/createBookmark.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/tabViews.dart';
 import 'package:veatre/src/ui/webViews.dart';
-import 'package:veatre/src/ui/signCertificateDialog.dart';
 import 'package:veatre/src/ui/signTxDialog.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/ui/alert.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/searchBar.dart';
 import 'package:veatre/src/ui/apps.dart';
-import 'package:veatre/src/storage/walletStorage.dart';
 
 class WebView extends StatefulWidget {
-  final Key key;
   final int id;
   final Network network;
   final Appearance appearance;
   final String initialURL;
 
   WebView({
-    @required this.key,
     @required this.id,
     @required this.network,
     @required this.appearance,
     @required this.initialURL,
-  }) : super(key: key);
+  });
 
   @override
   WebViewState createState() => WebViewState();
@@ -57,16 +59,16 @@ class WebView extends StatefulWidget {
 
 class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   String key;
+  int id;
   bool isKeyboardVisible = false;
-  int bookmarkID;
   bool canBack = false;
   bool canForward = false;
   bool isStartSearch = false;
-  int id;
   double progress = 0;
   bool canBookmarked = false;
   String _currentURL;
   Appearance _appearance;
+  int bookmarkID;
 
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
@@ -81,6 +83,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       ),
     ),
   );
+  Activity latestActivity;
 
   @override
   void initState() {
@@ -99,168 +102,135 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         });
       },
     );
+    updateLatestActivity();
   }
-
-  void _handleHeadChanged() async {
-    final blockHeadForNetwork = Globals.blockHeadForNetwork;
-    if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
-      _head.complete(blockHeadForNetwork.head);
-    }
-  }
-
-  void _handleAppearanceChanged() async {
-    setState(() {
-      _appearance = Globals.appearance;
-    });
-    if (controller != null) {
-      await controller
-          .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
-    }
-  }
-
-  void _handleTabChanged() async {
-    final tabValue = Globals.tabValue;
-    if (tabValue.network == widget.network) {
-      key = tabValue.tabKey;
-      if (tabValue.stage == TabStage.RemoveAll) {
-        await controller.loadHTMLString("", null);
-      }
-      if (tabValue.id == id) {
-        if (tabValue.stage == TabStage.Removed ||
-            tabValue.stage == TabStage.Coverred) {
-          await controller.loadHTMLString("", null);
-        } else if (tabValue.stage == TabStage.SelectedInAlive) {
-          await controller.loadUrl(tabValue.url);
-        }
-      }
-    }
-  }
-
-  Future<void> updateBookmarkID(String url) async {
-    Bookmark bookmark = await BookmarkStorage.queryByURL(widget.network, url);
-    if (bookmark != null) {
-      setState(() {
-        bookmarkID = bookmark.id;
-      });
-    } else {
-      setState(() {
-        bookmarkID = null;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    Globals.removeBlockHeadHandler(_handleHeadChanged);
-    Globals.removeAppearanceHandler(_handleAppearanceChanged);
-    Globals.removeTabHandler(_handleTabChanged);
-    super.dispose();
-  }
-
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
-        actions: <Widget>[
-          isStartSearch
-              ? FlatButton(
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: Theme.of(context).accentTextTheme.title.color,
-                      fontSize: 12,
+    return WillPopScope(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: Theme.of(context).primaryColor,
+        appBar: AppBar(
+          leading: null,
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          actions: <Widget>[
+            isStartSearch
+                ? FlatButton(
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: Theme.of(context).accentTextTheme.title.color,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                  onPressed: () async {
-                    searchBarController.valueWith(
-                      shouldCancelInput: true,
-                    );
-                    setState(() {
-                      isStartSearch = false;
-                    });
-                  },
-                )
-              : Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(left: 5),
-                      child: IconButton(
-                        icon: Icon(
-                          bookmarkID == null
-                              ? Icons.bookmark_border
-                              : Icons.bookmark,
-                          size: 20,
-                        ),
-                        disabledColor: Colors.grey[500],
-                        color: Colors.grey,
-                        onPressed: _currentURL == Globals.initialURL
-                            ? null
-                            : bookmarkID == null
-                                ? () async {
-                                    final meta = await metaData;
-                                    if (meta != null) {
-                                      await _present(
-                                        CreateBookmark(
-                                          documentMetaData: meta,
-                                          network: widget.network,
-                                        ),
-                                      );
-                                      await updateBookmarkID(_currentURL);
+                    onPressed: () async {
+                      updateSearchBar(_currentURL, 1);
+                      setState(() {
+                        isStartSearch = false;
+                      });
+                    },
+                  )
+                : Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(left: 5),
+                        child: IconButton(
+                          icon: Icon(
+                            bookmarkID == null
+                                ? Icons.bookmark_border
+                                : Icons.bookmark,
+                            size: 20,
+                          ),
+                          disabledColor: Colors.grey[500],
+                          color: Colors.grey,
+                          onPressed: _currentURL == Globals.initialURL
+                              ? null
+                              : bookmarkID == null
+                                  ? () async {
+                                      final meta = await metaData;
+                                      if (meta != null) {
+                                        await slide(
+                                          context,
+                                          CreateBookmark(
+                                            documentMetaData: meta,
+                                          ),
+                                        );
+                                        await updateBookmarkID(_currentURL);
+                                      }
                                     }
-                                  }
-                                : () async {
-                                    await BookmarkStorage.delete(bookmarkID);
-                                    await updateBookmarkID(_currentURL);
-                                  },
+                                  : () async {
+                                      await BookmarkStorage.delete(bookmarkID);
+                                      await updateBookmarkID(_currentURL);
+                                    },
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.settings,
-                        size: 20,
-                        color: Colors.grey,
+                      IconButton(
+                        icon: Icon(
+                          Icons.settings,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return Settings();
+                              },
+                              settings: RouteSettings(name: Settings.routeName),
+                            ),
+                          );
+                        },
                       ),
-                      onPressed: () async {
-                        await _present(Settings());
-                      },
-                    ),
-                  ],
-                ),
-        ],
-        title: searchBar,
-      ),
-      body: Column(
-        children: <Widget>[
-          !isStartSearch && progress < 1 && progress > 0
-              ? SizedBox(
-                  height: 2,
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    backgroundColor: Colors.transparent,
+                    ],
                   ),
-                )
-              : SizedBox(),
-          Expanded(
-            child: RepaintBoundary(
-              key: captureKey,
-              child: Stack(
-                children: [
-                  webView,
-                  _currentURL == Globals.initialURL || isStartSearch == true
-                      ? appView
-                      : SizedBox(),
-                ],
+          ],
+          title: searchBar,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              !isStartSearch && progress < 1 && progress > 0
+                  ? SizedBox(
+                      height: 2,
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    )
+                  : SizedBox(),
+              Expanded(
+                child: RepaintBoundary(
+                  key: captureKey,
+                  child: Stack(
+                    children: [
+                      webView,
+                      _currentURL == Globals.initialURL || isStartSearch == true
+                          ? appView
+                          : SizedBox(),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              isKeyboardVisible
+                  ? SizedBox()
+                  : SizedBox(
+                      height: 46,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: bottomItems,
+                      ),
+                    ),
+            ],
           ),
-        ],
+        ),
       ),
-      bottomNavigationBar: isKeyboardVisible ? SizedBox() : bottomNavigationBar,
+      onWillPop: () async {
+        return !Navigator.of(context).userGestureInProgress;
+      },
     );
   }
 
@@ -287,7 +257,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       );
 
   Widget get appView => DApps(
-        network: widget.network,
         onAppSelected: (DApp app) async {
           await _handleLoad(app.url);
         },
@@ -381,8 +350,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   String get _initialParamsJS {
-    final genesis = Globals.genesis(widget.network);
-    final initialHead = Globals.head(widget.network);
+    final genesis = Globals.genesis;
+    final initialHead = Globals.head(network: widget.network);
     return '''
     window.genesis = {
         number:${genesis.number},
@@ -523,8 +492,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       onMessageReceived: (List<dynamic> arguments) async {
         if (arguments.length >= 3) {
           String baseURL = widget.network == Network.MainNet
-              ? NetworkStorage.mainnet
-              : NetworkStorage.testnet;
+              ? Config.mainnet
+              : Config.testnet;
           dynamic data = await Net.http(
               arguments[0], "$baseURL/${arguments[1]}", arguments[2]);
           return data;
@@ -538,21 +507,31 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       onMessageReceived: (List<dynamic> arguments) async {
         if (arguments.length > 0) {
           if (arguments[0] == 'owned' && arguments.length == 2) {
-            List<String> wallets = await WalletStorage.wallets(widget.network);
+            List<String> wallets =
+                await WalletStorage.wallets(network: widget.network);
             return wallets.contains(arguments[1]);
           }
           List<WalletEntity> walletEntities =
-              await WalletStorage.readAll(widget.network);
+              await WalletStorage.readAll(network: widget.network);
           if (walletEntities.length == 0) {
-            return customAlert(
+            bool isConfirmd = await customAlert(
               context,
               title: Text('No wallet available'),
               content: Text('Create or import a new wallet?'),
               confirmAction: () async {
-                await Navigator.of(context).pushNamed(ManageWallets.routeName);
-                Navigator.pop(context);
+                Navigator.of(context).pop(true);
               },
             );
+            if (isConfirmd) {
+              await slide(
+                context,
+                CreateOrImportWallet(
+                  fromRouteName: MainUI.routeName,
+                ),
+                routeName: '/CreateOrImportWallet',
+              );
+            }
+            return null;
           }
           if (arguments[0] == 'signTx') {
             SigningTxOptions options =
@@ -564,7 +543,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             }
             return _showSigningDialog(
               SignTxDialog(
-                network: widget.network,
                 txMessages: txMessages,
                 options: options,
               ),
@@ -576,8 +554,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 SigningCertOptions.fromJSON(arguments[2], _currentURL);
             await _validate(options.signer);
             return _showSigningDialog(
-              SignCertificateDialog(
-                network: widget.network,
+              SignCertificate(
                 certMessage: certMessage,
                 options: options,
               ),
@@ -590,108 +567,107 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return [head, net, vendor];
   }
 
-  Future<void> _validate(String signer) async {
-    List<String> wallets = await WalletStorage.wallets(widget.network);
-    if (signer != null && !wallets.contains(signer)) {
-      throw 'signer does not exist';
-    }
-  }
-
-  BottomNavigationBar get bottomNavigationBar => BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Theme.of(context).primaryColor,
-        items: bottomNavigationBarItems,
-        onTap: (index) async {
-          switch (index) {
-            case 0:
-              if (canBack && controller != null) {
-                return controller.goBack();
+  List<Widget> get bottomItems {
+    return [
+      bottomItem(
+        Icons.arrow_back_ios,
+        onPressed: canBack
+            ? () async {
+                if (canBack && controller != null) {
+                  return controller.goBack();
+                }
               }
-              break;
-            case 1:
-              if (canForward && controller != null) {
-                return controller.goForward();
+            : null,
+      ),
+      bottomItem(
+        Icons.arrow_forward_ios,
+        onPressed: canForward
+            ? () async {
+                if (canForward && controller != null) {
+                  return controller.goForward();
+                }
               }
-              break;
-            case 2:
-              Uint8List captureData = await takeScreenshot();
-              String t = await title;
-              WebViews.updateSnapshot(
-                widget.network,
-                id,
-                key,
-                title: t == "" ? 'New Tab' : t,
-                data: captureData,
-                url: _currentURL,
-              );
-              final size = captureKey.currentContext.size;
-              await _present(
-                TabViews(
-                  id: id,
-                  currentTabKey: key,
-                  url: _currentURL,
-                  ratio: size.width / size.height,
-                  network: widget.network,
-                  appearance: _appearance,
-                ),
-              );
-              break;
-            case 3:
-              await _present(Activities(network: widget.network));
-              break;
-            case 4:
-              await _present(ManageWallets());
-              break;
+            : null,
+      ),
+      bottomItem(
+        Icons.filter_none,
+        onPressed: () async {
+          Uint8List captureData = await takeScreenshot();
+          String t = await title;
+          WebViews.updateSnapshot(
+            widget.network,
+            id,
+            key,
+            title: t == "" ? 'New Tab' : t,
+            data: captureData,
+            url: _currentURL,
+          );
+          final size = captureKey.currentContext.size;
+          await slide(
+            context,
+            TabViews(
+              id: id,
+              currentTabKey: key,
+              url: _currentURL,
+              ratio: size.width / size.height,
+              appearance: _appearance,
+            ),
+          );
+        },
+      ),
+      Stack(
+        alignment: Alignment.topRight,
+        children: <Widget>[
+          latestActivity != null &&
+                  !latestActivity.hasShown &&
+                  latestActivity?.status == ActivityStatus.Reverted
+              ? Icon(
+                  Icons.error,
+                  size: 12,
+                )
+              : SizedBox(),
+          bottomItem(
+            FontAwesomeIcons.arrowAltCircleUp,
+            onPressed: () async {
+              String url = await slide(context, Activities());
+              await updateLatestActivity();
+              if (url != null) {
+                await _handleLoad(url);
+              }
+            },
+          ),
+        ],
+      ),
+      bottomItem(
+        FontAwesomeIcons.wallet,
+        onPressed: () async {
+          final url = await slide(
+            context,
+            ManageWallets(),
+            routeName: ManageWallets.routeName,
+          );
+          if (url != null) {
+            await _handleLoad(url);
           }
         },
-      );
+      ),
+    ];
+  }
 
-  BottomNavigationBarItem bottomNavigationBarItem(
-    IconData iconData,
-    Color color,
-    double size,
-  ) {
-    Widget nullWidget = SizedBox(height: 0);
-    return BottomNavigationBarItem(
+  Widget bottomItem(
+    IconData iconData, {
+    double size = 30,
+    VoidCallback onPressed,
+  }) {
+    return IconButton(
       icon: Icon(
         iconData,
         size: size,
-        color: color,
       ),
-      title: nullWidget,
+      color: Colors.blue,
+      disabledColor: Colors.grey[300],
+      onPressed: onPressed,
     );
-  }
-
-  List<BottomNavigationBarItem> get bottomNavigationBarItems {
-    Color active = Colors.blue;
-    Color inactive = Colors.grey[300];
-    return [
-      bottomNavigationBarItem(
-        Icons.arrow_back_ios,
-        canBack ? active : inactive,
-        30,
-      ),
-      bottomNavigationBarItem(
-        Icons.arrow_forward_ios,
-        canForward ? active : inactive,
-        30,
-      ),
-      bottomNavigationBarItem(
-        Icons.filter_none,
-        active,
-        30,
-      ),
-      bottomNavigationBarItem(
-        FontAwesomeIcons.arrowAltCircleUp,
-        active,
-        30,
-      ),
-      bottomNavigationBarItem(
-        FontAwesomeIcons.wallet,
-        active,
-        30,
-      ),
-    ];
   }
 
   Future<DocumentMetaData> get metaData async {
@@ -727,21 +703,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       return controller.currentTitle();
     }
     return null;
-  }
-
-  Future<dynamic> _present(Widget widget) async {
-    dynamic result = await showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 200),
-      pageBuilder: (context, a, b) {
-        return SlideTransition(
-          position: Tween(begin: Offset(0, 1), end: Offset.zero).animate(a),
-          child: widget,
-        );
-      },
-    );
-    return result;
   }
 
   Widget sheet(Widget child) {
@@ -781,7 +742,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               style: TextStyle(color: Colors.blue, fontSize: 20),
             ),
             onPressed: () async {
-              await _present(
+              await slide(
+                context,
                 CreateBookmark(
                   eidtBookmarkID: bookmark.id,
                   documentMetaData: DocumentMetaData(
@@ -789,7 +751,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                     title: bookmark.title,
                     url: bookmark.url,
                   ),
-                  network: widget.network,
                 ),
               );
               Navigator.of(context).pop();
@@ -825,5 +786,83 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ),
       ),
     );
+  }
+
+  Future<void> updateBookmarkID(String url) async {
+    Bookmark bookmark = await BookmarkStorage.queryByURL(
+      url,
+      network: widget.network,
+    );
+    if (bookmark != null) {
+      setState(() {
+        bookmarkID = bookmark.id;
+      });
+    } else {
+      setState(() {
+        bookmarkID = null;
+      });
+    }
+  }
+
+  Future<void> updateLatestActivity() async {
+    final activity = await ActivityStorage.latest(network: widget.network);
+    setState(() {
+      latestActivity = activity;
+    });
+  }
+
+  Future<void> _validate(String signer) async {
+    List<String> wallets = await WalletStorage.wallets(network: widget.network);
+    if (signer != null && !wallets.contains(signer)) {
+      throw 'signer does not exist';
+    }
+  }
+
+  @override
+  void dispose() {
+    print('dispose ');
+    Globals.removeBlockHeadHandler(_handleHeadChanged);
+    Globals.removeAppearanceHandler(_handleAppearanceChanged);
+    Globals.removeTabHandler(_handleTabChanged);
+    super.dispose();
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  void _handleHeadChanged() async {
+    final blockHeadForNetwork = Globals.blockHeadForNetwork;
+    if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
+      await updateLatestActivity();
+      _head.complete(blockHeadForNetwork.head);
+    }
+  }
+
+  void _handleAppearanceChanged() async {
+    setState(() {
+      _appearance = Globals.appearance;
+    });
+    if (controller != null) {
+      await controller
+          .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
+    }
+  }
+
+  void _handleTabChanged() async {
+    final tabValue = Globals.tabValue;
+    if (tabValue.network == widget.network) {
+      key = tabValue.tabKey;
+      if (tabValue.stage == TabStage.RemoveAll) {
+        await controller.loadHTMLString("", null);
+      }
+      if (tabValue.id == id) {
+        if (tabValue.stage == TabStage.Removed ||
+            tabValue.stage == TabStage.Coverred) {
+          await controller.loadHTMLString("", null);
+        } else if (tabValue.stage == TabStage.SelectedInAlive) {
+          await controller.loadUrl(tabValue.url);
+        }
+      }
+    }
   }
 }

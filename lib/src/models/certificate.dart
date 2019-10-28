@@ -53,7 +53,7 @@ class Certificate {
     return blake2b.process(data);
   }
 
-  SigningCertResponse get encoded {
+  SigningCertResponse get response {
     return SigningCertResponse(
       annex: Annex(
         signer: _signer,
@@ -114,7 +114,7 @@ class SigningCertMessage {
   factory SigningCertMessage.fromJSON(Map<String, dynamic> parsedJSON) {
     return SigningCertMessage(
       purpose: parsedJSON['purpose'] ?? '',
-      payload: Payload.fromJSON(parsedJSON['payload']) ?? '',
+      payload: Payload.fromJSON(parsedJSON['payload']) ?? Payload(),
     );
   }
 }

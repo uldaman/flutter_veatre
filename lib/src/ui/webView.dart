@@ -34,7 +34,7 @@ import 'package:veatre/src/ui/createBookmark.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/tabViews.dart';
 import 'package:veatre/src/ui/webViews.dart';
-import 'package:veatre/src/ui/signTxDialog.dart';
+import 'package:veatre/src/ui/sign_dialog/transaction_dialog.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/searchBar.dart';
@@ -331,24 +331,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
       );
 
-  Future<dynamic> _showSigningDialog(Widget siginingDialog) async {
-    dynamic result = await showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 200),
-      pageBuilder: (context, a, b) {
-        return SlideTransition(
-          position: Tween(begin: Offset(0, 1), end: Offset.zero).animate(a),
-          child: siginingDialog,
-        );
-      },
-    );
-    if (result == null) {
-      throw 'user cancelled';
-    }
-    return result.encoded;
-  }
-
   String get _initialParamsJS {
     final genesis = Globals.genesis;
     final initialHead = Globals.head(network: widget.network);
@@ -533,6 +515,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             }
             return null;
           }
+          dynamic result;
           if (arguments[0] == 'signTx') {
             SigningTxOptions options =
                 SigningTxOptions.fromJSON(arguments[2], _currentURL);
@@ -541,10 +524,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             for (Map<String, dynamic> txMsg in arguments[1]) {
               txMessages.add(SigningTxMessage.fromJSON(txMsg));
             }
-            return _showSigningDialog(
-              SignTxDialog(
-                txMessages: txMessages,
+            result = await showModalBottomSheet(
+              isScrollControlled: true,
+              context: context,
+              backgroundColor: Colors.transparent,
+              builder: (context) => TransactionDialog(
                 options: options,
+                txMessages: txMessages,
               ),
             );
           } else if (arguments[0] == 'signCert') {
@@ -553,13 +539,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SigningCertOptions options =
                 SigningCertOptions.fromJSON(arguments[2], _currentURL);
             await _validate(options.signer);
-            return _showSigningDialog(
-              SignCertificate(
-                certMessage: certMessage,
-                options: options,
-              ),
+            result = await showModalBottomSheet(
+              isScrollControlled: true,
+              context: context,
+              backgroundColor: Colors.transparent,
+              builder: (context) => SignCertificate(certMessage, options),
             );
           }
+          if (result == null) {
+            throw 'user cancelled';
+          }
+          return result.encoded;
         }
         throw 'unsupported method';
       },

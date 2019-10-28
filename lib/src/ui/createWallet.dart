@@ -292,7 +292,7 @@ class _CreateWalletState extends State<CreateWallet> {
                   ),
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width - 180,
+                  width: MediaQuery.of(context).size.width - 170,
                   height: 46,
                   child: FlatButton(
                     child: Text(

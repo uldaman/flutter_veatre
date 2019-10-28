@@ -17,10 +17,7 @@ class SignCertificate extends StatefulWidget {
   final SigningCertMessage certMessage;
   final SigningCertOptions options;
 
-  SignCertificate({
-    this.certMessage,
-    this.options,
-  });
+  SignCertificate(this.certMessage, this.options);
 
   @override
   SignCertificateState createState() => SignCertificateState();

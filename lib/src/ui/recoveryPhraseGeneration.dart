@@ -141,7 +141,7 @@ class _RecoveryPhraseGenerationState extends State<RecoveryPhraseGeneration> {
                       top: 15,
                     ),
                     child: SizedBox(
-                      width: MediaQuery.of(context).size.width - 180,
+                      width: MediaQuery.of(context).size.width - 170,
                       height: 44,
                       child: FlatButton(
                         child: Text(

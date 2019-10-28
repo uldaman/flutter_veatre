@@ -1,8 +1,45 @@
+import 'dart:convert';
 import 'dart:typed_data';
+import 'package:veatre/src/api/AccountAPI.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/src/utils/rlp.dart' as rlp;
 import 'package:pointycastle/digests/blake2b.dart';
 import 'package:veatre/src/models/Crypto.dart';
+import 'package:web3dart/contracts.dart';
+
+Future<BigInt> initialBaseGasPrice() async {
+  final paramABI = [
+    {
+      "constant": true,
+      "inputs": [
+        {"name": "_key", "type": "bytes32"}
+      ],
+      "name": "get",
+      "outputs": [
+        {"name": "", "type": "uint256"}
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+  ];
+  final key = hexToBytes(
+      '0x000000000000000000000000000000000000626173652d6761732d7072696365');
+  final data = ContractAbi.fromJson(json.encode(paramABI), 'params')
+      .functions
+      .first
+      .encodeCall([key]);
+  List<CallResult> res = await AccountAPI.call(
+    [
+      SigningTxMessage(
+        data: '0x' + bytesToHex(data),
+        to: '0x0000000000000000000000000000506172616d73',
+      )
+    ],
+    caller: '0x0000000000000000000000000000506172616d73',
+  );
+  return BigInt.parse(res.first.data.substring(2), radix: 16);
+}
 
 class Transaction {
   final int chainTag;

@@ -5,6 +5,14 @@ import 'package:web3dart/crypto.dart';
 import 'package:pointycastle/api.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
 
+String abbreviate(String str, {int head = 0, int tail = 0}) {
+  int len = str.length;
+  if (head > len || tail > len) {
+    return str;
+  }
+  return '${str.substring(0, head)}…${str.substring(len - tail, len)}';
+}
+
 String zero2(word) {
   if (word.length == 1)
     return '0' + word;

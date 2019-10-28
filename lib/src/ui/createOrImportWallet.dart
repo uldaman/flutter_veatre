@@ -79,7 +79,7 @@ class CreateOrImportWallet extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   SizedBox(
-                    width: MediaQuery.of(context).size.width - 180,
+                    width: MediaQuery.of(context).size.width - 170,
                     height: 44,
                     child: FlatButton(
                       color: Theme.of(context).textTheme.title.color,
@@ -114,14 +114,14 @@ class CreateOrImportWallet extends StatelessWidget {
                       top: 15,
                     ),
                     child: SizedBox(
-                      width: MediaQuery.of(context).size.width - 180,
+                      width: MediaQuery.of(context).size.width - 170,
                       height: 44,
                       child: FlatButton(
                         child: Text(
                           'Import existed wallet',
                           style: TextStyle(
                             fontSize: 17,
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         color: Colors.transparent,

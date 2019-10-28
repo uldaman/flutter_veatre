@@ -188,7 +188,7 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                     ),
                   ),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width - 180,
+                    width: MediaQuery.of(context).size.width - 170,
                     height: 44,
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
@@ -214,7 +214,7 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
               ),
             ),
             SizedBox(
-              width: MediaQuery.of(context).size.width - 180,
+              width: MediaQuery.of(context).size.width - 170,
               height: 44,
               child: FlatButton(
                 color: Theme.of(context).textTheme.title.color,

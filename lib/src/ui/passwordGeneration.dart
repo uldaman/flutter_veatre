@@ -50,7 +50,7 @@ class PasswordGeneration extends StatelessWidget {
             Expanded(
               child: Center(
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width - 180,
+                  width: MediaQuery.of(context).size.width - 170,
                   height: 44,
                   child: FlatButton(
                     color: Theme.of(context).textTheme.title.color,

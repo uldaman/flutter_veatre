@@ -143,15 +143,6 @@ class _TransactionState extends State<TransactionDialog>
       tx.sign(privateKey);
       WalletStorage.setMainWallet(_entity);
       TransactionAPI.send(tx.serialized).then((result) {
-        String comment = 'Unkown';
-        if (widget.txMessages.length > 1) {
-          comment = 'Batch Call';
-        } else if (widget.txMessages.length == 1) {
-          SigningTxMessage msg = widget.txMessages.first;
-          comment = msg.data.length == 2
-              ? 'Transfer'
-              : msg.to.length == 2 ? 'Create' : 'Call';
-        }
         List<Map<String, dynamic>> content = [];
         for (final clause in widget.txMessages) {
           content.add(clause.encoded);
@@ -169,7 +160,7 @@ class _TransactionState extends State<TransactionDialog>
             link: widget.options.link,
             address: _entity.address,
             type: ActivityType.Transaction,
-            comment: comment,
+            comment: _makeSummary(),
             timestamp: head.timestamp,
             network: Globals.network,
             status: ActivityStatus.Pending,

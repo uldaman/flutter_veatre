@@ -515,7 +515,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             }
             return null;
           }
-          dynamic result;
           if (arguments[0] == 'signTx') {
             SigningTxOptions options =
                 SigningTxOptions.fromJSON(arguments[2], _currentURL);
@@ -524,11 +523,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             for (Map<String, dynamic> txMsg in arguments[1]) {
               txMessages.add(SigningTxMessage.fromJSON(txMsg));
             }
-            result = await showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              backgroundColor: Colors.transparent,
-              builder: (context) => TransactionDialog(
+            return showDialog(
+              TransactionDialog(
                 options: options,
                 txMessages: txMessages,
               ),
@@ -539,22 +535,24 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             SigningCertOptions options =
                 SigningCertOptions.fromJSON(arguments[2], _currentURL);
             await _validate(options.signer);
-            result = await showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              backgroundColor: Colors.transparent,
-              builder: (context) => SignCertificate(certMessage, options),
-            );
+            return showDialog(SignCertificate(certMessage, options));
           }
-          if (result == null) {
-            throw 'user cancelled';
-          }
-          return result.encoded;
         }
         throw 'unsupported method';
       },
     );
     return [head, net, vendor];
+  }
+
+  Future<dynamic> showDialog(Widget dialog) async {
+    dynamic result = await showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => dialog,
+    );
+    if (result == null) throw 'user cancelled';
+    return result.encoded;
   }
 
   List<Widget> get bottomItems {

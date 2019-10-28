@@ -5,16 +5,6 @@ import 'package:veatre/src/models/crypto.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 
-class Wallet {
-  WalletEntity entity;
-  Account account;
-
-  Wallet({
-    this.entity,
-    this.account,
-  });
-}
-
 class Account {
   final BigInt balance;
   final BigInt energy;
@@ -100,6 +90,4 @@ class WalletEntity {
       defaultDerivationPath,
     );
   }
-
-  // static String get zeroAddress => '0x0000000000000000000000000000000000000000';
 }

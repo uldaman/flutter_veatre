@@ -8,6 +8,7 @@ import 'package:veatre/src/models/certificate.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
+import 'package:veatre/src/ui/sign_dialog/bottom_modal/summary.dart';
 import 'package:veatre/src/ui/swipeButton.dart';
 import 'package:veatre/src/ui/wallets.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
@@ -96,210 +97,199 @@ class SignCertificateState extends State<SignCertificate>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Opacity(
-              opacity: 0.45,
-              child: Container(
-                color: Colors.black,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 56),
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
+    return Padding(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: Container(
+          color: Theme.of(context).primaryColor,
+          padding: EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Center(
                 child: Container(
-                  color: Theme.of(context).primaryColor,
-                  padding: EdgeInsets.all(15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Center(
-                        child: Container(
-                          color: Colors.grey[300],
-                          width: 100,
-                          height: 4,
+                  color: Colors.grey[300],
+                  width: 100,
+                  height: 4,
+                ),
+              ),
+              Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          'Certificate',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                            child: Row(
-                              children: <Widget>[
-                                Text(
-                                  'Certificate',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: FlatButton(
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: Colors.blueAccent,
                                 ),
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: FlatButton(
-                                      child: Text(
-                                        'Cancel',
-                                        style: TextStyle(
-                                          color: Colors.blueAccent,
-                                        ),
-                                      ),
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(),
-                                    ),
-                                  ),
-                                )
-                              ],
+                              ),
+                              onPressed: () => Navigator.of(context).pop(),
                             ),
                           ),
-                          Divider(
-                            color: Colors.grey,
-                            height: 2,
+                        )
+                      ],
+                    ),
+                  ),
+                  Divider(
+                    color: Colors.grey,
+                    height: 2,
+                  ),
+                ],
+              ),
+              cell(
+                'Wallet',
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Picasso(
+                          '0x${walletEntity?.address ?? ""}',
+                          size: 20,
+                          borderRadius: 3,
+                        ),
+                        Flexible(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              walletEntity?.name ?? "",
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '(' + shotHex('${walletEntity?.address ?? ""}' + ')'),
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Text(
+                            account?.formatBalance ?? '--',
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(left: 5, right: 6, top: 2),
+                            child: Text(
+                              'VET',
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 8,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      cell(
-                        'Wallet',
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                Picasso(
-                                  '0x${walletEntity?.address ?? ""}',
-                                  size: 20,
-                                  borderRadius: 3,
-                                ),
-                                Flexible(
-                                  child: Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 4),
-                                    child: Text(
-                                      walletEntity?.name ?? "",
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  '(' +
-                                      shotHex('${walletEntity?.address ?? ""}' +
-                                          ')'),
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 5),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: <Widget>[
-                                  Text(
-                                    account?.formatBalance ?? '--',
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        left: 5, right: 6, top: 2),
-                                    child: Text(
-                                      'VET',
-                                      style: TextStyle(
-                                        color: Colors.grey[500],
-                                        fontSize: 8,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                Text(
-                                  account?.formatEnergy ?? '--',
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 5, top: 2),
-                                  child: Text(
-                                    'VTHO',
-                                    style: TextStyle(
-                                      color: Colors.grey[500],
-                                      fontSize: 8,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                        showIcon: true,
-                        onPressed: changeWallet,
-                      ),
-                      cell(
-                        'Type',
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
                         Text(
-                          widget.certMessage.purpose.toUpperCase(),
+                          account?.formatEnergy ?? '--',
                         ),
-                      ),
-                      cell(
-                        'Message',
-                        Text(
-                          widget.certMessage.payload.content,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 5,
-                        ),
-                        showIcon: true,
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 10),
-                              child: Text(
-                                'Your signature is being requested. Please review the content before you signed. Always make sure you trust the sites you interact with.',
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 17,
-                                ),
-                              ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 5, top: 2),
+                          child: Text(
+                            'VTHO',
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 8,
                             ),
-                            Container(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              width: _animation.value,
-                              child: SwipeButton(
-                                swipeController: swipeController,
-                                content: Center(
-                                  child: Text(
-                                    'Slide to sign certificate',
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(22)),
-                                height: 44,
-                                onDragEnd: signCert,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      )
-                    ],
-                  ),
+                      ],
+                    )
+                  ],
+                ),
+                showIcon: true,
+                onPressed: changeWallet,
+              ),
+              cell(
+                'Type',
+                Text(
+                  widget.certMessage.purpose.toUpperCase(),
                 ),
               ),
-            ),
-          ],
+              cell(
+                'Message',
+                Text(
+                  widget.certMessage.payload.content,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 5,
+                ),
+                showIcon: true,
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => Summary(
+                        title: 'Certificate',
+                        content: widget.certMessage.payload.content,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        'Your signature is being requested. Please review the content before you signed. Always make sure you trust the sites you interact with.',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 17,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      width: _animation.value,
+                      child: SwipeButton(
+                        swipeController: swipeController,
+                        content: Center(
+                          child: Text(
+                            'Slide to sign certificate',
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(22)),
+                        height: 44,
+                        onDragEnd: signCert,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

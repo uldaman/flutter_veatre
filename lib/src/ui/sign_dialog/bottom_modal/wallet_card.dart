@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/src/ui/picasso.dart';
+import 'package:veatre/src/utils/common.dart';
 
 class WalletCard extends StatelessWidget {
   WalletCard({
     Key key,
     @required this.name,
+    @required this.address,
     @required this.vet,
     @required this.vtho,
   }) : super(key: key);
 
   final String name;
-  final double vet;
-  final double vtho;
+  final String address;
+  final String vet;
+  final String vtho;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         _buildWalletInfo(context),
-        _buildBalance(context, 'VET', '0.00'),
-        _buildBalance(context, 'VTHO', '1948.29'),
+        _buildBalance(context, 'VET', vet),
+        _buildBalance(context, 'VTHO', vtho),
       ],
     );
   }
@@ -52,20 +56,20 @@ class WalletCard extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(right: 5),
-          child: Icon(
-            Icons.portrait,
-            size: 25,
-            color: Colors.green,
+          child: Picasso(
+            '0x$address',
+            size: 20,
+            borderRadius: 3,
           ),
         ),
         Flexible(
           child: Text(
-            'Wassssssssssss',
+            name,
             overflow: TextOverflow.ellipsis,
           ),
         ),
         Text(
-          '(0x1234…1234)',
+          ' (0x${abbreviate(address, head: 6, tail: 4)})',
           style: TextStyle(
             fontSize: 12,
             color: Theme.of(context).accentTextTheme.title.color,

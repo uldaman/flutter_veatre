@@ -22,7 +22,7 @@ class BottomModal extends StatelessWidget {
       maxChildSize: _screenPercentage,
       minChildSize: _screenPercentage,
       builder: (context, scrollController) => Container(
-        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 26),
+        padding: EdgeInsets.only(top: 8, bottom: 34, left: 26, right: 26),
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.only(
@@ -49,7 +49,7 @@ class BottomModal extends StatelessWidget {
       _children.add(Spacer());
     }
     if (bottomActionButton != null) {
-      _children.add(_buildBottomActionButton());
+      _children.add(bottomActionButton);
     }
     return _children;
   }
@@ -106,19 +106,6 @@ class BottomModal extends StatelessWidget {
               fontSize: 17,
               color: Theme.of(context).accentColor,
             ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomActionButton() {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: SizedBox(
-            height: 50,
-            child: bottomActionButton,
           ),
         ),
       ],

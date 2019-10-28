@@ -191,20 +191,25 @@ class WalletStorage {
     return WalletEntity.fromJSON(rows.first);
   }
 
-  static Future<WalletEntity> getWalletEntity(String signer) async {
+  static Future<WalletEntity> getWalletEntity(String signer,
+      {Network network}) async {
+    network = network ?? Globals.network;
     if (signer != null) {
-      List<WalletEntity> walletEntities = await WalletStorage.readAll();
+      List<WalletEntity> walletEntities =
+          await WalletStorage.readAll(network: network);
       for (WalletEntity walletEntity in walletEntities) {
         if ('0x' + walletEntity.address == signer) {
           return walletEntity;
         }
       }
     }
-    WalletEntity mianWalletEntity = await WalletStorage.getMainWallet();
+    WalletEntity mianWalletEntity =
+        await WalletStorage.getMainWallet(network: network);
     if (mianWalletEntity != null) {
       return mianWalletEntity;
     }
-    List<WalletEntity> walletEntities = await WalletStorage.readAll();
+    List<WalletEntity> walletEntities =
+        await WalletStorage.readAll(network: network);
     return walletEntities[0];
   }
 

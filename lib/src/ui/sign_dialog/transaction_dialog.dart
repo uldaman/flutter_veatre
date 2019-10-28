@@ -25,12 +25,10 @@ import 'package:veatre/src/ui/swipeButton.dart';
 
 class TransactionDialog extends StatefulWidget {
   const TransactionDialog({
-    @required this.network,
     @required this.options,
     @required this.txMessages,
   });
 
-  final Network network;
   final SigningTxOptions options;
   final List<SigningTxMessage> txMessages;
 
@@ -40,7 +38,7 @@ class TransactionDialog extends StatefulWidget {
 
 class _TransactionState extends State<TransactionDialog>
     with SingleTickerProviderStateMixin {
-  Wallet _wallet;
+  Account _account;
   WalletEntity _entity;
   BigInt _estimatedFee;
 
@@ -76,8 +74,7 @@ class _TransactionState extends State<TransactionDialog>
   }
 
   Future<void> _initWalletEntity() async {
-    WalletEntity primalEntity = await WalletEntity.getWalletEntity(
-      widget.network,
+    WalletEntity primalEntity = await WalletStorage.getWalletEntity(
       widget.options.signer,
     );
     if (primalEntity != null) _completeByEntity(primalEntity);
@@ -129,10 +126,10 @@ class _TransactionState extends State<TransactionDialog>
   }
 
   void _signTx() {
-    _wallet.decrypt().then((privateKey) {
+    _entity.decryptPrivateKey(Globals.masterPasscodes).then((privateKey) {
       int nonce = Random(DateTime.now().millisecond).nextInt(1 << 32);
-      int chainTag = widget.network == Network.MainNet ? 0x4a : 0x27;
-      final head = Globals.head(widget.network);
+      int chainTag = Globals.network == Network.MainNet ? 0x4a : 0x27;
+      final head = Globals.head();
       Transaction tx = Transaction(
         blockRef: BlockRef(number32: head.number),
         expiration: 30,
@@ -144,14 +141,8 @@ class _TransactionState extends State<TransactionDialog>
         nonce: nonce,
       );
       tx.sign(privateKey);
-      WalletStorage.setMainWallet(
-        WalletEntity(name: _wallet.name),
-        widget.network,
-      );
-      TransactionAPI.send(
-        tx.serialized,
-        widget.network,
-      ).then((result) {
+      WalletStorage.setMainWallet(_entity);
+      TransactionAPI.send(tx.serialized).then((result) {
         String comment = 'Unkown';
         if (widget.txMessages.length > 1) {
           comment = 'Batch Call';
@@ -176,18 +167,18 @@ class _TransactionState extends State<TransactionDialog>
               'priority': _priority,
             }),
             link: widget.options.link,
-            address: _wallet.address,
+            address: _entity.address,
             type: ActivityType.Transaction,
             comment: comment,
             timestamp: head.timestamp,
-            network: widget.network,
+            network: Globals.network,
             status: ActivityStatus.Pending,
           ),
         );
         Navigator.of(context).pop(
           SigningTxResponse(
             txid: result['id'],
-            signer: '0x' + _wallet.address,
+            signer: '0x' + _entity.address,
           ),
         );
       }).catchError((err) async {
@@ -232,7 +223,6 @@ class _TransactionState extends State<TransactionDialog>
     int gas = _intrinsicGas;
     List<CallResult> results = await AccountAPI.call(
       widget.txMessages,
-      widget.network,
       caller: addr,
       gas: widget.options.gas,
     );
@@ -253,7 +243,7 @@ class _TransactionState extends State<TransactionDialog>
   }
 
   Future<void> _updateFee() async {
-    _estimatedFee = await initialBaseGasPrice(widget.network) *
+    _estimatedFee = await initialBaseGasPrice() *
         BigInt.from((1 + _priority / 255) * 1e10) *
         BigInt.from(_totalGas) ~/
         BigInt.from(1e10);
@@ -270,8 +260,8 @@ class _TransactionState extends State<TransactionDialog>
     try {
       _swipeController.valueWith(shouldLoading: true, enabled: false);
       _entity = entity;
-      _wallet = await Wallet.from(_entity, widget.network);
-      updateUI(await _estimateGas(_wallet.address));
+      _account = await AccountAPI.get(_entity.address);
+      updateUI(await _estimateGas(_entity.address));
     } catch (err) {
       if (err is VmErr) {
         updateUI(err.gas);
@@ -287,13 +277,13 @@ class _TransactionState extends State<TransactionDialog>
       content: WalletCard(
         name: _entity?.name ?? '',
         address: _entity?.address ?? '',
-        vet: _wallet != null ? fixed2Value(_wallet.account.balance) : '- -',
-        vtho: _wallet != null ? fixed2Value(_wallet.account.energy) : '- - ',
+        vet: _account?.formatBalance ?? '--',
+        vtho: _account?.formatBalance ?? '--',
       ),
       onExpand: () async {
         WalletEntity newEntity = await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => Wallets(network: widget.network),
+            builder: (context) => Wallets(),
           ),
         );
         if (newEntity != null) _completeByEntity(newEntity);

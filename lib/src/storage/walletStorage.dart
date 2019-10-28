@@ -246,26 +246,4 @@ class WalletStorage {
     await WalletStorage.write(walletEntity);
     await WalletStorage.setMainWallet(walletEntity, network: network);
   }
-
-  static Future<WalletEntity> getWalletEntity(
-    Network network,
-    String address,
-  ) async {
-    if (address != null) {
-      List<WalletEntity> walletEntities = await WalletStorage.readAll(network);
-      for (WalletEntity walletEntity in walletEntities) {
-        if ('0x' + walletEntity.address == address) {
-          return walletEntity;
-        }
-      }
-    }
-
-    WalletEntity mianWalletEntity = await WalletStorage.getMainWallet(network);
-    if (mianWalletEntity != null) {
-      return mianWalletEntity;
-    }
-
-    List<WalletEntity> walletEntities = await WalletStorage.readAll(network);
-    return walletEntities[0];
-  }
 }

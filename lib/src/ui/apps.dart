@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/api/DappAPI.dart';
-import 'package:veatre/src/models/dapp.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/models/dapp.dart';
+import 'package:veatre/src/api/dappAPI.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
 
 typedef onAppSelectedCallback = Future<void> Function(DApp app);
 typedef onBookmarkSelectedCallback = Future<void> Function(Bookmark bookmark);
@@ -12,13 +11,11 @@ typedef onBookmarkLongPressedCallback = Future<void> Function(
     Bookmark bookmark);
 
 class DApps extends StatefulWidget {
-  final Network network;
   final onAppSelectedCallback onAppSelected;
   final onBookmarkSelectedCallback onBookmarkSelected;
   final onBookmarkLongPressedCallback onBookmarkLongPressed;
 
   DApps({
-    this.network,
     this.onAppSelected,
     this.onBookmarkSelected,
     this.onBookmarkLongPressed,
@@ -46,7 +43,7 @@ class DAppsState extends State<DApps> {
   }
 
   Future<void> _handleBookmark() async {
-    if (mounted && Globals.bookmark.network == widget.network) {
+    if (mounted && Globals.bookmark.network == Globals.network) {
       await updateBookmarks();
     }
   }
@@ -67,7 +64,7 @@ class DAppsState extends State<DApps> {
   }
 
   Future<void> updateBookmarks() async {
-    List<Bookmark> bookmarks = await BookmarkStorage.queryAll(widget.network);
+    List<Bookmark> bookmarks = await BookmarkStorage.queryAll();
     if (mounted) {
       setState(() {
         this.bookmarks = bookmarks;
@@ -234,7 +231,7 @@ class DAppsState extends State<DApps> {
 
   @override
   void dispose() {
-    super.dispose();
     Globals.removeBookmarkHandler(_handleBookmark);
+    super.dispose();
   }
 }

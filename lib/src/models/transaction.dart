@@ -4,11 +4,6 @@ import 'package:web3dart/src/utils/rlp.dart' as rlp;
 import 'package:pointycastle/digests/blake2b.dart';
 import 'package:veatre/src/models/Crypto.dart';
 
-final int solo = 0xa4;
-final int testNetwork = 0x27;
-final int mainNetwork = 0x4a;
-final BigInt initialBaseGasPrice = BigInt.from(1e15);
-
 class Transaction {
   final int chainTag;
 
@@ -195,8 +190,8 @@ class SigningTxMessage {
   factory SigningTxMessage.fromJSON(Map<String, dynamic> parsedJson) {
     return SigningTxMessage(
       to: parsedJson['to'],
-      value: parsedJson['value'],
-      data: parsedJson['data'],
+      value: parsedJson['value'] ?? '0',
+      data: parsedJson['data'] ?? '0x',
       comment: parsedJson['comment'] ?? '',
     );
   }
@@ -208,6 +203,13 @@ class SigningTxMessage {
       data: hexToBytes(data),
     );
   }
+
+  Map<String, dynamic> get encoded => {
+        to: to,
+        value: value,
+        data: data,
+        comment: comment,
+      };
 }
 
 class SigningTxOptions {

@@ -1,10 +1,8 @@
 import 'dart:core';
 import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/appearanceStorage.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/webView.dart';
 
 class Snapshot {
@@ -46,10 +44,7 @@ class WebViews {
     @required Appearance appearance,
   }) {
     for (int id = 0; id < maxTabLen; id++) {
-      GlobalObjectKey<WebViewState> mainNetkey =
-          GlobalObjectKey<WebViewState>('mainNetWebView$id');
       WebView mainNetWebView = new WebView(
-        key: mainNetkey,
         id: id,
         network: Network.MainNet,
         initialURL: Globals.initialURL,
@@ -61,10 +56,7 @@ class WebViews {
         _activeMainNetPages.add(id);
       }
       mainNetWebViews.add(mainNetWebView);
-      GlobalObjectKey<WebViewState> testNetkey =
-          GlobalObjectKey<WebViewState>('testNetWebView$id');
       WebView testNetWebView = new WebView(
-        key: testNetkey,
         id: id,
         network: Network.TestNet,
         initialURL: Globals.initialURL,

@@ -1,12 +1,11 @@
 import "package:dio/dio.dart";
-import 'package:veatre/src/models/block.dart';
 
 class Net {
   static final dio = Dio();
   final String network;
   Net(this.network);
 
-  Future<Map<String, dynamic>> getBlock({dynamic revision = "best"}) async {
+  dynamic getBlock({dynamic revision = "best"}) async {
     Response response = await dio.get("$network/blocks/$revision");
     return response.data;
   }
@@ -64,17 +63,17 @@ class Net {
   }
 
   static dynamic http(
-      String method, String path, Map<String, dynamic> params) async {
+      String method, String url, Map<String, dynamic> params) async {
     if (method == 'GET') {
       Response response = await dio.get(
-        path,
+        url,
         queryParameters: params['query'],
         options: Options(headers: params['headers']),
       );
       return response.data;
     } else if (method == 'POST') {
       Response response = await dio.post(
-        path,
+        url,
         data: params['body'],
         queryParameters: params['query'],
         options: Options(headers: params['headers']),
@@ -82,9 +81,5 @@ class Net {
       return response.data;
     }
     throw 'method not implemented';
-  }
-
-  static Future<BlockHead> head(Net net) async {
-    return BlockHead.fromJSON(await net.getBlock());
   }
 }

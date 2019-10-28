@@ -1,10 +1,11 @@
 import 'package:sqflite/sqflite.dart';
+import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/database.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 
 class BookmarkStorage {
   static Future<void> insert(Bookmark bookmark) async {
-    final db = await database;
+    final db = await Storage.instance;
     await db.insert(
       bookmarkTableName,
       bookmark.encoded,
@@ -13,7 +14,7 @@ class BookmarkStorage {
   }
 
   static Future<void> update(int id, Map<String, dynamic> values) async {
-    final db = await database;
+    final db = await Storage.instance;
     await db.update(
       bookmarkTableName,
       values,
@@ -23,7 +24,7 @@ class BookmarkStorage {
   }
 
   static Future<void> delete(int id) async {
-    final db = await database;
+    final db = await Storage.instance;
     await db.delete(
       bookmarkTableName,
       where: "id = ?",
@@ -31,23 +32,23 @@ class BookmarkStorage {
     );
   }
 
-  static Future<List<Bookmark>> queryAll(Network network) async {
-    final db = await database;
+  static Future<List<Bookmark>> queryAll({Network network}) async {
+    final db = await Storage.instance;
     List<Map<String, dynamic>> rows = await db.query(
       bookmarkTableName,
       where: 'network = ?',
-      whereArgs: [network == Network.MainNet ? 0 : 1],
+      whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
       orderBy: 'id desc',
     );
     return List.from(rows.map((row) => Bookmark.fromJSON(row)));
   }
 
-  static Future<Bookmark> queryByURL(Network network, String url) async {
-    final db = await database;
+  static Future<Bookmark> queryByURL(String url, {Network network}) async {
+    final db = await Storage.instance;
     List<Map<String, dynamic>> rows = await db.query(
       bookmarkTableName,
       where: 'network = ? and url = ?',
-      whereArgs: [network == Network.MainNet ? 0 : 1, url],
+      whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1, url],
       orderBy: 'id desc',
     );
     if (rows.length == 0) {

@@ -2,13 +2,12 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/appearanceStorage.dart';
-import 'package:veatre/src/ui/manageWallets.dart';
+import 'package:veatre/src/storage/configStorage.dart';
+import 'package:veatre/src/ui/unlock.dart';
 import 'package:veatre/src/ui/webViews.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
 
 class MainUI extends StatefulWidget {
-  static const routeName = '/';
+  static const routeName = '/home';
 
   MainUI({Key key}) : super(key: key);
 
@@ -24,8 +23,8 @@ class MainUIState extends State<MainUI>
   PageController netPageController = PageController(initialPage: 0);
   PageController mainNetPageController = PageController(initialPage: 0);
   PageController testNetPageController = PageController(initialPage: 0);
-  int timestamp;
-  bool presented = false;
+  int timestamp = 0;
+  bool lockPagePresented = false;
 
   @override
   void initState() {
@@ -42,16 +41,19 @@ class MainUIState extends State<MainUI>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     final currentTime = DateTime.now().millisecondsSinceEpoch;
-    if (state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       timestamp = currentTime;
-      print("AppLifecycleState.paused $timestamp");
     }
-    if (state == AppLifecycleState.resumed) {
-      print("AppLifecycleState.resumed $timestamp");
-      if (currentTime - timestamp > 5 * 1000 && !presented) {
-        presented = true;
-        _present(ManageWallets());
-      }
+    if (state == AppLifecycleState.resumed &&
+        currentTime - timestamp > 30 * 1000 &&
+        !lockPagePresented) {
+      Globals.clearMasterPasscodes();
+      _present(
+        Unlock(
+          everLaunched: true,
+        ),
+      );
     }
   }
 
@@ -79,18 +81,18 @@ class MainUIState extends State<MainUI>
 
   @override
   void dispose() {
-    super.dispose();
-    print("dispose");
     WidgetsBinding.instance.removeObserver(this);
     Globals.removeTabHandler(_handleTabChanged);
     Globals.removeNetworkHandler(_hanleNetworkChanged);
+    super.dispose();
   }
 
   Future<dynamic> _present(Widget widget) async {
+    lockPagePresented = true;
     await showGeneralDialog(
       context: context,
       barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 500),
+      transitionDuration: Duration(milliseconds: 300),
       pageBuilder: (context, a, b) {
         return ScaleTransition(
           scale: Tween(begin: 0.0, end: 1.0).animate(a),
@@ -98,7 +100,7 @@ class MainUIState extends State<MainUI>
         );
       },
     );
-    presented = false;
+    lockPagePresented = false;
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/appearanceStorage.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 
 class Appearances extends StatefulWidget {
   static const routeName = '/appearances';
@@ -15,7 +15,7 @@ class AppearancesState extends State<Appearances> {
   @override
   void initState() {
     super.initState();
-    AppearanceStorage.appearance.then((appearance) {
+    Config.appearance.then((appearance) {
       setState(() {
         _appearance = appearance;
       });
@@ -25,7 +25,7 @@ class AppearancesState extends State<Appearances> {
   Future<void> changeTheme() async {
     final toAppearance =
         _appearance == Appearance.light ? Appearance.dark : Appearance.light;
-    await AppearanceStorage.set(toAppearance);
+    await Config.setAppearance(toAppearance);
     setState(() {
       _appearance = toAppearance;
     });
@@ -81,7 +81,7 @@ class AppearancesState extends State<Appearances> {
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 17,
                     color: Theme.of(context).textTheme.body1.color,
                   ),
                 ),

@@ -17,23 +17,22 @@ import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/swipeButton.dart';
 import 'package:veatre/src/ui/wallets.dart';
 
-class SignTxDialog extends StatefulWidget {
+class SignTransaction extends StatefulWidget {
   final List<SigningTxMessage> txMessages;
   final SigningTxOptions options;
 
-  SignTxDialog({
+  SignTransaction({
     this.txMessages,
     this.options,
   });
 
   @override
-  SignTxDialogState createState() => SignTxDialogState();
+  SignTransactionState createState() => SignTransactionState();
 }
 
-class SignTxDialogState extends State<SignTxDialog>
+class SignTransactionState extends State<SignTransaction>
     with SingleTickerProviderStateMixin {
   List<Clause> _clauses = [];
-  int _intrinsicGas = 0;
   Wallet wallet;
   WalletEntity walletEntity;
   double priority = 0;
@@ -42,6 +41,8 @@ class SignTxDialogState extends State<SignTxDialog>
   BigInt spendValue = BigInt.from(0);
   BigInt estimatedFee = BigInt.from(0);
   bool loading = true;
+  bool isEnable = false;
+  int _intrinsicGas = 0;
   BigInt initialBaseGasPrice;
 
   AnimationController _controller;

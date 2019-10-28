@@ -2,14 +2,15 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
+import "package:pointycastle/api.dart" as api;
+import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/models/account.dart';
+import 'package:veatre/src/models/crypto.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
-import 'package:bip_key_derivation/keystore.dart';
-import 'package:bip_key_derivation/bip_key_derivation.dart';
-import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/ui/alert.dart';
-import 'package:veatre/src/ui/progressHUD.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
+import 'package:veatre/src/ui/recoveryPhrasesBackup.dart';
 
 class WalletOperation extends StatefulWidget {
   final WalletEntity walletEntity;
@@ -21,297 +22,219 @@ class WalletOperation extends StatefulWidget {
 
 class WalletOperationState extends State<WalletOperation> {
   TextEditingController passwordController = TextEditingController();
-  TextEditingController originalPasswordController = TextEditingController();
-  TextEditingController newPasswordController = TextEditingController();
-  bool loading = false;
+  TextEditingController walletNameController = TextEditingController();
+  bool hasBackup;
+
+  @override
+  void initState() {
+    hasBackup = widget.walletEntity.hasBackup;
+    super.initState();
+  }
+
+  Future<void> updateBackup() async {
+    final walletEntity = await WalletStorage.read(widget.walletEntity.address);
+    setState(() {
+      this.hasBackup = walletEntity.hasBackup;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> widgets = [];
-    widgets.addAll([
-      buildCell("Backup wallet", () async {
-        customAlert(context,
-            title: Text('Backup wallet'),
-            content: TextField(
-              controller: passwordController,
-              maxLength: 20,
-              obscureText: true,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Password',
-              ),
-              style: Theme.of(context).textTheme.body1,
-            ), confirmAction: () async {
-          FocusScope.of(context).requestFocus(FocusNode());
-          String password = passwordController.text;
-          if (password.isEmpty) {
-            return alert(
-              context,
-              Text('Warnning'),
-              "Password can't be empty",
-            );
-          }
-          passwordController.clear();
-          Navigator.pop(context);
-          setState(() {
-            loading = true;
-          });
-          try {
-            WalletEntity walletEntity = await WalletStorage.read(
-                widget.walletEntity.name, widget.walletEntity.network);
-            await BipKeyDerivation.decryptedByKeystore(
-              walletEntity.keystore,
-              password,
-            );
-            setState(() {
-              loading = false;
-            });
-            await showDialog(
-                context: context,
-                barrierDismissible: true,
-                builder: (context) {
-                  return AlertDialog(
-                    contentPadding: EdgeInsets.all(12),
-                    backgroundColor: Theme.of(context).primaryColor,
-                    shape: Theme.of(context).cardTheme.shape,
-                    title: Text('Keystore'),
-                    content: Wrap(
-                      children: <Widget>[
-                        Card(
-                          child: Padding(
-                            padding: EdgeInsets.all(10),
-                            child: TextField(
-                              style: Theme.of(context).textTheme.body1,
-                              readOnly: true,
-                              enableInteractiveSelection: true,
-                              maxLines: null,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                              ),
-                              controller: TextEditingController(
-                                  text: json
-                                      .encode(walletEntity.keystore.encoded)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                });
-          } catch (err) {
-            return alert(
-              context,
-              Text('Warnning'),
-              err.toString(),
-            );
-          } finally {
-            setState(() {
-              loading = false;
-            });
-          }
-        }, cancelAction: () async {
-          passwordController.clear();
-          FocusScope.of(context).requestFocus(FocusNode());
-        });
-      }),
-      buildCell("Change password", () async {
-        customAlert(context,
-            title: Text('Change wallet password'),
-            content: Container(
-              height: 170,
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: originalPasswordController,
-                    maxLength: 20,
-                    autofocus: true,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'Original Password',
-                    ),
-                    style: Theme.of(context).textTheme.body1,
-                  ),
-                  TextField(
-                    controller: newPasswordController,
-                    maxLength: 20,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'New Password',
-                    ),
-                    style: Theme.of(context).textTheme.body1,
-                  ),
-                ],
-              ),
-            ), confirmAction: () async {
-          FocusScope.of(context).requestFocus(FocusNode());
-          String originalPassword = originalPasswordController.text;
-          String newPassword = newPasswordController.text;
-          if (originalPassword.isEmpty || newPassword.isEmpty) {
-            return alert(
-              context,
-              Text('Warnning'),
-              "Password can't be empty",
-            );
-          }
-          if (bool.fromEnvironment('dart.vm.product') &&
-              newPassword.length < 6) {
-            return alert(context, Text("Warnning"),
-                "Password must be 6 characters at least!");
-          }
-          originalPasswordController.clear();
-          newPasswordController.clear();
-          Navigator.pop(context);
-          setState(() {
-            loading = true;
-          });
-          try {
-            WalletEntity walletEntity = await WalletStorage.read(
-                widget.walletEntity.name, widget.walletEntity.network);
-            Uint8List privateKey = await BipKeyDerivation.decryptedByKeystore(
-              walletEntity.keystore,
-              originalPassword,
-            );
-            KeyStore newKeyStore =
-                await BipKeyDerivation.encrypt(privateKey, newPassword);
-            await WalletStorage.write(
-              walletEntity: WalletEntity(
-                keystore: newKeyStore,
-                name: walletEntity.name,
-                network: await NetworkStorage.network,
-              ),
-            );
-            await alert(
-                context, Text('Success'), 'Password changed successfully');
-          } catch (err) {
-            return alert(
-              context,
-              Text('Warnning'),
-              err.toString(),
-            );
-          } finally {
-            setState(() {
-              loading = false;
-            });
-          }
-        }, cancelAction: () async {
-          originalPasswordController.clear();
-          newPasswordController.clear();
-          FocusScope.of(context).requestFocus(FocusNode());
-        });
-      }),
-      buildCell("Delete wallet", () async {
-        customAlert(context,
-            title: Text('Delete wallet'),
-            content: TextField(
-              controller: passwordController,
-              maxLength: 20,
-              obscureText: true,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Password',
-              ),
-              style: Theme.of(context).textTheme.body1,
-            ), confirmAction: () async {
-          FocusScope.of(context).requestFocus(FocusNode());
-          String password = passwordController.text;
-          if (password.isEmpty) {
-            return alert(
-              context,
-              Text('Warnning'),
-              "Password can't be empty",
-            );
-          }
-          passwordController.clear();
-          Navigator.pop(context);
-          setState(() {
-            loading = true;
-          });
-          try {
-            WalletEntity walletEntity = await WalletStorage.read(
-                widget.walletEntity.name, widget.walletEntity.network);
-            await BipKeyDerivation.decryptedByKeystore(
-              walletEntity.keystore,
-              password,
-            );
-            await WalletStorage.delete(
-              walletEntity.name,
-              await NetworkStorage.network,
-            );
-            Navigator.popUntil(
-                context, ModalRoute.withName(ManageWallets.routeName));
-          } catch (err) {
-            return alert(
-              context,
-              Text('Warnning'),
-              err.toString(),
-            );
-          } finally {
-            setState(() {
-              loading = false;
-            });
-          }
-        }, cancelAction: () async {
-          passwordController.clear();
-          FocusScope.of(context).requestFocus(FocusNode());
-        });
-      }),
-    ]);
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Operation'),
         centerTitle: true,
       ),
-      body: ProgressHUD(
-        child: Container(
-          child: ListView(
-            padding: EdgeInsets.only(top: 8),
-            children: widgets,
+      body: ListView(
+        padding: EdgeInsets.only(top: 20),
+        children: [
+          buildCell(
+            "Change Wallet Name",
+            onTap: () async {
+              await customAlert(context,
+                  title: Text('Input Wallet Name'),
+                  content: Column(
+                    children: <Widget>[
+                      Text(
+                        'Please input new wallet name to continue',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 15),
+                        child: TextField(
+                          autofocus: true,
+                          controller: walletNameController,
+                          maxLength: 10,
+                          decoration: InputDecoration(
+                              hintText: 'Please input wallet name'),
+                        ),
+                      ),
+                    ],
+                  ), confirmAction: () async {
+                String walletName = walletNameController.text;
+                if (walletName.isEmpty) {
+                  return alert(context, Text('Incorrect Wallet Name'),
+                      "Wallet name can't be empty");
+                }
+                await WalletStorage.updateName(
+                    widget.walletEntity.address, walletName);
+                Navigator.of(context).pop();
+              });
+              walletNameController.clear();
+            },
           ),
-        ),
-        isLoading: loading,
+          buildCell(
+            "Backup Recovery Phrases",
+            showWarnning: !hasBackup,
+            onTap: () async {
+              String password = await verifyPassword();
+              if (password != null) {
+                String mnemonicCipher = widget.walletEntity.mnemonicCipher;
+                String iv = widget.walletEntity.iv;
+                Uint8List mnemonicData = AESCipher.decrypt(
+                  utf8.encode(password),
+                  hexToBytes(mnemonicCipher),
+                  hexToBytes(iv),
+                );
+                String mnemonic = utf8.decode(mnemonicData);
+                String name = ModalRoute.of(context).settings.name;
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => RecoveryPhraseBackup(
+                      hasBackup: hasBackup,
+                      mnemonic: mnemonic,
+                      rootRouteName: name,
+                    ),
+                  ),
+                );
+                await updateBackup();
+              }
+            },
+          ),
+          buildCell(
+            "Delete",
+            important: true,
+            centerTitle: true,
+            showArrow: false,
+            onTap: () async {
+              String password = await verifyPassword();
+              if (password != null) {
+                await customAlert(context,
+                    title: Text('Delete Wallet'),
+                    content: Text(
+                      'Are you sure to delete this wallet',
+                    ), confirmAction: () async {
+                  await WalletStorage.delete(widget.walletEntity.address);
+                  Navigator.of(context)
+                      .popUntil(ModalRoute.withName('/wallets'));
+                });
+              }
+            },
+          )
+        ],
       ),
     );
   }
 
-  Widget buildCell(String title, Future Function() onTap) {
+  Widget buildCell(
+    String title, {
+    bool showArrow = true,
+    bool centerTitle = false,
+    bool showWarnning = false,
+    bool important = false,
+    Future Function() onTap,
+  }) {
     return Container(
       child: GestureDetector(
-        onTap: () {
-          onTap();
+        onTap: () async {
+          if (onTap != null) {
+            await onTap();
+          }
         },
         child: Card(
           child: Row(
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 20),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
-              ),
               Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: 10),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(
-                      FontAwesomeIcons.angleRight,
-                      size: 20,
-                      color: Colors.grey,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20),
+                  child: Text(
+                    title,
+                    textAlign: centerTitle ? TextAlign.center : TextAlign.left,
+                    style: TextStyle(
+                      color: important ? Colors.red : Colors.grey[500],
+                      fontSize: 16,
                     ),
                   ),
                 ),
               ),
+              showArrow
+                  ? Padding(
+                      padding: EdgeInsets.only(right: 10),
+                      child: Row(
+                        children: <Widget>[
+                          showWarnning
+                              ? Padding(
+                                  padding: EdgeInsets.only(right: 10),
+                                  child: Icon(
+                                    Icons.error,
+                                    size: 20,
+                                    color: Colors.red,
+                                  ),
+                                )
+                              : SizedBox(),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 20,
+                            color: Colors.grey,
+                          )
+                        ],
+                      ),
+                    )
+                  : SizedBox(),
             ],
           ),
         ),
       ),
       height: 60,
     );
+  }
+
+  Future<String> verifyPassword() async {
+    String password = await customAlert(context,
+        title: Text('Input Master Code'),
+        content: Column(
+          children: <Widget>[
+            Text(
+              'Please input the master code to continue',
+              style: TextStyle(fontSize: 14),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 15),
+              child: TextField(
+                autofocus: true,
+                controller: passwordController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(hintText: 'Master code'),
+                maxLength: 6,
+              ),
+            ),
+          ],
+        ), confirmAction: () async {
+      String password = passwordController.text;
+      String passwordHash = await Config.passwordHash;
+      String hash =
+          bytesToHex(new api.Digest("SHA-512").process(utf8.encode(password)));
+      if (hash != passwordHash) {
+        Navigator.of(context).pop();
+        return alert(context, Text('Incorrect Master Code'),
+            'Please input correct master code');
+      } else {
+        Globals.updateMasterPasscodes(password);
+        Navigator.of(context).pop(password);
+      }
+    });
+    passwordController.clear();
+    return password;
   }
 }

@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:veatre/src/storage/appearanceStorage.dart';
+import "package:pointycastle/api.dart" as api;
+import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/storage/configStorage.dart';
+import 'package:veatre/src/ui/enterPassword.dart';
 import 'package:veatre/src/ui/apperance.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/network.dart';
-import 'package:veatre/src/storage/networkStorage.dart';
 
 class Settings extends StatefulWidget {
   static const routeName = '/settings';
@@ -16,6 +22,7 @@ class Settings extends StatefulWidget {
 class SettingsState extends State<Settings> {
   Network _network = Network.MainNet;
   Appearance _appearance = Appearance.light;
+  TextEditingController passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -25,14 +32,14 @@ class SettingsState extends State<Settings> {
   }
 
   Future<void> initNet() async {
-    final net = await NetworkStorage.network;
+    final net = await Config.network;
     setState(() {
       _network = net;
     });
   }
 
   Future<void> initAppearance() async {
-    final appearance = await AppearanceStorage.appearance;
+    final appearance = await Config.appearance;
     setState(() {
       _appearance = appearance;
     });
@@ -66,6 +73,24 @@ class SettingsState extends State<Settings> {
         () async {
           await Navigator.of(context).pushNamed(Appearances.routeName);
           await initAppearance();
+        },
+      ),
+      buildCell(
+        Icons.lock,
+        'Change Passcode',
+        '',
+        () async {
+          String password = await verifyPassword();
+          if (password != null) {
+            await Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) {
+                return EnterPassword(
+                  canBack: true,
+                  fromRoute: Settings.routeName,
+                );
+              }),
+            );
+          }
         },
       ),
     ]);
@@ -104,7 +129,7 @@ class SettingsState extends State<Settings> {
                   title,
                   style: TextStyle(
                     color: Theme.of(context).textTheme.title.color,
-                    fontSize: 18,
+                    fontSize: 17,
                   ),
                 ),
               ),
@@ -130,5 +155,41 @@ class SettingsState extends State<Settings> {
       ),
       height: 60,
     );
+  }
+
+  Future<String> verifyPassword() async {
+    String password = await customAlert(context,
+        title: Text('Input Master Code'),
+        content: Column(
+          children: <Widget>[
+            Text(
+              'Please input the master code to continue',
+              style: TextStyle(fontSize: 14),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 15),
+              child: TextField(
+                autofocus: true,
+                controller: passwordController,
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ), confirmAction: () async {
+      String password = passwordController.text;
+      String passwordHash = await Config.passwordHash;
+      String hash =
+          bytesToHex(new api.Digest("SHA-512").process(utf8.encode(password)));
+      if (hash != passwordHash) {
+        Navigator.of(context).pop();
+        return alert(context, Text('Incorrect Master Code'),
+            'Please input correct master code');
+      } else {
+        Globals.updateMasterPasscodes(password);
+        Navigator.of(context).pop(password);
+      }
+    });
+    passwordController.clear();
+    return password;
   }
 }

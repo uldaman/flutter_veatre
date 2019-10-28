@@ -1,10 +1,14 @@
 import 'dart:typed_data';
+
 import 'package:collection/collection.dart';
+import "package:pointycastle/api.dart";
+import "package:pointycastle/impl.dart";
+import "package:pointycastle/stream/ctr.dart";
+import "package:pointycastle/block/aes_fast.dart";
 import 'package:pointycastle/digests/sha256.dart';
 import "package:pointycastle/ecc/api.dart";
 import "package:pointycastle/ecc/curves/secp256k1.dart";
 import 'package:pointycastle/signers/ecdsa_signer.dart';
-import "package:pointycastle/api.dart";
 import "package:pointycastle/macs/hmac.dart";
 import 'package:web3dart/crypto.dart';
 
@@ -102,5 +106,25 @@ class Crypto {
     final compEnc = x9IntegerToBytes(xBN, 1 + ((c.fieldSize + 7) ~/ 8));
     compEnc[0] = yBit ? 0x03 : 0x02;
     return c.decodePoint(compEnc);
+  }
+}
+
+class AESCipher {
+  static Uint8List encrypt(Uint8List key, Uint8List data, Uint8List iv) {
+    Uint8List hashKey = new Digest("SHA-256").process(key);
+    CTRStreamCipher streamCipher = _initCipher(true, hashKey, iv);
+    return streamCipher.process(data);
+  }
+
+  static Uint8List decrypt(Uint8List key, Uint8List cipherData, Uint8List iv) {
+    Uint8List hashKey = new Digest("SHA-256").process(key);
+    CTRStreamCipher streamCipher = _initCipher(false, hashKey, iv);
+    return streamCipher.process(cipherData);
+  }
+
+  static CTRStreamCipher _initCipher(
+      bool forEncryption, Uint8List key, Uint8List iv) {
+    return CTRStreamCipher(AESFastEngine())
+      ..init(false, ParametersWithIV(KeyParameter(key), iv));
   }
 }

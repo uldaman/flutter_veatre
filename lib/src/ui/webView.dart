@@ -512,36 +512,45 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 ),
                 routeName: '/CreateOrImportWallet',
               );
+              List<WalletEntity> walletEntities =
+                  await WalletStorage.readAll(network: widget.network);
+              if (walletEntities.length > 0) {
+                return handleSign(arguments);
+              }
             }
-            return null;
+            throw 'user cancelled';
           }
-          if (arguments[0] == 'signTx') {
-            SigningTxOptions options =
-                SigningTxOptions.fromJSON(arguments[2], _currentURL);
-            await _validate(options.signer);
-            List<SigningTxMessage> txMessages = [];
-            for (Map<String, dynamic> txMsg in arguments[1]) {
-              txMessages.add(SigningTxMessage.fromJSON(txMsg));
-            }
-            return showDialog(
-              TransactionDialog(
-                options: options,
-                txMessages: txMessages,
-              ),
-            );
-          } else if (arguments[0] == 'signCert') {
-            SigningCertMessage certMessage =
-                SigningCertMessage.fromJSON(arguments[1]);
-            SigningCertOptions options =
-                SigningCertOptions.fromJSON(arguments[2], _currentURL);
-            await _validate(options.signer);
-            return showDialog(SignCertificate(certMessage, options));
-          }
+          return handleSign(arguments);
         }
-        throw 'unsupported method';
       },
     );
     return [head, net, vendor];
+  }
+
+  Future<dynamic> handleSign(dynamic arguments) async {
+    if (arguments[0] == 'signTx') {
+      SigningTxOptions options =
+          SigningTxOptions.fromJSON(arguments[2], _currentURL);
+      await _validate(options.signer);
+      List<SigningTxMessage> txMessages = [];
+      for (Map<String, dynamic> txMsg in arguments[1]) {
+        txMessages.add(SigningTxMessage.fromJSON(txMsg));
+      }
+      return showDialog(
+        TransactionDialog(
+          options: options,
+          txMessages: txMessages,
+        ),
+      );
+    } else if (arguments[0] == 'signCert') {
+      SigningCertMessage certMessage =
+          SigningCertMessage.fromJSON(arguments[1]);
+      SigningCertOptions options =
+          SigningCertOptions.fromJSON(arguments[2], _currentURL);
+      await _validate(options.signer);
+      return showDialog(SignCertificate(certMessage, options));
+    }
+    throw 'unsupported method';
   }
 
   Future<dynamic> showDialog(Widget dialog) async {

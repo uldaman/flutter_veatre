@@ -69,7 +69,7 @@ class WalletCard extends StatelessWidget {
           ),
         ),
         Text(
-          ' (0x${abbreviate(address, head: 6, tail: 4)})',
+          ' (0x${abbreviate(address)})',
           style: TextStyle(
             fontSize: 12,
             color: Theme.of(context).accentTextTheme.title.color,

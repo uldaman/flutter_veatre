@@ -188,7 +188,7 @@ class AppState extends State<App> {
         cardTheme: CardTheme(
           color: Colors.black,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
             side: BorderSide(color: Colors.grey[800], width: 1),
           ),
         ),

@@ -179,7 +179,7 @@ class ManageWalletsState extends State<ManageWallets> {
                         Padding(
                           padding: EdgeInsets.only(top: 5),
                           child: Text(
-                            shotHex(walletEntity.address),
+                            '0x${abbreviate(walletEntity.address)}',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[500],

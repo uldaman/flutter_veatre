@@ -169,7 +169,7 @@ class WalletInfoState extends State<WalletInfo> {
                       Padding(
                         padding: EdgeInsets.only(top: 5),
                         child: Text(
-                          shotHex(walletEntity?.address),
+                          '0x${abbreviate(walletEntity?.address)}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[500],
@@ -517,7 +517,7 @@ class WalletInfoState extends State<WalletInfo> {
                           ? FlatButton(
                               padding: EdgeInsets.only(left: 5),
                               child: Text(
-                                shotHex(activity.hash),
+                                '0x${abbreviate(activity.hash.substring(2))}',
                                 style: TextStyle(
                                   color: Colors.blue,
                                 ),

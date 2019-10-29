@@ -1,27 +1,26 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math';
-import 'dart:convert';
-import 'dart:async';
-
+import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:veatre/src/utils/common.dart';
+import 'package:web3dart/contracts.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/api/transactionAPI.dart';
-import 'package:veatre/src/ui/sign_dialog/bottom_modal/wallet_card.dart';
-import 'package:veatre/src/ui/sign_dialog/bottom_modal/row_element.dart';
-import 'package:veatre/src/ui/sign_dialog/bottom_modal/summary.dart';
-import 'package:veatre/src/ui/wallets.dart';
-import 'package:veatre/src/ui/commonComponents.dart';
-import 'package:veatre/src/ui/sign_dialog/bottom_modal/bottom_modal.dart';
 import 'package:veatre/src/models/account.dart';
+import 'package:veatre/src/models/transaction.dart';
+import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
-import 'package:veatre/src/models/transaction.dart';
-import 'package:web3dart/contracts.dart';
-import 'package:veatre/src/api/accountAPI.dart';
-import 'package:veatre/src/storage/activitiyStorage.dart';
+import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/swipeButton.dart';
+import 'package:veatre/src/ui/sign_dialog/bottom_modal/bottom_modal.dart';
+import 'package:veatre/src/ui/sign_dialog/bottom_modal/row_element.dart';
+import 'package:veatre/src/ui/sign_dialog/bottom_modal/summary.dart';
+import 'package:veatre/src/ui/sign_dialog/bottom_modal/wallet_card.dart';
+import 'package:veatre/src/ui/wallets.dart';
 
 class TransactionDialog extends StatefulWidget {
   const TransactionDialog({
@@ -70,14 +69,31 @@ class _TransactionState extends State<TransactionDialog>
     }
     _intrinsicGas = Transaction.intrinsicGas(_clauses);
     _initWalletEntity();
+    Globals.addBlockHeadHandler(_handleHeadChanged);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    Globals.removeBlockHeadHandler(_handleHeadChanged);
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleHeadChanged() async {
+    if (Globals.blockHeadForNetwork.network == Globals.network) {
+      await _completeByEntity(_entity);
+    }
   }
 
   Future<void> _initWalletEntity() async {
     WalletEntity primalEntity = await WalletStorage.getWalletEntity(
       widget.options.signer,
     );
-    if (primalEntity != null) _completeByEntity(primalEntity);
+    if (primalEntity != null) {
+      _swipeController.valueWith(shouldLoading: true, enabled: false);
+      await _completeByEntity(primalEntity);
+    }
   }
 
   @override
@@ -206,7 +222,7 @@ class _TransactionState extends State<TransactionDialog>
         }
         return 'Make contract call';
       default:
-        return 'Perform a batch of _clauses';
+        return 'Perform a batch of clauses';
     }
   }
 
@@ -249,7 +265,6 @@ class _TransactionState extends State<TransactionDialog>
       });
     };
     try {
-      _swipeController.valueWith(shouldLoading: true, enabled: false);
       _entity = entity;
       _account = await AccountAPI.get(_entity.address);
       updateUI(await _estimateGas(_entity.address));
@@ -277,7 +292,10 @@ class _TransactionState extends State<TransactionDialog>
             builder: (context) => Wallets(),
           ),
         );
-        if (newEntity != null) _completeByEntity(newEntity);
+        if (newEntity != null) {
+          _swipeController.valueWith(shouldLoading: true, enabled: false);
+          await _completeByEntity(newEntity);
+        }
       },
     );
   }

@@ -6,12 +6,13 @@ class Storage {
 
   static Future<Database> get instance async {
     if (_database == null) {
-      _database = await open;
+      _database = await open();
     }
     return _database;
   }
 
-  static Future<Database> open = (() async {
+  static Future<Database> open() async {
+    if (_database != null) return _database;
     _database = await openDatabase(
       join(await getDatabasesPath(), dbName),
       onCreate: (db, version) async {
@@ -43,7 +44,8 @@ class Storage {
       },
       version: 1,
     );
-  })();
+    return _database;
+  }
 }
 
 final configTableName = 'config';

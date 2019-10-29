@@ -32,7 +32,7 @@ void main() {
 }
 
 Future<void> init() async {
-  await Storage.open;
+  await Storage.open();
   Globals.connexJS = await rootBundle.loadString("assets/connex.js");
   Globals.setHead(
     BlockHeadForNetwork(
@@ -61,69 +61,38 @@ class App extends StatefulWidget {
 class AppState extends State<App> {
   Timer _timer;
   Appearance _appearance = Globals.appearance;
+
   @override
   void initState() {
     super.initState();
     Globals.addAppearanceHandler(_handleAppearanceChanged);
-    Globals.periodic(10, (timer) async {
-      try {
-        final network = Globals.network;
-        final block = await BlockAPI.best();
-        final newHead = BlockHead.fromJSON(block.encoded);
-        final head = Globals.head();
-        if (head.id != newHead.id && newHead.number > head.number) {
-          BlockHeadForNetwork blockHeadForNetwork = BlockHeadForNetwork(
-            head: newHead,
-            network: network,
-          );
-          await _syncActivities(blockHeadForNetwork);
-          Globals.updateBlockHead(blockHeadForNetwork);
+    Globals.periodic(
+      10,
+      (timer) async {
+        try {
+          final network = Globals.network;
+          final block = await BlockAPI.best();
+          final newHead = BlockHead.fromJSON(block.encoded);
+          final head = Globals.head();
+          if (head.id != newHead.id && newHead.number > head.number) {
+            BlockHeadForNetwork blockHeadForNetwork = BlockHeadForNetwork(
+              head: newHead,
+              network: network,
+            );
+            await ActivityStorage.sync(blockHeadForNetwork);
+            Globals.updateBlockHead(blockHeadForNetwork);
+          }
+        } catch (e) {
+          print('sync head error: $e');
         }
-      } catch (e) {
-        print('sync head error: $e');
-      }
-    });
+      },
+    );
   }
 
   void _handleAppearanceChanged() {
     setState(() {
       _appearance = Globals.appearance;
     });
-  }
-
-  Future<void> _syncActivities(BlockHeadForNetwork blockHeadForNetwork) async {
-    int headNumber = blockHeadForNetwork.head.number;
-    List<Activity> activities = await ActivityStorage.queryPendings(
-        network: blockHeadForNetwork.network);
-    for (Activity activity in activities) {
-      if (activity.type == ActivityType.Transaction) {
-        String txID = activity.hash;
-        final net = Config.net(network: blockHeadForNetwork.network);
-        Map<String, dynamic> receipt = await net.getReceipt(txID);
-        if (receipt != null) {
-          int processBlock = receipt['meta']['blockNumber'];
-          if (activity.processBlock == null) {
-            await ActivityStorage.update(activity.id, {
-              'processBlock': processBlock,
-              'status': ActivityStatus.Confirming.index,
-            });
-          }
-          bool reverted = receipt['reverted'];
-          if (reverted) {
-            await ActivityStorage.update(activity.id, {
-              'status': ActivityStatus.Reverted.index,
-            });
-          } else if (headNumber - processBlock >= 12) {
-            await ActivityStorage.update(activity.id, {
-              'status': ActivityStatus.Finished.index,
-            });
-          }
-        } else if (headNumber - activity.block >= 18) {
-          await ActivityStorage.update(
-              activity.id, {'status': ActivityStatus.Expired.index});
-        }
-      }
-    }
   }
 
   @override

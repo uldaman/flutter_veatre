@@ -265,7 +265,7 @@ class _TransactionState extends State<TransactionDialog>
       });
     };
     try {
-      _entity = entity;
+      setState(() => _entity = entity);
       _account = await AccountAPI.get(_entity.address);
       updateUI(await _estimateGas(_entity.address));
     } catch (err) {

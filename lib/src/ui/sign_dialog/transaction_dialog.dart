@@ -40,10 +40,10 @@ class _TransactionState extends State<TransactionDialog>
   Account _account;
   WalletEntity _entity;
   BigInt _estimatedFee;
-
   int _intrinsicGas;
   int _totalGas;
   List<Clause> _clauses = [];
+  StreamController<String> _vmErrStreamController = StreamController<String>();
 
   BigInt _totalVet = BigInt.from(0);
   int _priority = 0;
@@ -77,6 +77,7 @@ class _TransactionState extends State<TransactionDialog>
   void dispose() {
     Globals.removeBlockHeadHandler(_handleHeadChanged);
     _animationController.dispose();
+    _vmErrStreamController.close();
     super.dispose();
   }
 
@@ -138,6 +139,44 @@ class _TransactionState extends State<TransactionDialog>
           SizedBox(height: 8),
           _buildFee(),
           _buildDivider(),
+          Spacer(),
+          StreamBuilder<String>(
+            stream: _vmErrStreamController.stream,
+            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+              if (!snapshot.hasData) {
+                return Container();
+              }
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error,
+                    color: Colors.red,
+                    size: 17,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 5),
+                    child: GestureDetector(
+                      onTap: () => alert(
+                        context,
+                        Text('Transaction failed/reverted'),
+                        '${snapshot.data}',
+                      ),
+                      child: Text(
+                        'Transaction may fail/revert',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.red,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          SizedBox(height: 21),
         ],
       ),
     );
@@ -270,8 +309,10 @@ class _TransactionState extends State<TransactionDialog>
       setState(() => _entity = entity);
       _account = await AccountAPI.get(_entity.address);
       updateUI(await _estimateGas(_entity.address));
+      _vmErrStreamController.add(null);
     } catch (err) {
       if (err is VmErr) {
+        _vmErrStreamController.add(err.msg);
         updateUI(err.gas);
       } else {
         print('-------$err');
@@ -286,7 +327,7 @@ class _TransactionState extends State<TransactionDialog>
         name: _entity?.name ?? '',
         address: _entity?.address ?? '',
         vet: _account?.formatBalance ?? '--',
-        vtho: _account?.formatBalance ?? '--',
+        vtho: _account?.formatEnergy ?? '--',
       ),
       onExpand: () async {
         WalletEntity newEntity = await Navigator.of(context).push(

@@ -4,12 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/ui/sign_dialog/bottom_modal/summary.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
+import 'package:veatre/src/ui/sign_dialog/bottom_modal/summary.dart';
 
 class Activities extends StatefulWidget {
   @override
@@ -29,8 +29,8 @@ class ActivitiesState extends State<Activities> {
 
   void _handleHeadChanged() async {
     if (Globals.blockHeadForNetwork.network == Globals.network) {
-      await loadActivities();
       await ActivityStorage.updateHasShown();
+      await loadActivities();
     }
   }
 
@@ -384,7 +384,7 @@ class ActivitiesState extends State<Activities> {
                                 await Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => Summary(
-                                      title: 'Certificate',
+                                      title: 'Message',
                                       content: json.decode(
                                               activity.content)['payload']
                                           ['content'],

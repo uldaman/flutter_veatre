@@ -4,14 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/api/accountAPI.dart';
-import 'package:veatre/src/ui/sign_dialog/bottom_modal/summary.dart';
 import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/walletOperation.dart';
+import 'package:veatre/src/ui/sign_dialog/bottom_modal/summary.dart';
 
 class WalletInfo extends StatefulWidget {
   final WalletEntity walletEntity;
@@ -538,7 +538,7 @@ class WalletInfoState extends State<WalletInfo> {
                                 await Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => Summary(
-                                      title: 'Certificate',
+                                      title: 'Message',
                                       content: json.decode(
                                               activity.content)['payload']
                                           ['content'],

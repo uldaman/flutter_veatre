@@ -817,7 +817,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   @override
   void dispose() {
-    print('dispose ');
     Globals.removeBlockHeadHandler(_handleHeadChanged);
     Globals.removeAppearanceHandler(_handleAppearanceChanged);
     Globals.removeTabHandler(_handleTabChanged);

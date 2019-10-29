@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/models/account.dart';
@@ -522,8 +523,10 @@ class WalletInfoState extends State<WalletInfo> {
                                 ),
                               ),
                               onPressed: () async {
-                                Navigator.of(context).pop(
-                                    "https://insight.vecha.in/#/txs/${activity.hash}");
+                                final url = Globals.network == Network.MainNet
+                                    ? 'https://insight.vecha.in/#/txs/${activity.hash}'
+                                    : 'https://insight.vecha.in/#/test/txs/${activity.hash}';
+                                Navigator.of(context).pop(url);
                               },
                             )
                           : FlatButton(

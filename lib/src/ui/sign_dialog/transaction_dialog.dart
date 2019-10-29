@@ -126,15 +126,17 @@ class _TransactionState extends State<TransactionDialog>
       ),
       content: Column(
         children: <Widget>[
-          _buildWalletRow(context),
+          _buildWalletRow(),
           _buildDivider(),
           _buildPriorityRow(),
           _buildDivider(),
-          _buildSummaryRow(context),
+          _buildSummaryRow(),
           _buildDivider(),
           _buildClausesRow(),
           _buildDivider(),
-          _buildTotalValue(context),
+          _buildTotalValue(),
+          SizedBox(height: 8),
+          _buildFee(),
           _buildDivider(),
         ],
       ),
@@ -277,7 +279,7 @@ class _TransactionState extends State<TransactionDialog>
     }
   }
 
-  Widget _buildWalletRow(BuildContext context) {
+  Widget _buildWalletRow() {
     return RowElement(
       prefix: 'WALLET',
       content: WalletCard(
@@ -300,7 +302,7 @@ class _TransactionState extends State<TransactionDialog>
     );
   }
 
-  Widget _buildSummaryRow(BuildContext context) {
+  Widget _buildSummaryRow() {
     return RowElement(
       prefix: 'SUMMARY',
       content: Text(
@@ -372,30 +374,29 @@ class _TransactionState extends State<TransactionDialog>
     );
   }
 
-  Widget _buildTotalValue(BuildContext context) {
-    final Color color = Theme.of(context).accentTextTheme.title.color;
+  Widget _buildTotalValue() {
     return Row(
       children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Total Value'),
-            Text(
-              'Estimate fee',
-              style: TextStyle(color: color),
-            ),
-          ],
-        ),
+        Text('Total Value'),
         Expanded(
-          child: Column(
+          child: Row(
             children: <Widget>[
-              _buildBalance(context, 'VET', fixed2Value(_totalVet)),
-              _buildBalance(
-                context,
-                'VTHO',
-                _swipeController.value.enabled
-                    ? fixed2Value(_estimatedFee)
-                    : '- -',
+              Expanded(
+                child: Text(
+                  '-${formatNum(fixed2Value(_totalVet))}',
+                  textAlign: TextAlign.end,
+                ),
+              ),
+              SizedBox(
+                width: 40,
+                child: Text(
+                  'VET',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).accentTextTheme.title.color,
+                  ),
+                ),
               ),
             ],
           ),
@@ -404,24 +405,37 @@ class _TransactionState extends State<TransactionDialog>
     );
   }
 
-  Widget _buildBalance(BuildContext context, String suffix, String value) {
+  Widget _buildFee() {
+    final Color color = Theme.of(context).accentTextTheme.title.color;
     return Row(
       children: <Widget>[
+        Text('Estimate fee', style: TextStyle(color: color)),
         Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-          ),
-        ),
-        SizedBox(
-          width: 40,
-          child: Text(
-            suffix,
-            textAlign: TextAlign.end,
-            style: TextStyle(
-              fontSize: 11,
-              color: Theme.of(context).accentTextTheme.title.color,
-            ),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  _swipeController.value.enabled
+                      ? formatNum(fixed2Value(_estimatedFee))
+                      : '--',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    color: Theme.of(context).accentTextTheme.title.color,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 40,
+                child: Text(
+                  'VTHO',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).accentTextTheme.title.color,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

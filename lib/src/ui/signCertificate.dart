@@ -175,7 +175,7 @@ class SignCertificateState extends State<SignCertificate>
                           ),
                         ),
                         Text(
-                          '(' + shotHex('${walletEntity?.address ?? ""}' + ')'),
+                          '(' + shotHex('${walletEntity?.address ?? ""}') + ')',
                           style: TextStyle(
                             color: Colors.grey[500],
                             fontSize: 12,
@@ -245,7 +245,7 @@ class SignCertificateState extends State<SignCertificate>
                   await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => Summary(
-                        title: 'Certificate',
+                        title: 'Message',
                         content: widget.certMessage.payload.content,
                       ),
                     ),

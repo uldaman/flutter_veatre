@@ -94,8 +94,8 @@ class BottomModal extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         GestureDetector(

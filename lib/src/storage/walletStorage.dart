@@ -146,32 +146,33 @@ class WalletStorage {
 
   static Future<void> setMainWallet(WalletEntity walletEntity,
       {Network network}) async {
-    final db = await Storage.instance;
-    final batch = db.batch();
-    network = network ?? Globals.network;
-    batch.update(
-      walletTableName,
-      {
-        'isMain': 1,
-      },
-      where: 'isMain != ? and network = ?',
-      whereArgs: [
-        1,
-        network == Network.MainNet ? 0 : 1,
-      ],
-    );
-    batch.update(
-      walletTableName,
-      {
-        'isMain': 0,
-      },
-      where: 'address = ? and network = ?',
-      whereArgs: [
-        walletEntity.address,
-        network == Network.MainNet ? 0 : 1,
-      ],
-    );
-    await batch.commit(noResult: true);
+    return Storage.inTransaction((transaction) async {
+      final batch = transaction.batch();
+      network = network ?? Globals.network;
+      batch.update(
+        walletTableName,
+        {
+          'isMain': 1,
+        },
+        where: 'isMain != ? and network = ?',
+        whereArgs: [
+          1,
+          network == Network.MainNet ? 0 : 1,
+        ],
+      );
+      batch.update(
+        walletTableName,
+        {
+          'isMain': 0,
+        },
+        where: 'address = ? and network = ?',
+        whereArgs: [
+          walletEntity.address,
+          network == Network.MainNet ? 0 : 1,
+        ],
+      );
+      await batch.commit(noResult: true);
+    });
   }
 
   static Future<WalletEntity> getMainWallet({Network network}) async {

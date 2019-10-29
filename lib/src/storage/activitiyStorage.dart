@@ -92,53 +92,54 @@ class ActivityStorage {
     List<Activity> activities = await ActivityStorage.queryPendings(
       network: blockHeadForNetwork.network,
     );
-    final db = await Storage.instance;
-    for (Activity activity in activities) {
-      final batch = db.batch();
-      if (activity.type == ActivityType.Transaction) {
-        String txID = activity.hash;
-        final net = Config.net(network: blockHeadForNetwork.network);
-        Map<String, dynamic> receipt = await net.getReceipt(txID);
-        if (receipt != null) {
-          int processBlock = receipt['meta']['blockNumber'];
-          if (activity.processBlock == null) {
+    await Storage.inTransaction((transaction) async {
+      final batch = transaction.batch();
+      for (Activity activity in activities) {
+        if (activity.type == ActivityType.Transaction) {
+          String txID = activity.hash;
+          final net = Config.net(network: blockHeadForNetwork.network);
+          Map<String, dynamic> receipt = await net.getReceipt(txID);
+          if (receipt != null) {
+            int processBlock = receipt['meta']['blockNumber'];
+            if (activity.processBlock == null) {
+              batch.update(
+                activityTableName,
+                {
+                  'processBlock': processBlock,
+                  'status': ActivityStatus.Confirming.index,
+                },
+                where: "id = ?",
+                whereArgs: [activity.id],
+              );
+            }
+            bool reverted = receipt['reverted'];
+            if (reverted) {
+              batch.update(
+                activityTableName,
+                {'status': ActivityStatus.Reverted.index},
+                where: "id = ?",
+                whereArgs: [activity.id],
+              );
+            } else if (headNumber - processBlock >= 12) {
+              batch.update(
+                activityTableName,
+                {'status': ActivityStatus.Finished.index},
+                where: "id = ?",
+                whereArgs: [activity.id],
+              );
+            }
+          } else if (headNumber - activity.block >= 18) {
             batch.update(
               activityTableName,
-              {
-                'processBlock': processBlock,
-                'status': ActivityStatus.Confirming.index,
-              },
+              {'status': ActivityStatus.Expired.index},
               where: "id = ?",
               whereArgs: [activity.id],
             );
           }
-          bool reverted = receipt['reverted'];
-          if (reverted) {
-            batch.update(
-              activityTableName,
-              {'status': ActivityStatus.Reverted.index},
-              where: "id = ?",
-              whereArgs: [activity.id],
-            );
-          } else if (headNumber - processBlock >= 12) {
-            batch.update(
-              activityTableName,
-              {'status': ActivityStatus.Finished.index},
-              where: "id = ?",
-              whereArgs: [activity.id],
-            );
-          }
-        } else if (headNumber - activity.block >= 18) {
-          batch.update(
-            activityTableName,
-            {'status': ActivityStatus.Expired.index},
-            where: "id = ?",
-            whereArgs: [activity.id],
-          );
         }
         await batch.commit(noResult: true);
       }
-    }
+    });
   }
 }
 

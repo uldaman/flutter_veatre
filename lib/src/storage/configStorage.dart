@@ -79,35 +79,37 @@ class Config {
     String newPasscodes,
     String newPasscodeHash,
   ) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(walletTableName);
-    final batch = db.batch();
-    for (Map<String, dynamic> row in rows) {
-      WalletEntity walletEntity = WalletEntity.fromJSON(row);
-      Uint8List mnemonicData = AESCipher.decrypt(
-        utf8.encode(originPasscodes),
-        hexToBytes(walletEntity.mnemonicCipher),
-        hexToBytes(row['iv']),
-      );
-      final newIV = randomBytes(16);
-      final newMnemonicCipher = AESCipher.encrypt(
-        utf8.encode(newPasscodes),
-        mnemonicData,
-        newIV,
-      );
-      walletEntity.iv = bytesToHex(newIV);
-      walletEntity.mnemonicCipher = bytesToHex(newMnemonicCipher);
-      batch.update(
-        walletTableName,
-        walletEntity.encoded,
-        where: 'address = ? and network = ?',
-        whereArgs: [
-          walletEntity.address,
-          walletEntity.network == Network.MainNet ? 0 : 1,
-        ],
-      );
-    }
-    batch.update(configTableName, {'passwordHash': newPasscodeHash});
-    await batch.commit(noResult: true);
+    return Storage.inTransaction((transaction) async {
+      List<Map<String, dynamic>> rows =
+          await transaction.query(walletTableName);
+      final batch = transaction.batch();
+      for (Map<String, dynamic> row in rows) {
+        WalletEntity walletEntity = WalletEntity.fromJSON(row);
+        Uint8List mnemonicData = AESCipher.decrypt(
+          utf8.encode(originPasscodes),
+          hexToBytes(walletEntity.mnemonicCipher),
+          hexToBytes(row['iv']),
+        );
+        final newIV = randomBytes(16);
+        final newMnemonicCipher = AESCipher.encrypt(
+          utf8.encode(newPasscodes),
+          mnemonicData,
+          newIV,
+        );
+        walletEntity.iv = bytesToHex(newIV);
+        walletEntity.mnemonicCipher = bytesToHex(newMnemonicCipher);
+        batch.update(
+          walletTableName,
+          walletEntity.encoded,
+          where: 'address = ? and network = ?',
+          whereArgs: [
+            walletEntity.address,
+            walletEntity.network == Network.MainNet ? 0 : 1,
+          ],
+        );
+      }
+      batch.update(configTableName, {'passwordHash': newPasscodeHash});
+      await batch.commit(noResult: true);
+    });
   }
 }

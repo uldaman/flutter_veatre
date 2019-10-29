@@ -46,6 +46,16 @@ class Storage {
     );
     return _database;
   }
+
+  static Future<T> inTransaction<T>(Future<T> action(Transaction txn)) async {
+    final db = await Storage.instance;
+    return db.transaction(
+      (transaction) async {
+        return await action(transaction);
+      },
+      exclusive: true,
+    );
+  }
 }
 
 final configTableName = 'config';

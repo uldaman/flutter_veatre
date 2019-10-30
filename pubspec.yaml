@@ -35,6 +35,7 @@ dev_dependencies:
   fixnum: ^0.10.9
   validators: ^2.0.0
   dio: ^2.1.13
+  synchronized:
   keyboard_visibility:
   cached_network_image: ^0.8.0
   webview_flutter:

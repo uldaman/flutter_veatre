@@ -3,13 +3,12 @@ import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/crypto.dart';
-import 'package:veatre/src/storage/database.dart';
+import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 
 class WalletStorage {
   static Future<List<WalletEntity>> readAll({Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       walletTableName,
       where: 'network = ?',
       whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
@@ -19,8 +18,7 @@ class WalletStorage {
   }
 
   static Future<List<String>> wallets({Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       walletTableName,
       where: 'network = ?',
       whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
@@ -31,8 +29,7 @@ class WalletStorage {
   }
 
   static Future<int> count({Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       walletTableName,
       where: 'network = ?',
       whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
@@ -42,8 +39,7 @@ class WalletStorage {
   }
 
   static Future<bool> hasName(String name, {Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       walletTableName,
       where: 'name = ? and network = ?',
       whereArgs: [
@@ -57,8 +53,7 @@ class WalletStorage {
 
   static Future<void> updateName(String address, String name,
       {Network network}) async {
-    final db = await Storage.instance;
-    await db.update(
+    await Storage.update(
       walletTableName,
       {'name': name},
       where: 'address = ? and network = ? ',
@@ -74,8 +69,7 @@ class WalletStorage {
     bool hasBackup, {
     Network network,
   }) async {
-    final db = await Storage.instance;
-    await db.update(
+    await Storage.update(
       walletTableName,
       {'hasBackup': hasBackup ? 0 : 1},
       where: 'address = ? and network = ? ',
@@ -87,8 +81,7 @@ class WalletStorage {
   }
 
   static Future<bool> hasWallet(String address, {Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       walletTableName,
       where: 'address = ? and network = ?',
       whereArgs: [
@@ -101,8 +94,7 @@ class WalletStorage {
   }
 
   static Future<WalletEntity> read(String address, {Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       walletTableName,
       where: 'address = ? and network = ?',
       whereArgs: [
@@ -120,8 +112,7 @@ class WalletStorage {
   static Future<void> write(WalletEntity walletEntity,
       {Network network}) async {
     walletEntity.network = network ?? Globals.network;
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       walletTableName,
       where: 'address = ? and network = ?',
       whereArgs: [
@@ -131,9 +122,9 @@ class WalletStorage {
       orderBy: 'id desc',
     );
     if (rows.length == 0) {
-      return db.insert(walletTableName, walletEntity.encoded);
+      return Storage.insert(walletTableName, walletEntity.encoded);
     }
-    return db.update(
+    return Storage.update(
       walletTableName,
       walletEntity.encoded,
       where: 'address = ? and network = ?',
@@ -176,8 +167,7 @@ class WalletStorage {
   }
 
   static Future<WalletEntity> getMainWallet({Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       walletTableName,
       where: 'isMain = ? and network = ?',
       whereArgs: [
@@ -215,8 +205,7 @@ class WalletStorage {
   }
 
   static Future<void> delete(String address, {Network network}) async {
-    final db = await Storage.instance;
-    await db.delete(
+    await Storage.delete(
       walletTableName,
       where: 'address = ? and network = ?',
       whereArgs: [

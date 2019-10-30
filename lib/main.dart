@@ -8,7 +8,7 @@ import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/api/BlockAPI.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
-import 'package:veatre/src/storage/database.dart';
+import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/passwordGeneration.dart';

@@ -6,7 +6,7 @@ import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/crypto.dart';
-import 'package:veatre/src/storage/database.dart';
+import 'package:veatre/src/storage/storage.dart';
 
 enum Appearance {
   light,
@@ -23,22 +23,19 @@ class Config {
   static final mainnet = "https://sync-mainnet.vechain.org";
 
   static Future<void> setAppearance(Appearance appearance) async {
-    final db = await Storage.instance;
-    await db.update(
+    await Storage.update(
         configTableName, {'theme': appearance == Appearance.light ? 0 : 1});
   }
 
   static Future<Appearance> get appearance async {
-    final db = await Storage.instance;
-    final rows = await db.query(
+    final rows = await Storage.query(
       configTableName,
     );
     return rows.first['theme'] == 0 ? Appearance.light : Appearance.dark;
   }
 
   static Future<void> setNetwork(Network network) async {
-    final db = await Storage.instance;
-    await db.update(
+    await Storage.update(
         configTableName, {'network': network == Network.MainNet ? 0 : 1});
   }
 
@@ -50,8 +47,7 @@ class Config {
   }
 
   static Future<Network> get network async {
-    final db = await Storage.instance;
-    final rows = await db.query(
+    final rows = await Storage.query(
       configTableName,
       limit: 1,
     );
@@ -61,8 +57,7 @@ class Config {
   }
 
   static Future<String> get passwordHash async {
-    final db = await Storage.instance;
-    final rows = await db.query(
+    final rows = await Storage.query(
       configTableName,
       limit: 1,
     );
@@ -70,8 +65,7 @@ class Config {
   }
 
   static Future<void> setPasswordHash(String passwordHash) async {
-    final db = await Storage.instance;
-    await db.update(configTableName, {'passwordHash': passwordHash});
+    await Storage.update(configTableName, {'passwordHash': passwordHash});
   }
 
   static Future<void> changePassword(

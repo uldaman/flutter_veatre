@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
@@ -70,6 +71,14 @@ String randomHex(int hexLength) {
 
 String get defaultDerivationPath {
   return "m/44'/818'/0'/0/0";
+}
+
+Uint8List sha512(String str) {
+  return new Digest("SHA-512").process(utf8.encode(str));
+}
+
+Uint8List sha256(String str) {
+  return new Digest("SHA-256").process(utf8.encode(str));
 }
 
 String fixed2Value(BigInt value) {

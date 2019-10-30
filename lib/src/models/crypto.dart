@@ -111,14 +111,12 @@ class Crypto {
 
 class AESCipher {
   static Uint8List encrypt(Uint8List key, Uint8List data, Uint8List iv) {
-    Uint8List hashKey = new Digest("SHA-256").process(key);
-    CTRStreamCipher streamCipher = _initCipher(true, hashKey, iv);
+    CTRStreamCipher streamCipher = _initCipher(true, key, iv);
     return streamCipher.process(data);
   }
 
   static Uint8List decrypt(Uint8List key, Uint8List cipherData, Uint8List iv) {
-    Uint8List hashKey = new Digest("SHA-256").process(key);
-    CTRStreamCipher streamCipher = _initCipher(false, hashKey, iv);
+    CTRStreamCipher streamCipher = _initCipher(false, key, iv);
     return streamCipher.process(cipherData);
   }
 

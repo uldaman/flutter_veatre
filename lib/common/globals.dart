@@ -1,10 +1,13 @@
 import 'dart:core';
 import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
+import 'package:veatre/src/utils/common.dart';
 
 enum TabStage {
   ClearFocus,
@@ -60,7 +63,7 @@ class BlockHeadForNetwork {
 }
 
 class Globals {
-  static String _masterPasscodes = '';
+  static Uint8List _masterPasscodes = Uint8List.fromList([]);
 
   static final Block mainNetGenesis = Block.fromJSON({
     "number": 0,
@@ -241,14 +244,14 @@ class Globals {
   }
 
   static void updateMasterPasscodes(String passcodes) {
-    _masterPasscodes = passcodes;
+    _masterPasscodes = Uint8List.fromList(sha256(passcodes));
   }
 
   static void clearMasterPasscodes() {
-    _masterPasscodes = '';
+    _masterPasscodes.clear();
   }
 
-  static String get masterPasscodes {
+  static Uint8List get masterPasscodes {
     return _masterPasscodes;
   }
 

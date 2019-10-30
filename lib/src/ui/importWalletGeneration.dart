@@ -137,7 +137,7 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                           child: Align(
                             alignment: Alignment.bottomLeft,
                             child: Text(
-                              shotHex(address),
+                              '0x${abbreviate(address)}',
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: Theme.of(context).textTheme.title.color,

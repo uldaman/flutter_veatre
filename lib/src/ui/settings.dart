@@ -9,7 +9,6 @@ import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/enterPassword.dart';
 import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
-import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/network.dart';
 
 class Settings extends StatefulWidget {
@@ -49,14 +48,6 @@ class SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     List<Widget> widgets = [];
     widgets.addAll([
-      buildCell(
-        FontAwesomeIcons.wallet,
-        'Wallets',
-        '',
-        () async {
-          await Navigator.of(context).pushNamed(ManageWallets.routeName);
-        },
-      ),
       buildCell(
         Icons.network_check,
         'Network',

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:veatre/src/ui/clauses.dart';
 import 'package:web3dart/contracts.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/api/accountAPI.dart';
@@ -368,7 +369,13 @@ class _TransactionState extends State<TransactionDialog>
     return RowElement(
       prefix: 'Clauses',
       content: Text('${_clauses.length} Clauses'),
-      onExpand: () => print(1),
+      onExpand: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => Clauses(
+            txMessages: widget.txMessages,
+          ),
+        ),
+      ),
     );
   }
 

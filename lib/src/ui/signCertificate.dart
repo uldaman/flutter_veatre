@@ -175,7 +175,9 @@ class SignCertificateState extends State<SignCertificate>
                           ),
                         ),
                         Text(
-                          '(' + shotHex('${walletEntity?.address ?? ""}') + ')',
+                          '(0x' +
+                              abbreviate('${walletEntity?.address ?? ""}') +
+                              ')',
                           style: TextStyle(
                             color: Colors.grey[500],
                             fontSize: 12,

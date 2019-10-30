@@ -57,6 +57,8 @@ class ActivitiesState extends State<Activities> {
       appBar: AppBar(
         title: Text('Activity'),
         leading: FlatButton(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
           padding: EdgeInsets.all(0),
           child: Align(
             alignment: Alignment.centerRight,
@@ -363,7 +365,7 @@ class ActivitiesState extends State<Activities> {
                           ? FlatButton(
                               padding: EdgeInsets.only(left: 5),
                               child: Text(
-                                shotHex(activity.hash),
+                                '0x${abbreviate(activity.hash.substring(2))}',
                                 style: TextStyle(
                                   color: Colors.blue,
                                 ),

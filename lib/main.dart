@@ -8,7 +8,7 @@ import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/api/BlockAPI.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
-import 'package:veatre/src/storage/database.dart';
+import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/passwordGeneration.dart';
@@ -188,7 +188,7 @@ class AppState extends State<App> {
         cardTheme: CardTheme(
           color: Colors.black,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
             side: BorderSide(color: Colors.grey[800], width: 1),
           ),
         ),

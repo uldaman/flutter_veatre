@@ -166,7 +166,7 @@ class _CreateWalletState extends State<CreateWallet> {
                               child: Align(
                                 alignment: Alignment.bottomLeft,
                                 child: Text(
-                                  shotHex(address),
+                                  '0x${abbreviate(address ?? '')}',
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color:

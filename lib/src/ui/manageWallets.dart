@@ -57,6 +57,8 @@ class ManageWalletsState extends State<ManageWallets> {
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         leading: FlatButton(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
           padding: EdgeInsets.all(0),
           child: Align(
             alignment: Alignment.centerRight,
@@ -179,7 +181,7 @@ class ManageWalletsState extends State<ManageWallets> {
                         Padding(
                           padding: EdgeInsets.only(top: 5),
                           child: Text(
-                            shotHex(walletEntity.address),
+                            '0x${abbreviate(walletEntity.address)}',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[500],

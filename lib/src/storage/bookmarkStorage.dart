@@ -1,12 +1,11 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/database.dart';
+import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 
 class BookmarkStorage {
   static Future<void> insert(Bookmark bookmark) async {
-    final db = await Storage.instance;
-    await db.insert(
+    await Storage.insert(
       bookmarkTableName,
       bookmark.encoded,
       conflictAlgorithm: ConflictAlgorithm.replace,
@@ -14,8 +13,7 @@ class BookmarkStorage {
   }
 
   static Future<void> update(int id, Map<String, dynamic> values) async {
-    final db = await Storage.instance;
-    await db.update(
+    await Storage.update(
       bookmarkTableName,
       values,
       where: "id = ?",
@@ -24,8 +22,7 @@ class BookmarkStorage {
   }
 
   static Future<void> delete(int id) async {
-    final db = await Storage.instance;
-    await db.delete(
+    await Storage.delete(
       bookmarkTableName,
       where: "id = ?",
       whereArgs: [id],
@@ -33,8 +30,7 @@ class BookmarkStorage {
   }
 
   static Future<List<Bookmark>> queryAll({Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       bookmarkTableName,
       where: 'network = ?',
       whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
@@ -44,8 +40,7 @@ class BookmarkStorage {
   }
 
   static Future<Bookmark> queryByURL(String url, {Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       bookmarkTableName,
       where: 'network = ? and url = ?',
       whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1, url],

@@ -1,13 +1,12 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/database.dart';
+import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 
 class ActivityStorage {
   static Future<void> insert(Activity activity, {Network network}) async {
-    final db = await Storage.instance;
     activity.network = network ?? Globals.network;
-    await db.insert(
+    await Storage.insert(
       activityTableName,
       activity.encoded,
       conflictAlgorithm: ConflictAlgorithm.replace,
@@ -15,8 +14,7 @@ class ActivityStorage {
   }
 
   static Future<void> update(int id, Map<String, dynamic> values) async {
-    final db = await Storage.instance;
-    await db.update(
+    await Storage.update(
       activityTableName,
       values,
       where: "id = ?",
@@ -25,8 +23,7 @@ class ActivityStorage {
   }
 
   static Future<void> updateHasShown() async {
-    final db = await Storage.instance;
-    await db.update(
+    await Storage.update(
       activityTableName,
       {'hasShown': 0},
       where: 'hasShown = ?',
@@ -35,8 +32,7 @@ class ActivityStorage {
   }
 
   static Future<Activity> latest({Network network}) async {
-    final Database db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       activityTableName,
       where: 'network = ?',
       whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
@@ -49,8 +45,7 @@ class ActivityStorage {
   }
 
   static Future<List<Activity>> queryPendings({Network network}) async {
-    final Database db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       activityTableName,
       where: 'status in (?,?) and network = ?',
       whereArgs: [
@@ -63,8 +58,7 @@ class ActivityStorage {
   }
 
   static Future<List<Activity>> queryAll({Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       activityTableName,
       where: 'network = ?',
       whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
@@ -74,8 +68,7 @@ class ActivityStorage {
   }
 
   static Future<List<Activity>> query(String address, {Network network}) async {
-    final db = await Storage.instance;
-    List<Map<String, dynamic>> rows = await db.query(
+    List<Map<String, dynamic>> rows = await Storage.query(
       activityTableName,
       where: 'address = ? and network = ?',
       whereArgs: [

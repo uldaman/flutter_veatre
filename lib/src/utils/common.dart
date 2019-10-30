@@ -5,7 +5,7 @@ import 'package:web3dart/crypto.dart';
 import 'package:pointycastle/api.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
 
-String abbreviate(String str, {int head = 0, int tail = 0}) {
+String abbreviate(String str, {int head = 4, int tail = 4}) {
   int len = str.length;
   if (head > len || tail > len) {
     return str;
@@ -113,12 +113,6 @@ String formatNum(String num) {
     s += '.${splitNum[1]}';
   }
   return s;
-}
-
-String shotHex(String hex) {
-  return (hex == null || hex.length < 8)
-      ? '0x'
-      : '0x${hex.substring(0, 4)}...${hex.substring(hex.length - 4, hex.length)}';
 }
 
 class RandomBridge implements SecureRandom {

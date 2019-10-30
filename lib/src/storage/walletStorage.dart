@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/account.dart';
@@ -219,13 +220,13 @@ class WalletStorage {
     String address,
     String name,
     String mnemonic,
-    String password, {
+    Uint8List password, {
     Network network,
   }) async {
     final mnemonicData = utf8.encode(mnemonic);
     final iv = randomBytes(16);
     final mnemonicCipher = AESCipher.encrypt(
-      utf8.encode(password),
+      password,
       mnemonicData,
       iv,
     );

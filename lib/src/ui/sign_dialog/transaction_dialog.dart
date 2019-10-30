@@ -190,7 +190,7 @@ class _TransactionState extends State<TransactionDialog>
       final head = Globals.head();
       Transaction tx = Transaction(
         blockRef: BlockRef(number32: head.number),
-        expiration: 30,
+        expiration: 18,
         chainTag: chainTag,
         clauses: _clauses,
         gasPriceCoef: _priority,
@@ -218,7 +218,7 @@ class _TransactionState extends State<TransactionDialog>
             link: widget.options.link,
             address: _entity.address,
             type: ActivityType.Transaction,
-            comment: _makeSummary(),
+            comment: _makeSummary(shotSummary: true),
             timestamp: head.timestamp,
             network: Globals.network,
             status: ActivityStatus.Pending,
@@ -248,23 +248,23 @@ class _TransactionState extends State<TransactionDialog>
     });
   }
 
-  String _makeSummary() {
+  String _makeSummary({bool shotSummary = false}) {
     if (widget.options.comment != null) {
       return widget.options.comment;
     }
     switch (_clauses.length) {
       case 0:
-        return 'Empty';
+        return shotSummary ? 'Unkown' : 'Empty';
       case 1:
         if (_clauses[0].to == null) {
-          return 'Create a contract';
+          return shotSummary ? 'Create' : 'Create a contract';
         }
         if (_clauses[0].data.length == 0) {
-          return 'Transfer VET';
+          return shotSummary ? 'Transfer' : 'Transfer VET';
         }
-        return 'Make contract call';
+        return shotSummary ? 'Call' : 'Make contract call';
       default:
-        return 'Perform a batch of clauses';
+        return shotSummary ? 'Batch Call' : 'Perform a batch of clauses';
     }
   }
 

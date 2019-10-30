@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:veatre/common/net.dart';
@@ -69,7 +68,7 @@ class Config {
   }
 
   static Future<void> changePassword(
-    String originPasscodes,
+    Uint8List originPasscodes,
     String newPasscodes,
     String newPasscodeHash,
   ) async {
@@ -80,13 +79,13 @@ class Config {
       for (Map<String, dynamic> row in rows) {
         WalletEntity walletEntity = WalletEntity.fromJSON(row);
         Uint8List mnemonicData = AESCipher.decrypt(
-          utf8.encode(originPasscodes),
+          originPasscodes,
           hexToBytes(walletEntity.mnemonicCipher),
           hexToBytes(row['iv']),
         );
         final newIV = randomBytes(16);
         final newMnemonicCipher = AESCipher.encrypt(
-          utf8.encode(newPasscodes),
+          sha256(newPasscodes),
           mnemonicData,
           newIV,
         );

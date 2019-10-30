@@ -77,10 +77,10 @@ class WalletEntity {
   }
 
   Future<Uint8List> decryptPrivateKey(
-    String passcodes,
+    Uint8List passcodes,
   ) async {
     Uint8List mnemonicData = AESCipher.decrypt(
-      utf8.encode(passcodes),
+      passcodes,
       hexToBytes(mnemonicCipher),
       hexToBytes(iv),
     );

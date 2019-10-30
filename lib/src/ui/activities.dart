@@ -57,6 +57,8 @@ class ActivitiesState extends State<Activities> {
       appBar: AppBar(
         title: Text('Activity'),
         leading: FlatButton(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
           padding: EdgeInsets.all(0),
           child: Align(
             alignment: Alignment.centerRight,

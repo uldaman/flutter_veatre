@@ -57,6 +57,8 @@ class ManageWalletsState extends State<ManageWallets> {
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         leading: FlatButton(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
           padding: EdgeInsets.all(0),
           child: Align(
             alignment: Alignment.centerRight,

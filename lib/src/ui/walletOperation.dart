@@ -88,12 +88,12 @@ class WalletOperationState extends State<WalletOperation> {
             "Backup Recovery Phrases",
             showWarnning: !hasBackup,
             onTap: () async {
-              String password = await verifyPassword();
+              Uint8List password = await verifyPassword();
               if (password != null) {
                 String mnemonicCipher = widget.walletEntity.mnemonicCipher;
                 String iv = widget.walletEntity.iv;
                 Uint8List mnemonicData = AESCipher.decrypt(
-                  utf8.encode(password),
+                  password,
                   hexToBytes(mnemonicCipher),
                   hexToBytes(iv),
                 );
@@ -118,7 +118,7 @@ class WalletOperationState extends State<WalletOperation> {
             centerTitle: true,
             showArrow: false,
             onTap: () async {
-              String password = await verifyPassword();
+              Uint8List password = await verifyPassword();
               if (password != null) {
                 await customAlert(context,
                     title: Text('Delete Wallet'),
@@ -200,8 +200,8 @@ class WalletOperationState extends State<WalletOperation> {
     );
   }
 
-  Future<String> verifyPassword() async {
-    String password = await customAlert(context,
+  Future<Uint8List> verifyPassword() async {
+    Uint8List password = await customAlert(context,
         title: Text('Input Master Code'),
         content: Column(
           children: <Widget>[
@@ -231,7 +231,7 @@ class WalletOperationState extends State<WalletOperation> {
             'Please input correct master code');
       } else {
         Globals.updateMasterPasscodes(password);
-        Navigator.of(context).pop(password);
+        Navigator.of(context).pop(Globals.masterPasscodes);
       }
     });
     passwordController.clear();

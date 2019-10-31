@@ -248,7 +248,7 @@ class Globals {
   }
 
   static void clearMasterPasscodes() {
-    _masterPasscodes.clear();
+    _masterPasscodes = Uint8List.fromList([]);
   }
 
   static Uint8List get masterPasscodes {
@@ -256,9 +256,9 @@ class Globals {
   }
 
   static void destroy() {
-    _tabController.dispose();
     _appearanceController.dispose();
     _blockHeadController.dispose();
+    _tabController.dispose();
     _networkController.dispose();
   }
 }

@@ -46,7 +46,7 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
         child: Text(
           '${index + 1}',
           style: TextStyle(
-            color: Colors.grey[500],
+            color: Theme.of(context).primaryTextTheme.display2.color,
             fontSize: 17,
           ),
         ),
@@ -63,7 +63,7 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(5)),
         side: BorderSide(
-          color: Theme.of(context).textTheme.title.color,
+          color: Theme.of(context).primaryTextTheme.title.color,
           width: 0,
         ),
       ),
@@ -116,7 +116,7 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
       child: Text(
         '${randomWord.word}',
         style: TextStyle(
-          color: Colors.grey[500],
+          color: Theme.of(context).primaryTextTheme.display2.color,
           fontSize: 17,
         ),
       ),
@@ -126,151 +126,149 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text('Verify Recovery Phrases'),
-          centerTitle: true,
-        ),
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                color: Colors.grey[250],
-                height: 20,
-              ),
-              Container(
-                height: 200,
-                color: Theme.of(context).primaryColor,
-                child: GridView.builder(
-                  padding: EdgeInsets.all(10),
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: 4,
-                  ),
-                  itemCount: idleWords.length,
-                  itemBuilder: (context, index) {
-                    return SizedBox(
-                      child: buildIdleWord(index),
-                    );
-                  },
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: Text('Verify Recovery Phrases'),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              height: 20,
+            ),
+            Container(
+              height: 200,
+              child: GridView.builder(
+                padding: EdgeInsets.all(10),
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                  childAspectRatio: 4,
                 ),
+                itemCount: idleWords.length,
+                itemBuilder: (context, index) {
+                  return SizedBox(
+                    child: buildIdleWord(index),
+                  );
+                },
               ),
-              Expanded(
-                child: Container(
-                  color: Colors.grey[250],
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          child: Text(
-                            'Select the phrase in correct order',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 17,
-                            ),
+            ),
+            Expanded(
+              child: Container(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Text(
+                          'Select the phrase in correct order',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .display1
+                                .color,
+                            fontSize: 17,
                           ),
                         ),
                       ),
-                      Container(
-                        height: 220,
-                        child: GridView.builder(
-                          padding: EdgeInsets.all(10),
-                          physics: NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 20,
-                            childAspectRatio: 3.5,
-                          ),
-                          itemCount: randomWords.length,
-                          itemBuilder: (context, index) {
-                            return buildRandomWord(index);
-                          },
+                    ),
+                    Container(
+                      height: 220,
+                      child: GridView.builder(
+                        padding: EdgeInsets.all(10),
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 20,
+                          mainAxisSpacing: 20,
+                          childAspectRatio: 3.5,
                         ),
+                        itemCount: randomWords.length,
+                        itemBuilder: (context, index) {
+                          return buildRandomWord(index);
+                        },
                       ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width - 60,
-                        height: 24,
-                        child: errorMsg != null
-                            ? Row(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.error,
-                                    color: Colors.red,
-                                    size: 16,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 5),
-                                    child: Text(
-                                      errorMsg,
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 14,
-                                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width - 60,
+                      height: 24,
+                      child: errorMsg != null
+                          ? Row(
+                              children: <Widget>[
+                                Icon(
+                                  Icons.error,
+                                  color: Theme.of(context).errorColor,
+                                  size: 16,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 5),
+                                  child: Text(
+                                    errorMsg,
+                                    style: TextStyle(
+                                      color: Theme.of(context).errorColor,
+                                      fontSize: 14,
                                     ),
                                   ),
-                                ],
-                              )
-                            : SizedBox(),
-                      ),
-                    ],
-                  ),
+                                ),
+                              ],
+                            )
+                          : SizedBox(),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width - 60,
-                height: 44,
-                child: FlatButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    side: BorderSide(
-                      color: Theme.of(context).textTheme.title.color,
-                      width: 0,
-                    ),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width - 60,
+              height: 44,
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  side: BorderSide(
+                    color: Theme.of(context).textTheme.title.color,
+                    width: 0,
                   ),
-                  color: Theme.of(context).textTheme.title.color,
-                  child: Text(
-                    "Verify",
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 20,
-                    ),
+                ),
+                color: Theme.of(context).primaryColor,
+                child: Text(
+                  "Verify",
+                  style: TextStyle(
+                    color: Theme.of(context).accentColor,
+                    fontSize: 20,
                   ),
-                  disabledColor: Colors.grey[500],
-                  onPressed: hasFilled
-                      ? () async {
-                          if (verify()) {
-                            String address = await addressFrom(widget.mnemonic);
-                            await WalletStorage.updateHasBackup(address, true);
-                            Navigator.popUntil(
-                              context,
-                              ModalRoute.withName(widget.rootRouteName),
-                            );
-                          } else {
-                            setState(() {
-                              errorMsg =
-                                  'Incorrect recovery phrases, please double check.';
-                            });
-                          }
+                ),
+                disabledColor:
+                    Theme.of(context).primaryTextTheme.display3.color,
+                onPressed: hasFilled
+                    ? () async {
+                        if (verify()) {
+                          String address = await addressFrom(widget.mnemonic);
+                          await WalletStorage.updateHasBackup(address, true);
+                          Navigator.popUntil(
+                            context,
+                            ModalRoute.withName(widget.rootRouteName),
+                          );
+                        } else {
+                          setState(() {
+                            errorMsg =
+                                'Incorrect recovery phrases, please double check.';
+                          });
                         }
-                      : null,
-                ),
+                      }
+                    : null,
               ),
-              SizedBox(
-                height: 20,
-              ),
-            ],
-          ),
-        ));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   bool get hasFilled {

@@ -29,17 +29,14 @@ class CreateBookmarkState extends State<CreateBookmark> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Bookmark'),
+        backgroundColor: Theme.of(context).backgroundColor,
         centerTitle: true,
         actions: <Widget>[
           FlatButton(
             child: Text(
               'Save',
-              style: TextStyle(
-                color: Theme.of(context).textTheme.body1.color,
-              ),
             ),
             onPressed: () async {
               Bookmark bookmark = Bookmark(
@@ -100,16 +97,11 @@ class CreateBookmarkState extends State<CreateBookmark> {
                       children: <Widget>[
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.only(top: 10, right: 15),
+                            padding: EdgeInsets.only(top: 8, right: 15),
                             child: Container(
                               height: 60,
                               child: TextField(
                                 autofocus: true,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color:
-                                      Theme.of(context).textTheme.body1.color,
-                                ),
                                 maxLines: 1,
                                 controller: titleEditingController,
                               ),
@@ -122,12 +114,18 @@ class CreateBookmarkState extends State<CreateBookmark> {
                       children: <Widget>[
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.only(top: 5, right: 15),
+                            padding:
+                                EdgeInsets.only(top: 5, left: 10, right: 15),
                             child: Text(
                               widget.documentMetaData.url,
                               textAlign: TextAlign.left,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .primaryTextTheme
+                                      .display2
+                                      .color),
                             ),
                           ),
                         )

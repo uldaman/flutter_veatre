@@ -118,54 +118,87 @@ class AppState extends State<App> {
   ManageWallets get manageWallets => ManageWallets();
 
   ThemeData get lightTheme => ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: Colors.white,
-        accentColor: Colors.blue,
-        brightness: Brightness.light,
-        primaryIconTheme: IconThemeData(color: Colors.black),
-        iconTheme: IconThemeData(color: Colors.black),
-        accentTextTheme: TextTheme(
-          title: TextStyle(color: Colors.grey[500], fontFamily: "Aveny"),
+        buttonTheme: ButtonThemeData(
+          textTheme: ButtonTextTheme.normal,
+          buttonColor: Color(0xFF410FE6),
         ),
+        appBarTheme: AppBarTheme(
+          color: Color(0xFFF8F8F8),
+          iconTheme: IconThemeData(color: Color(0xFF666666)),
+        ),
+        primarySwatch: Colors.blue,
+        primaryColor: MaterialColor(0xFF410FE6, {0: Color(0xFF410FE6)}), //主色调
+        accentColor: Colors.white,
+        backgroundColor: Color(0xFFF8F8F8), //背景色
+        brightness: Brightness.light,
+        primaryIconTheme: IconThemeData(color: Color(0xFF410FE6)),
+        iconTheme: IconThemeData(color: Color(0xFF666666)),
         primaryTextTheme: TextTheme(
           title: TextStyle(
-            color: Colors.black,
+            color: Color(0xFF333333),
             fontFamily: "Aveny",
             fontSize: 17,
           ),
-        ),
+          subtitle: TextStyle(
+            color: Color(0xFF666666),
+            fontFamily: "Aveny",
+            fontSize: 17,
+          ),
+          //大标题
+          display1: TextStyle(
+            color: Color(0xFF333333),
+            fontFamily: "Aveny",
+            fontSize: 28,
+          ),
+          //描述性文字
+          display2: TextStyle(
+            color: Color(0xFF999999),
+            fontFamily: "Aveny",
+            fontSize: 17,
+          ),
+          //辅助文字
+          display3: TextStyle(
+            color: Color(0xFFCCCCCC),
+            fontFamily: "Aveny",
+            fontSize: 17,
+          ),
+          button: TextStyle(
+            // color: Colors.white,
+            fontFamily: "Aveny",
+            fontSize: 17,
+          ),
+        ), //主文字//副标题
         cardTheme: CardTheme(
           color: Colors.white,
+          elevation: 2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
           ),
-        ),
-        textTheme: TextTheme(
-          title: TextStyle(color: Colors.black),
-          display1: TextStyle(color: Colors.grey[500]),
-          body1: TextStyle(color: Colors.black),
         ),
         inputDecorationTheme: InputDecorationTheme(
           errorBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
+            borderSide: BorderSide(color: Color(0xFFEF6F6F), width: 1.0),
           ),
           focusedErrorBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
+            borderSide: BorderSide(color: Color(0xFFEF6F6F), width: 1.0),
           ),
           disabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.grey[500], width: 1.0),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue, width: 1.0),
+            borderSide: BorderSide(color: Color(0xFF410FE6), width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue, width: 1.0),
+            borderSide: BorderSide(color: Color(0xFF410FE6), width: 1.0),
           ),
           border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white, width: 1.0),
+            borderSide: BorderSide(color: Color(0xFF410FE6), width: 1.0),
           ),
-          hintStyle: TextStyle(color: Colors.grey[500]),
+          hintStyle: TextStyle(color: Color(0xFFCCCCCC)),
         ),
+        dividerColor: Color(0xFFCCCCCC),
+        buttonColor: Color(0xFF410FE6),
+        errorColor: Color(0xFFEF6F6F),
       );
 
   ThemeData get darkTheme => ThemeData(

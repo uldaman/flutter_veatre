@@ -41,7 +41,6 @@ class _RecoveryPhraseBackupState extends State<RecoveryPhraseBackup> {
           children: <Widget>[
             Container(
               height: 50,
-              color: Colors.grey[250],
               child: widget.hasBackup
                   ? SizedBox()
                   : Row(
@@ -51,7 +50,7 @@ class _RecoveryPhraseBackupState extends State<RecoveryPhraseBackup> {
                           padding: EdgeInsets.only(right: 10),
                           child: Icon(
                             Icons.error,
-                            color: Colors.red,
+                            color: Theme.of(context).errorColor,
                             size: 18,
                           ),
                         ),
@@ -67,7 +66,6 @@ class _RecoveryPhraseBackupState extends State<RecoveryPhraseBackup> {
             ),
             Expanded(
               child: Container(
-                color: Theme.of(context).primaryColor,
                 child: Center(
                   child: SizedBox(
                     height: 300,
@@ -104,15 +102,17 @@ class _RecoveryPhraseBackupState extends State<RecoveryPhraseBackup> {
               child: Column(
                 children: <Widget>[
                   Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 30),
+                    child: Center(
                       child: SizedBox(
-                        width: MediaQuery.of(context).size.width - 100,
+                        width: MediaQuery.of(context).size.width - 60,
                         child: Text(
                           'Recovery phrases are used to recover your wallet.Please write them down and keep them in a secure place.',
                           style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 16,
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .display2
+                                .color,
+                            fontSize: 17,
                           ),
                         ),
                       ),
@@ -125,15 +125,15 @@ class _RecoveryPhraseBackupState extends State<RecoveryPhraseBackup> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(5)),
                         side: BorderSide(
-                          color: Theme.of(context).textTheme.title.color,
+                          color: Theme.of(context).primaryTextTheme.title.color,
                           width: 1,
                         ),
                       ),
-                      color: Theme.of(context).textTheme.title.color,
+                      color: Theme.of(context).primaryColor,
                       child: Text(
                         "Verify Recovery Phrases",
                         style: TextStyle(
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).accentColor,
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
                         ),
@@ -150,9 +150,6 @@ class _RecoveryPhraseBackupState extends State<RecoveryPhraseBackup> {
                         );
                       },
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
                   ),
                 ],
               ),

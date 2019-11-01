@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/enterPassword.dart';
 
 class PasswordGeneration extends StatelessWidget {
@@ -43,6 +44,7 @@ class PasswordGeneration extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w400,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                   ),
                 ),
               ),
@@ -50,26 +52,12 @@ class PasswordGeneration extends StatelessWidget {
             Expanded(
               child: Center(
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width - 170,
+                  width: MediaQuery.of(context).size.width - 60,
                   height: 44,
-                  child: FlatButton(
-                    color: Theme.of(context).textTheme.title.color,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      side: BorderSide(
-                        color: Theme.of(context).textTheme.title.color,
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      'Start',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onPressed: () async {
+                  child: commonButton(
+                    context,
+                    'Start',
+                    () async {
                       await Navigator.push(
                         context,
                         new MaterialPageRoute(

@@ -105,14 +105,13 @@ class SignCertificateState extends State<SignCertificate>
           topRight: Radius.circular(20),
         ),
         child: Container(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).backgroundColor,
           padding: EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Center(
                 child: Container(
-                  color: Colors.grey[300],
                   width: 100,
                   height: 4,
                 ),
@@ -137,7 +136,7 @@ class SignCertificateState extends State<SignCertificate>
                               child: Text(
                                 'Cancel',
                                 style: TextStyle(
-                                  color: Colors.blueAccent,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                               onPressed: () => Navigator.of(context).pop(),
@@ -154,6 +153,7 @@ class SignCertificateState extends State<SignCertificate>
                 ],
               ),
               cell(
+                context,
                 'Wallet',
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -179,7 +179,10 @@ class SignCertificateState extends State<SignCertificate>
                               abbreviate('${walletEntity?.address ?? ""}') +
                               ')',
                           style: TextStyle(
-                            color: Colors.grey[500],
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .display2
+                                .color,
                             fontSize: 12,
                           ),
                         ),
@@ -198,7 +201,10 @@ class SignCertificateState extends State<SignCertificate>
                             child: Text(
                               'VET',
                               style: TextStyle(
-                                color: Colors.grey[500],
+                                color: Theme.of(context)
+                                    .primaryTextTheme
+                                    .display2
+                                    .color,
                                 fontSize: 8,
                               ),
                             ),
@@ -217,7 +223,10 @@ class SignCertificateState extends State<SignCertificate>
                           child: Text(
                             'VTHO',
                             style: TextStyle(
-                              color: Colors.grey[500],
+                              color: Theme.of(context)
+                                  .primaryTextTheme
+                                  .display2
+                                  .color,
                               fontSize: 8,
                             ),
                           ),
@@ -230,12 +239,14 @@ class SignCertificateState extends State<SignCertificate>
                 onPressed: changeWallet,
               ),
               cell(
+                context,
                 'Type',
                 Text(
                   widget.certMessage.purpose.toUpperCase(),
                 ),
               ),
               cell(
+                context,
                 'Message',
                 Text(
                   widget.certMessage.payload.content,
@@ -263,7 +274,8 @@ class SignCertificateState extends State<SignCertificate>
                       child: Text(
                         'Your signature is being requested. Please review the content before you signed. Always make sure you trust the sites you interact with.',
                         style: TextStyle(
-                          color: Colors.grey[500],
+                          color:
+                              Theme.of(context).primaryTextTheme.display2.color,
                           fontSize: 17,
                         ),
                       ),

@@ -56,7 +56,6 @@ class NetworksState extends State<Networks> {
       ),
     ]);
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text(
           'Networks',
@@ -82,7 +81,6 @@ class NetworksState extends State<Networks> {
                   title,
                   style: TextStyle(
                     fontSize: 17,
-                    color: Theme.of(context).textTheme.body1.color,
                   ),
                 ),
               ),
@@ -95,7 +93,6 @@ class NetworksState extends State<Networks> {
                           child: Icon(
                             Icons.check,
                             size: 20,
-                            color: Colors.grey,
                           ),
                         ),
                       ),

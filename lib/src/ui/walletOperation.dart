@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import "package:pointycastle/api.dart" as api;
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/account.dart';
@@ -41,7 +40,6 @@ class WalletOperationState extends State<WalletOperation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Operation'),
         centerTitle: true,
@@ -162,7 +160,9 @@ class WalletOperationState extends State<WalletOperation> {
                     title,
                     textAlign: centerTitle ? TextAlign.center : TextAlign.left,
                     style: TextStyle(
-                      color: important ? Colors.red : Colors.grey[500],
+                      color: important
+                          ? Theme.of(context).errorColor
+                          : Theme.of(context).primaryTextTheme.display1.color,
                       fontSize: 16,
                     ),
                   ),
@@ -179,14 +179,14 @@ class WalletOperationState extends State<WalletOperation> {
                                   child: Icon(
                                     Icons.error,
                                     size: 20,
-                                    color: Colors.red,
+                                    color: Theme.of(context).errorColor,
                                   ),
                                 )
                               : SizedBox(),
                           Icon(
                             Icons.arrow_forward_ios,
                             size: 20,
-                            color: Colors.grey,
+                            color: Theme.of(context).primaryIconTheme.color,
                           )
                         ],
                       ),
@@ -223,8 +223,7 @@ class WalletOperationState extends State<WalletOperation> {
         ), confirmAction: () async {
       String password = passwordController.text;
       String passwordHash = await Config.passwordHash;
-      String hash =
-          bytesToHex(new api.Digest("SHA-512").process(utf8.encode(password)));
+      String hash = bytesToHex(sha512(password));
       if (hash != passwordHash) {
         Navigator.of(context).pop();
         return alert(context, Text('Incorrect Master Code'),

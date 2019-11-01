@@ -4,7 +4,8 @@ import 'package:veatre/src/storage/storage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 
 class BookmarkStorage {
-  static Future<void> insert(Bookmark bookmark) async {
+  static Future<void> insert(Bookmark bookmark, {Network network}) async {
+    bookmark.network = network ?? Globals.network;
     await Storage.insert(
       bookmarkTableName,
       bookmark.encoded,

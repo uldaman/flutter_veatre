@@ -43,78 +43,73 @@ class TabViewsState extends State<TabViews> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      body: Column(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: 44),
-          ),
-          Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.all(15),
-              physics: ClampingScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: widget.ratio,
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: GridView.builder(
+                padding: EdgeInsets.all(15),
+                physics: ClampingScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: widget.ratio,
+                ),
+                itemCount: snapshots.length,
+                itemBuilder: (context, index) {
+                  return snapshotCard(index);
+                },
               ),
-              itemCount: snapshots.length,
-              itemBuilder: (context, index) {
-                return snapshotCard(index);
-              },
             ),
-          ),
-          Container(
-            margin: EdgeInsets.only(bottom: 20),
-            color: Theme.of(context).primaryColor,
-            height: 60,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                FlatButton(
-                  child: Text('Close All'),
-                  onPressed: () {
-                    WebViews.removeAll(Globals.network);
-                    setState(() {
-                      snapshots = WebViews.snapshots(Globals.network);
-                    });
-                    WebViews.create(Globals.network, randomHex(32));
-                    Navigator.of(context).pop();
-                  },
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.add,
-                    color: Colors.blue,
-                    size: 35,
+            Container(
+              height: 60,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  FlatButton(
+                    child: Text('Close All'),
+                    onPressed: () {
+                      WebViews.removeAll(Globals.network);
+                      setState(() {
+                        snapshots = WebViews.snapshots(Globals.network);
+                      });
+                      WebViews.create(Globals.network, randomHex(32));
+                      Navigator.of(context).pop();
+                    },
                   ),
-                  onPressed: () {
-                    WebViews.create(Globals.network, randomHex(32));
-                    Navigator.of(context).pop();
-                  },
-                ),
-                FlatButton(
-                  child: Text('Done'),
-                  onPressed: () {
-                    Globals.updateTabValue(
-                      TabControllerValue(
-                        id: selectedTab,
-                        url: url,
-                        network: Globals.network,
-                        stage: isSelectedTabAlive
-                            ? TabStage.SelectedAlive
-                            : TabStage.SelectedInAlive,
-                        tabKey: selectedTabKey,
-                      ),
-                    );
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            ),
-          )
-        ],
+                  IconButton(
+                    icon: Icon(
+                      Icons.add,
+                      size: 35,
+                    ),
+                    onPressed: () {
+                      WebViews.create(Globals.network, randomHex(32));
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  FlatButton(
+                    child: Text('Done'),
+                    onPressed: () {
+                      Globals.updateTabValue(
+                        TabControllerValue(
+                          id: selectedTab,
+                          url: url,
+                          network: Globals.network,
+                          stage: isSelectedTabAlive
+                              ? TabStage.SelectedAlive
+                              : TabStage.SelectedInAlive,
+                          tabKey: selectedTabKey,
+                        ),
+                      );
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -123,13 +118,14 @@ class TabViewsState extends State<TabViews> {
     Snapshot snapshot = snapshots[index];
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).backgroundColor,
         boxShadow: [
           BoxShadow(
             blurRadius: 2,
             offset: Offset(2, 2),
-            color:
-                selectedTabKey == snapshot.key ? Colors.blue : Colors.black87,
+            color: selectedTabKey == snapshot.key
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).backgroundColor,
           )
         ],
         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -166,6 +162,7 @@ class TabViewsState extends State<TabViews> {
                       icon: Icon(
                         Icons.close,
                         size: 20,
+                        color: Theme.of(context).primaryIconTheme.color,
                       ),
                       onPressed: () async {
                         WebViews.removeSnapshot(Globals.network, snapshot.key);

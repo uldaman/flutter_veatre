@@ -92,7 +92,7 @@ class ActivityStorage {
         String txID = activity.hash;
         Map<String, dynamic> receipt = await net.getReceipt(txID);
         Map<String, dynamic> result = {
-          'activity': activity.encoded,
+          'activity': activity,
           'receipt': receipt,
         };
         results.add(result);
@@ -106,6 +106,7 @@ class ActivityStorage {
         if (receipt != null) {
           int processBlock = receipt['meta']['blockNumber'];
           if (activity.processBlock == null) {
+            print('$activity ${receipt['meta']['blockNumber']}');
             batch.update(
               activityTableName,
               {

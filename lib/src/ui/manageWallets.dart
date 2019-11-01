@@ -54,7 +54,6 @@ class ManageWalletsState extends State<ManageWallets> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         leading: FlatButton(
           highlightColor: Colors.transparent,
@@ -64,10 +63,6 @@ class ManageWalletsState extends State<ManageWallets> {
             alignment: Alignment.centerRight,
             child: Text(
               'Close',
-              style: TextStyle(
-                color: Theme.of(context).textTheme.title.color,
-                fontSize: 16,
-              ),
             ),
           ),
           onPressed: () async {
@@ -115,7 +110,6 @@ class ManageWalletsState extends State<ManageWallets> {
                     child: Text(
                       'Add your first wallet',
                       style: TextStyle(
-                        color: Theme.of(context).textTheme.title.color,
                         fontSize: 22,
                       ),
                     ),
@@ -126,7 +120,8 @@ class ManageWalletsState extends State<ManageWallets> {
                       'Wallet is a universal identity on blockchain,create one to explore.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.grey[300],
+                        color:
+                            Theme.of(context).primaryTextTheme.display2.color,
                         fontSize: 16,
                       ),
                     ),
@@ -138,20 +133,11 @@ class ManageWalletsState extends State<ManageWallets> {
   }
 
   Widget buildWalletCard(BuildContext context, WalletEntity walletEntity) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 180,
-      child: GestureDetector(
+    return GestureDetector(
+      child: Card(
+        margin: EdgeInsets.only(left: 15, right: 15, top: 15),
         child: Container(
-          decoration: ShapeDecoration(
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: Colors.grey[300],
-                width: 2,
-              ),
-            ),
-          ),
-          margin: EdgeInsets.only(left: 15, right: 15, top: 15),
+          margin: EdgeInsets.all(10),
           child: Column(
             children: <Widget>[
               Row(
@@ -174,7 +160,6 @@ class ManageWalletsState extends State<ManageWallets> {
                             walletEntity.name,
                             style: TextStyle(
                               fontSize: 22,
-                              color: Theme.of(context).textTheme.title.color,
                             ),
                           ),
                         ),
@@ -183,8 +168,10 @@ class ManageWalletsState extends State<ManageWallets> {
                           child: Text(
                             '0x${abbreviate(walletEntity.address)}',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
+                              color: Theme.of(context)
+                                  .primaryTextTheme
+                                  .display2
+                                  .color,
                             ),
                           ),
                         ),
@@ -217,22 +204,16 @@ class ManageWalletsState extends State<ManageWallets> {
                   ),
                 ],
               ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        top: 10,
-                        left: 20,
-                        right: 20,
-                      ),
-                      child: Container(
-                        color: Colors.grey[300],
-                        height: 2,
-                      ),
-                    ),
-                  )
-                ],
+              Padding(
+                padding: EdgeInsets.only(
+                  top: 10,
+                  left: 15,
+                  right: 15,
+                ),
+                child: Divider(
+                  height: 2,
+                  color: Theme.of(context).dividerColor,
+                ),
               ),
               FutureBuilder(
                 future: AccountAPI.get(walletEntity.address),
@@ -243,25 +224,25 @@ class ManageWalletsState extends State<ManageWallets> {
                     account?.formatEnergy ?? '--',
                   );
                 },
-              )
+              ),
             ],
           ),
         ),
-        onTap: () async {
-          final result = await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => WalletInfo(
-                walletEntity: walletEntity,
-              ),
-            ),
-          );
-          if (result != null) {
-            Navigator.of(context).pop(result);
-          } else {
-            await updateWallets(Globals.network);
-          }
-        },
       ),
+      onTap: () async {
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => WalletInfo(
+              walletEntity: walletEntity,
+            ),
+          ),
+        );
+        if (result != null) {
+          Navigator.of(context).pop(result);
+        } else {
+          await updateWallets(Globals.network);
+        }
+      },
     );
   }
 
@@ -278,11 +259,11 @@ class ManageWalletsState extends State<ManageWallets> {
                 style: TextStyle(fontSize: 22),
               ),
               Container(
-                margin: EdgeInsets.only(left: 10, right: 14, top: 10),
+                margin: EdgeInsets.only(left: 5, right: 22, top: 10),
                 child: Text(
                   'VET',
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                     fontSize: 12,
                   ),
                 ),
@@ -297,12 +278,12 @@ class ManageWalletsState extends State<ManageWallets> {
             children: <Widget>[
               Text(energy, style: TextStyle(fontSize: 14)),
               Container(
-                margin: EdgeInsets.only(left: 5, right: 15, top: 2),
+                margin: EdgeInsets.only(left: 5, right: 12, top: 2),
                 child: Text(
                   'VTHO',
                   style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 10,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
+                    fontSize: 12,
                   ),
                 ),
               )

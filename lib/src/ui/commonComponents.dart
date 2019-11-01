@@ -8,7 +8,6 @@ Future alert(BuildContext context, Widget title, String message) async {
     barrierDismissible: true,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: Theme.of(context).primaryColor,
         shape: Theme.of(context).cardTheme.shape,
         contentPadding:
             EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 24),
@@ -47,7 +46,7 @@ Future customAlert(
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).backgroundColor,
         contentPadding:
             EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 12),
         shape: Theme.of(context).cardTheme.shape,
@@ -81,7 +80,7 @@ Future customAlert(
                 FlatButton(
                   child: const Text(
                     'Cancel',
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(color: Color(0xFFEF6F6F)),
                   ),
                   onPressed: () async {
                     await cancel();
@@ -97,7 +96,38 @@ Future customAlert(
   );
 }
 
+Widget commonButton(
+  BuildContext context,
+  String title,
+  Function onPressed, {
+  Color color,
+  Color textColor,
+  Color disabledColor,
+}) {
+  return FlatButton(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(5)),
+      side: BorderSide(
+        color: Theme.of(context).textTheme.title.color,
+        width: 0,
+      ),
+    ),
+    color: color ?? Theme.of(context).primaryColor,
+    child: Text(
+      title,
+      style: TextStyle(
+        color: textColor ?? Theme.of(context).accentColor,
+        fontSize: 17,
+      ),
+    ),
+    disabledColor:
+        disabledColor ?? Theme.of(context).primaryTextTheme.display3.color,
+    onPressed: onPressed,
+  );
+}
+
 Widget cell(
+  BuildContext context,
   String title,
   Widget right, {
   bool showIcon = false,
@@ -116,7 +146,7 @@ Widget cell(
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: Colors.grey[500],
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                     fontSize: 17,
                   ),
                 ),
@@ -129,7 +159,6 @@ Widget cell(
                 child: showIcon
                     ? Icon(
                         Icons.arrow_forward_ios,
-                        color: Colors.grey[500],
                         size: 17,
                       )
                     : SizedBox(),
@@ -138,7 +167,6 @@ Widget cell(
           ),
         ),
         Divider(
-          color: Colors.grey,
           height: 2,
         ),
       ],
@@ -174,25 +202,27 @@ Widget buildPasscodes(
 
 Widget _passcode(BuildContext context, List<String> passcodes, index) {
   return Container(
-    width: (MediaQuery.of(context).size.width - 5 * 15 - 60) / 6,
-    height: (MediaQuery.of(context).size.width - 5 * 15 - 60) / 6,
-    decoration: ShapeDecoration(
+    width: (MediaQuery.of(context).size.width - 5 * 10 - 40) / 6,
+    height: (MediaQuery.of(context).size.width - 5 * 10 - 40) / 6,
+    child: Card(
       shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(6)),
         side: BorderSide(
-          color: Theme.of(context).textTheme.title.color,
-          width: 2,
+          color: Theme.of(context).primaryTextTheme.display3.color,
+          width: 1,
         ),
       ),
+      child: index < passcodes.length
+          ? Align(
+              alignment: Alignment.center,
+              child: Icon(
+                FontAwesomeIcons.solidCircle,
+                size: 17,
+                color: Theme.of(context).primaryTextTheme.title.color,
+              ),
+            )
+          : SizedBox(),
     ),
-    child: index < passcodes.length
-        ? Align(
-            alignment: Alignment.center,
-            child: Icon(
-              FontAwesomeIcons.solidCircle,
-              size: 17,
-            ),
-          )
-        : SizedBox(),
   );
 }
 
@@ -203,7 +233,7 @@ Widget passcodeKeyboard(
 }) {
   return Container(
     height: 280,
-    color: Colors.grey[300],
+    // color: Color(0xFFCCCCCC),
     child: GridView.builder(
       padding: EdgeInsets.all(10),
       physics: NeverScrollableScrollPhysics(),

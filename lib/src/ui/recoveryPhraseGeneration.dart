@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/verifyRecoveryPhrases.dart';
 
 class RecoveryPhraseGeneration extends StatefulWidget {
@@ -52,7 +53,6 @@ class _RecoveryPhraseGenerationState extends State<RecoveryPhraseGeneration> {
             ),
             Expanded(
               child: Container(
-                color: Theme.of(context).primaryColor,
                 child: Center(
                   child: SizedBox(
                     height: 300,
@@ -106,24 +106,10 @@ class _RecoveryPhraseGenerationState extends State<RecoveryPhraseGeneration> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width - 60,
                     height: 44,
-                    child: FlatButton(
-                      color: Theme.of(context).textTheme.title.color,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        side: BorderSide(
-                          color: Theme.of(context).textTheme.title.color,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        "Done,let's verify",
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      onPressed: () async {
+                    child: commonButton(
+                      context,
+                      "Done,let's verify",
+                      () async {
                         await Navigator.push(
                           context,
                           new MaterialPageRoute(
@@ -141,23 +127,20 @@ class _RecoveryPhraseGenerationState extends State<RecoveryPhraseGeneration> {
                       top: 15,
                     ),
                     child: SizedBox(
-                      width: MediaQuery.of(context).size.width - 170,
+                      width: MediaQuery.of(context).size.width - 60,
                       height: 44,
-                      child: FlatButton(
-                        child: Text(
-                          'Skip Now',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        color: Colors.transparent,
-                        onPressed: () async {
+                      child: commonButton(
+                        context,
+                        'Skip Now',
+                        () async {
                           Navigator.popUntil(
                             context,
                             ModalRoute.withName(widget.rootRouteName),
                           );
                         },
+                        color: Colors.transparent,
+                        textColor:
+                            Theme.of(context).primaryTextTheme.title.color,
                       ),
                     ),
                   ),

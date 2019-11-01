@@ -13,7 +13,6 @@ class Summary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(title: Text(title)),
       body: SingleChildScrollView(
         child: Padding(
@@ -23,7 +22,15 @@ class Summary extends StatelessWidget {
               margin: EdgeInsets.all(10),
               child: Row(
                 children: <Widget>[
-                  Expanded(child: Text(content, style: TextStyle(fontSize: 17)))
+                  Expanded(
+                      child: Text(content,
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .display1
+                                .color,
+                          )))
                 ],
               ),
             ),

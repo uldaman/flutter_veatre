@@ -1,8 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import "package:pointycastle/api.dart" as api;
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
@@ -86,7 +82,6 @@ class SettingsState extends State<Settings> {
       ),
     ]);
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Settings'),
         centerTitle: true,
@@ -111,7 +106,6 @@ class SettingsState extends State<Settings> {
                 child: Icon(
                   icon,
                   size: 20,
-                  color: Theme.of(context).iconTheme.color,
                 ),
               ),
               Container(
@@ -119,7 +113,6 @@ class SettingsState extends State<Settings> {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.title.color,
                     fontSize: 17,
                   ),
                 ),
@@ -132,9 +125,8 @@ class SettingsState extends State<Settings> {
                     children: <Widget>[
                       subTitle == '' ? SizedBox() : Text(subTitle),
                       Icon(
-                        FontAwesomeIcons.angleRight,
-                        size: 20,
-                        color: Colors.grey,
+                        Icons.arrow_forward_ios,
+                        size: 16,
                       )
                     ],
                   ),
@@ -169,8 +161,7 @@ class SettingsState extends State<Settings> {
         ), confirmAction: () async {
       String password = passwordController.text;
       String passwordHash = await Config.passwordHash;
-      String hash =
-          bytesToHex(new api.Digest("SHA-512").process(utf8.encode(password)));
+      String hash = bytesToHex(sha512(password));
       if (hash != passwordHash) {
         Navigator.of(context).pop();
         return alert(context, Text('Incorrect Master Code'),

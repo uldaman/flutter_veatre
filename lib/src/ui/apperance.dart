@@ -56,7 +56,6 @@ class AppearancesState extends State<Appearances> {
       ),
     ]);
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text(
           'Theme',
@@ -64,6 +63,7 @@ class AppearancesState extends State<Appearances> {
         centerTitle: true,
       ),
       body: ListView(
+        padding: EdgeInsets.only(top: 5),
         children: widgets,
       ),
     );
@@ -94,8 +94,7 @@ class AppearancesState extends State<Appearances> {
                           alignment: Alignment.centerRight,
                           child: Icon(
                             Icons.check,
-                            size: 20,
-                            color: Colors.grey,
+                            size: 16,
                           ),
                         ),
                       ),

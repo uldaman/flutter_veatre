@@ -95,21 +95,17 @@ class WalletInfoState extends State<WalletInfo> {
           ),
         ],
       ),
-      backgroundColor: Theme.of(context).primaryColor,
       body: Column(
         children: <Widget>[
+          buildWalletCard(context, walletEntity),
           Padding(
-            padding: EdgeInsets.all(15),
-            child: buildWalletCard(context, walletEntity),
-          ),
-          Padding(
-            padding: EdgeInsets.all(15),
+            padding: EdgeInsets.only(left: 15, right: 15),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Activities',
                 style: TextStyle(
-                  color: Colors.brown,
+                  color: Theme.of(context).primaryTextTheme.subtitle.color,
                   fontSize: 22,
                 ),
               ),
@@ -117,6 +113,7 @@ class WalletInfoState extends State<WalletInfo> {
           ),
           Expanded(
             child: ListView.builder(
+              padding: EdgeInsets.only(bottom: 15),
               itemBuilder: buildActivity,
               itemCount: activities.length,
               physics: ClampingScrollPhysics(),
@@ -128,18 +125,10 @@ class WalletInfoState extends State<WalletInfo> {
   }
 
   Widget buildWalletCard(BuildContext context, WalletEntity walletEntity) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 165,
+    return Card(
+      margin: EdgeInsets.all(15),
       child: Container(
-        decoration: ShapeDecoration(
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: Colors.grey[300],
-              width: 2,
-            ),
-          ),
-        ),
+        margin: EdgeInsets.all(10),
         child: Column(
           children: <Widget>[
             Row(
@@ -162,7 +151,6 @@ class WalletInfoState extends State<WalletInfo> {
                           walletEntity?.name,
                           style: TextStyle(
                             fontSize: 22,
-                            color: Theme.of(context).textTheme.title.color,
                           ),
                         ),
                       ),
@@ -171,8 +159,10 @@ class WalletInfoState extends State<WalletInfo> {
                         child: Text(
                           '0x${abbreviate(walletEntity?.address)}',
                           style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .display2
+                                .color,
                           ),
                         ),
                       ),
@@ -181,22 +171,15 @@ class WalletInfoState extends State<WalletInfo> {
                 ),
               ],
             ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 10,
-                      left: 20,
-                      right: 20,
-                    ),
-                    child: Container(
-                      color: Colors.grey[300],
-                      height: 2,
-                    ),
-                  ),
-                )
-              ],
+            Padding(
+              padding: EdgeInsets.only(
+                top: 10,
+                left: 15,
+                right: 15,
+              ),
+              child: Divider(
+                height: 2,
+              ),
             ),
             FutureBuilder(
               future: AccountAPI.get(walletEntity?.address),
@@ -227,11 +210,11 @@ class WalletInfoState extends State<WalletInfo> {
                 style: TextStyle(fontSize: 22),
               ),
               Container(
-                margin: EdgeInsets.only(left: 10, right: 14, top: 10),
+                margin: EdgeInsets.only(left: 5, right: 22, top: 10),
                 child: Text(
                   'VET',
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                     fontSize: 12,
                   ),
                 ),
@@ -249,12 +232,12 @@ class WalletInfoState extends State<WalletInfo> {
                 style: TextStyle(fontSize: 14),
               ),
               Container(
-                margin: EdgeInsets.only(left: 5, right: 15, top: 2),
+                margin: EdgeInsets.only(left: 5, right: 12, top: 2),
                 child: Text(
                   'VTHO',
                   style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 10,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
+                    fontSize: 12,
                   ),
                 ),
               )
@@ -272,15 +255,7 @@ class WalletInfoState extends State<WalletInfo> {
     String dateString =
         "${formatTime(date.day)} ${formatMonth(date.month)},${date.year} ${formatTime(date.hour)}:${formatTime(date.minute)}:${formatTime(date.second)}";
     int processBlock = activity.processBlock;
-    return Container(
-      decoration: ShapeDecoration(
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Colors.grey[300],
-            width: 2,
-          ),
-        ),
-      ),
+    return Card(
       margin: EdgeInsets.only(left: 15, right: 15, top: 15),
       child: Column(
         children: <Widget>[
@@ -291,8 +266,8 @@ class WalletInfoState extends State<WalletInfo> {
                 margin: EdgeInsets.only(left: 10),
                 width: 40,
                 color: activity.type == ActivityType.Transaction
-                    ? Colors.blue
-                    : Colors.black,
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).primaryTextTheme.title.color,
                 child: Padding(
                   padding: EdgeInsets.all(5),
                   child: Text(
@@ -325,7 +300,8 @@ class WalletInfoState extends State<WalletInfo> {
                         textAlign: TextAlign.right,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: Colors.grey[500],
+                          color:
+                              Theme.of(context).primaryTextTheme.display2.color,
                           fontSize: 12,
                         ),
                       ),
@@ -341,13 +317,13 @@ class WalletInfoState extends State<WalletInfo> {
                                   children: <Widget>[
                                     Icon(
                                       Icons.check_circle_outline,
-                                      color: Colors.greenAccent,
-                                      size: 20,
+                                      color: Color(0xFF57BD89),
+                                      size: 16,
                                     ),
                                     Text(
                                       'Confirmed',
                                       style: TextStyle(
-                                        color: Colors.green,
+                                        color: Color(0xFF57BD89),
                                         fontSize: 12,
                                       ),
                                     )
@@ -358,13 +334,13 @@ class WalletInfoState extends State<WalletInfo> {
                                       children: <Widget>[
                                         Icon(
                                           FontAwesomeIcons.arrowAltCircleUp,
-                                          color: Colors.blue,
+                                          color: Color(0xFF57BD89),
                                           size: 16,
                                         ),
                                         Text(
                                           'Sending',
                                           style: TextStyle(
-                                            color: Colors.blue,
+                                            color: Color(0xFF57BD89),
                                             fontSize: 12,
                                           ),
                                         )
@@ -375,13 +351,13 @@ class WalletInfoState extends State<WalletInfo> {
                                           children: <Widget>[
                                             Icon(
                                               Icons.alarm_off,
-                                              color: Colors.grey,
-                                              size: 20,
+                                              color: Color(0xFFEF8816),
+                                              size: 16,
                                             ),
                                             Text(
                                               'Expired',
                                               style: TextStyle(
-                                                color: Colors.grey,
+                                                color: Color(0xFFEF8816),
                                                 fontSize: 12,
                                               ),
                                             )
@@ -393,13 +369,15 @@ class WalletInfoState extends State<WalletInfo> {
                                               children: <Widget>[
                                                 Icon(
                                                   Icons.error,
-                                                  color: Colors.greenAccent,
-                                                  size: 20,
+                                                  color: Theme.of(context)
+                                                      .errorColor,
+                                                  size: 16,
                                                 ),
                                                 Text(
                                                   'Reverted',
                                                   style: TextStyle(
-                                                    color: Colors.green,
+                                                    color: Theme.of(context)
+                                                        .errorColor,
                                                     fontSize: 12,
                                                   ),
                                                 )
@@ -413,13 +391,14 @@ class WalletInfoState extends State<WalletInfo> {
                                                     Icon(
                                                       Icons
                                                           .check_circle_outline,
-                                                      color: Colors.greenAccent,
-                                                      size: 20,
+                                                      color: Color(0xFF57BD89),
+                                                      size: 16,
                                                     ),
                                                     Text(
                                                       'Confirmed',
                                                       style: TextStyle(
-                                                        color: Colors.green,
+                                                        color:
+                                                            Color(0xFF57BD89),
                                                         fontSize: 12,
                                                       ),
                                                     )
@@ -432,12 +411,20 @@ class WalletInfoState extends State<WalletInfo> {
                                                       height: 18,
                                                       child:
                                                           CircularProgressIndicator(
-                                                        backgroundColor:
-                                                            Colors.grey[200],
+                                                        backgroundColor: Theme
+                                                                .of(context)
+                                                            .primaryTextTheme
+                                                            .display3
+                                                            .color,
                                                         value: (Globals.head()
                                                                     .number -
                                                                 processBlock) /
                                                             12,
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation(
+                                                                Theme.of(
+                                                                        context)
+                                                                    .primaryColor),
                                                         strokeWidth: 2,
                                                       ),
                                                     ),
@@ -448,7 +435,11 @@ class WalletInfoState extends State<WalletInfo> {
                                                         textAlign:
                                                             TextAlign.right,
                                                         style: TextStyle(
-                                                          color: Colors.grey,
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .primaryTextTheme
+                                                              .display2
+                                                              .color,
                                                           fontSize: 12,
                                                         ),
                                                       ),
@@ -464,7 +455,6 @@ class WalletInfoState extends State<WalletInfo> {
             ],
           ),
           Divider(
-            color: Colors.grey[350],
             height: 2,
           ),
           Padding(
@@ -478,7 +468,7 @@ class WalletInfoState extends State<WalletInfo> {
                       Icon(
                         FontAwesomeIcons.link,
                         size: 12,
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                       ),
                       FlatButton(
                         padding: EdgeInsets.only(left: 5),
@@ -486,7 +476,7 @@ class WalletInfoState extends State<WalletInfo> {
                           getDomain(Uri.parse(activity.link)),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.blue,
+                            color: Theme.of(context).primaryColor,
                           ),
                         ),
                         onPressed: () async {
@@ -511,7 +501,7 @@ class WalletInfoState extends State<WalletInfo> {
                             ? FontAwesomeIcons.search
                             : FontAwesomeIcons.copy,
                         size: 12,
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                       ),
                       activity.type == ActivityType.Transaction
                           ? FlatButton(
@@ -519,7 +509,7 @@ class WalletInfoState extends State<WalletInfo> {
                               child: Text(
                                 '0x${abbreviate(activity.hash.substring(2))}',
                                 style: TextStyle(
-                                  color: Colors.blue,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                               onPressed: () async {
@@ -534,7 +524,7 @@ class WalletInfoState extends State<WalletInfo> {
                               child: Text(
                                 'Signed Message',
                                 style: TextStyle(
-                                  color: Colors.blue,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                               onPressed: () async {

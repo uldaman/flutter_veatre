@@ -88,8 +88,6 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                                   textAlign: TextAlign.left,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color:
-                                        Theme.of(context).textTheme.title.color,
                                     fontSize: 17,
                                   ),
                                 ),
@@ -130,7 +128,6 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                           },
                         ),
                         Divider(
-                          color: Theme.of(context).textTheme.title.color,
                           height: 2,
                         ),
                         Expanded(
@@ -140,8 +137,9 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                               '0x${abbreviate(address)}',
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Theme.of(context).textTheme.title.color,
-                                fontSize: 16,
+                                color:
+                                    Theme.of(context).textTheme.display2.color,
+                                fontSize: 17,
                               ),
                             ),
                           ),
@@ -152,98 +150,89 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                 ],
               ),
             ),
+            SizedBox(
+              height: 40,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Card(
+                  child: new QrImage(
+                    padding: EdgeInsets.all(40),
+                    data: "0x${address ?? ''}",
+                    size: MediaQuery.of(context).size.width - 150,
+                    backgroundColor: Theme.of(context).backgroundColor,
+                  ),
+                ),
+                SizedBox(
+                  height: 40,
+                  child: Center(
+                    child: isCopied
+                        ? Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5)),
+                              side: BorderSide.none,
+                            ),
+                            color: Colors.grey[200],
+                            child: Container(
+                              child: Text(
+                                'copied',
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.amber),
+                              ),
+                              padding: EdgeInsets.all(8),
+                            ),
+                          )
+                        : Text(''),
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 150,
+                  height: 44,
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: Theme.of(context).primaryTextTheme.title.color,
+                      ),
+                    ),
+                    child: Text('Copy address'),
+                    onPressed: () async {
+                      await Clipboard.setData(
+                          new ClipboardData(text: '0x' + address));
+                      setState(() {
+                        isCopied = true;
+                      });
+                      await Future.delayed(Duration(seconds: 1));
+                      setState(() {
+                        isCopied = false;
+                      });
+                    },
+                  ),
+                )
+              ],
+            ),
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Card(
-                    child: new QrImage(
-                      padding: EdgeInsets.all(40),
-                      data: '0x' + address,
-                      size: MediaQuery.of(context).size.width - 100,
-                    ),
-                  ),
                   SizedBox(
-                    height: 40,
-                    child: Center(
-                      child: isCopied
-                          ? Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5)),
-                                side: BorderSide.none,
-                              ),
-                              color: Colors.grey[200],
-                              child: Container(
-                                child: Text(
-                                  'copied',
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.amber),
-                                ),
-                                padding: EdgeInsets.all(8),
-                              ),
-                            )
-                          : Text(''),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width - 170,
+                    width: MediaQuery.of(context).size.width - 60,
                     height: 44,
-                    child: FlatButton(
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          color: Theme.of(context).primaryTextTheme.title.color,
-                        ),
-                      ),
-                      child: Text('Copy address'),
-                      onPressed: () async {
-                        await Clipboard.setData(
-                            new ClipboardData(text: '0x' + address));
-                        setState(() {
-                          isCopied = true;
-                        });
-                        await Future.delayed(Duration(seconds: 1));
-                        setState(() {
-                          isCopied = false;
-                        });
+                    child: commonButton(
+                      context,
+                      'Done',
+                      () async {
+                        await WalletStorage.updateName(address, walletName);
+                        Navigator.popUntil(
+                          context,
+                          ModalRoute.withName(widget.rootRouteName),
+                        );
                       },
                     ),
-                  )
+                  ),
                 ],
               ),
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width - 170,
-              height: 44,
-              child: FlatButton(
-                color: Theme.of(context).textTheme.title.color,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                  side: BorderSide(
-                    color: Theme.of(context).textTheme.title.color,
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  'Done',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onPressed: () async {
-                  await WalletStorage.updateName(address, walletName);
-                  Navigator.popUntil(
-                    context,
-                    ModalRoute.withName(widget.rootRouteName),
-                  );
-                },
-              ),
-            ),
-            SizedBox(
-              height: 20,
             ),
           ],
         ),

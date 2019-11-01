@@ -111,7 +111,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return WillPopScope(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: Theme.of(context).primaryColor,
         appBar: AppBar(
           leading: null,
           centerTitle: true,
@@ -122,7 +121,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                     child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: Theme.of(context).accentTextTheme.title.color,
                         fontSize: 12,
                       ),
                     ),
@@ -144,8 +142,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                                 : Icons.bookmark,
                             size: 20,
                           ),
-                          disabledColor: Colors.grey[500],
-                          color: Colors.grey,
+                          disabledColor: Theme.of(context).iconTheme.color,
+                          color: Theme.of(context).primaryIconTheme.color,
                           onPressed: _currentURL == Globals.initialURL
                               ? null
                               : bookmarkID == null
@@ -171,7 +169,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                         icon: Icon(
                           Icons.settings,
                           size: 20,
-                          color: Colors.grey,
+                          color: Theme.of(context).iconTheme.color,
                         ),
                         onPressed: () async {
                           await Navigator.of(context).push(
@@ -715,8 +713,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       title: sheet(
         Text(
           bookmark.url,
-          style: Theme.of(context).accentTextTheme.title,
           overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: Theme.of(context).primaryTextTheme.display1.color,
+            fontSize: 17,
+          ),
         ),
       ),
       actions: <Widget>[
@@ -724,7 +725,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           FlatButton(
             child: Text(
               'Copy URL',
-              style: TextStyle(color: Colors.blue, fontSize: 20),
+              style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                fontSize: 17,
+              ),
             ),
             onPressed: () async {
               await Clipboard.setData(new ClipboardData(text: bookmark.url));
@@ -736,7 +740,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           FlatButton(
             child: Text(
               'Edit',
-              style: TextStyle(color: Colors.blue, fontSize: 20),
+              style: TextStyle(
+                  color: Theme.of(context).primaryColor, fontSize: 17),
             ),
             onPressed: () async {
               await slide(
@@ -759,8 +764,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             child: Text(
               'Remove',
               style: TextStyle(
-                color: Colors.red,
-                fontSize: 20,
+                color: Theme.of(context).errorColor,
+                fontSize: 17,
               ),
             ),
             onPressed: () async {
@@ -775,7 +780,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         FlatButton(
           child: Text(
             'Cancel',
-            style: TextStyle(color: Colors.blue, fontSize: 20),
+            style:
+                TextStyle(color: Theme.of(context).primaryColor, fontSize: 17),
           ),
           onPressed: () async {
             Navigator.of(context).pop();

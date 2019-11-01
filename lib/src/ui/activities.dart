@@ -53,7 +53,6 @@ class ActivitiesState extends State<Activities> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Activity'),
         leading: FlatButton(
@@ -66,7 +65,6 @@ class ActivitiesState extends State<Activities> {
               'Close',
               style: TextStyle(
                 color: Theme.of(context).textTheme.title.color,
-                fontSize: 16,
               ),
             ),
           ),
@@ -91,15 +89,7 @@ class ActivitiesState extends State<Activities> {
     String dateString =
         "${formatTime(date.day)} ${formatMonth(date.month)},${date.year} ${formatTime(date.hour)}:${formatTime(date.minute)}:${formatTime(date.second)}";
     int processBlock = activity.processBlock;
-    return Container(
-      decoration: ShapeDecoration(
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Colors.grey[300],
-            width: 2,
-          ),
-        ),
-      ),
+    return Card(
       margin: EdgeInsets.only(left: 15, right: 15, top: 15),
       child: Column(
         children: <Widget>[
@@ -110,8 +100,8 @@ class ActivitiesState extends State<Activities> {
                 margin: EdgeInsets.only(left: 10),
                 width: 40,
                 color: activity.type == ActivityType.Transaction
-                    ? Colors.blue
-                    : Colors.black,
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).primaryTextTheme.title.color,
                 child: Padding(
                   padding: EdgeInsets.all(5),
                   child: Text(
@@ -141,7 +131,7 @@ class ActivitiesState extends State<Activities> {
                     textAlign: TextAlign.right,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: Theme.of(context).primaryTextTheme.display2.color,
                       fontSize: 12,
                     ),
                   ),
@@ -160,7 +150,7 @@ class ActivitiesState extends State<Activities> {
                 Text(
                   'Signed by',
                   style: TextStyle(
-                    color: Colors.grey[500],
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                     fontSize: 14,
                   ),
                 ),
@@ -195,13 +185,13 @@ class ActivitiesState extends State<Activities> {
                               children: <Widget>[
                                 Icon(
                                   Icons.check_circle_outline,
-                                  color: Colors.greenAccent,
-                                  size: 20,
+                                  color: Color(0xFF57BD89),
+                                  size: 16,
                                 ),
                                 Text(
                                   'Confirmed',
                                   style: TextStyle(
-                                    color: Colors.green,
+                                    color: Color(0xFF57BD89),
                                     fontSize: 12,
                                   ),
                                 )
@@ -212,13 +202,13 @@ class ActivitiesState extends State<Activities> {
                                   children: <Widget>[
                                     Icon(
                                       FontAwesomeIcons.arrowAltCircleUp,
-                                      color: Colors.blue,
+                                      color: Color(0xFF57BD89),
                                       size: 16,
                                     ),
                                     Text(
                                       'Sending',
                                       style: TextStyle(
-                                        color: Colors.blue,
+                                        color: Color(0xFF57BD89),
                                         fontSize: 12,
                                       ),
                                     )
@@ -229,13 +219,13 @@ class ActivitiesState extends State<Activities> {
                                       children: <Widget>[
                                         Icon(
                                           Icons.alarm_off,
-                                          color: Colors.grey,
-                                          size: 20,
+                                          color: Color(0xFFEF8816),
+                                          size: 16,
                                         ),
                                         Text(
                                           'Expired',
                                           style: TextStyle(
-                                            color: Colors.grey,
+                                            color: Color(0xFFEF8816),
                                             fontSize: 12,
                                           ),
                                         )
@@ -246,13 +236,15 @@ class ActivitiesState extends State<Activities> {
                                           children: <Widget>[
                                             Icon(
                                               Icons.error,
-                                              color: Colors.greenAccent,
-                                              size: 20,
+                                              color:
+                                                  Theme.of(context).errorColor,
+                                              size: 16,
                                             ),
                                             Text(
                                               'Reverted',
                                               style: TextStyle(
-                                                color: Colors.green,
+                                                color: Theme.of(context)
+                                                    .errorColor,
                                                 fontSize: 12,
                                               ),
                                             )
@@ -264,13 +256,13 @@ class ActivitiesState extends State<Activities> {
                                               children: <Widget>[
                                                 Icon(
                                                   Icons.check_circle_outline,
-                                                  color: Colors.greenAccent,
-                                                  size: 20,
+                                                  color: Color(0xFF57BD89),
+                                                  size: 16,
                                                 ),
                                                 Text(
                                                   'Confirmed',
                                                   style: TextStyle(
-                                                    color: Colors.green,
+                                                    color: Color(0xFF57BD89),
                                                     fontSize: 12,
                                                   ),
                                                 )
@@ -284,11 +276,18 @@ class ActivitiesState extends State<Activities> {
                                                   child:
                                                       CircularProgressIndicator(
                                                     backgroundColor:
-                                                        Colors.grey[200],
+                                                        Theme.of(context)
+                                                            .primaryTextTheme
+                                                            .display3
+                                                            .color,
                                                     value:
                                                         (Globals.head().number -
                                                                 processBlock) /
                                                             12,
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation(
+                                                            Theme.of(context)
+                                                                .primaryColor),
                                                     strokeWidth: 2,
                                                   ),
                                                 ),
@@ -298,7 +297,10 @@ class ActivitiesState extends State<Activities> {
                                                     '${Globals.head().number - processBlock}/12',
                                                     textAlign: TextAlign.right,
                                                     style: TextStyle(
-                                                      color: Colors.grey,
+                                                      color: Theme.of(context)
+                                                          .primaryTextTheme
+                                                          .display2
+                                                          .color,
                                                       fontSize: 12,
                                                     ),
                                                   ),
@@ -312,7 +314,6 @@ class ActivitiesState extends State<Activities> {
             ),
           ),
           Divider(
-            color: Colors.grey[350],
             height: 2,
           ),
           Padding(
@@ -326,7 +327,7 @@ class ActivitiesState extends State<Activities> {
                       Icon(
                         FontAwesomeIcons.link,
                         size: 12,
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                       ),
                       FlatButton(
                         padding: EdgeInsets.only(left: 5),
@@ -334,7 +335,7 @@ class ActivitiesState extends State<Activities> {
                           getDomain(Uri.parse(activity.link)),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.blue,
+                            color: Theme.of(context).primaryColor,
                           ),
                         ),
                         onPressed: () async {
@@ -359,7 +360,7 @@ class ActivitiesState extends State<Activities> {
                             ? FontAwesomeIcons.search
                             : FontAwesomeIcons.copy,
                         size: 12,
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                       ),
                       activity.type == ActivityType.Transaction
                           ? FlatButton(
@@ -367,7 +368,7 @@ class ActivitiesState extends State<Activities> {
                               child: Text(
                                 '0x${abbreviate(activity.hash.substring(2))}',
                                 style: TextStyle(
-                                  color: Colors.blue,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                               onPressed: () async {
@@ -382,7 +383,7 @@ class ActivitiesState extends State<Activities> {
                               child: Text(
                                 'Signed Message',
                                 style: TextStyle(
-                                  color: Colors.blue,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                               onPressed: () async {

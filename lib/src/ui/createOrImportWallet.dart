@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
 
@@ -67,7 +68,7 @@ class CreateOrImportWallet extends StatelessWidget {
                     child: Container(
                       width: MediaQuery.of(context).size.width - 120,
                       height: MediaQuery.of(context).size.width - 120,
-                      color: Colors.grey[350],
+                      color: Colors.grey,
                       //TODO LOGO
                     ),
                   ),
@@ -79,26 +80,12 @@ class CreateOrImportWallet extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   SizedBox(
-                    width: MediaQuery.of(context).size.width - 170,
+                    width: MediaQuery.of(context).size.width - 60,
                     height: 44,
-                    child: FlatButton(
-                      color: Theme.of(context).textTheme.title.color,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        side: BorderSide(
-                          color: Theme.of(context).textTheme.title.color,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        'Create a new wallet',
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      onPressed: () async {
+                    child: commonButton(
+                      context,
+                      'Create a new wallet',
+                      () async {
                         await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => CreateWallet(
@@ -114,18 +101,12 @@ class CreateOrImportWallet extends StatelessWidget {
                       top: 15,
                     ),
                     child: SizedBox(
-                      width: MediaQuery.of(context).size.width - 170,
+                      width: MediaQuery.of(context).size.width - 60,
                       height: 44,
-                      child: FlatButton(
-                        child: Text(
-                          'Import existed wallet',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        color: Colors.transparent,
-                        onPressed: () async {
+                      child: commonButton(
+                        context,
+                        'Import existed wallet',
+                        () async {
                           await Navigator.push(
                             context,
                             new MaterialPageRoute(
@@ -135,6 +116,9 @@ class CreateOrImportWallet extends StatelessWidget {
                             ),
                           );
                         },
+                        color: Colors.transparent,
+                        textColor:
+                            Theme.of(context).primaryTextTheme.title.color,
                       ),
                     ),
                   ),

@@ -132,10 +132,8 @@ class AddressDetailState extends State<AddressDetail> {
                                 child: new QrImage(
                                   data: '0x' + walletEntity.address,
                                   size: MediaQuery.of(context).size.width - 200,
-                                  foregroundColor: Theme.of(context)
-                                      .primaryTextTheme
-                                      .title
-                                      .color,
+                                  backgroundColor:
+                                      Theme.of(context).backgroundColor,
                                 ),
                               ),
                             ),

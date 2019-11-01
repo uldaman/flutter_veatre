@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
@@ -114,13 +112,6 @@ class SwipeButtonState extends State<SwipeButton>
                     colors: [const Color(0xFF81269D), const Color(0xFFEE112D)],
                     stops: [0, 1],
                   ),
-                  boxShadow: [
-                    // BoxShadow(
-                    //   blurRadius: 2,
-                    //   color: Colors.lightBlue,
-                    //   offset: Offset(2, 2),
-                    // )
-                  ],
                   borderRadius: widget.borderRadius,
                 ),
                 child: ClipRRect(
@@ -133,7 +124,7 @@ class SwipeButtonState extends State<SwipeButton>
                   borderRadius: widget.borderRadius,
                   child: SizedBox.expand(
                     child: Container(
-                      color: Colors.blueGrey,
+                      color: Theme.of(context).primaryColor,
                       child: widget.content,
                     ),
                   ),
@@ -150,38 +141,31 @@ class SwipeButtonState extends State<SwipeButton>
                     width: widget.height,
                     height: widget.height,
                     decoration: BoxDecoration(
-                      color: enabled ? Colors.green[300] : Colors.grey[400],
+                      border: Border.all(
+                        width: 2,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      color: Colors.white,
                       borderRadius: widget.borderRadius,
                     ),
                     child: Stack(
                       children: <Widget>[
-                        SizedBox.expand(
-                          child: CircularProgressIndicator(
-                            backgroundColor: Colors.transparent,
-                            valueColor:
-                                AlwaysStoppedAnimation(Colors.blueAccent),
-                            value: _controller.value,
-                            strokeWidth: 2,
-                          ),
-                        ),
                         shouldLoading
                             ? SizedBox.expand(
                                 child: Center(
                                   child: CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation(
-                                      Colors.blueAccent,
+                                      Theme.of(context).primaryColor,
                                     ),
                                     strokeWidth: 2,
                                   ),
                                 ),
                               )
                             : SizedBox.expand(
-                                child: CustomPaint(
-                                  painter: _DrawCheck(
-                                    backgroundColor: Colors.brown,
-                                    strokeColor: Colors.white,
-                                    progress: _controller.value,
-                                  ),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Theme.of(context).primaryColor,
+                                  size: 16,
                                 ),
                               ),
                       ],
@@ -282,70 +266,4 @@ class _SwipeButtonClipper extends CustomClipper<RRect> {
 
   @override
   bool shouldReclip(_SwipeButtonClipper oldClipper) => true;
-}
-
-class _DrawCheck extends CustomPainter {
-  Color backgroundColor;
-  Color strokeColor;
-  double progress;
-  double strokeWidth;
-
-  _DrawCheck({
-    this.strokeColor = Colors.white,
-    this.backgroundColor = Colors.grey,
-    this.progress = 0,
-    this.strokeWidth = 2,
-  }) : assert(progress != null);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint = Paint();
-    paint.color = backgroundColor;
-    paint.style = PaintingStyle.fill;
-    paint.strokeWidth = strokeWidth;
-    final minOffset = min(size.width, size.height);
-    Point p1 =
-        Point(size.width / 2 - minOffset / 5, size.height / 2 + minOffset / 20);
-    Point p2 =
-        Point(size.width / 2 - minOffset / 20, size.height / 2 + minOffset / 8);
-    Point p3 =
-        Point(size.width / 2 + minOffset / 8, size.height / 2 - minOffset / 8);
-    canvas.drawLine(Offset(p1.x, p1.y), Offset(p2.x, p2.y), paint);
-    canvas.drawLine(Offset(p2.x, p2.y), Offset(p3.x, p3.y), paint);
-    paint.color = strokeColor;
-    if (progress <= 0.3) {
-      double nmd = progress / 0.3;
-      canvas.drawLine(
-        Offset(
-          p1.x,
-          p1.y,
-        ),
-        Offset(
-          nmd * p2.x + (1 - nmd) * p1.x,
-          nmd * p2.y + (1 - nmd) * p1.y,
-        ),
-        paint,
-      );
-    } else {
-      double nmd = (progress - 0.3) / 0.7;
-      canvas.drawLine(Offset(p1.x, p1.y), Offset(p2.x, p2.y), paint);
-      canvas.drawLine(
-        Offset(
-          p2.x,
-          p2.y,
-        ),
-        Offset(
-          nmd * p3.x + (1 - nmd) * p2.x,
-          nmd * p3.y + (1 - nmd) * p2.y,
-        ),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DrawCheck oldDelegate) => false;
-
-  @override
-  bool shouldRebuildSemantics(_DrawCheck oldDelegate) => false;
 }

@@ -87,7 +87,7 @@ class ImportWalletState extends State<ImportWallet> {
             Container(
               width: MediaQuery.of(context).size.width - 60,
               height: 200,
-              padding: EdgeInsets.only(top: 40),
+              padding: EdgeInsets.only(top: 20),
               child: TextFormField(
                 onChanged: (text) async {
                   setState(() {
@@ -111,38 +111,24 @@ class ImportWalletState extends State<ImportWallet> {
               child: Text(
                 errorMsg,
                 style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 16,
+                  color: Theme.of(context).errorColor,
+                  fontSize: 17,
                 ),
               ),
             ),
             SizedBox(
               width: MediaQuery.of(context).size.width - 60,
               height: 44,
-              child: FlatButton(
-                color: Theme.of(context).textTheme.title.color,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                  side: BorderSide(
-                    color: Theme.of(context).textTheme.title.color,
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  'Import',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onPressed: () async {
+              child: commonButton(
+                context,
+                'Import',
+                () async {
                   String mnemonic = mnemonicController.text;
                   bool isValid =
                       await BipKeyDerivation.isValidMnemonic(mnemonic);
                   if (!isValid) {
                     return setState(() {
-                      errorMsg = "Invalid Recovery phrases.";
+                      errorMsg = "Invalid recovery phrases.";
                     });
                   }
                   String address;

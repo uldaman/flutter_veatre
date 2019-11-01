@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import "package:pointycastle/api.dart" as api;
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/ui/transition.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
@@ -71,6 +70,7 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w400,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                   ),
                 ),
               ),
@@ -137,8 +137,7 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
       });
       if (passcodes.length == 6) {
         String password = passcodes.join("");
-        String passwordHash = bytesToHex(
-            new api.Digest("SHA-512").process(utf8.encode(password)));
+        String passwordHash = bytesToHex(sha512(password));
         if (passwordHash != widget.passwordHash) {
           Globals.clearMasterPasscodes();
           setState(() {
@@ -161,7 +160,8 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
         } else {
           await Config.setPasswordHash(passwordHash);
           Globals.updateMasterPasscodes(password);
-          await Navigator.pushNamed(context, MainUI.routeName);
+          slide(context, MainUI(), routeName: MainUI.routeName);
+          // await Navigator.pushNamed(context, MainUI.routeName);
         }
       }
     }

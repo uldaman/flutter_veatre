@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import "package:pointycastle/api.dart" as api;
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/reEnterPassword.dart';
@@ -101,6 +99,7 @@ class EnterPasswordState extends State<EnterPassword> {
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w400,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                   ),
                 ),
               ),
@@ -159,8 +158,7 @@ class EnterPasswordState extends State<EnterPassword> {
       });
       if (passcodes.length == 6) {
         String password = passcodes.join("");
-        String passwordHash = bytesToHex(
-            new api.Digest("SHA-512").process(utf8.encode(password)));
+        String passwordHash = bytesToHex(sha512(password));
         await Navigator.push(
           context,
           new MaterialPageRoute(

@@ -53,7 +53,6 @@ class WalletsState extends State<Wallets> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Wallets'),
         centerTitle: true,
@@ -79,20 +78,11 @@ class WalletsState extends State<Wallets> {
   }
 
   Widget buildWalletCard(BuildContext context, WalletEntity walletEntity) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 180,
+    return Card(
+      margin: EdgeInsets.only(left: 15, top: 15, right: 15),
       child: GestureDetector(
         child: Container(
-          decoration: ShapeDecoration(
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: Colors.grey[300],
-                width: 2,
-              ),
-            ),
-          ),
-          margin: EdgeInsets.only(left: 15, right: 15, top: 15),
+          margin: EdgeInsets.all(10),
           child: Column(
             children: <Widget>[
               Row(
@@ -115,7 +105,6 @@ class WalletsState extends State<Wallets> {
                             walletEntity.name,
                             style: TextStyle(
                               fontSize: 22,
-                              color: Theme.of(context).textTheme.title.color,
                             ),
                           ),
                         ),
@@ -124,8 +113,11 @@ class WalletsState extends State<Wallets> {
                           child: Text(
                             '0x${abbreviate(walletEntity.address)}',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
+                              fontSize: 17,
+                              color: Theme.of(context)
+                                  .primaryTextTheme
+                                  .display2
+                                  .color,
                             ),
                           ),
                         ),
@@ -158,22 +150,15 @@ class WalletsState extends State<Wallets> {
                   ),
                 ],
               ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        top: 10,
-                        left: 20,
-                        right: 20,
-                      ),
-                      child: Container(
-                        color: Colors.grey[300],
-                        height: 2,
-                      ),
-                    ),
-                  )
-                ],
+              Padding(
+                padding: EdgeInsets.only(
+                  top: 10,
+                  left: 15,
+                  right: 15,
+                ),
+                child: Divider(
+                  height: 2,
+                ),
               ),
               FutureBuilder(
                 future: AccountAPI.get(walletEntity.address),
@@ -208,11 +193,11 @@ class WalletsState extends State<Wallets> {
                 style: TextStyle(fontSize: 22),
               ),
               Container(
-                margin: EdgeInsets.only(left: 10, right: 14, top: 10),
+                margin: EdgeInsets.only(left: 5, right: 22, top: 10),
                 child: Text(
                   'VET',
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                     fontSize: 12,
                   ),
                 ),
@@ -227,12 +212,12 @@ class WalletsState extends State<Wallets> {
             children: <Widget>[
               Text(energy, style: TextStyle(fontSize: 14)),
               Container(
-                margin: EdgeInsets.only(left: 5, right: 15, top: 2),
+                margin: EdgeInsets.only(left: 5, right: 12, top: 2),
                 child: Text(
                   'VTHO',
                   style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 10,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
+                    fontSize: 12,
                   ),
                 ),
               )

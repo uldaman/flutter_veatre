@@ -75,7 +75,6 @@ class DAppsState extends State<DApps> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       body: ListView(
         padding: EdgeInsets.all(0),
         children: <Widget>[
@@ -83,7 +82,7 @@ class DAppsState extends State<DApps> {
               ? Padding(
                   child: Text(
                     'Bookmarks',
-                    style: Theme.of(context).accentTextTheme.title,
+                    style: Theme.of(context).primaryTextTheme.subtitle,
                   ),
                   padding: EdgeInsets.all(15),
                 )
@@ -93,7 +92,7 @@ class DAppsState extends State<DApps> {
               ? Padding(
                   child: Text(
                     'Recomends',
-                    style: Theme.of(context).accentTextTheme.title,
+                    style: Theme.of(context).primaryTextTheme.subtitle,
                   ),
                   padding: EdgeInsets.all(15),
                 )
@@ -135,7 +134,7 @@ class DAppsState extends State<DApps> {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: TextStyle(
-                    color: Theme.of(context).accentTextTheme.title.color,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                     fontSize: 10,
                   ),
                 ),
@@ -190,7 +189,7 @@ class DAppsState extends State<DApps> {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: TextStyle(
-                      color: Theme.of(context).accentTextTheme.title.color,
+                      color: Theme.of(context).primaryTextTheme.display2.color,
                       fontSize: 10,
                     ),
                   ),

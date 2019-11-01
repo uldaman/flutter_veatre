@@ -159,7 +159,6 @@ class _CreateWalletState extends State<CreateWallet> {
                               },
                             ),
                             Divider(
-                              color: Theme.of(context).textTheme.title.color,
                               height: 2,
                             ),
                             Expanded(
@@ -182,141 +181,131 @@ class _CreateWalletState extends State<CreateWallet> {
                     ],
                   ),
                 ),
+                SizedBox(
+                  height: 40,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Card(
+                      child: new QrImage(
+                        padding: EdgeInsets.all(40),
+                        data: "0x${address ?? ''}",
+                        size: MediaQuery.of(context).size.width - 150,
+                        backgroundColor: Theme.of(context).backgroundColor,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: Center(
+                        child: isCopied
+                            ? Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5)),
+                                  side: BorderSide.none,
+                                ),
+                                color: Colors.grey[200],
+                                child: Container(
+                                  child: Text(
+                                    'copied',
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.amber),
+                                  ),
+                                  padding: EdgeInsets.all(8),
+                                ),
+                              )
+                            : Text(''),
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width - 150,
+                      height: 44,
+                      child: FlatButton(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color:
+                                Theme.of(context).primaryTextTheme.title.color,
+                          ),
+                        ),
+                        child: Text('Copy address'),
+                        onPressed: () async {
+                          await Clipboard.setData(
+                              new ClipboardData(text: '0x' + address));
+                          setState(() {
+                            isCopied = true;
+                          });
+                          await Future.delayed(Duration(seconds: 1));
+                          setState(() {
+                            isCopied = false;
+                          });
+                        },
+                      ),
+                    )
+                  ],
+                ),
                 Expanded(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      Card(
-                        color: Theme.of(context).primaryColor,
-                        child: new QrImage(
-                          padding: EdgeInsets.all(40),
-                          data: "0x${address ?? ''}",
-                          size: MediaQuery.of(context).size.width - 200,
-                          foregroundColor:
-                              Theme.of(context).primaryTextTheme.title.color,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 40,
-                        child: Center(
-                          child: isCopied
-                              ? Card(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5)),
-                                    side: BorderSide.none,
+                      Padding(
+                        padding: EdgeInsets.only(top: 5),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width - 60,
+                          height: 44,
+                          child: commonButton(
+                            context,
+                            'Backup Now',
+                            () async {
+                              await WalletStorage.saveWallet(
+                                address,
+                                walletName,
+                                mnemonic,
+                                Globals.masterPasscodes,
+                              );
+                              await Navigator.push(
+                                context,
+                                new MaterialPageRoute(
+                                  builder: (context) =>
+                                      new RecoveryPhraseGeneration(
+                                    rootRouteName: widget.rootRouteName,
+                                    mnemonic: mnemonic,
                                   ),
-                                  color: Colors.grey[200],
-                                  child: Container(
-                                    child: Text(
-                                      'copied',
-                                      style: TextStyle(
-                                          fontSize: 12, color: Colors.amber),
-                                    ),
-                                    padding: EdgeInsets.all(8),
-                                  ),
-                                )
-                              : Text(''),
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width - 200,
-                        height: 44,
-                        child: FlatButton(
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: Theme.of(context)
-                                  .primaryTextTheme
-                                  .title
-                                  .color,
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                          child: Text('Copy address'),
-                          onPressed: () async {
-                            await Clipboard.setData(
-                                new ClipboardData(text: '0x' + address));
-                            setState(() {
-                              isCopied = true;
-                            });
-                            await Future.delayed(Duration(seconds: 1));
-                            setState(() {
-                              isCopied = false;
-                            });
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width - 60,
+                        height: 44,
+                        child: commonButton(
+                          context,
+                          'Skip Now',
+                          () async {
+                            await WalletStorage.saveWallet(
+                              address,
+                              walletName,
+                              mnemonic,
+                              Globals.masterPasscodes,
+                            );
+                            Navigator.popUntil(
+                              context,
+                              ModalRoute.withName(widget.rootRouteName),
+                            );
                           },
+                          color: Colors.transparent,
+                          textColor:
+                              Theme.of(context).primaryTextTheme.title.color,
                         ),
                       )
                     ],
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 5),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width - 200,
-                    height: 46,
-                    child: FlatButton(
-                      color: Theme.of(context).textTheme.title.color,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        side: BorderSide(
-                          color: Theme.of(context).textTheme.title.color,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        'Backup Now',
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      onPressed: () async {
-                        await WalletStorage.saveWallet(
-                          address,
-                          walletName,
-                          mnemonic,
-                          Globals.masterPasscodes,
-                        );
-                        await Navigator.push(
-                          context,
-                          new MaterialPageRoute(
-                            builder: (context) => new RecoveryPhraseGeneration(
-                              rootRouteName: widget.rootRouteName,
-                              mnemonic: mnemonic,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width - 170,
-                  height: 46,
-                  child: FlatButton(
-                    child: Text(
-                      'Skip Now',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    color: Colors.transparent,
-                    onPressed: () async {
-                      await WalletStorage.saveWallet(
-                        address,
-                        walletName,
-                        mnemonic,
-                        Globals.masterPasscodes,
-                      );
-                      Navigator.popUntil(
-                        context,
-                        ModalRoute.withName(widget.rootRouteName),
-                      );
-                    },
-                  ),
-                ),
+                )
               ],
             ),
           ),

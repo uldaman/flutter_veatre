@@ -1,13 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
-import 'package:veatre/src/ui/addressDetail.dart';
 
 class Wallets extends StatefulWidget {
   @override
@@ -78,9 +76,9 @@ class WalletsState extends State<Wallets> {
   }
 
   Widget buildWalletCard(BuildContext context, WalletEntity walletEntity) {
-    return Card(
-      margin: EdgeInsets.only(left: 15, top: 15, right: 15),
-      child: GestureDetector(
+    return GestureDetector(
+      child: Card(
+        margin: EdgeInsets.only(left: 15, top: 15, right: 15),
         child: Container(
           margin: EdgeInsets.all(10),
           child: Column(
@@ -124,30 +122,6 @@ class WalletsState extends State<Wallets> {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(right: 10, top: 10),
-                    child: IconButton(
-                      icon: Icon(
-                        FontAwesomeIcons.qrcode,
-                        size: 30,
-                      ),
-                      onPressed: () async {
-                        await showGeneralDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          transitionDuration: Duration(milliseconds: 150),
-                          pageBuilder: (context, a, b) {
-                            return ScaleTransition(
-                              scale: Tween(begin: 0.0, end: 1.0).animate(a),
-                              child: AddressDetail(
-                                walletEntity: walletEntity,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
                 ],
               ),
               Padding(
@@ -173,40 +147,37 @@ class WalletsState extends State<Wallets> {
             ],
           ),
         ),
-        onTap: () async {
-          Navigator.of(context).pop(walletEntity);
-        },
       ),
+      onTap: () async {
+        Navigator.of(context).pop(walletEntity);
+      },
     );
   }
 
   Widget balance(String balance, String energy) {
     return Column(
       children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(top: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                balance,
-                style: TextStyle(fontSize: 22),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 5, right: 22, top: 10),
-                child: Text(
-                  'VET',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryTextTheme.display2.color,
-                    fontSize: 12,
-                  ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Text(
+              balance,
+              style: TextStyle(fontSize: 22),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 5, right: 22, top: 10),
+              child: Text(
+                'VET',
+                style: TextStyle(
+                  color: Theme.of(context).primaryTextTheme.display2.color,
+                  fontSize: 12,
                 ),
-              )
-            ],
-          ),
+              ),
+            )
+          ],
         ),
         Container(
-          margin: EdgeInsets.only(top: 15),
+          margin: EdgeInsets.only(top: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[

@@ -249,7 +249,7 @@ class ManageWalletsState extends State<ManageWallets> {
     return Column(
       children: <Widget>[
         Container(
-          margin: EdgeInsets.only(top: 10),
+          margin: EdgeInsets.only(top: 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
@@ -271,7 +271,7 @@ class ManageWalletsState extends State<ManageWallets> {
           ),
         ),
         Container(
-          margin: EdgeInsets.only(top: 15),
+          margin: EdgeInsets.only(top: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[

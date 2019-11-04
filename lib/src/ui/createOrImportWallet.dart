@@ -97,9 +97,7 @@ class CreateOrImportWallet extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
-                      top: 15,
-                    ),
+                    padding: EdgeInsets.only(top: 15),
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width - 60,
                       height: 44,

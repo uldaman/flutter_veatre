@@ -160,8 +160,21 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
         } else {
           await Config.setPasswordHash(passwordHash);
           Globals.updateMasterPasscodes(password);
-          slide(context, MainUI(), routeName: MainUI.routeName);
-          // await Navigator.pushNamed(context, MainUI.routeName);
+          await Navigator.of(context).pushAndRemoveUntil(
+            PageRouteBuilder(
+              barrierDismissible: false,
+              transitionDuration: Duration(milliseconds: 200),
+              pageBuilder: (context, a, b) {
+                return SlideTransition(
+                  position:
+                      Tween(begin: Offset(0, 1), end: Offset.zero).animate(a),
+                  child: MainUI(),
+                );
+              },
+              settings: RouteSettings(name: MainUI.routeName),
+            ),
+            (route) => route == null,
+          );
         }
       }
     }

@@ -24,7 +24,7 @@ class BottomModal extends StatelessWidget {
       builder: (context, scrollController) => Container(
         padding: EdgeInsets.only(top: 8, bottom: 34, left: 26, right: 26),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).backgroundColor,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
@@ -74,10 +74,7 @@ class BottomModal extends StatelessWidget {
           flex: 2,
           child: Container(
             height: 3,
-            decoration: ShapeDecoration(
-              shape: StadiumBorder(),
-              color: Theme.of(context).accentTextTheme.title.color,
-            ),
+            decoration: ShapeDecoration(shape: StadiumBorder()),
           ),
         ),
         Spacer(
@@ -104,7 +101,7 @@ class BottomModal extends StatelessWidget {
             'Cancel',
             style: TextStyle(
               fontSize: 17,
-              color: Theme.of(context).accentColor,
+              color: Theme.of(context).primaryColor,
             ),
           ),
         ),

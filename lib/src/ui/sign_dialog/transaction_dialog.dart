@@ -152,7 +152,7 @@ class _TransactionState extends State<TransactionDialog>
                 children: [
                   Icon(
                     Icons.error,
-                    color: Colors.red,
+                    color: Theme.of(context).errorColor,
                     size: 17,
                   ),
                   Padding(
@@ -167,7 +167,7 @@ class _TransactionState extends State<TransactionDialog>
                         'Transaction may fail/revert',
                         style: TextStyle(
                           fontSize: 15,
-                          color: Colors.red,
+                          color: Theme.of(context).errorColor,
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -442,7 +442,7 @@ class _TransactionState extends State<TransactionDialog>
                   textAlign: TextAlign.end,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Theme.of(context).accentTextTheme.title.color,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                   ),
                 ),
               ),
@@ -454,7 +454,7 @@ class _TransactionState extends State<TransactionDialog>
   }
 
   Widget _buildFee() {
-    final Color color = Theme.of(context).accentTextTheme.title.color;
+    final Color color = Theme.of(context).primaryTextTheme.display2.color;
     return Row(
       children: <Widget>[
         Text('Estimate fee', style: TextStyle(color: color)),
@@ -468,7 +468,7 @@ class _TransactionState extends State<TransactionDialog>
                       : '--',
                   textAlign: TextAlign.end,
                   style: TextStyle(
-                    color: Theme.of(context).accentTextTheme.title.color,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                   ),
                 ),
               ),
@@ -479,7 +479,7 @@ class _TransactionState extends State<TransactionDialog>
                   textAlign: TextAlign.end,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Theme.of(context).accentTextTheme.title.color,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                   ),
                 ),
               ),

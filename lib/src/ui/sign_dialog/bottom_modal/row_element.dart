@@ -21,7 +21,7 @@ class RowElement extends StatelessWidget {
           child: Text(
             prefix,
             style: TextStyle(
-              color: Theme.of(context).accentTextTheme.title.color,
+              color: Theme.of(context).primaryTextTheme.display2.color,
             ),
           ),
         ),
@@ -50,7 +50,7 @@ class RowElement extends StatelessWidget {
                 padding: EdgeInsets.only(left: 12.5),
                 child: Icon(
                   Icons.arrow_forward_ios,
-                  color: Theme.of(context).accentTextTheme.title.color,
+                  color: Theme.of(context).primaryTextTheme.display3.color,
                   size: 15,
                 ),
               )

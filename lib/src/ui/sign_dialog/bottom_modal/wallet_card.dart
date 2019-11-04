@@ -43,7 +43,7 @@ class WalletCard extends StatelessWidget {
             textAlign: TextAlign.end,
             style: TextStyle(
               fontSize: 11,
-              color: Theme.of(context).accentTextTheme.title.color,
+              color: Theme.of(context).primaryTextTheme.display2.color,
             ),
           ),
         ),
@@ -72,7 +72,7 @@ class WalletCard extends StatelessWidget {
           ' (0x${abbreviate(address)})',
           style: TextStyle(
             fontSize: 12,
-            color: Theme.of(context).accentTextTheme.title.color,
+            color: Theme.of(context).primaryTextTheme.display2.color,
           ),
         ),
       ],

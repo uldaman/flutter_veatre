@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:veatre/src/ui/shimmer.dart';
 
 class _SwipeValue {
   bool enabled;
@@ -125,7 +126,11 @@ class SwipeButtonState extends State<SwipeButton>
                   child: SizedBox.expand(
                     child: Container(
                       color: Theme.of(context).primaryColor,
-                      child: widget.content,
+                      child: Shimmer.fromColors(
+                        child: widget.content,
+                        baseColor: Colors.blueGrey,
+                        highlightColor: Colors.white,
+                      ),
                     ),
                   ),
                 ),

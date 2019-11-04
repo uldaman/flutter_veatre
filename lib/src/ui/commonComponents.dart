@@ -167,7 +167,7 @@ Widget cell(
           ),
         ),
         Divider(
-          height: 2,
+          thickness: 1,
         ),
       ],
     ),

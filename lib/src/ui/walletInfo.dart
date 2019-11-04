@@ -178,7 +178,7 @@ class WalletInfoState extends State<WalletInfo> {
                 right: 15,
               ),
               child: Divider(
-                height: 2,
+                thickness: 1,
               ),
             ),
             FutureBuilder(
@@ -455,7 +455,7 @@ class WalletInfoState extends State<WalletInfo> {
             ],
           ),
           Divider(
-            height: 2,
+            thickness: 1,
           ),
           Padding(
             padding: EdgeInsets.only(left: 10, right: 10),

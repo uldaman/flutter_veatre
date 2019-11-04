@@ -157,7 +157,7 @@ class WalletsState extends State<Wallets> {
                   right: 15,
                 ),
                 child: Divider(
-                  height: 2,
+                  thickness: 1,
                 ),
               ),
               FutureBuilder(

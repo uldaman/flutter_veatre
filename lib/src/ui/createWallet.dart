@@ -159,7 +159,7 @@ class _CreateWalletState extends State<CreateWallet> {
                               },
                             ),
                             Divider(
-                              height: 2,
+                              thickness: 1,
                             ),
                             Expanded(
                               child: Align(

@@ -327,6 +327,21 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           }
           return FlutterWebView.NavigationDecision.prevent;
         },
+        onDelegateError: (String error) {
+          controller.loadHTMLString('''
+            <html>
+              <body>
+                  <p style="text-align:center;
+                    position: absolute;
+                    left: 50%;
+                    top: 40%;
+                    transform: translate(-50%,-50%);
+                    font-size: 50px;">$error</p >
+                  </p >
+              </body>
+            </html>
+          ''', _currentURL);
+        },
       );
 
   String get _initialParamsJS {

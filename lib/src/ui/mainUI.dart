@@ -126,7 +126,6 @@ class MainUIState extends State<MainUI>
       physics: NeverScrollableScrollPhysics(),
     );
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
       body: PageView(
         children: <Widget>[
           mainNetPageView,

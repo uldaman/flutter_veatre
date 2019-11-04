@@ -118,15 +118,11 @@ class AppState extends State<App> {
   ManageWallets get manageWallets => ManageWallets();
 
   ThemeData get lightTheme => ThemeData(
-        buttonTheme: ButtonThemeData(
-          textTheme: ButtonTextTheme.normal,
-          buttonColor: Color(0xFF410FE6),
-        ),
         appBarTheme: AppBarTheme(
           color: Color(0xFFF8F8F8),
           iconTheme: IconThemeData(color: Color(0xFF666666)),
+          brightness: Brightness.light,
         ),
-        primarySwatch: Colors.blue,
         primaryColor: MaterialColor(0xFF410FE6, {0: Color(0xFF410FE6)}), //主色调
         accentColor: Colors.white,
         backgroundColor: Color(0xFFF8F8F8), //背景色
@@ -163,7 +159,6 @@ class AppState extends State<App> {
             fontSize: 17,
           ),
           button: TextStyle(
-            // color: Colors.white,
             fontFamily: "Aveny",
             fontSize: 17,
           ),
@@ -197,7 +192,7 @@ class AppState extends State<App> {
           hintStyle: TextStyle(color: Color(0xFFCCCCCC)),
         ),
         dividerColor: Color(0xFFCCCCCC),
-        buttonColor: Color(0xFF410FE6),
+        buttonColor: Colors.blueGrey,
         errorColor: Color(0xFFEF6F6F),
       );
 

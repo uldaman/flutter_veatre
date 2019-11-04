@@ -106,7 +106,6 @@ class ActivityStorage {
         if (receipt != null) {
           int processBlock = receipt['meta']['blockNumber'];
           if (activity.processBlock == null) {
-            print('$activity ${receipt['meta']['blockNumber']}');
             batch.update(
               activityTableName,
               {

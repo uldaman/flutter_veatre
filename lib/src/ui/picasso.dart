@@ -69,7 +69,7 @@ class Picasso extends StatelessWidget {
       Color color = genColor();
       circles.add(
         Opacity(
-          opacity: 0.5,
+          opacity: 0.9,
           child: SizedBox(
             width: size,
             height: size,

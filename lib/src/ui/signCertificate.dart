@@ -277,7 +277,7 @@ class SignCertificateState extends State<SignCertificate>
                         style: TextStyle(
                           color:
                               Theme.of(context).primaryTextTheme.display2.color,
-                          fontSize: 17,
+                          // fontSize: 14,
                         ),
                       ),
                     ),

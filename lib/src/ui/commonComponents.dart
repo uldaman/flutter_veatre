@@ -107,10 +107,7 @@ Widget commonButton(
   return FlatButton(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5)),
-      side: BorderSide(
-        color: Theme.of(context).textTheme.title.color,
-        width: 0,
-      ),
+      side: BorderSide.none,
     ),
     color: color ?? Theme.of(context).primaryColor,
     child: Text(

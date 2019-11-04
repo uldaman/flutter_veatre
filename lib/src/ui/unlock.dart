@@ -22,90 +22,96 @@ class UnlockState extends State<Unlock> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        maintainBottomViewPadding: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(
-                top: 60,
-              ),
-              child: Text(
-                'Welcome back',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).primaryTextTheme.title.color,
-                  fontSize: 28,
+    return WillPopScope(
+      child: Scaffold(
+        body: SafeArea(
+          maintainBottomViewPadding: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(
+                  top: 60,
+                ),
+                child: Text(
+                  'Welcome back',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).primaryTextTheme.title.color,
+                    fontSize: 28,
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 40),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Enter the passcode',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).primaryTextTheme.title.color,
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 40),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Enter the passcode',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                Theme.of(context).primaryTextTheme.title.color,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  buildPasscodes(
-                    context,
-                    passcodes,
-                    6,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: 30,
-                        top: 10,
-                      ),
-                      child: Text(
-                        errorMsg,
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: Theme.of(context).errorColor,
-                          fontWeight: FontWeight.w400,
+                    buildPasscodes(
+                      context,
+                      passcodes,
+                      6,
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: 30,
+                          top: 10,
+                        ),
+                        child: Text(
+                          errorMsg,
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: Theme.of(context).errorColor,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            passcodeKeyboard(
-              context,
-              onCodeSelected: selectCode,
-              onDelete: () async {
-                if (passcodes.length > 0) {
-                  setState(() {
-                    passcodes.removeLast();
-                  });
-                }
-                if (passcodes.length < 6) {
-                  setState(() {
-                    errorMsg = '';
-                  });
-                }
-              },
-            ),
-          ],
+              passcodeKeyboard(
+                context,
+                onCodeSelected: selectCode,
+                onDelete: () async {
+                  if (passcodes.length > 0) {
+                    setState(() {
+                      passcodes.removeLast();
+                    });
+                  }
+                  if (passcodes.length < 6) {
+                    setState(() {
+                      errorMsg = '';
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
+      onWillPop: () async {
+        return !Navigator.of(context).userGestureInProgress;
+      },
     );
   }
 
@@ -129,8 +135,21 @@ class UnlockState extends State<Unlock> {
         } else {
           Globals.updateMasterPasscodes(password);
           if (!widget.everLaunched) {
-            slide(context, MainUI(), routeName: MainUI.routeName);
-            // await Navigator.pushNamed(context, MainUI.routeName);
+            await Navigator.of(context).pushAndRemoveUntil(
+              PageRouteBuilder(
+                barrierDismissible: false,
+                transitionDuration: Duration(milliseconds: 200),
+                pageBuilder: (context, a, b) {
+                  return SlideTransition(
+                    position:
+                        Tween(begin: Offset(0, 1), end: Offset.zero).animate(a),
+                    child: MainUI(),
+                  );
+                },
+                settings: RouteSettings(name: MainUI.routeName),
+              ),
+              (route) => route == null,
+            );
           } else {
             Navigator.of(context).pop();
           }

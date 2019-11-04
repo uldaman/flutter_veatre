@@ -111,9 +111,11 @@ class SignCertificateState extends State<SignCertificate>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Center(
-                child: Container(
-                  width: 100,
-                  height: 4,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: Divider(
+                    thickness: 4,
+                  ),
                 ),
               ),
               Column(
@@ -147,8 +149,7 @@ class SignCertificateState extends State<SignCertificate>
                     ),
                   ),
                   Divider(
-                    color: Colors.grey,
-                    height: 2,
+                    thickness: 1,
                   ),
                 ],
               ),

@@ -211,8 +211,7 @@ class ManageWalletsState extends State<ManageWallets> {
                   right: 15,
                 ),
                 child: Divider(
-                  height: 2,
-                  color: Theme.of(context).dividerColor,
+                  thickness: 1,
                 ),
               ),
               FutureBuilder(

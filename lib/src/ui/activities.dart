@@ -314,7 +314,7 @@ class ActivitiesState extends State<Activities> {
             ),
           ),
           Divider(
-            height: 2,
+            thickness: 1,
           ),
           Padding(
             padding: EdgeInsets.only(left: 10, right: 10),

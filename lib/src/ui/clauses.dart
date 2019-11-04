@@ -85,8 +85,7 @@ class Clauses extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 5),
                 child: Divider(
-                  color: Theme.of(context).primaryTextTheme.title.color,
-                  height: 2,
+                  thickness: 1,
                 ),
               ),
               Padding(

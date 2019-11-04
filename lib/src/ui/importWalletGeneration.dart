@@ -128,7 +128,7 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                           },
                         ),
                         Divider(
-                          height: 2,
+                          thickness: 1,
                         ),
                         Expanded(
                           child: Align(

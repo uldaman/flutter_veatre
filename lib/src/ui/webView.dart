@@ -139,9 +139,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                           icon: Icon(
                             bookmarkID == null
                                 ? MaterialCommunityIcons.getIconData(
-                                    'bookmark-plus-outline')
+                                    'bookmark-plus-outline',
+                                  )
                                 : MaterialCommunityIcons.getIconData(
-                                    'bookmark-plus'),
+                                    'bookmark-plus',
+                                  ),
                             size: 20,
                           ),
                           disabledColor: Theme.of(context).iconTheme.color,
@@ -169,7 +171,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                       ),
                       IconButton(
                         icon: Icon(
-                          MaterialCommunityIcons.getIconData('dots-vertical'),
+                          MaterialCommunityIcons.getIconData(
+                              'settings-outline'),
                           size: 20,
                           color: Theme.of(context).iconTheme.color,
                         ),
@@ -219,7 +222,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               isKeyboardVisible
                   ? SizedBox()
                   : SizedBox(
-                      height: 46,
+                      height: 56,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -582,30 +585,44 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   List<Widget> get bottomItems {
+    final snapshotLegnth = WebViews.snapshots(widget.network).length;
+    final tabLength = snapshotLegnth == 0
+        ? 1
+        : snapshotLegnth + (Globals.tabValue.stage == TabStage.Created ? 1 : 0);
     return [
-      bottomItem(
-        MaterialCommunityIcons.getIconData('chevron-left'),
-        onPressed: canBack
-            ? () async {
-                if (canBack && controller != null) {
-                  return controller.goBack();
+      Padding(
+        padding: EdgeInsets.only(bottom: 10),
+        child: bottomItem(
+          MaterialCommunityIcons.getIconData('chevron-left'),
+          onPressed: canBack
+              ? () async {
+                  if (canBack && controller != null) {
+                    return controller.goBack();
+                  }
                 }
-              }
-            : null,
+              : null,
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.only(bottom: 10),
+        child: bottomItem(
+          MaterialCommunityIcons.getIconData('chevron-right'),
+          onPressed: canForward
+              ? () async {
+                  if (canForward && controller != null) {
+                    return controller.goForward();
+                  }
+                }
+              : null,
+        ),
       ),
       bottomItem(
-        MaterialCommunityIcons.getIconData('chevron-right'),
-        onPressed: canForward
-            ? () async {
-                if (canForward && controller != null) {
-                  return controller.goForward();
-                }
-              }
-            : null,
-      ),
-      bottomItem(
-        MaterialCommunityIcons.getIconData('bookmark-multiple-outline'),
-        size: 35,
+        MaterialCommunityIcons.getIconData(
+          tabLength > 9
+              ? 'numeric-9-plus-box-multiple-outline'
+              : 'numeric-$tabLength-box-multiple-outline',
+        ),
+        size: 28,
         onPressed: () async {
           Uint8List captureData = await takeScreenshot();
           String t = await title;
@@ -643,7 +660,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               : SizedBox(),
           bottomItem(
             MaterialCommunityIcons.getIconData('arrow-up-bold-circle-outline'),
-            size: 35,
+            size: 28,
             onPressed: () async {
               String url = await slide(context, Activities());
               await updateLatestActivity();
@@ -656,7 +673,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       ),
       bottomItem(
         MaterialCommunityIcons.getIconData('cards'),
-        size: 35,
+        size: 28,
         onPressed: () async {
           final url = await slide(
             context,
@@ -681,8 +698,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         iconData,
         size: size,
       ),
-      color: Colors.blue,
-      disabledColor: Colors.grey[300],
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      color: Theme.of(context).primaryColor,
+      disabledColor: Theme.of(context).primaryTextTheme.display3.color,
       onPressed: onPressed,
     );
   }

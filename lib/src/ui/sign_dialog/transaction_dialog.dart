@@ -393,8 +393,10 @@ class _TransactionState extends State<TransactionDialog>
         padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
         child: Icon(
           MaterialCommunityIcons.getIconData('rocket'),
-          color: _priority >= priority ? Colors.blue : Colors.grey,
-          size: 15,
+          color: _priority >= priority
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).primaryTextTheme.display3.color,
+          size: 20,
         ),
       ),
     );

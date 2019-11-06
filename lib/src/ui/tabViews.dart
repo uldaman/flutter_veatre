@@ -124,7 +124,7 @@ class TabViewsState extends State<TabViews> {
           width: 2,
           color: selectedTabKey == snapshot.key
               ? Theme.of(context).primaryColor
-              : Theme.of(context).primaryTextTheme.display2.color,
+              : Theme.of(context).primaryTextTheme.display3.color,
         ),
       ),
       child: Column(

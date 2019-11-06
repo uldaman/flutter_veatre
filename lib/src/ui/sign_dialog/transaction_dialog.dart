@@ -325,7 +325,7 @@ class _TransactionState extends State<TransactionDialog>
 
   Widget _buildWalletRow() {
     return RowElement(
-      prefix: 'WALLET',
+      prefix: 'Wallet',
       content: WalletCard(
         name: _entity?.name ?? '',
         address: _entity?.address ?? '',
@@ -348,7 +348,7 @@ class _TransactionState extends State<TransactionDialog>
 
   Widget _buildSummaryRow() {
     return RowElement(
-      prefix: 'SUMMARY',
+      prefix: 'Summary',
       content: Text(
         _makeSummary(),
         maxLines: 5,
@@ -390,13 +390,13 @@ class _TransactionState extends State<TransactionDialog>
         setState(() {});
       },
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 17),
         child: Icon(
           MaterialCommunityIcons.getIconData('rocket'),
           color: _priority >= priority
               ? Theme.of(context).primaryColor
               : Theme.of(context).primaryTextTheme.display3.color,
-          size: 20,
+          size: 21,
         ),
       ),
     );

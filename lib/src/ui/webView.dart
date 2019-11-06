@@ -192,9 +192,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             children: <Widget>[
               !isStartSearch && progress < 1 && progress > 0
                   ? SizedBox(
-                      height: 2,
+                      height: 1,
                       child: LinearProgressIndicator(
                         value: progress,
+                        valueColor: AlwaysStoppedAnimation(
+                            Theme.of(context).primaryColor),
                         backgroundColor: Colors.transparent,
                       ),
                     )

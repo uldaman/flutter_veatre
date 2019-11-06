@@ -67,23 +67,11 @@ class SearchBarState extends State<SearchBar>
   Widget rightView;
   String defautText;
   TextEditingController _searchTextEditingController = TextEditingController();
-  final _focusNode = FocusNode();
-
   @override
   void initState() {
     super.initState();
     _handleValueChanged();
     widget.searchBarController.addListener(_handleValueChanged);
-    _focusNode.addListener(_handleFocus);
-  }
-
-  void _handleFocus() {
-    if (_focusNode.hasFocus) {
-      _searchTextEditingController.selection = TextSelection(
-        baseOffset: 0,
-        extentOffset: _searchTextEditingController.text.length,
-      );
-    }
   }
 
   void _handleValueChanged() async {
@@ -105,7 +93,6 @@ class SearchBarState extends State<SearchBar>
   @override
   void dispose() {
     widget.searchBarController.removeListener(_handleValueChanged);
-    _focusNode.removeListener(_handleFocus);
     super.dispose();
   }
 
@@ -117,7 +104,6 @@ class SearchBarState extends State<SearchBar>
         color: Theme.of(context).textTheme.body1.color,
       ),
       controller: _searchTextEditingController,
-      focusNode: _focusNode,
       decoration: InputDecoration(
         border: InputBorder.none,
         focusedBorder: InputBorder.none,

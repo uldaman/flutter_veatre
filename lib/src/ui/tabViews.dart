@@ -119,16 +119,13 @@ class TabViewsState extends State<TabViews> {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).backgroundColor,
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 2,
-            offset: Offset(2, 2),
-            color: selectedTabKey == snapshot.key
-                ? Theme.of(context).primaryColor
-                : Theme.of(context).backgroundColor,
-          )
-        ],
         borderRadius: BorderRadius.all(Radius.circular(10)),
+        border: Border.all(
+          width: 2,
+          color: selectedTabKey == snapshot.key
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).primaryTextTheme.display2.color,
+        ),
       ),
       child: Column(
         children: <Widget>[

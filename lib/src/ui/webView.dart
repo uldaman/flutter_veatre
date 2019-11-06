@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:veatre/src/ui/signCertificate.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
@@ -78,7 +78,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       shouldCancelInput: true,
       rightView: null,
       leftView: Icon(
-        Icons.search,
+        MaterialCommunityIcons.getIconData('magnify'),
         size: 20,
       ),
     ),
@@ -138,8 +138,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                         child: IconButton(
                           icon: Icon(
                             bookmarkID == null
-                                ? Icons.bookmark_border
-                                : Icons.bookmark,
+                                ? MaterialCommunityIcons.getIconData(
+                                    'bookmark-plus-outline')
+                                : MaterialCommunityIcons.getIconData(
+                                    'bookmark-plus'),
                             size: 20,
                           ),
                           disabledColor: Theme.of(context).iconTheme.color,
@@ -167,7 +169,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                       ),
                       IconButton(
                         icon: Icon(
-                          Icons.settings,
+                          MaterialCommunityIcons.getIconData('dots-vertical'),
                           size: 20,
                           color: Theme.of(context).iconTheme.color,
                         ),
@@ -415,7 +417,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             : !isStartSearch && progress == 1
                 ? IconButton(
                     icon: Icon(
-                      Icons.refresh,
+                      MaterialCommunityIcons.getIconData('refresh'),
                       size: 20,
                     ),
                     onPressed: () async {
@@ -582,7 +584,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   List<Widget> get bottomItems {
     return [
       bottomItem(
-        Icons.arrow_back_ios,
+        MaterialCommunityIcons.getIconData('chevron-left'),
         onPressed: canBack
             ? () async {
                 if (canBack && controller != null) {
@@ -592,7 +594,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             : null,
       ),
       bottomItem(
-        Icons.arrow_forward_ios,
+        MaterialCommunityIcons.getIconData('chevron-right'),
         onPressed: canForward
             ? () async {
                 if (canForward && controller != null) {
@@ -602,7 +604,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             : null,
       ),
       bottomItem(
-        Icons.filter_none,
+        MaterialCommunityIcons.getIconData('bookmark-multiple-outline'),
+        size: 35,
         onPressed: () async {
           Uint8List captureData = await takeScreenshot();
           String t = await title;
@@ -639,7 +642,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 )
               : SizedBox(),
           bottomItem(
-            FontAwesomeIcons.arrowAltCircleUp,
+            MaterialCommunityIcons.getIconData('arrow-up-bold-circle-outline'),
+            size: 35,
             onPressed: () async {
               String url = await slide(context, Activities());
               await updateLatestActivity();
@@ -651,7 +655,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ],
       ),
       bottomItem(
-        FontAwesomeIcons.wallet,
+        MaterialCommunityIcons.getIconData('cards'),
+        size: 35,
         onPressed: () async {
           final url = await slide(
             context,
@@ -668,7 +673,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   Widget bottomItem(
     IconData iconData, {
-    double size = 30,
+    double size = 40,
     VoidCallback onPressed,
   }) {
     return IconButton(

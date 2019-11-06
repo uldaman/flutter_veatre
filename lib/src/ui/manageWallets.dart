@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
@@ -182,7 +182,7 @@ class ManageWalletsState extends State<ManageWallets> {
                     padding: EdgeInsets.only(right: 10, top: 10),
                     child: IconButton(
                       icon: Icon(
-                        FontAwesomeIcons.qrcode,
+                        MaterialCommunityIcons.getIconData('qrcode'),
                         size: 30,
                       ),
                       onPressed: () async {

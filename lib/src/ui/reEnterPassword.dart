@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/ui/transition.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/commonComponents.dart';

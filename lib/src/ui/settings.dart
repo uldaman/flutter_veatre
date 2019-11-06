@@ -155,6 +155,8 @@ class SettingsState extends State<Settings> {
                 autofocus: true,
                 controller: passwordController,
                 keyboardType: TextInputType.number,
+                maxLength: 6,
+                decoration: InputDecoration(hintText: 'Master code'),
               ),
             ),
           ],

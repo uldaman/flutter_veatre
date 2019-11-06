@@ -45,7 +45,7 @@ class WalletOperationState extends State<WalletOperation> {
         centerTitle: true,
       ),
       body: ListView(
-        padding: EdgeInsets.only(top: 20),
+        padding: EdgeInsets.only(top: 10),
         children: [
           buildCell(
             "Change Wallet Name",

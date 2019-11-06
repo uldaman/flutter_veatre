@@ -63,7 +63,7 @@ class AppearancesState extends State<Appearances> {
         centerTitle: true,
       ),
       body: ListView(
-        padding: EdgeInsets.only(top: 5),
+        padding: EdgeInsets.only(top: 10),
         children: widgets,
       ),
     );

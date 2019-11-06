@@ -63,6 +63,7 @@ class NetworksState extends State<Networks> {
         centerTitle: true,
       ),
       body: ListView(
+        padding: EdgeInsets.only(top: 10),
         children: widgets,
       ),
     );

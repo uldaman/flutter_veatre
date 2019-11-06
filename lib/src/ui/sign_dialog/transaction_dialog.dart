@@ -359,7 +359,7 @@ class _TransactionState extends State<TransactionDialog>
                 MaterialPageRoute(
                   builder: (context) => Summary(
                     title: 'Summary',
-                    content: 's',
+                    content: widget.options.comment,
                   ),
                 ),
               )

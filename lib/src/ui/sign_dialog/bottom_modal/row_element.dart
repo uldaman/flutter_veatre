@@ -14,7 +14,7 @@ class RowElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final widget = Row(
       children: <Widget>[
         SizedBox(
           width: 88,
@@ -25,26 +25,7 @@ class RowElement extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(
-          child: onExpand != null
-              ? GestureDetector(
-                  onTap: onExpand,
-                  child: _buildContent(context),
-                )
-              : _buildContent(context),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildContent(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        content != null
-            ? Expanded(
-                child: content,
-              )
-            : Spacer(),
+        content != null ? Expanded(child: content) : Spacer(),
         onExpand != null
             ? Padding(
                 padding: EdgeInsets.only(left: 12.5),
@@ -57,5 +38,12 @@ class RowElement extends StatelessWidget {
             : SizedBox(width: 25),
       ],
     );
+    return onExpand != null
+        ? GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: onExpand,
+            child: widget,
+          )
+        : widget;
   }
 }

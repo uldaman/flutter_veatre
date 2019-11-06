@@ -129,9 +129,11 @@ class _TransactionState extends State<TransactionDialog>
       content: Column(
         children: <Widget>[
           _buildWalletRow(),
-          _buildDivider(),
+          SizedBox(height: 16),
+          Divider(thickness: 1, height: 0),
           _buildPriorityRow(),
-          _buildDivider(),
+          Divider(thickness: 1, height: 0),
+          SizedBox(height: 16),
           _buildSummaryRow(),
           _buildDivider(),
           _buildClausesRow(),
@@ -388,7 +390,7 @@ class _TransactionState extends State<TransactionDialog>
         setState(() {});
       },
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 17),
+        padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
         child: Icon(
           FontAwesomeIcons.rocket,
           color: _priority >= priority ? Colors.blue : Colors.grey,

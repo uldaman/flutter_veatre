@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/utils/common.dart';
@@ -79,7 +79,9 @@ class WalletInfoState extends State<WalletInfo> {
         centerTitle: true,
         actions: <Widget>[
           IconButton(
-            icon: Icon(FontAwesomeIcons.wrench),
+            icon: Icon(
+              MaterialCommunityIcons.getIconData('dots-vertical'),
+            ),
             iconSize: 20,
             onPressed: () async {
               await Navigator.of(context).push(
@@ -332,8 +334,10 @@ class WalletInfoState extends State<WalletInfo> {
                               : activity.status == ActivityStatus.Pending
                                   ? Row(
                                       children: <Widget>[
+                                        //TODO sending
                                         Icon(
-                                          FontAwesomeIcons.arrowAltCircleUp,
+                                          MaterialCommunityIcons.getIconData(
+                                              'content-copy'),
                                           color: Color(0xFF57BD89),
                                           size: 16,
                                         ),
@@ -466,7 +470,7 @@ class WalletInfoState extends State<WalletInfo> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Icon(
-                        FontAwesomeIcons.link,
+                        MaterialCommunityIcons.getIconData('link-variant'),
                         size: 12,
                         color: Theme.of(context).primaryColor,
                       ),
@@ -498,8 +502,9 @@ class WalletInfoState extends State<WalletInfo> {
                     children: <Widget>[
                       Icon(
                         activity.type == ActivityType.Transaction
-                            ? FontAwesomeIcons.search
-                            : FontAwesomeIcons.copy,
+                            ? MaterialCommunityIcons.getIconData('magnify')
+                            : MaterialCommunityIcons.getIconData(
+                                'content-copy'),
                         size: 12,
                         color: Theme.of(context).primaryColor,
                       ),

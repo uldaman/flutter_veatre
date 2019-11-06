@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:veatre/src/models/account.dart';
 
 class AddressDetail extends StatefulWidget {
@@ -94,7 +94,8 @@ class AddressDetailState extends State<AddressDetail> {
                                           Padding(
                                             padding: EdgeInsets.only(left: 5),
                                             child: Icon(
-                                              FontAwesomeIcons.copy,
+                                              MaterialCommunityIcons
+                                                  .getIconData('content-copy'),
                                               color: Colors.white,
                                               size: 12,
                                             ),

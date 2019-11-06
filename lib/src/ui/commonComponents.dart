@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:veatre/src/utils/mersenneTwister.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 Future alert(BuildContext context, Widget title, String message) async {
   return showDialog(
@@ -213,7 +213,7 @@ Widget _passcode(BuildContext context, List<String> passcodes, index) {
           ? Align(
               alignment: Alignment.center,
               child: Icon(
-                FontAwesomeIcons.solidCircle,
+                MaterialCommunityIcons.getIconData('checkbox-blank-circle'),
                 size: 17,
                 color: Theme.of(context).primaryTextTheme.title.color,
               ),

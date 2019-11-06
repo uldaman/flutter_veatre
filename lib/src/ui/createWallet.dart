@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:bip_key_derivation/bip_key_derivation.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -123,7 +124,10 @@ class _CreateWalletState extends State<CreateWallet> {
                                       ),
                                     ),
                                   ),
-                                  Icon(Icons.edit),
+                                  Icon(
+                                    MaterialCommunityIcons.getIconData(
+                                        'pencil-outline'),
+                                  ),
                                 ],
                               ),
                               onPressed: () async {

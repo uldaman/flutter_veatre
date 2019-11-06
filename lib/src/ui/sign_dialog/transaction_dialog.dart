@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:veatre/src/ui/clauses.dart';
 import 'package:web3dart/contracts.dart';
 import 'package:veatre/common/globals.dart';
@@ -392,7 +392,7 @@ class _TransactionState extends State<TransactionDialog>
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
         child: Icon(
-          FontAwesomeIcons.rocket,
+          MaterialCommunityIcons.getIconData('rocket'),
           color: _priority >= priority ? Colors.blue : Colors.grey,
           size: 15,
         ),

@@ -29,7 +29,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   qr_flutter: ^2.0.0
-  font_awesome_flutter: ^8.2.0
+  flutter_icons:
   pointycastle: ^1.0.1
   web3dart: 1.0.0-rc.1
   fixnum: ^0.10.9

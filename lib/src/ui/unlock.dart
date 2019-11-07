@@ -116,11 +116,9 @@ class UnlockState extends State<Unlock> {
 
   Future<void> selectCode(String code) async {
     if (passcodes.length < 6) {
+      passcodes.add(code);
       setState(() {
         errorMsg = '';
-      });
-      setState(() {
-        passcodes.add(code);
       });
       if (passcodes.length == 6) {
         String passwordHash = await Config.passwordHash;
@@ -128,7 +126,6 @@ class UnlockState extends State<Unlock> {
         if (passwordHash != bytesToHex(sha512(password))) {
           Globals.clearMasterPasscodes();
           setState(() {
-            passcodes.clear();
             errorMsg = 'Passcode mismatch';
           });
         } else {
@@ -153,6 +150,7 @@ class UnlockState extends State<Unlock> {
             Navigator.of(context).pop();
           }
         }
+        passcodes.clear();
       }
     }
   }

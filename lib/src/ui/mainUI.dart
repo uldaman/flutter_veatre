@@ -19,10 +19,6 @@ class MainUIState extends State<MainUI>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   Network network = Globals.network;
   Appearance appearance = Globals.appearance;
-
-  PageController netPageController = PageController(initialPage: 0);
-  PageController mainNetPageController = PageController(initialPage: 0);
-  PageController testNetPageController = PageController(initialPage: 0);
   int timestamp = 0;
   bool lockPagePresented = false;
 
@@ -31,10 +27,7 @@ class MainUIState extends State<MainUI>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WebViews.initialWebViews(appearance: appearance);
-    netPageController =
-        PageController(initialPage: network == Network.MainNet ? 0 : 1);
     Globals.addNetworkHandler(_hanleNetworkChanged);
-    Globals.addTabHandler(_handleTabChanged);
   }
 
   @override
@@ -60,29 +53,12 @@ class MainUIState extends State<MainUI>
   void _hanleNetworkChanged() {
     setState(() {
       network = Globals.network;
-      netPageController.jumpToPage(network == Network.MainNet ? 0 : 1);
     });
-  }
-
-  void _handleTabChanged() {
-    final tabValue = Globals.tabValue;
-    if (tabValue.stage != TabStage.Removed) {
-      if (tabValue.network == Network.MainNet) {
-        setState(() {
-          mainNetPageController.jumpToPage(tabValue.id);
-        });
-      } else {
-        setState(() {
-          testNetPageController.jumpToPage(tabValue.id);
-        });
-      }
-    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    Globals.removeTabHandler(_handleTabChanged);
     Globals.removeNetworkHandler(_hanleNetworkChanged);
     super.dispose();
   }
@@ -109,30 +85,24 @@ class MainUIState extends State<MainUI>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    PageView testNetPageView = PageView.builder(
-      controller: testNetPageController,
-      itemCount: WebViews.testNetWebViews.length,
-      itemBuilder: (context, index) {
-        return WebViews.testNetWebViews[index];
-      },
-      physics: NeverScrollableScrollPhysics(),
+    Stack testStack = Stack(
+      children: WebViews.testNetWebViews,
     );
-    PageView mainNetPageView = PageView.builder(
-      controller: mainNetPageController,
-      itemCount: WebViews.mainNetWebViews.length,
-      itemBuilder: (context, index) {
-        return WebViews.mainNetWebViews[index];
-      },
-      physics: NeverScrollableScrollPhysics(),
+    Stack mainStack = Stack(
+      children: WebViews.mainNetWebViews,
     );
     return Scaffold(
-      body: PageView(
+      body: Stack(
         children: <Widget>[
-          mainNetPageView,
-          testNetPageView,
+          Offstage(
+            child: testStack,
+            offstage: network != Network.TestNet,
+          ),
+          Offstage(
+            child: mainStack,
+            offstage: network != Network.MainNet,
+          ),
         ],
-        physics: NeverScrollableScrollPhysics(),
-        controller: netPageController,
       ),
     );
   }

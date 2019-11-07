@@ -128,19 +128,17 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
 
   Future<void> selectCode(String code) async {
     if (passcodes.length < 6) {
+      passcodes.add(code);
       setState(() {
         errorMsg = '';
-      });
-      setState(() {
-        passcodes.add(code);
       });
       if (passcodes.length == 6) {
         String password = passcodes.join("");
         String passwordHash = bytesToHex(sha512(password));
         if (passwordHash != widget.passwordHash) {
           Globals.clearMasterPasscodes();
+          passcodes.clear();
           setState(() {
-            passcodes.clear();
             errorMsg = 'Passcode mismatch';
           });
         } else if (widget.fromRoute != null) {

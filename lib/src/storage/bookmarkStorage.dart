@@ -37,6 +37,7 @@ class BookmarkStorage {
       whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
       orderBy: 'id desc',
     );
+    print('rows $rows ${network ?? Globals.network}');
     return List.from(rows.map((row) => Bookmark.fromJSON(row)));
   }
 

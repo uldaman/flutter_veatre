@@ -908,25 +908,30 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     if (tabValue.network == widget.network) {
       key = tabValue.tabKey;
       if (tabValue.stage == TabStage.RemoveAll) {
-        await controller.loadHTMLString("", null);
-      }
-      if (tabValue.id == id) {
-        if (tabValue.stage == TabStage.Removed ||
-            tabValue.stage == TabStage.Coverred) {
-          await controller.loadHTMLString("", null);
-        } else if (tabValue.stage == TabStage.SelectedInAlive) {
-          await controller.loadUrl(tabValue.url);
-        }
-        setState(() {
-          _offstage = !(tabValue.stage == TabStage.SelectedInAlive ||
-              tabValue.stage == TabStage.SelectedAlive ||
-              tabValue.stage == TabStage.Coverred ||
-              tabValue.stage == TabStage.Created);
-        });
-      } else if (!_offstage) {
         setState(() {
           _offstage = true;
         });
+        await controller.loadHTMLString("", null);
+      } else {
+        print('tabValue ${tabValue.stage} ${tabValue.id} $id');
+        if (tabValue.id == id) {
+          if (tabValue.stage == TabStage.Removed ||
+              tabValue.stage == TabStage.Coverred) {
+            await controller.loadHTMLString("", null);
+          } else if (tabValue.stage == TabStage.SelectedInAlive) {
+            await controller.loadUrl(tabValue.url);
+          }
+          setState(() {
+            _offstage = !(tabValue.stage == TabStage.SelectedInAlive ||
+                tabValue.stage == TabStage.SelectedAlive ||
+                tabValue.stage == TabStage.Coverred ||
+                tabValue.stage == TabStage.Created);
+          });
+        } else if (!_offstage) {
+          setState(() {
+            _offstage = true;
+          });
+        }
       }
     }
   }

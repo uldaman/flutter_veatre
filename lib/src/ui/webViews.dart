@@ -32,7 +32,7 @@ class WebViews {
   static Map<String, Snapshot> _testNetSnapshots = {};
   static List<WebView> testNetWebViews = [];
 
-  static final maxTabLen = 10;
+  static final maxTabLen = 5;
 
   static List<int> _activeMainNetPages = [];
   static List<int> _inactiveMainNetPages = [];
@@ -46,6 +46,7 @@ class WebViews {
     for (int id = 0; id < maxTabLen; id++) {
       WebView mainNetWebView = new WebView(
         id: id,
+        offstage: id != 0,
         network: Network.MainNet,
         initialURL: Globals.initialURL,
         appearance: appearance,
@@ -58,6 +59,7 @@ class WebViews {
       mainNetWebViews.add(mainNetWebView);
       WebView testNetWebView = new WebView(
         id: id,
+        offstage: id != 0,
         network: Network.TestNet,
         initialURL: Globals.initialURL,
         appearance: appearance,

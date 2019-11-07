@@ -45,12 +45,14 @@ class WebView extends StatefulWidget {
   final Network network;
   final Appearance appearance;
   final String initialURL;
+  final bool offstage;
 
   WebView({
     @required this.id,
     @required this.network,
     @required this.appearance,
     @required this.initialURL,
+    @required this.offstage,
   });
 
   @override
@@ -66,6 +68,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   bool isStartSearch = false;
   double progress = 0;
   bool canBookmarked = false;
+  bool _offstage;
   String _currentURL;
   Appearance _appearance;
   int bookmarkID;
@@ -90,6 +93,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     super.initState();
     id = widget.id;
     key = randomHex(32);
+    _offstage = widget.offstage;
     _currentURL = widget.initialURL;
     _appearance = widget.appearance;
     Globals.addBlockHeadHandler(_handleHeadChanged);
@@ -108,134 +112,141 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return WillPopScope(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          leading: null,
-          centerTitle: true,
-          automaticallyImplyLeading: false,
-          actions: <Widget>[
-            isStartSearch
-                ? FlatButton(
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                    onPressed: () async {
-                      updateSearchBar(_currentURL, 1);
-                      setState(() {
-                        isStartSearch = false;
-                      });
-                    },
-                  )
-                : Row(
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(left: 5),
-                        child: IconButton(
-                          icon: Icon(
-                            bookmarkID == null
-                                ? MaterialCommunityIcons.getIconData(
-                                    'bookmark-plus-outline',
-                                  )
-                                : MaterialCommunityIcons.getIconData(
-                                    'bookmark-plus',
-                                  ),
-                            size: 20,
-                          ),
-                          disabledColor: Theme.of(context).iconTheme.color,
-                          color: Theme.of(context).primaryIconTheme.color,
-                          onPressed: _currentURL == Globals.initialURL
-                              ? null
-                              : bookmarkID == null
-                                  ? () async {
-                                      final meta = await metaData;
-                                      if (meta != null) {
-                                        await slide(
-                                          context,
-                                          CreateBookmark(
-                                            documentMetaData: meta,
-                                          ),
-                                        );
-                                        await updateBookmarkID(_currentURL);
-                                      }
-                                    }
-                                  : () async {
-                                      await BookmarkStorage.delete(bookmarkID);
-                                      await updateBookmarkID(_currentURL);
-                                    },
+    return Offstage(
+      child: WillPopScope(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            leading: null,
+            centerTitle: true,
+            automaticallyImplyLeading: false,
+            actions: <Widget>[
+              isStartSearch
+                  ? FlatButton(
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontSize: 12,
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          MaterialCommunityIcons.getIconData(
-                              'settings-outline'),
-                          size: 20,
-                          color: Theme.of(context).iconTheme.color,
-                        ),
-                        onPressed: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return Settings();
-                              },
-                              settings: RouteSettings(name: Settings.routeName),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-          ],
-          title: searchBar,
-        ),
-        body: SafeArea(
-          child: Column(
-            children: <Widget>[
-              !isStartSearch && progress < 1 && progress > 0
-                  ? SizedBox(
-                      height: 1,
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        valueColor: AlwaysStoppedAnimation(
-                            Theme.of(context).primaryColor),
-                        backgroundColor: Colors.transparent,
-                      ),
+                      onPressed: () async {
+                        updateSearchBar(_currentURL, 1);
+                        setState(() {
+                          isStartSearch = false;
+                        });
+                      },
                     )
-                  : SizedBox(),
-              Expanded(
-                child: RepaintBoundary(
-                  key: captureKey,
-                  child: Stack(
-                    children: [
-                      webView,
-                      _currentURL == Globals.initialURL || isStartSearch == true
-                          ? appView
-                          : SizedBox(),
-                    ],
-                  ),
-                ),
-              ),
-              isKeyboardVisible
-                  ? SizedBox()
-                  : SizedBox(
-                      height: 56,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: bottomItems,
-                      ),
+                  : Row(
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(left: 5),
+                          child: IconButton(
+                            icon: Icon(
+                              bookmarkID == null
+                                  ? MaterialCommunityIcons.getIconData(
+                                      'bookmark-plus-outline',
+                                    )
+                                  : MaterialCommunityIcons.getIconData(
+                                      'bookmark-plus',
+                                    ),
+                              size: 20,
+                            ),
+                            disabledColor: Theme.of(context).iconTheme.color,
+                            color: Theme.of(context).primaryIconTheme.color,
+                            onPressed: _currentURL == Globals.initialURL
+                                ? null
+                                : bookmarkID == null
+                                    ? () async {
+                                        final meta = await metaData;
+                                        if (meta != null) {
+                                          await slide(
+                                            context,
+                                            CreateBookmark(
+                                              documentMetaData: meta,
+                                            ),
+                                          );
+                                          await updateBookmarkID(_currentURL);
+                                        }
+                                      }
+                                    : () async {
+                                        await BookmarkStorage.delete(
+                                            bookmarkID);
+                                        await updateBookmarkID(_currentURL);
+                                      },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            MaterialCommunityIcons.getIconData(
+                                'settings-outline'),
+                            size: 20,
+                            color: Theme.of(context).iconTheme.color,
+                          ),
+                          onPressed: () async {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return Settings();
+                                },
+                                settings:
+                                    RouteSettings(name: Settings.routeName),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
             ],
+            title: searchBar,
+          ),
+          body: SafeArea(
+            child: Column(
+              children: <Widget>[
+                !isStartSearch && progress < 1 && progress > 0
+                    ? SizedBox(
+                        height: 1,
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          valueColor: AlwaysStoppedAnimation(
+                              Theme.of(context).primaryColor),
+                          backgroundColor: Colors.transparent,
+                        ),
+                      )
+                    : SizedBox(),
+                Expanded(
+                  child: RepaintBoundary(
+                    key: captureKey,
+                    child: Stack(
+                      children: [
+                        webView,
+                        Offstage(
+                          child: appView,
+                          offstage: !(_currentURL == Globals.initialURL ||
+                              isStartSearch == true),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                isKeyboardVisible
+                    ? SizedBox()
+                    : SizedBox(
+                        height: 56,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: bottomItems,
+                        ),
+                      ),
+              ],
+            ),
           ),
         ),
+        onWillPop: () async {
+          return !Navigator.of(context).userGestureInProgress;
+        },
       ),
-      onWillPop: () async {
-        return !Navigator.of(context).userGestureInProgress;
-      },
+      offstage: _offstage,
     );
   }
 
@@ -262,6 +273,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       );
 
   Widget get appView => DApps(
+        network: widget.network,
         onAppSelected: (DApp app) async {
           await _handleLoad(app.url);
         },
@@ -905,6 +917,16 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         } else if (tabValue.stage == TabStage.SelectedInAlive) {
           await controller.loadUrl(tabValue.url);
         }
+        setState(() {
+          _offstage = !(tabValue.stage == TabStage.SelectedInAlive ||
+              tabValue.stage == TabStage.SelectedAlive ||
+              tabValue.stage == TabStage.Coverred ||
+              tabValue.stage == TabStage.Created);
+        });
+      } else if (!_offstage) {
+        setState(() {
+          _offstage = true;
+        });
       }
     }
   }

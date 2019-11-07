@@ -4,6 +4,7 @@ import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/api/dappAPI.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 
 typedef onAppSelectedCallback = Future<void> Function(DApp app);
 typedef onBookmarkSelectedCallback = Future<void> Function(Bookmark bookmark);
@@ -14,11 +15,13 @@ class DApps extends StatefulWidget {
   final onAppSelectedCallback onAppSelected;
   final onBookmarkSelectedCallback onBookmarkSelected;
   final onBookmarkLongPressedCallback onBookmarkLongPressed;
+  final Network network;
 
   DApps({
     this.onAppSelected,
     this.onBookmarkSelected,
     this.onBookmarkLongPressed,
+    @required this.network,
   });
 
   @override
@@ -64,7 +67,8 @@ class DAppsState extends State<DApps> {
   }
 
   Future<void> updateBookmarks() async {
-    List<Bookmark> bookmarks = await BookmarkStorage.queryAll();
+    List<Bookmark> bookmarks =
+        await BookmarkStorage.queryAll(network: widget.network);
     if (mounted) {
       setState(() {
         this.bookmarks = bookmarks;

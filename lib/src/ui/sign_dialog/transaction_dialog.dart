@@ -59,7 +59,7 @@ class _TransactionState extends State<TransactionDialog>
       vsync: this,
       duration: Duration(milliseconds: 200),
     );
-    _animation = Tween(begin: 600.0, end: 44.0).animate(_animationController)
+    _animation = Tween(begin: 600.0, end: 54.0).animate(_animationController)
       ..addListener(() {
         setState(() {});
       });
@@ -102,29 +102,27 @@ class _TransactionState extends State<TransactionDialog>
   Widget build(BuildContext context) {
     return BottomModal(
       title: 'Transaction',
-      bottomActionButton: SizedBox(
-        child: SwipeButton(
-          swipeController: _swipeController,
-          content: Center(
-            child: Text(
-              _swipeController.value.enabled
-                  ? 'Slide to send transaction'
-                  : 'Loading...',
-              style: TextStyle(
-                fontSize: 17,
-                color: Colors.white,
+      bottomActionButton: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 23),
+        child: SizedBox(
+          width: _animation.value,
+          child: SwipeButton(
+            swipeController: _swipeController,
+            content: Center(
+              child: Text(
+                _swipeController.value.enabled ? 'Slide to send' : 'Loading...',
+                style: TextStyle(fontSize: 17, color: Colors.white),
               ),
             ),
+            borderRadius: BorderRadius.all(Radius.circular(27)),
+            height: 54,
+            onDragEnd: () async {
+              _swipeController.valueWith(shouldLoading: true, enabled: false);
+              await _animationController.forward();
+              _signTx();
+            },
           ),
-          borderRadius: BorderRadius.all(Radius.circular(22)),
-          height: 44,
-          onDragEnd: () {
-            _animationController.forward();
-            _swipeController.valueWith(shouldLoading: true, enabled: false);
-            _signTx();
-          },
         ),
-        width: _animation.value,
       ),
       content: Column(
         children: <Widget>[
@@ -467,7 +465,7 @@ class _TransactionState extends State<TransactionDialog>
             children: <Widget>[
               Expanded(
                 child: Text(
-                  _swipeController.value.enabled
+                  _swipeController.value.enabled && _estimatedFee != null
                       ? formatNum(fixed2Value(_estimatedFee))
                       : '--',
                   textAlign: TextAlign.end,

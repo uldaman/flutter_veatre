@@ -205,8 +205,8 @@ class Globals {
     _bookmarkController.removeListener(handler);
   }
 
-  static Block get genesis {
-    if (Globals.network == Network.MainNet) {
+  static Block genesis(Network network) {
+    if (network == Network.MainNet) {
       return mainNetGenesis;
     }
     return testNetGenesis;

@@ -364,7 +364,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       );
 
   String get _initialParamsJS {
-    final genesis = Globals.genesis;
+    final genesis = Globals.genesis(widget.network);
     final initialHead = Globals.head(network: widget.network);
     return '''
     window.genesis = {
@@ -577,8 +577,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     } else if (arguments[0] == 'signCert') {
       SigningCertMessage certMessage =
           SigningCertMessage.fromJSON(arguments[1]);
-      SigningCertOptions options =
-          SigningCertOptions.fromJSON(arguments[2], _currentURL);
+      SigningCertOptions options = SigningCertOptions.fromJSON(
+          arguments[2], Uri.parse(_currentURL).host);
       await _validate(options.signer);
       return showDialog(SignCertificate(certMessage, options));
     }
@@ -913,7 +913,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         });
         await controller.loadHTMLString("", null);
       } else {
-        print('tabValue ${tabValue.stage} ${tabValue.id} $id');
         if (tabValue.id == id) {
           if (tabValue.stage == TabStage.Removed ||
               tabValue.stage == TabStage.Coverred) {

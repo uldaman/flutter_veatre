@@ -145,7 +145,7 @@ class WalletOperationState extends State<WalletOperation> {
   }) {
     return Container(
       child: GestureDetector(
-        onTap: () async {
+        onTapUp: (detail) async {
           if (onTap != null) {
             await onTap();
           }

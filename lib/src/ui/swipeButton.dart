@@ -209,7 +209,7 @@ class SwipeButtonState extends State<SwipeButton>
         fractionalVelocity = 1;
       }
       double acceleration, velocity;
-      if (_controller.value < 1) {
+      if (_controller.value < 0.9) {
         acceleration = -2;
         velocity = -fractionalVelocity;
       } else {

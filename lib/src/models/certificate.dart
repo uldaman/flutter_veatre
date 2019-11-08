@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:veatre/src/models/Crypto.dart';
 import 'package:pointycastle/digests/blake2b.dart';
 import "package:pointycastle/ecc/api.dart";
@@ -9,24 +10,22 @@ class Certificate {
   String domain;
   SigningCertMessage certMessage;
   int timestamp;
-
-  String _signer;
+  String signer;
   Uint8List _signature = Uint8List(0);
 
   Certificate({
-    String domain,
-    int timestamp,
-    SigningCertMessage certMessage,
+    @required String signer,
+    @required String domain,
+    @required SigningCertMessage certMessage,
+    @required int timestamp,
   }) {
     this.domain = domain ?? '';
     this.timestamp = timestamp ?? 0;
     this.certMessage = certMessage;
+    this.signer = signer;
   }
 
   void sign(Uint8List privateKey) {
-    Uint8List publicKey = privateKeyBytesToPublic(privateKey);
-    Uint8List address = publicKeyToAddress(publicKey);
-    _signer = '0x' + bytesToHex(address);
     _signature = Crypto.sign(signingHash, privateKey);
   }
 
@@ -43,7 +42,7 @@ class Certificate {
     Uint8List publicKey =
         Crypto.sigToPub(_signature.last, ECSignature(r, s), signingHash);
     Uint8List address = publicKeyToAddress(publicKey);
-    return '0x' + bytesToHex(address) == _signer;
+    return '0x' + bytesToHex(address) == signer;
   }
 
   Uint8List get signingHash {
@@ -56,7 +55,7 @@ class Certificate {
   SigningCertResponse get response {
     return SigningCertResponse(
       annex: Annex(
-        signer: _signer,
+        signer: signer,
         timestamp: timestamp,
         domain: domain,
       ),
@@ -69,7 +68,7 @@ class Certificate {
       'domain': domain,
       'payload': certMessage.payload.encoded,
       'purpose': certMessage.purpose,
-      'signer': _signer,
+      'signer': signer,
       'timestamp': timestamp,
     };
   }

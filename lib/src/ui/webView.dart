@@ -577,8 +577,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     } else if (arguments[0] == 'signCert') {
       SigningCertMessage certMessage =
           SigningCertMessage.fromJSON(arguments[1]);
-      SigningCertOptions options = SigningCertOptions.fromJSON(
-          arguments[2], Uri.parse(_currentURL).host);
+      SigningCertOptions options =
+          SigningCertOptions.fromJSON(arguments[2], _currentURL);
       await _validate(options.signer);
       return showDialog(SignCertificate(certMessage, options));
     }

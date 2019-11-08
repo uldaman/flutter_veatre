@@ -129,11 +129,11 @@ class SigningCertOptions {
 
   factory SigningCertOptions.fromJSON(
     Map<String, dynamic> parsedJSON,
-    String link,
+    String url,
   ) {
     return SigningCertOptions(
       signer: parsedJSON['signer'],
-      link: link,
+      link: parsedJSON['link'] ?? url,
     );
   }
 }

@@ -42,7 +42,7 @@ class SignCertificateState extends State<SignCertificate>
   Future<void> init() async {
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 200));
-    _animation = Tween(begin: 600.0, end: 44.0).animate(_controller)
+    _animation = Tween(begin: 600.0, end: 54.0).animate(_controller)
       ..addListener(() {
         setState(() {});
       });
@@ -98,7 +98,7 @@ class SignCertificateState extends State<SignCertificate>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
+      padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
       child: ClipRRect(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -280,23 +280,28 @@ class SignCertificateState extends State<SignCertificate>
                         ),
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      width: _animation.value,
-                      child: SwipeButton(
-                        swipeController: swipeController,
-                        content: Center(
-                          child: Text(
-                            'Slide to sign certificate',
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: Colors.white,
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 40),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 20,
+                        ),
+                        width: _animation.value,
+                        child: SwipeButton(
+                          swipeController: swipeController,
+                          content: Center(
+                            child: Text(
+                              'Slide to sign',
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
+                          borderRadius: BorderRadius.all(Radius.circular(27)),
+                          height: 54,
+                          onDragEnd: signCert,
                         ),
-                        borderRadius: BorderRadius.all(Radius.circular(22)),
-                        height: 44,
-                        onDragEnd: signCert,
                       ),
                     ),
                   ],
@@ -325,6 +330,7 @@ class SignCertificateState extends State<SignCertificate>
         certMessage: widget.certMessage,
         timestamp: timestamp,
         domain: widget.options.link,
+        signer: '0x' + walletEntity.address,
       );
       cert.sign(privateKey);
       await ActivityStorage.insert(

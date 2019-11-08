@@ -125,7 +125,6 @@ class SearchBarState extends State<SearchBar>
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.all(
           Radius.circular(10),
         ),

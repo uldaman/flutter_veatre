@@ -228,7 +228,7 @@ class ManageWalletsState extends State<ManageWallets> {
           ),
         ),
       ),
-      onTap: () async {
+      onTapUp: (details) async {
         final result = await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => WalletInfo(

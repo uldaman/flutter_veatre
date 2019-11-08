@@ -77,6 +77,7 @@ class WalletsState extends State<Wallets> {
 
   Widget buildWalletCard(BuildContext context, WalletEntity walletEntity) {
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       child: Card(
         margin: EdgeInsets.only(left: 15, top: 15, right: 15),
         child: Container(

@@ -326,10 +326,11 @@ class SignCertificateState extends State<SignCertificate>
           await walletEntity.decryptPrivateKey(Globals.masterPasscodes);
       final head = Globals.head();
       int timestamp = head.timestamp;
+      final uri = Uri.parse(widget.options.link);
       Certificate cert = Certificate(
         certMessage: widget.certMessage,
         timestamp: timestamp,
-        domain: widget.options.link,
+        domain: uri?.host ?? '',
         signer: '0x' + walletEntity.address,
       );
       cert.sign(privateKey);
@@ -337,7 +338,7 @@ class SignCertificateState extends State<SignCertificate>
         Activity(
           block: head.number,
           content: json.encode(cert.unserialized),
-          link: cert.domain,
+          link: widget.options.link,
           address: walletEntity.address,
           type: ActivityType.Certificate,
           comment: 'Certification',

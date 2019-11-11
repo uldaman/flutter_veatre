@@ -29,7 +29,6 @@ import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/ui/activities.dart';
 import 'package:veatre/src/ui/createOrImportWallet.dart';
 import 'package:veatre/src/ui/mainUI.dart';
-import 'package:veatre/src/ui/transition.dart';
 import 'package:veatre/src/ui/createBookmark.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/tabViews.dart';
@@ -159,10 +158,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                                     ? () async {
                                         final meta = await metaData;
                                         if (meta != null) {
-                                          await slide(
-                                            context,
-                                            CreateBookmark(
-                                              documentMetaData: meta,
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (_) => CreateBookmark(
+                                                  documentMetaData: meta),
+                                              fullscreenDialog: true,
                                             ),
                                           );
                                           await updateBookmarkID(_currentURL);
@@ -537,12 +537,14 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               },
             );
             if (isConfirmd) {
-              await slide(
-                context,
-                CreateOrImportWallet(
-                  fromRouteName: MainUI.routeName,
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CreateOrImportWallet(
+                    fromRouteName: MainUI.routeName,
+                  ),
+                  fullscreenDialog: true,
+                  settings: RouteSettings(name: '/CreateOrImportWallet'),
                 ),
-                routeName: '/CreateOrImportWallet',
               );
               List<WalletEntity> walletEntities =
                   await WalletStorage.readAll(network: widget.network);
@@ -647,14 +649,16 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             url: _currentURL,
           );
           final size = captureKey.currentContext.size;
-          await slide(
-            context,
-            TabViews(
-              id: id,
-              currentTabKey: key,
-              url: _currentURL,
-              ratio: size.width / size.height,
-              appearance: _appearance,
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => TabViews(
+                id: id,
+                currentTabKey: key,
+                url: _currentURL,
+                ratio: size.width / size.height,
+                appearance: _appearance,
+              ),
+              fullscreenDialog: true,
             ),
           );
         },
@@ -674,7 +678,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             MaterialCommunityIcons.getIconData('arrow-up-bold-circle-outline'),
             size: 28,
             onPressed: () async {
-              String url = await slide(context, Activities());
+              String url = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Activities(),
+                  fullscreenDialog: true,
+                ),
+              );
               await updateLatestActivity();
               if (url != null) {
                 await _handleLoad(url);
@@ -687,10 +696,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         MaterialCommunityIcons.getIconData('cards'),
         size: 28,
         onPressed: () async {
-          final url = await slide(
-            context,
-            ManageWallets(),
-            routeName: ManageWallets.routeName,
+          final url = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ManageWallets(),
+              fullscreenDialog: true,
+              settings: RouteSettings(name: ManageWallets.routeName),
+            ),
           );
           if (url != null) {
             await _handleLoad(url);
@@ -797,15 +808,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                   color: Theme.of(context).primaryColor, fontSize: 17),
             ),
             onPressed: () async {
-              await slide(
-                context,
-                CreateBookmark(
-                  eidtBookmarkID: bookmark.id,
-                  documentMetaData: DocumentMetaData(
-                    icon: bookmark.favicon,
-                    title: bookmark.title,
-                    url: bookmark.url,
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CreateBookmark(
+                    eidtBookmarkID: bookmark.id,
+                    documentMetaData: DocumentMetaData(
+                      icon: bookmark.favicon,
+                      title: bookmark.title,
+                      url: bookmark.url,
+                    ),
                   ),
+                  fullscreenDialog: true,
                 ),
               );
               Navigator.of(context).pop();

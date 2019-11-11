@@ -1,4 +1,4 @@
-import 'dart:core';
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:veatre/common/globals.dart';
@@ -8,8 +8,8 @@ import 'package:veatre/src/ui/webView.dart';
 class Snapshot {
   int id;
   String key;
-  String title;
-  Uint8List data;
+  Future<Uint8List> data;
+  Future<String> title;
   String url;
   int timestamp;
   bool isAlive;
@@ -179,14 +179,14 @@ class WebViews {
     Network net,
     int id,
     String key, {
-    Uint8List data,
-    String title,
+    Future<Uint8List> data,
+    Future<String> title,
     String url,
   }) {
     Snapshot _snapshot = Snapshot(
       id: id,
       key: key,
-      data: Uint8List.fromList(data),
+      data: data,
       title: title,
       url: url,
       timestamp: DateTime.now().millisecondsSinceEpoch,

@@ -638,14 +638,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ),
         size: 28,
         onPressed: () async {
-          Uint8List captureData = await takeScreenshot();
-          String t = await title;
           WebViews.updateSnapshot(
             widget.network,
             id,
             key,
-            title: t == "" ? 'New Tab' : t,
-            data: captureData,
+            title: title,
+            data: takeScreenshot(),
             url: _currentURL,
           );
           final size = captureKey.currentContext.size;

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
@@ -139,11 +141,14 @@ class TabViewsState extends State<TabViews> {
                     Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(left: 40, right: 40),
-                        child: Text(
-                          snapshot.title ?? '',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
+                        child: FutureBuilder<String>(
+                          future: snapshot.title,
+                          builder: (context, snapshot) => Text(
+                            snapshot.hasData ? snapshot.data : 'New Tab',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                     ),
@@ -208,18 +213,21 @@ class TabViewsState extends State<TabViews> {
             child: Padding(
               padding: EdgeInsets.only(top: 0),
               child: GestureDetector(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                    image: DecorationImage(
-                      alignment: Alignment.topCenter,
-                      fit: BoxFit.fitWidth,
-                      image: snapshot.data == null
-                          ? AssetImage('assets/blank.png')
-                          : MemoryImage(snapshot.data),
+                child: FutureBuilder<Uint8List>(
+                  future: snapshot.data,
+                  builder: (context, snapshot) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      ),
+                      image: DecorationImage(
+                        alignment: Alignment.topCenter,
+                        fit: BoxFit.fitWidth,
+                        image: snapshot.hasData
+                            ? MemoryImage(snapshot.data)
+                            : AssetImage('assets/blank.png'),
+                      ),
                     ),
                   ),
                 ),

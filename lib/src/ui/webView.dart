@@ -86,6 +86,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     ),
   );
   Activity latestActivity;
+  bool btnEnabled = true;
 
   @override
   void initState() {
@@ -712,7 +713,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Widget bottomItem(
     IconData iconData, {
     double size = 40,
-    VoidCallback onPressed,
+    Future<void> Function() onPressed,
   }) {
     return IconButton(
       icon: Icon(
@@ -723,7 +724,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       highlightColor: Colors.transparent,
       color: Theme.of(context).primaryColor,
       disabledColor: Theme.of(context).primaryTextTheme.display3.color,
-      onPressed: onPressed,
+      onPressed: () async {
+        if (btnEnabled) {
+          btnEnabled = false;
+          await onPressed();
+          btnEnabled = true;
+        }
+      },
     );
   }
 
@@ -917,6 +924,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   void _handleTabChanged() async {
     final tabValue = Globals.tabValue;
     if (tabValue.network == widget.network) {
+      if (tabValue.stage == TabStage.Created ||
+          tabValue.stage == TabStage.Removed) {
+        setState(() {});
+      }
       key = tabValue.tabKey;
       if (tabValue.stage == TabStage.RemoveAll) {
         setState(() {

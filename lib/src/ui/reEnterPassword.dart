@@ -158,16 +158,9 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
           await Config.setPasswordHash(passwordHash);
           Globals.updateMasterPasscodes(password);
           await Navigator.of(context).pushAndRemoveUntil(
-            PageRouteBuilder(
-              barrierDismissible: false,
-              transitionDuration: Duration(milliseconds: 200),
-              pageBuilder: (context, a, b) {
-                return SlideTransition(
-                  position:
-                      Tween(begin: Offset(0, 1), end: Offset.zero).animate(a),
-                  child: MainUI(),
-                );
-              },
+            MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (_) => MainUI(),
               settings: RouteSettings(name: MainUI.routeName),
             ),
             (route) => route == null,

@@ -19,8 +19,9 @@ class MainUIState extends State<MainUI>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   Network network = Globals.network;
   Appearance appearance = Globals.appearance;
-  int timestamp = 0;
-  bool lockPagePresented = false;
+  int _timestamp = 0;
+  bool _pageLocked = false;
+  AppLifecycleState _state = AppLifecycleState.resumed;
 
   @override
   void initState() {
@@ -32,22 +33,26 @@ class MainUIState extends State<MainUI>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
     final currentTime = DateTime.now().millisecondsSinceEpoch;
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      timestamp = currentTime;
+    if ((state == AppLifecycleState.paused ||
+            state == AppLifecycleState.inactive) &&
+        _state == AppLifecycleState.resumed) {
+      _state = state;
+      _timestamp = currentTime;
+    } else if (state == AppLifecycleState.resumed) {
+      if ((_state == AppLifecycleState.paused ||
+              _state == AppLifecycleState.inactive) &&
+          currentTime - _timestamp > 5 * 1000 &&
+          !_pageLocked) {
+        _present(
+          Unlock(
+            everLaunched: true,
+          ),
+        );
+      }
+      _state = AppLifecycleState.resumed;
     }
-    if (state == AppLifecycleState.resumed &&
-        currentTime - timestamp > 30 * 1000 &&
-        !lockPagePresented) {
-      Globals.clearMasterPasscodes();
-      _present(
-        Unlock(
-          everLaunched: true,
-        ),
-      );
-    }
+    super.didChangeAppLifecycleState(state);
   }
 
   void _hanleNetworkChanged() {
@@ -64,19 +69,14 @@ class MainUIState extends State<MainUI>
   }
 
   Future<dynamic> _present(Widget widget) async {
-    lockPagePresented = true;
-    await showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 300),
-      pageBuilder: (context, a, b) {
-        return ScaleTransition(
-          scale: Tween(begin: 0.0, end: 1.0).animate(a),
-          child: widget,
-        );
-      },
+    _pageLocked = true;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => widget,
+        fullscreenDialog: true,
+      ),
     );
-    lockPagePresented = false;
+    _pageLocked = false;
   }
 
   @override

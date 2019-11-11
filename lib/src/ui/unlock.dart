@@ -20,6 +20,12 @@ class UnlockState extends State<Unlock> {
   String errorMsg = '';
 
   @override
+  void initState() {
+    Globals.clearMasterPasscodes();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
@@ -132,16 +138,9 @@ class UnlockState extends State<Unlock> {
           Globals.updateMasterPasscodes(password);
           if (!widget.everLaunched) {
             await Navigator.of(context).pushAndRemoveUntil(
-              PageRouteBuilder(
-                barrierDismissible: false,
-                transitionDuration: Duration(milliseconds: 200),
-                pageBuilder: (context, a, b) {
-                  return SlideTransition(
-                    position:
-                        Tween(begin: Offset(0, 1), end: Offset.zero).animate(a),
-                    child: MainUI(),
-                  );
-                },
+              MaterialPageRoute(
+                fullscreenDialog: true,
+                builder: (_) => MainUI(),
                 settings: RouteSettings(name: MainUI.routeName),
               ),
               (route) => route == null,

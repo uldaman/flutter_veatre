@@ -230,7 +230,6 @@ Widget passcodeKeyboard(
 }) {
   return Container(
     height: 280,
-    // color: Color(0xFFCCCCCC),
     child: GridView.builder(
       padding: EdgeInsets.all(10),
       physics: NeverScrollableScrollPhysics(),
@@ -296,11 +295,13 @@ class CodeButton extends StatelessWidget {
     return Card(
       child: Center(
         child: FlatButton(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
           child: Text(
             code,
             style: TextStyle(
               color: Theme.of(context).textTheme.title.color,
-              fontSize: 25,
+              fontSize: 22,
             ),
           ),
           onPressed: () async {

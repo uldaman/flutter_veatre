@@ -16,7 +16,6 @@ import 'package:veatre/src/ui/signCertificate.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/common/net.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/dapp.dart';
@@ -45,13 +44,14 @@ class WebView extends StatefulWidget {
   final Appearance appearance;
   final String initialURL;
   final bool offstage;
-
+  final String tabKey;
   WebView({
     @required this.id,
     @required this.network,
     @required this.appearance,
     @required this.initialURL,
     @required this.offstage,
+    @required this.tabKey,
   });
 
   @override
@@ -92,7 +92,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     id = widget.id;
-    key = randomHex(32);
+    key = widget.tabKey;
     _offstage = widget.offstage;
     _currentURL = widget.initialURL;
     _appearance = widget.appearance;
@@ -600,10 +600,14 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   List<Widget> get bottomItems {
-    final snapshotLegnth = WebViews.snapshots(widget.network).length;
-    final tabLength = snapshotLegnth == 0
+    final snapshotLength = WebViews.snapshots(network: widget.network).length;
+    final tabLength = snapshotLength == 0
         ? 1
-        : snapshotLegnth + (Globals.tabValue.stage == TabStage.Created ? 1 : 0);
+        : snapshotLength +
+            ((Globals.tabValue.stage == TabStage.Created ||
+                    Globals.tabValue.stage == TabStage.Coverred)
+                ? 1
+                : 0);
     return [
       Padding(
         padding: EdgeInsets.only(bottom: 10),
@@ -640,9 +644,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         size: 28,
         onPressed: () async {
           WebViews.updateSnapshot(
-            widget.network,
             id,
             key,
+            widget.network,
             title: title,
             data: takeScreenshot(),
             url: _currentURL,
@@ -724,13 +728,15 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       highlightColor: Colors.transparent,
       color: Theme.of(context).primaryColor,
       disabledColor: Theme.of(context).primaryTextTheme.display3.color,
-      onPressed: () async {
-        if (btnEnabled) {
-          btnEnabled = false;
-          await onPressed();
-          btnEnabled = true;
-        }
-      },
+      onPressed: onPressed != null
+          ? () async {
+              if (btnEnabled) {
+                btnEnabled = false;
+                await onPressed();
+                btnEnabled = true;
+              }
+            }
+          : null,
     );
   }
 

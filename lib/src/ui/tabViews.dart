@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/webViews.dart';
 
@@ -76,7 +75,7 @@ class TabViewsState extends State<TabViews> {
                       setState(() {
                         snapshots = WebViews.snapshots(Globals.network);
                       });
-                      WebViews.create(Globals.network, randomHex(32));
+                      WebViews.create(Globals.network);
                       Navigator.of(context).pop();
                     },
                   ),
@@ -86,7 +85,7 @@ class TabViewsState extends State<TabViews> {
                       size: 35,
                     ),
                     onPressed: () {
-                      WebViews.create(Globals.network, randomHex(32));
+                      WebViews.create(Globals.network);
                       Navigator.of(context).pop();
                     },
                   ),
@@ -170,7 +169,7 @@ class TabViewsState extends State<TabViews> {
                         WebViews.removeSnapshot(Globals.network, snapshot.key);
                         if (snapshots.length == 1) {
                           WebViews.removeWebview(Globals.network, snapshot.id);
-                          WebViews.create(Globals.network, randomHex(32));
+                          WebViews.create(Globals.network);
                           Navigator.of(context).pop();
                           return;
                         }

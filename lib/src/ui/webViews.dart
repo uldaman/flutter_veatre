@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/webView.dart';
+import 'package:veatre/src/utils/common.dart';
 
 class Snapshot {
   int id;
@@ -50,6 +51,7 @@ class WebViews {
         network: Network.MainNet,
         initialURL: Globals.initialURL,
         appearance: appearance,
+        tabKey: randomHex(32),
       );
       if (id != 0) {
         _inactiveMainNetPages.add(id);
@@ -63,6 +65,7 @@ class WebViews {
         network: Network.TestNet,
         initialURL: Globals.initialURL,
         appearance: appearance,
+        tabKey: randomHex(32),
       );
       if (id != 0) {
         _inactiveTestNetPages.add(id);
@@ -106,8 +109,8 @@ class WebViews {
 
   static void create(
     Network network,
-    String key,
   ) {
+    final key = randomHex(32);
     if (network == Network.MainNet) {
       if (_activeMainNetPages.length < maxTabLen) {
         int firstInactiveID = _inactiveMainNetPages.first;

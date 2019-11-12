@@ -78,31 +78,62 @@ class WebViews {
         ),
       );
     } else {
-      int id;
-      int time;
-      if (snapshots.isEmpty) {
-        id = 0;
-        time = 0;
-      } else {
+      int id = _unusedId(webViews, snapshots);
+      int time = 0;
+      if (id == null) {
         id = snapshots.values.first.id;
         time = snapshots.values.first.timestamp;
-      }
-      for (var entry in snapshots.entries) {
-        Snapshot snapshot = entry.value;
-        if (time > snapshot.timestamp) {
-          time = snapshot.timestamp;
-          id = snapshot.id;
+        for (var entry in snapshots.entries) {
+          Snapshot snapshot = entry.value;
+          if (time > snapshot.timestamp) {
+            time = snapshot.timestamp;
+            id = snapshot.id;
+          }
         }
+        Globals.updateTabValue(
+          TabControllerValue(
+            id: id,
+            network: network,
+            stage: TabStage.Coverred,
+            tabKey: tabKey,
+          ),
+        );
+      } else {
+        Globals.updateTabValue(
+          TabControllerValue(
+            id: id,
+            network: network,
+            stage: TabStage.Coverred,
+            tabKey: tabKey,
+          ),
+        );
       }
-      Globals.updateTabValue(
-        TabControllerValue(
-          id: id,
-          network: network,
-          stage: TabStage.Coverred,
-          tabKey: tabKey,
-        ),
-      );
     }
+  }
+
+  static int _unusedId(
+    List<WebView> webViews,
+    Map<String, Snapshot> snapshots,
+  ) {
+    List<int> ids = [];
+    for (final webView in webViews) {
+      ids.add(webView.id);
+    }
+    List<int> snapshotIds = [];
+    for (final snapshot in snapshots.values) {
+      if (!snapshotIds.contains(snapshot.id)) {
+        snapshotIds.add(snapshot.id);
+      }
+    }
+    if (snapshotIds.length == ids.length) {
+      return null;
+    }
+    for (final id in ids) {
+      if (!snapshotIds.contains(id)) {
+        return id;
+      }
+    }
+    return null;
   }
 
   static void create({Network network}) {

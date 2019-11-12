@@ -600,10 +600,14 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   List<Widget> get bottomItems {
-    final snapshotLegnth = WebViews.snapshots(widget.network).length;
-    final tabLength = snapshotLegnth == 0
+    final snapshotLength = WebViews.snapshots(network: widget.network).length;
+    final tabLength = snapshotLength == 0
         ? 1
-        : snapshotLegnth + (Globals.tabValue.stage == TabStage.Created ? 1 : 0);
+        : snapshotLength +
+            ((Globals.tabValue.stage == TabStage.Created ||
+                    Globals.tabValue.stage == TabStage.Coverred)
+                ? 1
+                : 0);
     return [
       Padding(
         padding: EdgeInsets.only(bottom: 10),
@@ -640,9 +644,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         size: 28,
         onPressed: () async {
           WebViews.updateSnapshot(
-            widget.network,
             id,
             key,
+            widget.network,
             title: title,
             data: takeScreenshot(),
             url: _currentURL,

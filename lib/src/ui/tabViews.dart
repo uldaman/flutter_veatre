@@ -37,7 +37,7 @@ class TabViewsState extends State<TabViews> {
     super.initState();
     selectedTab = widget.id;
     url = widget.url;
-    snapshots = WebViews.snapshots(Globals.network);
+    snapshots = WebViews.snapshots();
     selectedTabKey = widget.currentTabKey;
   }
 
@@ -71,11 +71,11 @@ class TabViewsState extends State<TabViews> {
                   FlatButton(
                     child: Text('Close All'),
                     onPressed: () {
-                      WebViews.removeAll(Globals.network);
+                      WebViews.removeAll();
                       setState(() {
-                        snapshots = WebViews.snapshots(Globals.network);
+                        snapshots = WebViews.snapshots();
                       });
-                      WebViews.create(Globals.network);
+                      WebViews.create();
                       Navigator.of(context).pop();
                     },
                   ),
@@ -85,7 +85,7 @@ class TabViewsState extends State<TabViews> {
                       size: 35,
                     ),
                     onPressed: () {
-                      WebViews.create(Globals.network);
+                      WebViews.create();
                       Navigator.of(context).pop();
                     },
                   ),
@@ -166,24 +166,30 @@ class TabViewsState extends State<TabViews> {
                         color: Theme.of(context).primaryIconTheme.color,
                       ),
                       onPressed: () async {
-                        WebViews.removeSnapshot(Globals.network, snapshot.key);
-                        if (snapshots.length == 1) {
-                          WebViews.removeWebview(Globals.network, snapshot.id);
-                          WebViews.create(Globals.network);
+                        WebViews.removeSnapshot(
+                          snapshot.key,
+                        );
+                        setState(() {
+                          snapshots = WebViews.snapshots();
+                        });
+                        if (snapshots.length == 0) {
+                          WebViews.removeWebview(
+                            snapshot.id,
+                          );
+                          WebViews.create();
                           Navigator.of(context).pop();
                           return;
                         }
                         if (snapshot.isAlive) {
-                          WebViews.removeWebview(Globals.network, snapshot.id);
+                          WebViews.removeWebview(
+                            snapshot.id,
+                          );
                         }
-                        setState(() {
-                          snapshots = WebViews.snapshots(Globals.network);
-                        });
                         if (index == 0) {
-                          selectedTab = snapshots[index + 1].id;
-                          isSelectedTabAlive = snapshots[index + 1].isAlive;
-                          url = snapshots[index + 1].url;
-                          selectedTabKey = snapshots[index + 1].key;
+                          selectedTab = snapshots.first.id;
+                          isSelectedTabAlive = snapshots.first.isAlive;
+                          url = snapshots.first.url;
+                          selectedTabKey = snapshots.first.key;
                         } else if (selectedTab == snapshot.id) {
                           selectedTab = snapshots[index - 1].id;
                           isSelectedTabAlive = snapshots[index - 1].isAlive;

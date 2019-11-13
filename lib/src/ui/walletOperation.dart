@@ -155,7 +155,7 @@ class WalletOperationState extends State<WalletOperation> {
             children: <Widget>[
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(left: 20),
+                  padding: EdgeInsets.only(left: 10),
                   child: Text(
                     title,
                     textAlign: centerTitle ? TextAlign.center : TextAlign.left,
@@ -186,7 +186,6 @@ class WalletOperationState extends State<WalletOperation> {
                           Icon(
                             Icons.arrow_forward_ios,
                             size: 20,
-                            color: Theme.of(context).primaryIconTheme.color,
                           )
                         ],
                       ),

@@ -179,7 +179,7 @@ class ManageWalletsState extends State<ManageWallets> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(right: 10, top: 10),
+                    padding: EdgeInsets.only(top: 10),
                     child: IconButton(
                       icon: Icon(
                         MaterialCommunityIcons.getIconData('qrcode'),
@@ -199,6 +199,20 @@ class ManageWalletsState extends State<ManageWallets> {
                             );
                           },
                         );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(right: 10, top: 10),
+                    child: IconButton(
+                      icon: Icon(
+                        MaterialCommunityIcons.getIconData('file-find-outline'),
+                        size: 30,
+                      ),
+                      onPressed: () async {
+                        final url =
+                            "https://insight.vecha.in/#/${Globals.network == Network.MainNet ? 'main' : 'test'}/accounts/0x${walletEntity.address}";
+                        Navigator.of(context).pop(url);
                       },
                     ),
                   ),

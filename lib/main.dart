@@ -9,12 +9,7 @@ import 'package:veatre/src/api/BlockAPI.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/storage/storage.dart';
-import 'package:veatre/src/ui/mainUI.dart';
-import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/passwordGeneration.dart';
-import 'package:veatre/src/ui/manageWallets.dart';
-import 'package:veatre/src/ui/settings.dart';
-import 'package:veatre/src/ui/network.dart';
 import 'package:veatre/src/ui/unlock.dart';
 
 void main() {
@@ -61,11 +56,13 @@ class App extends StatefulWidget {
 class AppState extends State<App> {
   Timer _timer;
   Appearance _appearance = Globals.appearance;
+  Network _network = Globals.network;
 
   @override
   void initState() {
     super.initState();
     Globals.addAppearanceHandler(_handleAppearanceChanged);
+    Globals.addNetworkHandler(_hanleNetworkChanged);
     Globals.periodic(
       10,
       (timer) async {
@@ -95,15 +92,27 @@ class AppState extends State<App> {
     });
   }
 
+  void _hanleNetworkChanged() {
+    setState(() {
+      _network = Globals.network;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      routes: {
-        MainUI.routeName: (context) => mainUI,
-        ManageWallets.routeName: (context) => manageWallets,
-        Settings.routeName: (context) => new Settings(),
-        Networks.routeName: (context) => new Networks(),
-        Appearances.routeName: (context) => new Appearances(),
+      builder: (context, child) {
+        return Banner(
+          child: child,
+          color: Theme.of(context).primaryColor,
+          textStyle: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).accentColor,
+          ),
+          message: _network == Network.MainNet ? 'Main' : 'Test',
+          textDirection: TextDirection.ltr,
+          location: BannerLocation.topStart,
+        );
       },
       theme: _appearance == Appearance.light ? lightTheme : darkTheme,
       home: !widget.hasPasscodes
@@ -113,9 +122,6 @@ class AppState extends State<App> {
             ),
     );
   }
-
-  MainUI get mainUI => MainUI();
-  ManageWallets get manageWallets => ManageWallets();
 
   ThemeData get lightTheme => ThemeData(
         appBarTheme: AppBarTheme(

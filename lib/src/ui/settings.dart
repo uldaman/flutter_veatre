@@ -49,7 +49,8 @@ class SettingsState extends State<Settings> {
         'Network',
         _network == Network.MainNet ? 'MainNet' : 'TestNet',
         () async {
-          await Navigator.of(context).pushNamed(Networks.routeName);
+          await Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => Networks()));
           await initNet();
         },
       ),
@@ -58,7 +59,8 @@ class SettingsState extends State<Settings> {
         'Theme',
         _appearance == Appearance.light ? 'Light' : 'Dark',
         () async {
-          await Navigator.of(context).pushNamed(Appearances.routeName);
+          await Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => Appearances()));
           await initAppearance();
         },
       ),

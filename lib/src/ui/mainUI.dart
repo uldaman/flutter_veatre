@@ -30,7 +30,6 @@ class MainUIState extends State<MainUI>
     WebViews.create(network: Network.MainNet);
     WebViews.create(network: Network.TestNet);
     Globals.addNetworkHandler(_hanleNetworkChanged);
-    Globals.addTabHandler(_hanleTabChanged);
   }
 
   @override
@@ -55,10 +54,6 @@ class MainUIState extends State<MainUI>
       _state = AppLifecycleState.resumed;
     }
     super.didChangeAppLifecycleState(state);
-  }
-
-  void _hanleTabChanged() {
-    setState(() {});
   }
 
   void _hanleNetworkChanged() {

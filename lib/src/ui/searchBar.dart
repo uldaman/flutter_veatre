@@ -77,7 +77,7 @@ class SearchBarState extends State<SearchBar>
     super.initState();
   }
 
-  void _handleFocus() {
+  void _handleFocus() async {
     if (_focusNode.hasFocus) {
       final text = _searchTextEditingController.text;
       _searchTextEditingController.value =
@@ -85,22 +85,28 @@ class SearchBarState extends State<SearchBar>
         text: text,
         selection: TextSelection(baseOffset: 0, extentOffset: text.length),
       );
+      if (widget.onStartSearch != null) {
+        await widget.onStartSearch();
+      }
     }
   }
 
   void _handleValueChanged() async {
     SearchBarValue value = widget.searchBarController.value;
     setState(() {
-      if (value.submitedText != '' && showTextField) {
-        showTextField = false;
-      }
-    });
-    setState(() {
       leftView = value.leftView;
       rightView = value.rightView;
       defautText = value.defautText;
-      showTextField = !value.shouldCancelInput;
-      _searchTextEditingController.text = value.submitedText;
+      if (showTextField == value.shouldCancelInput) {
+        showTextField = !value.shouldCancelInput;
+      }
+      if (!showTextField) {
+        _searchTextEditingController.value =
+            _searchTextEditingController.value.copyWith(
+          text: value.submitedText,
+          selection: _searchTextEditingController.value.selection,
+        );
+      }
     });
   }
 
@@ -178,9 +184,6 @@ class SearchBarState extends State<SearchBar>
                         setState(() {
                           showTextField = true;
                         });
-                        if (widget.onStartSearch != null) {
-                          await widget.onStartSearch();
-                        }
                       },
                     ),
             ),

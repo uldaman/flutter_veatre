@@ -130,7 +130,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                         ),
                       ),
                       onPressed: () async {
-                        updateSearchBar(_currentURL, 1);
+                        updateSearchBar(_currentURL, 1, true);
                         setState(() {
                           isStartSearch = false;
                         });
@@ -159,7 +159,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                                     ? () async {
                                         final meta = await metaData;
                                         if (meta != null) {
-                                          Navigator.of(context).push(
+                                          await Navigator.of(context).push(
                                             MaterialPageRoute(
                                               builder: (_) => CreateBookmark(
                                                   documentMetaData: meta),
@@ -303,22 +303,21 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           await updateBackForwad();
           _currentURL = url;
           if (_currentURL != Globals.initialURL) {
-            updateSearchBar(url, progress);
+            updateSearchBar(url, progress, !isStartSearch);
           }
         },
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
-          updateSearchBar(_currentURL, progress);
+          updateSearchBar(_currentURL, progress, !isStartSearch);
         },
         onPageStarted: (String url) async {
-          if (controller != null) {
-            await updateBackForwad();
-            updateSearchBar(url, 0);
-          }
           setState(() {
             _currentURL = url;
-            isStartSearch = false;
           });
+          if (controller != null) {
+            await updateBackForwad();
+            updateSearchBar(url, 0, !isStartSearch);
+          }
         },
         onPageFinished: (String url) async {
           if (controller != null) {
@@ -327,15 +326,14 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             await controller
                 .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
           }
-          updateSearchBar(url, 1);
+          updateSearchBar(url, 1, !isStartSearch);
           setState(() {
             _currentURL = url;
             progress = 1;
-            isStartSearch = false;
           });
         },
         onProgressChanged: (double progress) {
-          updateSearchBar(_currentURL, progress);
+          updateSearchBar(_currentURL, progress, !isStartSearch);
           setState(() {
             this.progress = progress;
           });
@@ -411,7 +409,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void updateSearchBar(String url, double progress) {
+  void updateSearchBar(String url, double progress, bool shouldCancelInput) {
     Uri uri = Uri.parse(url);
     if (url != Globals.initialURL) {
       IconData icon;
@@ -426,11 +424,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           icon,
           size: 20,
         ),
+        shouldCancelInput: shouldCancelInput,
         defautText: domain == "" ? "Search" : domain,
         submitedText: url,
-        rightView: !uri.scheme.startsWith("http")
+        rightView: !uri.scheme.startsWith("http") || isStartSearch
             ? null
-            : !isStartSearch && progress == 1
+            : progress == 1
                 ? IconButton(
                     icon: Icon(
                       MaterialCommunityIcons.getIconData('refresh'),
@@ -462,6 +461,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ),
         defautText: 'Search',
         rightView: null,
+        shouldCancelInput: shouldCancelInput,
         submitedText: _currentURL,
       );
     }

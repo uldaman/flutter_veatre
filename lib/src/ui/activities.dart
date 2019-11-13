@@ -201,10 +201,9 @@ class ActivitiesState extends State<Activities> {
                           : activity.status == ActivityStatus.Pending
                               ? Row(
                                   children: <Widget>[
-                                    //TODO sending
                                     Icon(
                                       MaterialCommunityIcons.getIconData(
-                                          'magnify'),
+                                          'progress-upload'),
                                       color: Color(0xFF57BD89),
                                       size: 16,
                                     ),
@@ -376,9 +375,8 @@ class ActivitiesState extends State<Activities> {
                                 ),
                               ),
                               onPressed: () async {
-                                final url = Globals.network == Network.MainNet
-                                    ? 'https://insight.vecha.in/#/txs/${activity.hash}'
-                                    : 'https://insight.vecha.in/#/test/txs/${activity.hash}';
+                                final url =
+                                    "https://insight.vecha.in/#${Globals.network == Network.MainNet ? '' : '/test'}/txs/${activity.hash}";
                                 Navigator.of(context).pop(url);
                               },
                             )

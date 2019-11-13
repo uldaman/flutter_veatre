@@ -334,10 +334,9 @@ class WalletInfoState extends State<WalletInfo> {
                               : activity.status == ActivityStatus.Pending
                                   ? Row(
                                       children: <Widget>[
-                                        //TODO sending
                                         Icon(
                                           MaterialCommunityIcons.getIconData(
-                                              'content-copy'),
+                                              'progress-upload'),
                                           color: Color(0xFF57BD89),
                                           size: 16,
                                         ),
@@ -518,9 +517,8 @@ class WalletInfoState extends State<WalletInfo> {
                                 ),
                               ),
                               onPressed: () async {
-                                final url = Globals.network == Network.MainNet
-                                    ? 'https://insight.vecha.in/#/txs/${activity.hash}'
-                                    : 'https://insight.vecha.in/#/test/txs/${activity.hash}';
+                                final url =
+                                    "https://insight.vecha.in/#${Globals.network == Network.MainNet ? '' : '/test'}/txs/${activity.hash}";
                                 Navigator.of(context).pop(url);
                               },
                             )

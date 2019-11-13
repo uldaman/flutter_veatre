@@ -155,21 +155,4 @@ class _RecoveryPhraseGenerationState extends State<RecoveryPhraseGeneration> {
       ),
     );
   }
-
-  TextField textField({
-    TextEditingController controller,
-    String hitText,
-    String errorText,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLength: 20,
-      autofocus: true,
-      decoration: InputDecoration(
-        hintText: hitText,
-        errorText: errorText,
-      ),
-      style: Theme.of(context).textTheme.body1,
-    );
-  }
 }

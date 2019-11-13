@@ -17,12 +17,30 @@ class CreateBookmark extends StatefulWidget {
 
 class CreateBookmarkState extends State<CreateBookmark> {
   TextEditingController titleEditingController;
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    _focusNode.addListener(_handleFocus);
     titleEditingController =
         TextEditingController(text: widget.documentMetaData.title);
+  }
+
+  void _handleFocus() {
+    if (_focusNode.hasFocus) {
+      final text = titleEditingController.text;
+      titleEditingController.value = titleEditingController.value.copyWith(
+        text: text,
+        selection: TextSelection(baseOffset: 0, extentOffset: text.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocus);
+    super.dispose();
   }
 
   @override
@@ -102,6 +120,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
                               height: 60,
                               child: TextField(
                                 autofocus: true,
+                                focusNode: _focusNode,
                                 maxLines: 1,
                                 controller: titleEditingController,
                               ),

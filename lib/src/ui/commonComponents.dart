@@ -479,3 +479,21 @@ class _DrawCircle extends CustomPainter {
   @override
   bool shouldRebuildSemantics(_DrawCircle oldDelegate) => false;
 }
+
+TextField walletNameTextField({
+  TextEditingController controller,
+  String hitText,
+  String errorText,
+  FocusNode focusNode,
+}) {
+  return TextField(
+    controller: controller,
+    maxLength: 10,
+    autofocus: true,
+    focusNode: focusNode,
+    decoration: InputDecoration(
+      hintText: hitText,
+      errorText: errorText,
+    ),
+  );
+}

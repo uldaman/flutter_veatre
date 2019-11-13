@@ -25,14 +25,32 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
   String address;
   String walletName;
   bool isCopied = false;
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    _focusNode.addListener(_handleFocus);
     address = widget.address;
     walletName = widget.defaultWalletName;
     walletNameController =
         TextEditingController(text: widget.defaultWalletName);
+  }
+
+  void _handleFocus() {
+    if (_focusNode.hasFocus) {
+      final text = walletNameController.text;
+      walletNameController.value = walletNameController.value.copyWith(
+        text: text,
+        selection: TextSelection(baseOffset: 0, extentOffset: text.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocus);
+    super.dispose();
   }
 
   @override
@@ -106,9 +124,10 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                                         'input a name which can help you identify the wallet',
                                       ),
                                     ),
-                                    textField(
+                                    walletNameTextField(
                                       controller: walletNameController,
                                       hitText: 'Input',
+                                      focusNode: _focusNode,
                                     ),
                                   ],
                                 ), confirmAction: () async {
@@ -236,22 +255,6 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  TextField textField({
-    TextEditingController controller,
-    String hitText,
-    String errorText,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLength: 10,
-      autofocus: true,
-      decoration: InputDecoration(
-        hintText: hitText,
-        errorText: errorText,
       ),
     );
   }

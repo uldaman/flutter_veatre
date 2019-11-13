@@ -27,14 +27,32 @@ class _CreateWalletState extends State<CreateWallet> {
   String mnemonic;
   bool isCopied = false;
   bool isInitialized = false;
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
-    super.initState();
     init();
+    super.initState();
+  }
+
+  void _handleFocus() {
+    if (_focusNode.hasFocus) {
+      final text = walletNameController.text;
+      walletNameController.value = walletNameController.value.copyWith(
+        text: text,
+        selection: TextSelection(baseOffset: 0, extentOffset: text.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocus);
+    super.dispose();
   }
 
   Future<void> init() async {
+    _focusNode.addListener(_handleFocus);
     await generateWalletName();
     String mnemonicWords = await BipKeyDerivation.generateRandomMnemonic(128);
     String addr = await addressFrom(mnemonicWords);
@@ -141,7 +159,8 @@ class _CreateWalletState extends State<CreateWallet> {
                                             'input a name which can help you identify the wallet',
                                           ),
                                         ),
-                                        textField(
+                                        walletNameTextField(
+                                          focusNode: _focusNode,
                                           controller: walletNameController,
                                           hitText: 'Input',
                                         ),
@@ -319,23 +338,6 @@ class _CreateWalletState extends State<CreateWallet> {
       onWillPop: () async {
         return !Navigator.of(context).userGestureInProgress;
       },
-    );
-  }
-
-  TextField textField({
-    TextEditingController controller,
-    String hitText,
-    String errorText,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLength: 10,
-      autofocus: true,
-      decoration: InputDecoration(
-        hintText: hitText,
-        errorText: errorText,
-      ),
-      style: Theme.of(context).textTheme.body1,
     );
   }
 }

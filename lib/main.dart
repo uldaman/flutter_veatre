@@ -63,27 +63,26 @@ class AppState extends State<App> {
     super.initState();
     Globals.addAppearanceHandler(_handleAppearanceChanged);
     Globals.addNetworkHandler(_hanleNetworkChanged);
-    Globals.periodic(
-      10,
-      (timer) async {
-        try {
-          final network = Globals.network;
-          final block = await BlockAPI.best();
-          final newHead = BlockHead.fromJSON(block.encoded);
-          final head = Globals.head();
-          if (head.id != newHead.id && newHead.number > head.number) {
-            BlockHeadForNetwork blockHeadForNetwork = BlockHeadForNetwork(
-              head: newHead,
-              network: network,
-            );
-            await ActivityStorage.sync(blockHeadForNetwork);
-            Globals.updateBlockHead(blockHeadForNetwork);
-          }
-        } catch (e) {
-          print('sync head error: $e');
-        }
-      },
-    );
+    Globals.periodic(10, _syncBlock);
+  }
+
+  Future<void> _syncBlock(Timer timer) async {
+    try {
+      final network = Globals.network;
+      final block = await BlockAPI.best();
+      final newHead = BlockHead.fromJSON(block.encoded);
+      final head = Globals.head();
+      if (head.id != newHead.id && newHead.number > head.number) {
+        BlockHeadForNetwork blockHeadForNetwork = BlockHeadForNetwork(
+          head: newHead,
+          network: network,
+        );
+        await ActivityStorage.sync(blockHeadForNetwork);
+        Globals.updateBlockHead(blockHeadForNetwork);
+      }
+    } catch (e) {
+      print('sync head error: $e');
+    }
   }
 
   void _handleAppearanceChanged() {
@@ -106,7 +105,8 @@ class AppState extends State<App> {
           child: child,
           color: Theme.of(context).primaryColor,
           textStyle: TextStyle(
-            fontSize: 12,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
             color: Theme.of(context).accentColor,
           ),
           message: _network == Network.MainNet ? 'Main' : 'Test',

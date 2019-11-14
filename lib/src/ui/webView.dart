@@ -153,7 +153,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                             ),
                             disabledColor: Theme.of(context).iconTheme.color,
                             color: Theme.of(context).primaryIconTheme.color,
-                            onPressed: _currentURL == Globals.initialURL
+                            onPressed: _currentURL == Globals.initialURL ||
+                                    progress != 1
                                 ? null
                                 : bookmarkID == null
                                     ? () async {
@@ -282,7 +283,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           await showCupertinoModalPopup(
               context: context,
               builder: (context) {
-                return actionSheet(bookmark);
+                return actionSheet(context, bookmark);
               });
         },
         onBookmarkSelected: (Bookmark bookmark) async {
@@ -775,18 +776,34 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return null;
   }
 
-  Widget sheet(Widget child) {
+  Widget _sheet(
+    String text,
+    Color color,
+    Future<void> Function() onPressed,
+  ) {
     return Container(
-      alignment: Alignment.center,
-      child: child,
-      height: 45,
+      child: FlatButton(
+        child: Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontSize: 17,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        onPressed: () async {
+          await onPressed();
+        },
+      ),
+      height: 46,
     );
   }
 
-  CupertinoActionSheet actionSheet(Bookmark bookmark) {
+  CupertinoActionSheet actionSheet(BuildContext context, Bookmark bookmark) {
     return CupertinoActionSheet(
-      title: sheet(
-        Text(
+      title: Align(
+        alignment: Alignment.center,
+        child: Text(
           bookmark.url,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
@@ -796,74 +813,50 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ),
       ),
       actions: <Widget>[
-        sheet(
-          FlatButton(
-            child: Text(
-              'Copy URL',
-              style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                fontSize: 17,
-              ),
-            ),
-            onPressed: () async {
-              await Clipboard.setData(new ClipboardData(text: bookmark.url));
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-        sheet(
-          FlatButton(
-            child: Text(
-              'Edit',
-              style: TextStyle(
-                  color: Theme.of(context).primaryColor, fontSize: 17),
-            ),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CreateBookmark(
-                    eidtBookmarkID: bookmark.id,
-                    documentMetaData: DocumentMetaData(
-                      icon: bookmark.favicon,
-                      title: bookmark.title,
-                      url: bookmark.url,
-                    ),
-                  ),
-                  fullscreenDialog: true,
-                ),
-              );
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-        sheet(
-          FlatButton(
-            child: Text(
-              'Remove',
-              style: TextStyle(
-                color: Theme.of(context).errorColor,
-                fontSize: 17,
-              ),
-            ),
-            onPressed: () async {
-              await BookmarkStorage.delete(bookmark.id);
-              Globals.updateBookmark(bookmark);
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-      ],
-      cancelButton: sheet(
-        FlatButton(
-          child: Text(
-            'Cancel',
-            style:
-                TextStyle(color: Theme.of(context).primaryColor, fontSize: 17),
-          ),
-          onPressed: () async {
+        _sheet(
+          'Copy URL',
+          Theme.of(context).primaryColor,
+          () async {
+            await Clipboard.setData(new ClipboardData(text: bookmark.url));
             Navigator.of(context).pop();
           },
         ),
+        _sheet(
+          'Edit',
+          Theme.of(context).primaryColor,
+          () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => CreateBookmark(
+                  eidtBookmarkID: bookmark.id,
+                  documentMetaData: DocumentMetaData(
+                    icon: bookmark.favicon,
+                    title: bookmark.title,
+                    url: bookmark.url,
+                  ),
+                ),
+                fullscreenDialog: true,
+              ),
+            );
+            Navigator.of(context).pop();
+          },
+        ),
+        _sheet(
+          'Remove',
+          Theme.of(context).errorColor,
+          () async {
+            await BookmarkStorage.delete(bookmark.id);
+            Globals.updateBookmark(bookmark);
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+      cancelButton: _sheet(
+        'Cancel',
+        Theme.of(context).primaryColor,
+        () async {
+          Navigator.of(context).pop();
+        },
       ),
     );
   }

@@ -48,6 +48,20 @@ class CreateBookmarkState extends State<CreateBookmark> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        leading: FlatButton(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          padding: EdgeInsets.all(0),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'Close',
+            ),
+          ),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
         title: Text('Bookmark'),
         backgroundColor: Theme.of(context).backgroundColor,
         centerTitle: true,

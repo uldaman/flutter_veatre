@@ -83,9 +83,8 @@ class _TransactionState extends State<TransactionDialog>
   }
 
   Future<void> _handleHeadChanged() async {
-    if (Globals.blockHeadForNetwork.network == Globals.network) {
+    if (Globals.blockHeadForNetwork.network == Globals.network)
       await _completeByEntity(_entity);
-    }
   }
 
   Future<void> _initWalletEntity() async {
@@ -231,6 +230,7 @@ class _TransactionState extends State<TransactionDialog>
           ),
         );
       }).catchError((err) async {
+        Globals.removeBlockHeadHandler(_handleHeadChanged);
         if (err.response != null) {
           await alert(
             context,
@@ -244,6 +244,7 @@ class _TransactionState extends State<TransactionDialog>
           enabled: true,
           rollBack: true,
         );
+        Globals.addBlockHeadHandler(_handleHeadChanged);
       });
     });
   }
@@ -302,9 +303,9 @@ class _TransactionState extends State<TransactionDialog>
     dynamic updateUI = (int gas) async {
       _totalGas = widget.options.gas ?? gas;
       await _updateFee();
-      setState(() {
-        _swipeController.valueWith(shouldLoading: false, enabled: true);
-      });
+      setState(
+        () => _swipeController.valueWith(shouldLoading: false, enabled: true),
+      );
     };
     try {
       setState(() => _entity = entity);

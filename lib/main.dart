@@ -105,11 +105,11 @@ class AppState extends State<App> {
           child: child,
           color: Theme.of(context).primaryColor,
           textStyle: TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Theme.of(context).accentColor,
           ),
-          message: _network == Network.MainNet ? 'Main' : 'Test',
+          message: _network == Network.MainNet ? 'MAIN' : 'TEST',
           textDirection: TextDirection.ltr,
           location: BannerLocation.topStart,
         );

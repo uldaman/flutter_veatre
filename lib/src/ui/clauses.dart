@@ -38,15 +38,12 @@ class Clauses extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     "To: 0x${abbreviate(txMessage.to.substring(2))}",
-                    style: TextStyle(
-                      fontSize: 15,
-                    ),
                   ),
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: Container(
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                         padding: EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 2,
@@ -95,10 +92,10 @@ class Clauses extends StatelessWidget {
                     SizedBox(
                       width: 65,
                       child: Text(
-                        'VALUE',
+                        'Value',
                         style: TextStyle(
-                          fontSize: 17,
-                          color: Colors.grey[500],
+                          color:
+                              Theme.of(context).primaryTextTheme.display2.color,
                         ),
                       ),
                     ),
@@ -108,16 +105,18 @@ class Clauses extends StatelessWidget {
                           Text(
                             '${formatNum(fixed2Value(BigInt.parse(txMessage.value)))}',
                             textAlign: TextAlign.left,
-                            style: TextStyle(fontSize: 14),
                             overflow: TextOverflow.ellipsis,
                           ),
                           Padding(
-                            padding: EdgeInsets.only(left: 4, top: 4),
+                            padding: EdgeInsets.only(left: 3, top: 2),
                             child: Text(
                               'VET',
                               style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[500],
+                                fontSize: 10,
+                                color: Theme.of(context)
+                                    .primaryTextTheme
+                                    .display2
+                                    .color,
                               ),
                             ),
                           )
@@ -135,10 +134,10 @@ class Clauses extends StatelessWidget {
                     SizedBox(
                       width: 65,
                       child: Text(
-                        'DATA',
+                        'Data',
                         style: TextStyle(
-                          fontSize: 17,
-                          color: Colors.grey[500],
+                          color:
+                              Theme.of(context).primaryTextTheme.display2.color,
                         ),
                       ),
                     ),
@@ -146,7 +145,6 @@ class Clauses extends StatelessWidget {
                       child: Text(
                         '${txMessage.data}',
                         textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 14),
                       ),
                     )
                   ],

@@ -203,7 +203,7 @@ class ManageWalletsState extends State<ManageWallets> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(right: 10, top: 10),
+                    padding: EdgeInsets.only(top: 10),
                     child: IconButton(
                       icon: Icon(
                         MaterialCommunityIcons.getIconData('file-find-outline'),

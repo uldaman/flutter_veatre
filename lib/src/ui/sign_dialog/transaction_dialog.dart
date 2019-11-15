@@ -465,9 +465,9 @@ class _TransactionState extends State<TransactionDialog>
             children: <Widget>[
               Expanded(
                 child: Text(
-                  _swipeController.value.enabled && _estimatedFee != null
-                      ? formatNum(fixed2Value(_estimatedFee))
-                      : '--',
+                  !_swipeController.value.enabled && _estimatedFee == null
+                      ? '--'
+                      : formatNum(fixed2Value(_estimatedFee)),
                   textAlign: TextAlign.end,
                   style: TextStyle(
                     color: Theme.of(context).primaryTextTheme.display2.color,

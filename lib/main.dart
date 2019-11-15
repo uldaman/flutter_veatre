@@ -101,18 +101,20 @@ class AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) {
-        return Banner(
-          child: child,
-          color: Theme.of(context).primaryColor,
-          textStyle: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).accentColor,
-          ),
-          message: _network == Network.MainNet ? 'MAIN' : 'TEST',
-          textDirection: TextDirection.ltr,
-          location: BannerLocation.topStart,
-        );
+        return _network == Network.MainNet
+            ? child
+            : Banner(
+                child: child,
+                color: Theme.of(context).primaryColor,
+                textStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).accentColor,
+                ),
+                message: 'TEST',
+                textDirection: TextDirection.ltr,
+                location: BannerLocation.topStart,
+              );
       },
       theme: _appearance == Appearance.light ? lightTheme : darkTheme,
       home: !widget.hasPasscodes

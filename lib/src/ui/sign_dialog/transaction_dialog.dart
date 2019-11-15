@@ -83,9 +83,8 @@ class _TransactionState extends State<TransactionDialog>
   }
 
   Future<void> _handleHeadChanged() async {
-    if (Globals.blockHeadForNetwork.network == Globals.network) {
+    if (Globals.blockHeadForNetwork.network == Globals.network)
       await _completeByEntity(_entity);
-    }
   }
 
   Future<void> _initWalletEntity() async {
@@ -200,6 +199,7 @@ class _TransactionState extends State<TransactionDialog>
       );
       tx.sign(privateKey);
       WalletStorage.setMainWallet(_entity);
+      Globals.removeBlockHeadHandler(_handleHeadChanged);
       TransactionAPI.send(tx.serialized).then((result) {
         List<Map<String, dynamic>> content = [];
         for (final clause in widget.txMessages) {
@@ -244,7 +244,7 @@ class _TransactionState extends State<TransactionDialog>
           enabled: true,
           rollBack: true,
         );
-      });
+      }).whenComplete(() => Globals.addBlockHeadHandler(_handleHeadChanged));
     });
   }
 
@@ -302,9 +302,9 @@ class _TransactionState extends State<TransactionDialog>
     dynamic updateUI = (int gas) async {
       _totalGas = widget.options.gas ?? gas;
       await _updateFee();
-      setState(() {
-        _swipeController.valueWith(shouldLoading: false, enabled: true);
-      });
+      setState(
+        () => _swipeController.valueWith(shouldLoading: false, enabled: true),
+      );
     };
     try {
       setState(() => _entity = entity);
@@ -465,7 +465,7 @@ class _TransactionState extends State<TransactionDialog>
             children: <Widget>[
               Expanded(
                 child: Text(
-                  _swipeController.value.enabled && _estimatedFee != null
+                  _estimatedFee != null
                       ? formatNum(fixed2Value(_estimatedFee))
                       : '--',
                   textAlign: TextAlign.end,

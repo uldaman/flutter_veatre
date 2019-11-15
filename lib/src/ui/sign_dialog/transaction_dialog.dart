@@ -199,6 +199,7 @@ class _TransactionState extends State<TransactionDialog>
       );
       tx.sign(privateKey);
       WalletStorage.setMainWallet(_entity);
+      Globals.removeBlockHeadHandler(_handleHeadChanged);
       TransactionAPI.send(tx.serialized).then((result) {
         List<Map<String, dynamic>> content = [];
         for (final clause in widget.txMessages) {
@@ -230,7 +231,6 @@ class _TransactionState extends State<TransactionDialog>
           ),
         );
       }).catchError((err) async {
-        Globals.removeBlockHeadHandler(_handleHeadChanged);
         if (err.response != null) {
           await alert(
             context,
@@ -244,8 +244,7 @@ class _TransactionState extends State<TransactionDialog>
           enabled: true,
           rollBack: true,
         );
-        Globals.addBlockHeadHandler(_handleHeadChanged);
-      });
+      }).whenComplete(() => Globals.addBlockHeadHandler(_handleHeadChanged));
     });
   }
 
@@ -466,9 +465,9 @@ class _TransactionState extends State<TransactionDialog>
             children: <Widget>[
               Expanded(
                 child: Text(
-                  !_swipeController.value.enabled && _estimatedFee == null
-                      ? '--'
-                      : formatNum(fixed2Value(_estimatedFee)),
+                  _estimatedFee != null
+                      ? formatNum(fixed2Value(_estimatedFee))
+                      : '--',
                   textAlign: TextAlign.end,
                   style: TextStyle(
                     color: Theme.of(context).primaryTextTheme.display2.color,

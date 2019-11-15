@@ -162,8 +162,7 @@ class TabViewsState extends State<TabViews> {
                     IconButton(
                       icon: Icon(
                         Icons.close,
-                        size: 20,
-                        color: Theme.of(context).primaryIconTheme.color,
+                        size: 17,
                       ),
                       onPressed: () async {
                         WebViews.removeSnapshot(

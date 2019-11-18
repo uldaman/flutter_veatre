@@ -9,7 +9,7 @@ import 'package:veatre/src/api/BlockAPI.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/storage/storage.dart';
-import 'package:veatre/src/ui/passwordGeneration.dart';
+import 'package:veatre/src/ui/welcome.dart';
 import 'package:veatre/src/ui/unlock.dart';
 
 void main() {
@@ -118,7 +118,7 @@ class AppState extends State<App> {
       },
       theme: _appearance == Appearance.light ? lightTheme : darkTheme,
       home: !widget.hasPasscodes
-          ? PasswordGeneration()
+          ? Welcome()
           : Unlock(
               everLaunched: false,
             ),

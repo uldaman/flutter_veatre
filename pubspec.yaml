@@ -61,6 +61,9 @@ flutter:
   assets:
     - "assets/resource/en-mnemonic-word-list.txt"
     - "assets/blank.png"
+    - "assets/step1.png"
+    - "assets/step2.png"
+    - "assets/step3.png"
     - "assets/connex.js"
 
 

@@ -787,12 +787,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     return null;
   }
 
-  Future<String> get title async {
-    if (controller != null) {
-      return controller.currentTitle();
-    }
-    return null;
-  }
+  Future<String> get title async => controller ?? controller.getTitle();
 
   Widget _sheet(
     String text,

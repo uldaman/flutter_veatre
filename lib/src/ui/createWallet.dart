@@ -82,232 +82,200 @@ class _CreateWalletState extends State<CreateWallet> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: ProgressHUD(
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: 30, top: 20),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Congratulation',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 28,
-                      ),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: ProgressHUD(
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(left: 30, top: 20),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Congratulation',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 28,
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 30,
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width - 100,
-                  height: 80,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(right: 15),
-                        child: Picasso(
-                          '0x$address',
-                          size: 80,
-                          borderRadius: 10,
-                        ),
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width - 100,
+                height: 80,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(right: 15),
+                      child: Picasso(
+                        '0x$address',
+                        size: 80,
+                        borderRadius: 10,
                       ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            FlatButton(
-                              padding: EdgeInsets.all(0),
-                              child: Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Text(
-                                      walletName,
-                                      textAlign: TextAlign.left,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .textTheme
-                                            .title
-                                            .color,
-                                        fontSize: 17,
-                                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          FlatButton(
+                            padding: EdgeInsets.all(0),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Text(
+                                    walletName,
+                                    textAlign: TextAlign.left,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .title
+                                          .color,
+                                      fontSize: 17,
                                     ),
                                   ),
-                                  Icon(
-                                    MaterialCommunityIcons.pencil_outline,
-                                  ),
-                                ],
-                              ),
-                              onPressed: () async {
-                                await customAlert(context,
-                                    title: Text('Wallet name'),
-                                    content: Column(
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: EdgeInsets.only(bottom: 10),
-                                          child: Text(
-                                            'input a name which can help you identify the wallet',
-                                          ),
+                                ),
+                                Icon(
+                                  MaterialCommunityIcons.pencil_outline,
+                                ),
+                              ],
+                            ),
+                            onPressed: () async {
+                              await customAlert(context,
+                                  title: Text('Wallet name'),
+                                  content: Column(
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.only(bottom: 10),
+                                        child: Text(
+                                          'input a name which can help you identify the wallet',
                                         ),
-                                        walletNameTextField(
-                                          focusNode: _focusNode,
-                                          controller: walletNameController,
-                                          hitText: 'Input',
-                                        ),
-                                      ],
-                                    ), confirmAction: () async {
-                                  String name = walletNameController.text;
-                                  if (name.isEmpty) {
-                                    return alert(
-                                      context,
-                                      Text('Invalid wallet name'),
-                                      "wallet name can't be empty",
-                                    );
-                                  }
-                                  Navigator.pop(context);
-                                  setState(() {
-                                    walletName = name;
-                                  });
+                                      ),
+                                      walletNameTextField(
+                                        focusNode: _focusNode,
+                                        controller: walletNameController,
+                                        hitText: 'Input',
+                                      ),
+                                    ],
+                                  ), confirmAction: () async {
+                                String name = walletNameController.text;
+                                if (name.isEmpty) {
+                                  return alert(
+                                    context,
+                                    Text('Invalid wallet name'),
+                                    "wallet name can't be empty",
+                                  );
+                                }
+                                Navigator.pop(context);
+                                setState(() {
+                                  walletName = name;
                                 });
-                              },
-                            ),
-                            Divider(
-                              thickness: 1,
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  '0x${abbreviate(address ?? '')}',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).textTheme.title.color,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Card(
-                      child: new QrImage(
-                        padding: EdgeInsets.all(40),
-                        data: "0x${address ?? ''}",
-                        size: MediaQuery.of(context).size.width - 150,
-                        backgroundColor: Theme.of(context).backgroundColor,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 40,
-                      child: Center(
-                        child: isCopied
-                            ? Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5)),
-                                  side: BorderSide.none,
-                                ),
-                                color: Colors.grey[200],
-                                child: Container(
-                                  child: Text(
-                                    'copied',
-                                    style: TextStyle(
-                                        fontSize: 12, color: Colors.amber),
-                                  ),
-                                  padding: EdgeInsets.all(8),
-                                ),
-                              )
-                            : Text(''),
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 150,
-                      height: 44,
-                      child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            color:
-                                Theme.of(context).primaryTextTheme.title.color,
-                          ),
-                        ),
-                        child: Text('Copy address'),
-                        onPressed: () async {
-                          await Clipboard.setData(
-                              new ClipboardData(text: '0x' + address));
-                          setState(() {
-                            isCopied = true;
-                          });
-                          await Future.delayed(Duration(seconds: 1));
-                          setState(() {
-                            isCopied = false;
-                          });
-                        },
-                      ),
-                    )
-                  ],
-                ),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: 5),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width - 60,
-                          height: 44,
-                          child: commonButton(
-                            context,
-                            'Backup Now',
-                            () async {
-                              await WalletStorage.saveWallet(
-                                address,
-                                walletName,
-                                mnemonic,
-                                Globals.masterPasscodes,
-                              );
-                              await Navigator.push(
-                                context,
-                                new MaterialPageRoute(
-                                  builder: (context) =>
-                                      new RecoveryPhraseGeneration(
-                                    rootRouteName: widget.rootRouteName,
-                                    mnemonic: mnemonic,
-                                  ),
-                                ),
-                              );
+                              });
                             },
                           ),
+                          Divider(
+                            thickness: 1,
+                          ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Text(
+                                '0x${abbreviate(address ?? '')}',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).textTheme.title.color,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 40,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Card(
+                    child: new QrImage(
+                      padding: EdgeInsets.all(40),
+                      data: "0x${address ?? ''}",
+                      size: MediaQuery.of(context).size.width - 150,
+                      backgroundColor: Theme.of(context).backgroundColor,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 40,
+                    child: Center(
+                      child: isCopied
+                          ? Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5)),
+                                side: BorderSide.none,
+                              ),
+                              color: Colors.grey[200],
+                              child: Container(
+                                child: Text(
+                                  'copied',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.amber),
+                                ),
+                                padding: EdgeInsets.all(8),
+                              ),
+                            )
+                          : Text(''),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width - 150,
+                    height: 44,
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          color: Theme.of(context).primaryTextTheme.title.color,
                         ),
                       ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      SizedBox(
+                      child: Text('Copy address'),
+                      onPressed: () async {
+                        await Clipboard.setData(
+                            new ClipboardData(text: '0x' + address));
+                        setState(() {
+                          isCopied = true;
+                        });
+                        await Future.delayed(Duration(seconds: 1));
+                        setState(() {
+                          isCopied = false;
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 5),
+                      child: SizedBox(
                         width: MediaQuery.of(context).size.width - 60,
                         height: 44,
                         child: commonButton(
                           context,
-                          'Skip Now',
+                          'Backup Now',
                           () async {
                             await WalletStorage.saveWallet(
                               address,
@@ -315,28 +283,54 @@ class _CreateWalletState extends State<CreateWallet> {
                               mnemonic,
                               Globals.masterPasscodes,
                             );
-                            Navigator.popUntil(
+                            await Navigator.push(
                               context,
-                              ModalRoute.withName(widget.rootRouteName),
+                              new MaterialPageRoute(
+                                builder: (context) =>
+                                    new RecoveryPhraseGeneration(
+                                  rootRouteName: widget.rootRouteName,
+                                  mnemonic: mnemonic,
+                                ),
+                              ),
                             );
                           },
-                          color: Colors.transparent,
-                          textColor:
-                              Theme.of(context).primaryTextTheme.title.color,
                         ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width - 60,
+                      height: 44,
+                      child: commonButton(
+                        context,
+                        'Skip Now',
+                        () async {
+                          await WalletStorage.saveWallet(
+                            address,
+                            walletName,
+                            mnemonic,
+                            Globals.masterPasscodes,
+                          );
+                          Navigator.popUntil(
+                            context,
+                            ModalRoute.withName(widget.rootRouteName),
+                          );
+                        },
+                        color: Colors.transparent,
+                        textColor:
+                            Theme.of(context).primaryTextTheme.title.color,
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ],
           ),
-          isLoading: !isInitialized,
         ),
+        isLoading: !isInitialized,
       ),
-      onWillPop: () async {
-        return !Navigator.of(context).userGestureInProgress;
-      },
     );
   }
 }

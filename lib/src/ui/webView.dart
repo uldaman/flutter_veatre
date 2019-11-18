@@ -113,135 +113,128 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return Offstage(
-      child: WillPopScope(
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            leading: null,
-            centerTitle: true,
-            automaticallyImplyLeading: false,
-            actions: <Widget>[
-              isStartSearch
-                  ? FlatButton(
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontSize: 12,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          leading: null,
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          actions: <Widget>[
+            isStartSearch
+                ? FlatButton(
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                    onPressed: () async {
+                      updateSearchBar(_currentURL, 1, true);
+                      setState(() {
+                        isStartSearch = false;
+                      });
+                    },
+                  )
+                : Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(left: 5),
+                        child: IconButton(
+                          icon: Icon(
+                            bookmarkID == null
+                                ? MaterialCommunityIcons.bookmark_plus_outline
+                                : MaterialCommunityIcons.bookmark_plus,
+                            size: 20,
+                          ),
+                          disabledColor: Theme.of(context).iconTheme.color,
+                          color: Theme.of(context).primaryIconTheme.color,
+                          onPressed: _currentURL == Globals.initialURL ||
+                                  progress != 1
+                              ? null
+                              : bookmarkID == null
+                                  ? () async {
+                                      final meta = await metaData;
+                                      if (meta != null) {
+                                        await Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => CreateBookmark(
+                                                documentMetaData: meta),
+                                            fullscreenDialog: true,
+                                          ),
+                                        );
+                                        await updateBookmarkID(_currentURL);
+                                      }
+                                    }
+                                  : () async {
+                                      await BookmarkStorage.delete(bookmarkID);
+                                      await updateBookmarkID(_currentURL);
+                                    },
                         ),
                       ),
-                      onPressed: () async {
-                        updateSearchBar(_currentURL, 1, true);
-                        setState(() {
-                          isStartSearch = false;
-                        });
-                      },
-                    )
-                  : Row(
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(left: 5),
-                          child: IconButton(
-                            icon: Icon(
-                              bookmarkID == null
-                                  ? MaterialCommunityIcons.bookmark_plus_outline
-                                  : MaterialCommunityIcons.bookmark_plus,
-                              size: 20,
+                      IconButton(
+                        icon: Icon(
+                          MaterialCommunityIcons.settings_outline,
+                          size: 20,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return Settings();
+                              },
+                              settings: RouteSettings(name: Settings.routeName),
                             ),
-                            disabledColor: Theme.of(context).iconTheme.color,
-                            color: Theme.of(context).primaryIconTheme.color,
-                            onPressed: _currentURL == Globals.initialURL ||
-                                    progress != 1
-                                ? null
-                                : bookmarkID == null
-                                    ? () async {
-                                        final meta = await metaData;
-                                        if (meta != null) {
-                                          await Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) => CreateBookmark(
-                                                  documentMetaData: meta),
-                                              fullscreenDialog: true,
-                                            ),
-                                          );
-                                          await updateBookmarkID(_currentURL);
-                                        }
-                                      }
-                                    : () async {
-                                        await BookmarkStorage.delete(
-                                            bookmarkID);
-                                        await updateBookmarkID(_currentURL);
-                                      },
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            MaterialCommunityIcons.settings_outline,
-                            size: 20,
-                            color: Theme.of(context).iconTheme.color,
-                          ),
-                          onPressed: () async {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return Settings();
-                                },
-                                settings:
-                                    RouteSettings(name: Settings.routeName),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-            ],
-            title: searchBar,
-          ),
-          body: SafeArea(
-            child: Column(
-              children: <Widget>[
-                !isStartSearch && progress < 1 && progress > 0
-                    ? SizedBox(
-                        height: 1,
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          valueColor: AlwaysStoppedAnimation(
-                              Theme.of(context).primaryColor),
-                          backgroundColor: Colors.transparent,
-                        ),
-                      )
-                    : SizedBox(),
-                Expanded(
-                  child: RepaintBoundary(
-                    key: captureKey,
-                    child: Stack(
-                      children: [
-                        webView,
-                        Offstage(
-                          child: appView,
-                          offstage: !(_currentURL == Globals.initialURL ||
-                              isStartSearch == true),
-                        ),
-                      ],
-                    ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+          ],
+          title: searchBar,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              !isStartSearch && progress < 1 && progress > 0
+                  ? SizedBox(
+                      height: 1,
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        valueColor: AlwaysStoppedAnimation(
+                            Theme.of(context).primaryColor),
+                        backgroundColor: Colors.transparent,
+                      ),
+                    )
+                  : SizedBox(),
+              Expanded(
+                child: RepaintBoundary(
+                  key: captureKey,
+                  child: Stack(
+                    children: [
+                      webView,
+                      Offstage(
+                        child: appView,
+                        offstage: !(_currentURL == Globals.initialURL ||
+                            isStartSearch == true),
+                      ),
+                    ],
                   ),
                 ),
-                isKeyboardVisible
-                    ? SizedBox()
-                    : SizedBox(
-                        height: 56,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: bottomItems,
-                        ),
+              ),
+              isKeyboardVisible
+                  ? SizedBox()
+                  : SizedBox(
+                      height: 56,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: bottomItems,
                       ),
-              ],
-            ),
+                    ),
+            ],
           ),
         ),
-        onWillPop: () async {
-          return !Navigator.of(context).userGestureInProgress;
-        },
       ),
       offstage: _offstage,
     );

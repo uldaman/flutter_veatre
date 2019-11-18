@@ -9,8 +9,8 @@ import 'package:veatre/src/api/BlockAPI.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/storage/storage.dart';
+import 'package:veatre/src/ui/authentication/decision.dart';
 import 'package:veatre/src/ui/welcome.dart';
-import 'package:veatre/src/ui/unlock.dart';
 
 void main() {
   runZoned(() async {
@@ -117,11 +117,7 @@ class AppState extends State<App> {
               );
       },
       theme: _appearance == Appearance.light ? lightTheme : darkTheme,
-      home: !widget.hasPasscodes
-          ? Welcome()
-          : Unlock(
-              everLaunched: false,
-            ),
+      home: !widget.hasPasscodes ? Welcome() : Decision(),
     );
   }
 

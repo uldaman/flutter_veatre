@@ -95,7 +95,7 @@ class AddressDetailState extends State<AddressDetail> {
                                             padding: EdgeInsets.only(left: 5),
                                             child: Icon(
                                               MaterialCommunityIcons
-                                                  .getIconData('content-copy'),
+                                                  .content_copy,
                                               color: Colors.white,
                                               size: 12,
                                             ),

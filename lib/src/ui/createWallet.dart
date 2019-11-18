@@ -143,8 +143,7 @@ class _CreateWalletState extends State<CreateWallet> {
                                     ),
                                   ),
                                   Icon(
-                                    MaterialCommunityIcons.getIconData(
-                                        'pencil-outline'),
+                                    MaterialCommunityIcons.pencil_outline,
                                   ),
                                 ],
                               ),

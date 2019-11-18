@@ -202,8 +202,7 @@ class ActivitiesState extends State<Activities> {
                               ? Row(
                                   children: <Widget>[
                                     Icon(
-                                      MaterialCommunityIcons.getIconData(
-                                          'progress-upload'),
+                                      MaterialCommunityIcons.progress_upload,
                                       color: Color(0xFF57BD89),
                                       size: 16,
                                     ),
@@ -327,7 +326,7 @@ class ActivitiesState extends State<Activities> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Icon(
-                        MaterialCommunityIcons.getIconData('link-variant'),
+                        MaterialCommunityIcons.link_variant,
                         size: 12,
                         color: Theme.of(context).primaryColor,
                       ),
@@ -359,9 +358,8 @@ class ActivitiesState extends State<Activities> {
                     children: <Widget>[
                       Icon(
                         activity.type == ActivityType.Transaction
-                            ? MaterialCommunityIcons.getIconData('magnify')
-                            : MaterialCommunityIcons.getIconData(
-                                'content-copy'),
+                            ? MaterialCommunityIcons.magnify
+                            : MaterialCommunityIcons.content_copy,
                         size: 12,
                         color: Theme.of(context).primaryColor,
                       ),

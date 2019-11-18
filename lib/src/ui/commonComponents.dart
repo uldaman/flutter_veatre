@@ -213,7 +213,7 @@ Widget _passcode(BuildContext context, List<String> passcodes, index) {
           ? Align(
               alignment: Alignment.center,
               child: Icon(
-                MaterialCommunityIcons.getIconData('checkbox-blank-circle'),
+                MaterialCommunityIcons.checkbox_blank_circle,
                 size: 17,
                 color: Theme.of(context).primaryTextTheme.title.color,
               ),

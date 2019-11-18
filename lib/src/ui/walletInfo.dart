@@ -80,7 +80,7 @@ class WalletInfoState extends State<WalletInfo> {
         actions: <Widget>[
           IconButton(
             icon: Icon(
-              MaterialCommunityIcons.getIconData('dots-vertical'),
+              MaterialCommunityIcons.dots_vertical,
             ),
             iconSize: 20,
             onPressed: () async {
@@ -335,8 +335,8 @@ class WalletInfoState extends State<WalletInfo> {
                                   ? Row(
                                       children: <Widget>[
                                         Icon(
-                                          MaterialCommunityIcons.getIconData(
-                                              'progress-upload'),
+                                          MaterialCommunityIcons
+                                              .progress_upload,
                                           color: Color(0xFF57BD89),
                                           size: 16,
                                         ),
@@ -469,7 +469,7 @@ class WalletInfoState extends State<WalletInfo> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Icon(
-                        MaterialCommunityIcons.getIconData('link-variant'),
+                        MaterialCommunityIcons.link_variant,
                         size: 12,
                         color: Theme.of(context).primaryColor,
                       ),
@@ -501,9 +501,8 @@ class WalletInfoState extends State<WalletInfo> {
                     children: <Widget>[
                       Icon(
                         activity.type == ActivityType.Transaction
-                            ? MaterialCommunityIcons.getIconData('magnify')
-                            : MaterialCommunityIcons.getIconData(
-                                'content-copy'),
+                            ? MaterialCommunityIcons.magnify
+                            : MaterialCommunityIcons.content_copy,
                         size: 12,
                         color: Theme.of(context).primaryColor,
                       ),

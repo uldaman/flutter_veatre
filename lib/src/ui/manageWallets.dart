@@ -182,7 +182,7 @@ class ManageWalletsState extends State<ManageWallets> {
                     padding: EdgeInsets.only(top: 10),
                     child: IconButton(
                       icon: Icon(
-                        MaterialCommunityIcons.getIconData('qrcode'),
+                        MaterialCommunityIcons.qrcode,
                         size: 30,
                       ),
                       onPressed: () async {
@@ -206,7 +206,7 @@ class ManageWalletsState extends State<ManageWallets> {
                     padding: EdgeInsets.only(top: 10),
                     child: IconButton(
                       icon: Icon(
-                        MaterialCommunityIcons.getIconData('file-find-outline'),
+                        MaterialCommunityIcons.file_find_outline,
                         size: 30,
                       ),
                       onPressed: () async {

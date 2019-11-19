@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc_cracker/flutter_bloc_cracker.dart';
 import 'package:veatre/src/ui/authentication/bloc/bloc.dart';
 import 'package:veatre/src/ui/authentication/bloc/event.dart';
 import 'package:veatre/src/ui/authentication/bloc/state.dart';
@@ -47,7 +48,7 @@ class _DecisionState extends State<Decision> {
                   ),
                 ),
               ),
-              Expanded(child: Unlock()),
+              Expanded(child: BlocProvider(bloc: _bloc, child: Unlock())),
             ],
           ),
         ),

@@ -64,6 +64,7 @@ class BlockHeadForNetwork {
 
 class Globals {
   static final bioPass = BioPass();
+  static bool hasBiometrics = false;
 
   static Uint8List _masterPasscodes = Uint8List.fromList([]);
 

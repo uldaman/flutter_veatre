@@ -116,7 +116,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          leading: null,
           centerTitle: true,
           automaticallyImplyLeading: false,
           actions: <Widget>[

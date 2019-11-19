@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/configStorage.dart';
-import 'package:veatre/src/ui/unlock.dart';
+import 'package:veatre/src/ui/authentication/decision.dart';
 import 'package:veatre/src/ui/webViews.dart';
 
 class MainUI extends StatefulWidget {
@@ -45,11 +45,7 @@ class MainUIState extends State<MainUI>
               _state == AppLifecycleState.inactive) &&
           currentTime - _timestamp > 5 * 1000 &&
           !_pageLocked) {
-        _present(
-          Unlock(
-            everLaunched: true,
-          ),
-        );
+        _present(Decision());
       }
       _state = AppLifecycleState.resumed;
     }
@@ -93,8 +89,7 @@ class MainUIState extends State<MainUI>
       children: WebViews.mainNetWebViews,
     );
     return Scaffold(
-      body: 
-      Stack(
+      body: Stack(
         children: <Widget>[
           Offstage(
             child: testStack,

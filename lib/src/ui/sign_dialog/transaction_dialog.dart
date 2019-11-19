@@ -291,17 +291,13 @@ class _TransactionState extends State<TransactionDialog>
     return gas;
   }
 
-  Future<void> _updateFee() async {
-    _estimatedFee = await initialBaseGasPrice() *
-        BigInt.from((1 + _priority / 255) * 1e10) *
-        BigInt.from(_totalGas) ~/
-        BigInt.from(1e10);
-  }
-
   Future<void> _completeByEntity(WalletEntity entity) async {
     dynamic updateUI = (int gas) async {
       _totalGas = widget.options.gas ?? gas;
-      await _updateFee();
+      _estimatedFee = await initialBaseGasPrice() *
+          BigInt.from((1 + _priority / 255) * 1e10) *
+          BigInt.from(_totalGas) ~/
+          BigInt.from(1e10);
       setState(
         () => _swipeController.valueWith(shouldLoading: false, enabled: true),
       );
@@ -382,11 +378,7 @@ class _TransactionState extends State<TransactionDialog>
   Widget _buildPriorityButton(int priority) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () async {
-        _priority = priority;
-        await _updateFee();
-        setState(() {});
-      },
+      onTap: () => setState(() => _priority = priority),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 17),
         child: Icon(

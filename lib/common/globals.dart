@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_biopass/flutter_biopass.dart' show BioPass;
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
@@ -63,9 +62,6 @@ class BlockHeadForNetwork {
 }
 
 class Globals {
-  static final bioPass = BioPass();
-  static bool hasBiometrics = false;
-
   static Uint8List _masterPasscodes = Uint8List.fromList([]);
 
   static final Block mainNetGenesis = Block.fromJSON({

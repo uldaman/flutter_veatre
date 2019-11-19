@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc_cracker/flutter_bloc_cracker.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/ui/authentication/bloc/bloc.dart';
+import 'package:veatre/src/ui/authentication/bloc/state.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
@@ -50,12 +53,16 @@ class UnlockState extends State<Unlock> {
                 alignment: Alignment.centerLeft,
                 child: Padding(
                   padding: EdgeInsets.only(left: 30, top: 10),
-                  child: Text(
-                    errorMsg,
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Theme.of(context).errorColor,
-                      fontWeight: FontWeight.w400,
+                  child: BlocConsumer<AuthenticationState, AuthenticationBloc>(
+                    builder: (_, state, ___, ____) => Text(
+                      (state is Authenticated && !state.didAuthenticate)
+                          ? state.errMsg
+                          : errorMsg,
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: Theme.of(context).errorColor,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ),
                 ),

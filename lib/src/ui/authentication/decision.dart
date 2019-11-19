@@ -15,8 +15,15 @@ class _DecisionState extends State<Decision> {
 
   @override
   void initState() {
+    _subscribeBloc();
     _bloc.emit(Initialize());
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _bloc.dispose();
+    super.dispose();
   }
 
   @override
@@ -40,28 +47,22 @@ class _DecisionState extends State<Decision> {
                   ),
                 ),
               ),
-              StreamBuilder<AuthenticationState>(
-                stream: _bloc.state,
-                initialData: _bloc.initialState,
-                builder: (context, snapshot) {
-                  final AuthenticationState state = snapshot.data;
-
-                  if (state is Unauthenticated &&
-                      state.authenticationType == AuthenticationType.biometrics)
-                    _redirectToAuthenticate();
-
-                  if (state is Authenticated && state.didAuthenticate)
-                    _redirectToMainUi();
-
-                  return Expanded(child: Unlock());
-                },
-              ),
+              Expanded(child: Unlock()),
             ],
           ),
         ),
       ),
     );
   }
+
+  void _subscribeBloc() => _bloc.state.listen((state) {
+        if (state is Unauthenticated &&
+            state.authenticationType == AuthenticationType.biometrics)
+          _redirectToAuthenticate();
+
+        if (state is Authenticated && state.didAuthenticate)
+          _redirectToMainUi();
+      });
 
   void _redirectToAuthenticate() =>
       WidgetsBinding.instance.addPostFrameCallback(

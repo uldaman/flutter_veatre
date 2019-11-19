@@ -1,6 +1,9 @@
 import 'package:flutter_bloc_cracker/flutter_bloc_cracker.dart';
+import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/authentication/bloc/bloc.dart';
 import 'package:veatre/src/ui/authentication/bloc/state.dart';
+import 'package:veatre/src/utils/common.dart';
 
 abstract class AuthenticationEvent
     extends BlocEvent<AuthenticationState, AuthenticationBloc> {}
@@ -11,27 +14,7 @@ class Initialize extends AuthenticationEvent {
     AuthenticationBloc bloc,
     AuthenticationState currentState,
   ) async* {
-    bloc.localAuth.canCheckBiometrics.then(
-      // 回调函数中无法 yield, 所以绕一下
-      (canCheckBiometrics) => bloc.emit(_Initialize(canCheckBiometrics)),
-    );
-  }
-}
-
-class _Initialize extends AuthenticationEvent {
-  _Initialize(this._canCheckBiometrics);
-  final bool _canCheckBiometrics;
-
-  @override
-  Stream<AuthenticationState> handleEvent(
-    AuthenticationBloc bloc,
-    AuthenticationState currentState,
-  ) async* {
-    yield Unauthenticated(
-      _canCheckBiometrics
-          ? AuthenticationType.biometrics
-          : AuthenticationType.password,
-    );
+    yield Unauthenticated(AuthenticationType.biometrics);
   }
 }
 
@@ -41,24 +24,18 @@ class Authenticate extends AuthenticationEvent {
     AuthenticationBloc bloc,
     AuthenticationState currentState,
   ) async* {
-    bloc.localAuth
-        .authenticateWithBiometrics(
-            localizedReason: 'Authenticate to use connet')
-        .then(
-          (didAuthenticate) => bloc.emit(_Authenticate(didAuthenticate)),
-        );
-  }
-}
-
-class _Authenticate extends AuthenticationEvent {
-  _Authenticate(this._didAuthenticate);
-  final bool _didAuthenticate;
-
-  @override
-  Stream<AuthenticationState> handleEvent(
-    AuthenticationBloc bloc,
-    AuthenticationState currentState,
-  ) async* {
-    yield Authenticated(_didAuthenticate);
+    final String password = await Globals.bioPass.retreive(
+      withPrompt: 'Authenticate to use connet',
+    );
+    if (password != null) {
+      if (bytesToHex(sha512(password)) == await Config.passwordHash) {
+        Globals.updateMasterPasscodes(password);
+        yield Authenticated(true);
+      } else {
+        yield Authenticated(false, errMsg: 'Please update biometrics');
+      }
+    } else {
+      yield Authenticated(false, errMsg: 'Biometrics mismatch');
+    }
   }
 }

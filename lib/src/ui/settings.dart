@@ -65,6 +65,15 @@ class SettingsState extends State<Settings> {
         },
       ),
       buildCell(
+        Icons.fingerprint,
+        'Enable FaceID/TouchID',
+        '',
+        () async {
+          final String password = await verifyPassword();
+          if (password != null) await Globals.bioPass.store(password);
+        },
+      ),
+      buildCell(
         Icons.lock,
         'Change Passcode',
         '',

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/enterPassword.dart';
-import 'package:veatre/src/ui/apperance.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
-import 'package:veatre/src/ui/network.dart';
 
 class Settings extends StatefulWidget {
   static const routeName = '/settings';
@@ -15,144 +14,286 @@ class Settings extends StatefulWidget {
 }
 
 class SettingsState extends State<Settings> {
-  Network _network = Network.MainNet;
-  Appearance _appearance = Appearance.light;
+  bool _bioEnabled = false;
+  Network _network = Globals.network;
+  Appearance _appearance = Globals.appearance;
   TextEditingController passwordController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    initNet();
-    initAppearance();
+    updateBioEnabled();
   }
 
-  Future<void> initNet() async {
-    final net = await Config.network;
+  updateBioEnabled() async {
+    final pass = await Globals.getKeychainPass();
     setState(() {
-      _network = net;
-    });
-  }
-
-  Future<void> initAppearance() async {
-    final appearance = await Config.appearance;
-    setState(() {
-      _appearance = appearance;
+      _bioEnabled = pass != null;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> widgets = [];
-    widgets.addAll([
-      buildCell(
-        Icons.network_check,
-        'Network',
-        _network == Network.MainNet ? 'MainNet' : 'TestNet',
-        () async {
-          await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => Networks()));
-          await initNet();
-        },
-      ),
-      buildCell(
-        Icons.face,
-        'Theme',
-        _appearance == Appearance.light ? 'Light' : 'Dark',
-        () async {
-          await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => Appearances()));
-          await initAppearance();
-        },
-      ),
-      buildCell(
-        Icons.fingerprint,
-        'Enable FaceID/TouchID',
-        '',
-        () async {
-          Globals.hasBiometrics = false;
-          final String password = await verifyPassword();
-          if (password != null) {
-            await Globals.bioPass.store(password);
-            Globals.hasBiometrics = true;
-          }
-        },
-      ),
-      buildCell(
-        Icons.lock,
-        'Change Passcode',
-        '',
-        () async {
-          String password = await verifyPassword();
-          if (password != null) {
-            await Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) {
-                return EnterPassword(
-                  canBack: true,
-                  fromRoute: Settings.routeName,
-                );
-              }),
-            );
-          }
-        },
-      ),
-    ]);
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Text('Settings'),
         centerTitle: true,
       ),
-      body: ListView(
-        padding: EdgeInsets.only(top: 10),
-        children: widgets,
-      ),
-    );
-  }
-
-  Widget buildCell(
-      IconData icon, String title, String subTitle, Function() onTap) {
-    return Container(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Card(
-          child: Row(
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 15),
-                child: Icon(
-                  icon,
-                  size: 20,
+              Padding(
+                padding: EdgeInsets.only(bottom: 15),
+                child: Text(
+                  'Security',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryTextTheme.display2.color,
+                  ),
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(left: 15),
+                color: Theme.of(context).accentColor,
+                padding: EdgeInsets.only(top: 15, left: 15, right: 15),
+                child: Column(
+                  children: <Widget>[
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text('Change Master Code'),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                            )
+                          ],
+                        ),
+                      ),
+                      onTapUp: (details) async {
+                        String password = await verifyPassword();
+                        if (password != null) {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) {
+                              return EnterPassword(
+                                canBack: true,
+                                fromRoute: Settings.routeName,
+                              );
+                            }),
+                          );
+                        }
+                      },
+                    ),
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Expanded(
+                            child: Text('Enable FaceID/TouchID'),
+                          ),
+                          CupertinoSwitch(
+                            value: _bioEnabled,
+                            activeColor: Theme.of(context).primaryColor,
+                            onChanged: (value) async {
+                              if (value) {
+                                final pass = await verifyPassword();
+                                if (pass != null) {
+                                  await Globals.setKeychainPass(pass);
+                                  setState(() {
+                                    _bioEnabled = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    _bioEnabled = false;
+                                  });
+                                }
+                              } else {
+                                await Globals.removeKeychainPass();
+                                setState(() {
+                                  _bioEnabled = false;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 15),
                 child: Text(
-                  title,
+                  'Network',
                   style: TextStyle(
-                    fontSize: 17,
+                    color: Theme.of(context).primaryTextTheme.display2.color,
                   ),
+                ),
+              ),
+              Container(
+                color: Theme.of(context).accentColor,
+                child: Column(
+                  children: <Widget>[
+                    buildCell(
+                      'MainNet',
+                      _network == Network.MainNet,
+                      () async {
+                        await changeNet(Network.MainNet);
+                      },
+                    ),
+                    _divider,
+                    buildCell(
+                      'TestNet',
+                      _network == Network.TestNet,
+                      () async {
+                        await changeNet(Network.TestNet);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 15),
+                child: Text(
+                  'Theme',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryTextTheme.display2.color,
+                  ),
+                ),
+              ),
+              Container(
+                color: Theme.of(context).accentColor,
+                child: Column(
+                  children: <Widget>[
+                    buildCell(
+                      'Light',
+                      _appearance == Appearance.light,
+                      () async {
+                        await changeTheme(Appearance.light);
+                      },
+                    ),
+                    _divider,
+                    buildCell(
+                      'Dark',
+                      _appearance == Appearance.dark,
+                      () async {
+                        await changeTheme(Appearance.dark);
+                      },
+                    ),
+                  ],
                 ),
               ),
               Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: 15),
-                  child: Row(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 34),
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      subTitle == '' ? SizedBox() : Text(subTitle),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                      )
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            'App Ver 1.0.0',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .primaryTextTheme
+                                  .display2
+                                  .color,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'Connex 1.1.4',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .primaryTextTheme
+                                    .display2
+                                    .color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
       ),
-      height: 60,
     );
+  }
+
+  Widget get _divider => Padding(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        child: Divider(
+          height: 1,
+          thickness: 1,
+        ),
+      );
+
+  Widget buildCell(String title, bool isSelected, Function() onTap) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: (details) {
+        onTap();
+      },
+      child: Container(
+        padding: EdgeInsets.all(15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text(
+              title,
+            ),
+            isSelected
+                ? Icon(
+                    Icons.check,
+                    size: 16,
+                    color: Theme.of(context).primaryColor,
+                  )
+                : SizedBox(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> changeNet(Network network) async {
+    if (_network != network) {
+      await Config.setNetwork(network);
+      setState(() {
+        this._network = network;
+      });
+      Globals.updateNetwork(network);
+    }
+  }
+
+  Future<void> changeTheme(Appearance appearance) async {
+    if (_appearance != appearance) {
+      await Config.setAppearance(appearance);
+      setState(() {
+        _appearance = appearance;
+      });
+      Globals.updateAppearance(appearance);
+    }
   }
 
   Future<String> verifyPassword() async {

@@ -1,8 +1,9 @@
 import 'dart:core';
 import 'dart:async';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_keychain/flutter_keychain.dart';
+
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
@@ -252,6 +253,18 @@ class Globals {
 
   static Uint8List get masterPasscodes {
     return _masterPasscodes;
+  }
+
+  static Future<void> setKeychainPass(String passcodes) async {
+    return FlutterKeychain.put(key: 'password', value: passcodes);
+  }
+
+  static Future<String> getKeychainPass() async {
+    return FlutterKeychain.get(key: 'password');
+  }
+
+  static Future<void> removeKeychainPass() async {
+    return FlutterKeychain.remove(key: 'password');
   }
 
   static void destroy() {

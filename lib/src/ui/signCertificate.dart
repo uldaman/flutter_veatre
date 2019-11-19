@@ -106,7 +106,7 @@ class SignCertificateState extends State<SignCertificate>
         ),
         child: Container(
           color: Theme.of(context).backgroundColor,
-          padding: EdgeInsets.all(15),
+          padding: EdgeInsets.only(top: 8, left: 26, right: 26),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -134,14 +134,15 @@ class SignCertificateState extends State<SignCertificate>
                         Expanded(
                           child: Align(
                             alignment: Alignment.centerRight,
-                            child: FlatButton(
+                            child: GestureDetector(
                               child: Text(
                                 'Cancel',
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
+                                  fontSize: 17,
                                 ),
                               ),
-                              onPressed: () => Navigator.of(context).pop(),
+                              onTapUp: (details) => Navigator.of(context).pop(),
                             ),
                           ),
                         )

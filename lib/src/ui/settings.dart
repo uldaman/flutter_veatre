@@ -108,6 +108,8 @@ class SettingsState extends State<Settings> {
                               if (value) {
                                 final pass = await verifyPassword();
                                 if (pass != null) {
+                                  await Globals.setKeychainPass(
+                                      bytesToHex(sha256(pass)));
                                   setState(() {
                                     _bioEnabled = true;
                                   });
@@ -324,7 +326,6 @@ class SettingsState extends State<Settings> {
         return alert(context, Text('Incorrect Master Code'),
             'Please input correct master code');
       } else {
-        await Globals.updateMasterPasscodes(password);
         Navigator.of(context).pop(password);
       }
     });

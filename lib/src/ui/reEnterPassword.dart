@@ -150,7 +150,7 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
             );
             final keychainPass = await Globals.getKeychainPass();
             if (keychainPass != null) {
-              Globals.setKeychainPass(password);
+              Globals.setKeychainPass(bytesToHex(Globals.masterPasscodes));
             }
             await Globals.updateMasterPasscodes(password);
             Navigator.of(context)

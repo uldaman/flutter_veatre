@@ -108,7 +108,6 @@ class SettingsState extends State<Settings> {
                               if (value) {
                                 final pass = await verifyPassword();
                                 if (pass != null) {
-                                  await Globals.setKeychainPass(pass);
                                   setState(() {
                                     _bioEnabled = true;
                                   });

@@ -40,7 +40,7 @@ class Authenticate extends AuthenticationEvent {
 
     final String password = await FlutterKeychain.get(key: 'password');
     if (bytesToHex(sha512(password)) == await Config.passwordHash) {
-      Globals.updateMasterPasscodes(password);
+      await Globals.updateMasterPasscodes(password);
       yield Authenticated(true);
     } else {
       yield Authenticated(false, errMsg: 'Please update biometrics');

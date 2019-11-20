@@ -152,7 +152,7 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
             if (keychainPass != null) {
               Globals.setKeychainPass(password);
             }
-            Globals.updateMasterPasscodes(password);
+            await Globals.updateMasterPasscodes(password);
             Navigator.of(context)
                 .popUntil(ModalRoute.withName(widget.fromRoute));
           } catch (e) {
@@ -160,7 +160,7 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
           }
         } else {
           await Config.setPasswordHash(passwordHash);
-          Globals.updateMasterPasscodes(password);
+          await Globals.updateMasterPasscodes(password);
           await Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               fullscreenDialog: true,

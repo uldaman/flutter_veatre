@@ -325,7 +325,7 @@ class SettingsState extends State<Settings> {
         return alert(context, Text('Incorrect Master Code'),
             'Please input correct master code');
       } else {
-        Globals.updateMasterPasscodes(password);
+        await Globals.updateMasterPasscodes(password);
         Navigator.of(context).pop(password);
       }
     });

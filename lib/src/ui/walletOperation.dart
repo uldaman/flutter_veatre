@@ -233,9 +233,9 @@ class WalletOperationState extends State<WalletOperation> {
           ],
         ), confirmAction: () async {
       String password = passwordController.text;
-      String passwordHash = await Config.passwordHash;
-      String hash = bytesToHex(sha512(password));
-      if (hash != passwordHash) {
+      String masterPassHash = await Config.masterPassHash;
+      String hash = bytesToHex(sha512(bytesToHex(sha256(password))));
+      if (hash != masterPassHash) {
         Navigator.of(context).pop();
         return alert(context, Text('Incorrect Master Code'),
             'Please input correct master code');

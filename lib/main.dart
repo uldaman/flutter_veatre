@@ -16,9 +16,8 @@ void main() {
   runZoned(() async {
     WidgetsFlutterBinding.ensureInitialized();
     await init();
-    String passwordHash = await Config.passwordHash;
     runApp(App(
-      hasPasscodes: passwordHash != null,
+      hasPasscodes: await Config.masterPassHash != null,
     ));
   }, onError: (dynamic err, StackTrace stack) {
     print("unhandled error: $err");

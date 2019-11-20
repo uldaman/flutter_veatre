@@ -158,7 +158,7 @@ class EnterPasswordState extends State<EnterPassword> {
       });
       if (passcodes.length == 6) {
         String password = passcodes.join("");
-        String passwordHash = bytesToHex(sha512(password));
+        String passwordHash = bytesToHex(sha512(bytesToHex(sha256(password))));
         await Navigator.push(
           context,
           new MaterialPageRoute(

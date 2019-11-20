@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_keychain/flutter_keychain.dart';
-import 'package:sqflite/utils/utils.dart';
 
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/block.dart';

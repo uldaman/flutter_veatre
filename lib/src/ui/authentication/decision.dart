@@ -7,6 +7,9 @@ import 'package:veatre/src/ui/authentication/unlock.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 
 class Decision extends StatefulWidget {
+  Decision({Key key, this.canCancel: false}) : super(key: key);
+  final bool canCancel;
+
   @override
   _DecisionState createState() => _DecisionState();
 }
@@ -48,7 +51,12 @@ class _DecisionState extends State<Decision> {
                   ),
                 ),
               ),
-              Expanded(child: BlocProvider(bloc: _bloc, child: Unlock())),
+              Expanded(
+                child: BlocProvider(
+                  bloc: _bloc,
+                  child: Unlock(canCancel: widget.canCancel),
+                ),
+              ),
             ],
           ),
         ),
@@ -77,7 +85,7 @@ class _DecisionState extends State<Decision> {
     final navigator = Navigator.of(context);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => navigator.canPop()
-          ? navigator.pop()
+          ? navigator.pop(true)
           : navigator.pushAndRemoveUntil(
               MaterialPageRoute(
                 fullscreenDialog: true,

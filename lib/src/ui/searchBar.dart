@@ -129,6 +129,7 @@ class SearchBarState extends State<SearchBar>
         border: InputBorder.none,
         focusedBorder: InputBorder.none,
         enabledBorder: InputBorder.none,
+        contentPadding: EdgeInsets.only(bottom: 8),
         hintText: 'Search',
       ),
       focusNode: _focusNode,
@@ -145,13 +146,15 @@ class SearchBarState extends State<SearchBar>
       },
     );
     return Container(
-      height: 44,
+      height: 40,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(
           Radius.circular(10),
         ),
       ),
       child: Card(
+        color: Colors.grey[300],
+        elevation: 0,
         margin: EdgeInsets.all(0),
         child: Row(
           children: <Widget>[
@@ -164,7 +167,7 @@ class SearchBarState extends State<SearchBar>
             Expanded(
               child: showTextField
                   ? Padding(
-                      padding: EdgeInsets.only(left: 5),
+                      padding: EdgeInsets.only(left: 5, top: 0),
                       child: searchTextField,
                     )
                   : FlatButton(

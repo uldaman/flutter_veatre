@@ -116,6 +116,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
+          elevation: 0,
           centerTitle: true,
           automaticallyImplyLeading: false,
           actions: <Widget>[
@@ -202,10 +203,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                         value: progress,
                         valueColor: AlwaysStoppedAnimation(
                             Theme.of(context).primaryColor),
-                        backgroundColor: Colors.transparent,
+                        backgroundColor: Theme.of(context).dividerColor,
                       ),
                     )
-                  : SizedBox(),
+                  : Divider(height: 1, thickness: 1),
               Expanded(
                 child: RepaintBoundary(
                   key: captureKey,
@@ -224,11 +225,19 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               isKeyboardVisible
                   ? SizedBox()
                   : SizedBox(
-                      height: 56,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: bottomItems,
+                      height: 59,
+                      child: Column(
+                        children: <Widget>[
+                          Divider(
+                            thickness: 1,
+                            height: 1,
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: bottomItems,
+                          ),
+                        ],
                       ),
                     ),
             ],

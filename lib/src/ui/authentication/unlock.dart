@@ -97,9 +97,10 @@ class UnlockState extends State<Unlock> {
       passcodes.add(code);
       setState(() => errorMsg = '');
       if (passcodes.length == 6) {
-        String passwordHash = await Config.passwordHash;
+        String masterPassHash = await Config.masterPassHash;
         String password = passcodes.join("");
-        if (passwordHash != bytesToHex(sha512(password))) {
+        if (masterPassHash !=
+            bytesToHex(sha512(bytesToHex(sha256(password))))) {
           Globals.clearMasterPasscodes();
           setState(() => errorMsg = 'Passcode mismatch');
         } else {

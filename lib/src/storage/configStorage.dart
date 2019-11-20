@@ -55,16 +55,16 @@ class Config {
     return network;
   }
 
-  static Future<String> get passwordHash async {
+  static Future<String> get masterPassHash async {
     final rows = await Storage.query(
       configTableName,
       limit: 1,
     );
-    return rows.first['passwordHash'];
+    return rows.first['masterPassHash'];
   }
 
-  static Future<void> setPasswordHash(String passwordHash) async {
-    await Storage.update(configTableName, {'passwordHash': passwordHash});
+  static Future<void> setMasterPassHash(String masterPassHash) async {
+    await Storage.update(configTableName, {'masterPassHash': masterPassHash});
   }
 
   static Future<void> changePassword(

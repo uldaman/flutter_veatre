@@ -134,7 +134,7 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
       });
       if (passcodes.length == 6) {
         String password = passcodes.join("");
-        String passwordHash = bytesToHex(sha512(password));
+        String passwordHash = bytesToHex(sha512(bytesToHex(sha256(password))));
         if (passwordHash != widget.passwordHash) {
           Globals.clearMasterPasscodes();
           passcodes.clear();
@@ -159,7 +159,7 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
             alert(context, Text('Change passcodes failed'), e.toString());
           }
         } else {
-          await Config.setPasswordHash(passwordHash);
+          await Config.setMasterPassHash(passwordHash);
           await Globals.updateMasterPasscodes(password);
           await Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(

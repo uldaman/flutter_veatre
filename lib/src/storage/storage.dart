@@ -19,7 +19,7 @@ class Storage {
       join(await getDatabasesPath(), dbName),
       onCreate: (db, version) async {
         await db.execute(
-          '''CREATE TABLE IF NOT EXISTS $configTableName (id INTEGER PRIMARY KEY, theme INTEGER,passwordHash TEXT, network INTEGER);
+          '''CREATE TABLE IF NOT EXISTS $configTableName (id INTEGER PRIMARY KEY, theme INTEGER,masterPassHash TEXT, network INTEGER);
         ''',
         );
         await db.execute(

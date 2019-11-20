@@ -1,5 +1,4 @@
 import 'package:flutter_bloc_cracker/flutter_bloc_cracker.dart';
-import 'package:flutter_keychain/flutter_keychain.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/authentication/bloc/bloc.dart';
@@ -15,7 +14,7 @@ class Initialize extends AuthenticationEvent {
     AuthenticationBloc bloc,
     AuthenticationState currentState,
   ) async* {
-    if (await FlutterKeychain.get(key: 'password') != null) {
+    if (await Globals.getKeychainPass() != null) {
       yield Unauthenticated(AuthenticationType.biometrics);
     } else {
       yield Unauthenticated(AuthenticationType.password);
@@ -38,9 +37,9 @@ class Authenticate extends AuthenticationEvent {
       return;
     }
 
-    final String password = await FlutterKeychain.get(key: 'password');
-    if (bytesToHex(sha512(password)) == await Config.passwordHash) {
-      await Globals.updateMasterPasscodes(password);
+    final String masterPass = await Globals.getKeychainPass();
+    if (bytesToHex(sha512(masterPass)) == await Config.masterPassHash) {
+      await Globals.setKeychainPass(masterPass);
       yield Authenticated(true);
     } else {
       yield Authenticated(false, errMsg: 'Please update biometrics');

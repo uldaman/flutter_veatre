@@ -9,7 +9,8 @@ import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 
 class Unlock extends StatefulWidget {
-  Unlock();
+  Unlock({Key key, this.canCancel: false}) : super(key: key);
+  final bool canCancel;
 
   @override
   UnlockState createState() => UnlockState();
@@ -67,6 +68,15 @@ class UnlockState extends State<Unlock> {
                   ),
                 ),
               ),
+              widget.canCancel
+                  ? FlatButton(
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: Theme.of(context).primaryColor),
+                      ),
+                      onPressed: () => Navigator.of(context).maybePop(false),
+                    )
+                  : Container(),
             ],
           ),
         ),
@@ -96,7 +106,7 @@ class UnlockState extends State<Unlock> {
           Globals.updateMasterPasscodes(password);
           final navigator = Navigator.of(context);
           navigator.canPop()
-              ? navigator.pop()
+              ? navigator.pop(true)
               : navigator.pushAndRemoveUntil(
                   MaterialPageRoute(
                     fullscreenDialog: true,

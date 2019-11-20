@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/ui/authentication/decision.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/crypto.dart';
@@ -86,28 +87,32 @@ class WalletOperationState extends State<WalletOperation> {
             "Backup Recovery Phrases",
             showWarnning: !hasBackup,
             onTap: () async {
-              Uint8List password = await verifyPassword();
-              if (password != null) {
-                String mnemonicCipher = widget.walletEntity.mnemonicCipher;
-                String iv = widget.walletEntity.iv;
-                Uint8List mnemonicData = AESCipher.decrypt(
-                  password,
-                  hexToBytes(mnemonicCipher),
-                  hexToBytes(iv),
-                );
-                String mnemonic = utf8.decode(mnemonicData);
-                String name = ModalRoute.of(context).settings.name;
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => RecoveryPhraseBackup(
-                      hasBackup: hasBackup,
-                      mnemonic: mnemonic,
-                      rootRouteName: name,
-                    ),
+              final bool isOK = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => Decision(canCancel: true),
+                  fullscreenDialog: true,
+                ),
+              );
+              if (!isOK) return;
+              String mnemonicCipher = widget.walletEntity.mnemonicCipher;
+              String iv = widget.walletEntity.iv;
+              Uint8List mnemonicData = AESCipher.decrypt(
+                Globals.masterPasscodes,
+                hexToBytes(mnemonicCipher),
+                hexToBytes(iv),
+              );
+              String mnemonic = utf8.decode(mnemonicData);
+              String name = ModalRoute.of(context).settings.name;
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => RecoveryPhraseBackup(
+                    hasBackup: hasBackup,
+                    mnemonic: mnemonic,
+                    rootRouteName: name,
                   ),
-                );
-                await updateBackup();
-              }
+                ),
+              );
+              await updateBackup();
             },
           ),
           buildCell(
@@ -116,18 +121,25 @@ class WalletOperationState extends State<WalletOperation> {
             centerTitle: true,
             showArrow: false,
             onTap: () async {
-              Uint8List password = await verifyPassword();
-              if (password != null) {
-                await customAlert(context,
-                    title: Text('Delete Wallet'),
-                    content: Text(
-                      'Are you sure to delete this wallet',
-                    ), confirmAction: () async {
+              final bool isOK = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => Decision(canCancel: true),
+                  fullscreenDialog: true,
+                ),
+              );
+              if (!isOK) return;
+              await customAlert(
+                context,
+                title: Text('Delete Wallet'),
+                content: Text(
+                  'Are you sure to delete this wallet',
+                ),
+                confirmAction: () async {
                   await WalletStorage.delete(widget.walletEntity.address);
                   Navigator.of(context)
                       .popUntil(ModalRoute.withName('/wallets'));
-                });
-              }
+                },
+              );
             },
           )
         ],

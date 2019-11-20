@@ -103,7 +103,7 @@ class UnlockState extends State<Unlock> {
           Globals.clearMasterPasscodes();
           setState(() => errorMsg = 'Passcode mismatch');
         } else {
-          Globals.updateMasterPasscodes(password);
+          await Globals.updateMasterPasscodes(password);
           final navigator = Navigator.of(context);
           navigator.canPop()
               ? navigator.pop(true)

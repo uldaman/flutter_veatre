@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_keychain/flutter_keychain.dart';
+import 'package:sqflite/utils/utils.dart';
 
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/block.dart';
@@ -243,8 +244,9 @@ class Globals {
     );
   }
 
-  static void updateMasterPasscodes(String passcodes) {
+  static Future<void> updateMasterPasscodes(String passcodes) async {
     _masterPasscodes = Uint8List.fromList(sha256(passcodes));
+    await setKeychainPass(bytesToHex(_masterPasscodes));
   }
 
   static void clearMasterPasscodes() {
@@ -255,8 +257,9 @@ class Globals {
     return _masterPasscodes;
   }
 
-  static Future<void> setKeychainPass(String passcodes) async {
-    return FlutterKeychain.put(key: 'password', value: passcodes);
+  static Future<void> setKeychainPass(String masterPass) async {
+    _masterPasscodes = hexToBytes(masterPass);
+    return FlutterKeychain.put(key: 'password', value: masterPass);
   }
 
   static Future<String> getKeychainPass() async {

@@ -68,17 +68,27 @@ class UnlockState extends State<Unlock> {
                   ),
                 ),
               ),
-              widget.canCancel
-                  ? FlatButton(
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(color: Theme.of(context).primaryColor),
-                      ),
-                      onPressed: () => Navigator.of(context).maybePop(false),
-                    )
-                  : Container(),
             ],
           ),
+        ),
+        BlocConsumer<AuthenticationState, AuthenticationBloc>(
+          builder: (_, state, ___, ____) {
+            String title = '';
+            Function() callback;
+            if (widget.canCancel) {
+              if (state is Authenticated && !state.didAuthenticate) {
+                title = 'Cancel';
+                callback = () => Navigator.of(context).maybePop(false);
+              }
+            }
+            return FlatButton(
+              child: Text(
+                title,
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+              onPressed: callback,
+            );
+          },
         ),
         passcodeKeyboard(
           context,

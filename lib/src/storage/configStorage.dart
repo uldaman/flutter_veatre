@@ -72,7 +72,7 @@ class Config {
     String newPasscodes,
     String newPasscodeHash,
   ) async {
-    return Storage.inTransaction((transaction) async {
+    await Storage.inTransaction((transaction) async {
       List<Map<String, dynamic>> rows =
           await transaction.query(walletTableName);
       final batch = transaction.batch();
@@ -101,8 +101,9 @@ class Config {
           ],
         );
       }
-      batch.update(configTableName, {'passwordHash': newPasscodeHash});
+      batch.update(configTableName, {'masterPassHash': newPasscodeHash});
       await batch.commit(noResult: true);
     });
+    await Globals.updateMasterPasscodes(newPasscodes);
   }
 }

@@ -148,7 +148,6 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
               password,
               passwordHash,
             );
-            await Globals.updateMasterPasscodes(password);
             Navigator.of(context)
                 .popUntil(ModalRoute.withName(widget.fromRoute));
           } catch (e) {

@@ -132,6 +132,7 @@ class AppState extends State<App> {
         brightness: Brightness.light,
         primaryIconTheme: IconThemeData(color: Color(0xFF410FE6)),
         iconTheme: IconThemeData(color: Color(0xFF666666)),
+        primaryColorBrightness: Brightness.light,
         primaryTextTheme: TextTheme(
           title: TextStyle(
             color: Color(0xFF333333),

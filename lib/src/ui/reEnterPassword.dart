@@ -148,10 +148,6 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
               password,
               passwordHash,
             );
-            final keychainPass = await Globals.getKeychainPass();
-            if (keychainPass != null) {
-              Globals.setKeychainPass(bytesToHex(Globals.masterPasscodes));
-            }
             await Globals.updateMasterPasscodes(password);
             Navigator.of(context)
                 .popUntil(ModalRoute.withName(widget.fromRoute));

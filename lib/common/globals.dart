@@ -245,7 +245,9 @@ class Globals {
 
   static Future<void> updateMasterPasscodes(String passcodes) async {
     _masterPasscodes = Uint8List.fromList(sha256(passcodes));
-    await setKeychainPass(bytesToHex(_masterPasscodes));
+    if (await getKeychainPass() != null) {
+      await setKeychainPass(bytesToHex(_masterPasscodes));
+    }
   }
 
   static void clearMasterPasscodes() {

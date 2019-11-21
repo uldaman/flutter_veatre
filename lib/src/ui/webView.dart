@@ -126,6 +126,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                       'Cancel',
                       style: TextStyle(
                         fontSize: 12,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                     onPressed: () async {
@@ -287,15 +288,19 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
       );
 
+  String get _injectedJS =>
+      _initialParamsJS +
+      Globals.connexJS +
+      _darkMode(
+        _appearance == Appearance.dark,
+      );
+
   FlutterWebView.WebView get webView => FlutterWebView.WebView(
         initialUrl: widget.initialURL,
         javascriptMode: FlutterWebView.JavascriptMode.unrestricted,
         javascriptHandlers: _javascriptChannels.toSet(),
-        injectJavascript: _initialParamsJS +
-            Globals.connexJS +
-            _darkMode(
-              _appearance == Appearance.dark,
-            ),
+        injectJavascript: _injectedJS,
+        prompt: json.encode(Globals.head(network: widget.network).encoded),
         onURLChanged: (url) async {
           await updateBackForwad();
           _currentURL = url;
@@ -361,7 +366,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   String get _initialParamsJS {
     final genesis = Globals.genesis(widget.network);
-    final initialHead = Globals.head(network: widget.network);
     return '''
     window.genesis = {
         number:${genesis.number},
@@ -380,12 +384,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         signer:'${genesis.signer}',
         transactions:${genesis.transactions},
         isTrunk:${genesis.isTrunk}
-    };
-    window.initialHead = {
-        id: '${initialHead.id}',
-        number:${initialHead.number},
-        timestamp:${initialHead.timestamp},
-        parentID:'${initialHead.parentID}'
     };
     ''';
   }
@@ -919,6 +917,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   void _handleHeadChanged() async {
     final blockHeadForNetwork = Globals.blockHeadForNetwork;
     if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
+      await controller.setPrompt(json.encode(blockHeadForNetwork.head.encoded));
       await updateLatestActivity();
       _head.complete(blockHeadForNetwork.head);
     }

@@ -71,6 +71,7 @@ class MainUIState extends State<MainUI>
       MaterialPageRoute(
         builder: (_) => widget,
         fullscreenDialog: true,
+        settings: RouteSettings(isInitialRoute: true),
       ),
     );
     _pageLocked = false;

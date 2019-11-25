@@ -33,7 +33,7 @@ class Authenticate extends AuthenticationEvent {
             localizedReason: 'Authenticate to use connet');
 
     if (!didAuthenticate) {
-      yield Authenticated(false, errMsg: 'Biometrics mismatch');
+      yield Authenticated(false);
       return;
     }
 
@@ -42,7 +42,7 @@ class Authenticate extends AuthenticationEvent {
       await Globals.setKeychainPass(masterPass);
       yield Authenticated(true);
     } else {
-      yield Authenticated(false, errMsg: 'Please update biometrics');
+      yield Authenticated(false);
     }
   }
 }

@@ -51,11 +51,20 @@ class _DecisionState extends State<Decision> {
                   ),
                 ),
               ),
-              Expanded(
-                child: BlocProvider(
-                  bloc: _bloc,
-                  child: Unlock(canCancel: widget.canCancel),
-                ),
+              StreamBuilder<AuthenticationState>(
+                stream: _bloc.state,
+                initialData: _bloc.initialState,
+                builder: (context, snapshot) {
+                  final AuthenticationState state = snapshot.data;
+                  return (state is Authenticated && !state.didAuthenticate)
+                      ? Expanded(
+                          child: BlocProvider(
+                            bloc: _bloc,
+                            child: Unlock(canCancel: widget.canCancel),
+                          ),
+                        )
+                      : Container();
+                },
               ),
             ],
           ),

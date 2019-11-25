@@ -115,13 +115,14 @@ class SignCertificateState extends State<SignCertificate>
                   width: MediaQuery.of(context).size.width / 3,
                   child: Divider(
                     thickness: 4,
+                    height: 4,
                   ),
                 ),
               ),
               Column(
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
+                    padding: EdgeInsets.symmetric(vertical: 20),
                     child: Row(
                       children: <Widget>[
                         Text(
@@ -151,6 +152,7 @@ class SignCertificateState extends State<SignCertificate>
                   ),
                   Divider(
                     thickness: 1,
+                    height: 1,
                   ),
                 ],
               ),

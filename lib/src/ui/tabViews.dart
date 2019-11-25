@@ -125,7 +125,7 @@ class TabViewsState extends State<TabViews> {
           width: 2,
           color: selectedTabKey == snapshot.key
               ? Theme.of(context).primaryColor
-              : Theme.of(context).primaryTextTheme.display3.color,
+              : Color(0xFF666666),
         ),
       ),
       child: Column(
@@ -139,14 +139,18 @@ class TabViewsState extends State<TabViews> {
                   children: <Widget>[
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsets.only(left: 40, right: 40),
+                        padding: EdgeInsets.only(left: 10, right: 40),
                         child: FutureBuilder<String>(
                           future: snapshot.title,
                           builder: (context, snapshot) => Text(
-                            snapshot.hasData ? snapshot.data : 'New Tab',
+                            !snapshot.hasData
+                                ? 'New Tab'
+                                : snapshot.data == ''
+                                    ? 'New Tab'
+                                    : snapshot.data,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                           ),
                         ),
                       ),

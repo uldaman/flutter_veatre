@@ -226,6 +226,7 @@ class ManageWalletsState extends State<ManageWallets> {
                 ),
                 child: Divider(
                   thickness: 1,
+                  height: 1,
                 ),
               ),
               FutureBuilder(
@@ -263,7 +264,7 @@ class ManageWalletsState extends State<ManageWallets> {
     return Column(
       children: <Widget>[
         Container(
-          margin: EdgeInsets.only(top: 0),
+          margin: EdgeInsets.only(top: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[

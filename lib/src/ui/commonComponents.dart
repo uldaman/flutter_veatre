@@ -135,7 +135,7 @@ Widget cell(
     child: Column(
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 10),
+          padding: EdgeInsets.symmetric(vertical: 15),
           child: Row(
             children: <Widget>[
               SizedBox(
@@ -165,6 +165,7 @@ Widget cell(
         ),
         Divider(
           thickness: 1,
+          height: 1,
         ),
       ],
     ),

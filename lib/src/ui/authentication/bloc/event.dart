@@ -14,14 +14,15 @@ class Initialize extends AuthenticationEvent {
     AuthenticationBloc bloc,
     AuthenticationState currentState,
   ) async* {
-    if (await Globals.getKeychainPass() != null) {
-      if (await bloc.localAuth.canCheckBiometrics) {
-        yield Unauthenticated(AuthType.biometrics);
-      } else {
-        yield Unauthenticated(AuthType.biometrics, hasAuthority: false);
-      }
-    } else {
+    if (await Globals.getKeychainPass() == null) {
       yield Unauthenticated(AuthType.password);
+      return;
+    }
+
+    if (await bloc.localAuth.canCheckBiometrics) {
+      yield Unauthenticated(AuthType.biometrics);
+    } else {
+      yield Unauthenticated(AuthType.biometrics, hasAuthority: false);
     }
   }
 }

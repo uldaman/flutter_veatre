@@ -54,15 +54,14 @@ class _DecisionState extends State<Decision> {
               StreamBuilder<AuthenticationState>(
                 stream: _bloc.state,
                 initialData: _bloc.initialState,
-                builder: (context, snapshot) =>
-                    _isShowUnlockWidget(snapshot.data)
-                        ? Expanded(
-                            child: BlocProvider(
-                              bloc: _bloc,
-                              child: Unlock(canCancel: widget.canCancel),
-                            ),
-                          )
+                builder: (context, snapshot) => Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: _isShowUnlockWidget(snapshot.data)
+                        ? Unlock(canCancel: widget.canCancel)
                         : Container(),
+                  ),
+                ),
               ),
             ],
           ),

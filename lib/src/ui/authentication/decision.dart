@@ -82,7 +82,7 @@ class _DecisionState extends State<Decision> {
                                     ),
                                     SizedBox(height: 10),
                                     Text(
-                                      '点击进行物理识别',
+                                      '点击进行生物识别',
                                       style: TextStyle(color: primaryColor),
                                     )
                                   ],
@@ -118,8 +118,8 @@ class _DecisionState extends State<Decision> {
         )
       : customAlert(
           context,
-          title: Text('物理识别'),
-          content: Text('去设置物理识别权限'),
+          title: Text('生物识别'),
+          content: Text('去设置生物识别权限'),
           confirmAction: () async {
             SystemSetting.goto(SettingTarget.LOCATION);
             Navigator.of(context).pop();

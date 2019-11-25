@@ -163,37 +163,37 @@ class SettingsState extends State<Settings> {
                   ],
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 15),
-                child: Text(
-                  'Theme',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryTextTheme.display2.color,
-                  ),
-                ),
-              ),
-              Container(
-                color: Theme.of(context).accentColor,
-                child: Column(
-                  children: <Widget>[
-                    buildCell(
-                      'Light',
-                      _appearance == Appearance.light,
-                      () async {
-                        await changeTheme(Appearance.light);
-                      },
-                    ),
-                    _divider,
-                    buildCell(
-                      'Dark',
-                      _appearance == Appearance.dark,
-                      () async {
-                        await changeTheme(Appearance.dark);
-                      },
-                    ),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding: EdgeInsets.symmetric(vertical: 15),
+              //   child: Text(
+              //     'Theme',
+              //     style: TextStyle(
+              //       color: Theme.of(context).primaryTextTheme.display2.color,
+              //     ),
+              //   ),
+              // ),
+              // Container(
+              //   color: Theme.of(context).accentColor,
+              //   child: Column(
+              //     children: <Widget>[
+              //       buildCell(
+              //         'Light',
+              //         _appearance == Appearance.light,
+              //         () async {
+              //           await changeTheme(Appearance.light);
+              //         },
+              //       ),
+              //       _divider,
+              //       buildCell(
+              //         'Dark',
+              //         _appearance == Appearance.dark,
+              //         () async {
+              //           await changeTheme(Appearance.dark);
+              //         },
+              //       ),
+              //     ],
+              //   ),
+              // ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(bottom: 34),

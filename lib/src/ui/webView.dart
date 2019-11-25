@@ -168,6 +168,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                                     }
                                   : () async {
                                       await BookmarkStorage.delete(bookmarkID);
+                                      Globals.updateBookmark(
+                                          Bookmark(id: bookmarkID));
                                       await updateBookmarkID(_currentURL);
                                     },
                         ),

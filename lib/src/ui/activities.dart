@@ -74,11 +74,38 @@ class ActivitiesState extends State<Activities> {
         ),
         centerTitle: true,
       ),
-      body: ListView.builder(
-        itemBuilder: buildActivity,
-        itemCount: activities.length,
-        physics: ClampingScrollPhysics(),
-      ),
+      body: activities.length > 0
+          ? ListView.builder(
+              itemBuilder: buildActivity,
+              itemCount: activities.length,
+              physics: ClampingScrollPhysics(),
+            )
+          : Center(
+              child: SizedBox(
+                height: 200,
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      'No Activity',
+                      style: TextStyle(
+                        fontSize: 22,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 20, left: 40, right: 40),
+                      child: Text(
+                        "Transaction and Certificate that you've signed will appear here",
+                        style: TextStyle(
+                          color:
+                              Theme.of(context).primaryTextTheme.display2.color,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 

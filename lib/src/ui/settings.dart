@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:system_setting/system_setting.dart';
+
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
@@ -18,6 +21,7 @@ class SettingsState extends State<Settings> {
   Network _network = Globals.network;
   Appearance _appearance = Globals.appearance;
   TextEditingController passwordController = TextEditingController();
+  final LocalAuthentication localAuth = LocalAuthentication();
 
   @override
   void initState() {
@@ -106,12 +110,30 @@ class SettingsState extends State<Settings> {
                             activeColor: Theme.of(context).primaryColor,
                             onChanged: (value) async {
                               if (value) {
-                                final pass = await verifyPassword();
-                                if (pass != null) {
+                                final isAuthed =
+                                    await localAuth.authenticateWithBiometrics(
+                                        localizedReason:
+                                            'Authenticate to use connet');
+                                if (isAuthed) {
                                   await Globals.setKeychainPass(
-                                      bytesToHex(sha256(pass)));
+                                      bytesToHex(Globals.masterPasscodes));
                                   setState(() {
                                     _bioEnabled = true;
+                                  });
+                                } else if (!(await localAuth
+                                    .canCheckBiometrics)) {
+                                  await customAlert(
+                                    context,
+                                    title: Text('生物识别'),
+                                    content: Text('去设置生物识别权限'),
+                                    confirmAction: () async {
+                                      SystemSetting.goto(
+                                          SettingTarget.LOCATION);
+                                      Navigator.of(context).pop();
+                                    },
+                                  );
+                                  setState(() {
+                                    _bioEnabled = false;
                                   });
                                 } else {
                                   setState(() {
@@ -163,37 +185,37 @@ class SettingsState extends State<Settings> {
                   ],
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 15),
-                child: Text(
-                  'Theme',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryTextTheme.display2.color,
-                  ),
-                ),
-              ),
-              Container(
-                color: Theme.of(context).accentColor,
-                child: Column(
-                  children: <Widget>[
-                    buildCell(
-                      'Light',
-                      _appearance == Appearance.light,
-                      () async {
-                        await changeTheme(Appearance.light);
-                      },
-                    ),
-                    _divider,
-                    buildCell(
-                      'Dark',
-                      _appearance == Appearance.dark,
-                      () async {
-                        await changeTheme(Appearance.dark);
-                      },
-                    ),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding: EdgeInsets.symmetric(vertical: 15),
+              //   child: Text(
+              //     'Theme',
+              //     style: TextStyle(
+              //       color: Theme.of(context).primaryTextTheme.display2.color,
+              //     ),
+              //   ),
+              // ),
+              // Container(
+              //   color: Theme.of(context).accentColor,
+              //   child: Column(
+              //     children: <Widget>[
+              //       buildCell(
+              //         'Light',
+              //         _appearance == Appearance.light,
+              //         () async {
+              //           await changeTheme(Appearance.light);
+              //         },
+              //       ),
+              //       _divider,
+              //       buildCell(
+              //         'Dark',
+              //         _appearance == Appearance.dark,
+              //         () async {
+              //           await changeTheme(Appearance.dark);
+              //         },
+              //       ),
+              //     ],
+              //   ),
+              // ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(bottom: 34),
@@ -312,6 +334,7 @@ class SettingsState extends State<Settings> {
                 autofocus: true,
                 controller: passwordController,
                 keyboardType: TextInputType.number,
+                obscureText: true,
                 maxLength: 6,
                 decoration: InputDecoration(hintText: 'Master code'),
               ),

@@ -123,7 +123,7 @@ class ImportWalletState extends State<ImportWallet> {
                 context,
                 'Import',
                 () async {
-                  String mnemonic = mnemonicController.text;
+                  String mnemonic = mnemonicController.text.toLowerCase();
                   bool isValid =
                       await BipKeyDerivation.isValidMnemonic(mnemonic);
                   if (!isValid) {

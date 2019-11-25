@@ -42,7 +42,7 @@ class WalletOperationState extends State<WalletOperation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Operation'),
+        title: Text('Advance'),
         centerTitle: true,
       ),
       body: ListView(
@@ -225,6 +225,7 @@ class WalletOperationState extends State<WalletOperation> {
               child: TextField(
                 autofocus: true,
                 controller: passwordController,
+                obscureText: true,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(hintText: 'Master code'),
                 maxLength: 6,

@@ -98,6 +98,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     _appearance = widget.appearance;
     Globals.addBlockHeadHandler(_handleHeadChanged);
     Globals.addTabHandler(_handleTabChanged);
+    Globals.addBookmarkHandler(_handleBookmark);
+
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
@@ -146,7 +148,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                                 : MaterialCommunityIcons.bookmark_plus,
                             size: 20,
                           ),
-                          disabledColor: Theme.of(context).iconTheme.color,
+                          disabledColor: Color(0xFFCCCCCC),
                           color: Theme.of(context).primaryIconTheme.color,
                           onPressed: _currentURL == Globals.initialURL ||
                                   progress != 1
@@ -167,8 +169,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                                     }
                                   : () async {
                                       await BookmarkStorage.delete(bookmarkID);
-                                      Globals.updateBookmark(
-                                          Bookmark(id: bookmarkID));
+                                      Globals.updateBookmark(Bookmark(
+                                          id: bookmarkID,
+                                          network: widget.network));
                                       await updateBookmarkID(_currentURL);
                                     },
                         ),
@@ -738,8 +741,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       ),
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
-      color: Theme.of(context).primaryColor,
-      disabledColor: Theme.of(context).primaryTextTheme.display3.color,
+      color: Color(0xFF666666),
+      disabledColor: Color(0xFFCCCCCC),
       onPressed: onPressed != null
           ? () async {
               if (btnEnabled) {
@@ -901,6 +904,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   void dispose() {
     Globals.removeBlockHeadHandler(_handleHeadChanged);
     Globals.removeTabHandler(_handleTabChanged);
+    Globals.removeBookmarkHandler(_handleBookmark);
     super.dispose();
   }
 
@@ -949,6 +953,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           });
         }
       }
+    }
+  }
+
+  Future<void> _handleBookmark() async {
+    if (Globals.bookmark.network == Globals.network) {
+      await updateBookmarkID(_currentURL);
     }
   }
 }

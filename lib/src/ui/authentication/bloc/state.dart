@@ -10,7 +10,6 @@ class Unauthenticated extends AuthenticationState {
 }
 
 class Authenticated extends AuthenticationState {
-  Authenticated(this.didAuthenticate, {this.errMsg: ''});
+  Authenticated(this.didAuthenticate);
   final bool didAuthenticate;
-  final String errMsg;
 }

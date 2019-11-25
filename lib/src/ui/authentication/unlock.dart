@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc_cracker/flutter_bloc_cracker.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/ui/authentication/bloc/bloc.dart';
-import 'package:veatre/src/ui/authentication/bloc/state.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
@@ -18,7 +15,7 @@ class Unlock extends StatefulWidget {
 
 class UnlockState extends State<Unlock> {
   List<String> passcodes = [];
-  String errorMsg = '';
+  String errorMsg = 'Please enter the master code';
 
   @override
   void initState() {
@@ -54,16 +51,12 @@ class UnlockState extends State<Unlock> {
                 alignment: Alignment.centerLeft,
                 child: Padding(
                   padding: EdgeInsets.only(left: 30, top: 10),
-                  child: BlocConsumer<AuthenticationState, AuthenticationBloc>(
-                    builder: (_, state, ___, ____) => Text(
-                      (state is Authenticated && !state.didAuthenticate)
-                          ? state.errMsg
-                          : errorMsg,
-                      style: TextStyle(
-                        fontSize: 17,
-                        color: Theme.of(context).errorColor,
-                        fontWeight: FontWeight.w400,
-                      ),
+                  child: Text(
+                    errorMsg,
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Theme.of(context).errorColor,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
@@ -71,25 +64,15 @@ class UnlockState extends State<Unlock> {
             ],
           ),
         ),
-        BlocConsumer<AuthenticationState, AuthenticationBloc>(
-          builder: (_, state, ___, ____) {
-            String title = '';
-            Function() callback;
-            if (widget.canCancel) {
-              if (state is Authenticated && !state.didAuthenticate) {
-                title = 'Cancel';
-                callback = () => Navigator.of(context).maybePop(false);
-              }
-            }
-            return FlatButton(
-              child: Text(
-                title,
-                style: TextStyle(color: Theme.of(context).primaryColor),
-              ),
-              onPressed: callback,
-            );
-          },
-        ),
+        widget.canCancel
+            ? FlatButton(
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+                onPressed: () => Navigator.of(context).maybePop(false),
+              )
+            : Container(),
         passcodeKeyboard(
           context,
           onCodeSelected: selectCode,

@@ -133,6 +133,7 @@ class WalletsState extends State<Wallets> {
                 ),
                 child: Divider(
                   thickness: 1,
+                  height: 1,
                 ),
               ),
               FutureBuilder(
@@ -156,37 +157,21 @@ class WalletsState extends State<Wallets> {
   }
 
   Widget balance(String balance, String energy) {
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Text(
-              balance,
-              style: TextStyle(fontSize: 22),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: 5, right: 22, top: 10),
-              child: Text(
-                'VET',
-                style: TextStyle(
-                  color: Theme.of(context).primaryTextTheme.display2.color,
-                  fontSize: 12,
-                ),
-              ),
-            )
-          ],
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 8),
-          child: Row(
+    return Container(
+      margin: EdgeInsets.only(top: 10),
+      child: Column(
+        children: <Widget>[
+          Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              Text(energy, style: TextStyle(fontSize: 14)),
+              Text(
+                balance,
+                style: TextStyle(fontSize: 22),
+              ),
               Container(
-                margin: EdgeInsets.only(left: 5, right: 12, top: 2),
+                margin: EdgeInsets.only(left: 5, right: 22, top: 10),
                 child: Text(
-                  'VTHO',
+                  'VET',
                   style: TextStyle(
                     color: Theme.of(context).primaryTextTheme.display2.color,
                     fontSize: 12,
@@ -195,8 +180,27 @@ class WalletsState extends State<Wallets> {
               )
             ],
           ),
-        ),
-      ],
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Text(energy, style: TextStyle(fontSize: 14)),
+                Container(
+                  margin: EdgeInsets.only(left: 5, right: 12, top: 2),
+                  child: Text(
+                    'VTHO',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryTextTheme.display2.color,
+                      fontSize: 12,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

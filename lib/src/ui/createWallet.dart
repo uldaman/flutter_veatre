@@ -147,40 +147,44 @@ class _CreateWalletState extends State<CreateWallet> {
                               ],
                             ),
                             onPressed: () async {
-                              await customAlert(context,
-                                  title: Text('Wallet name'),
-                                  content: Column(
-                                    children: <Widget>[
-                                      Padding(
-                                        padding: EdgeInsets.only(bottom: 10),
-                                        child: Text(
-                                          'input a name which can help you identify the wallet',
-                                        ),
+                              await customAlert(
+                                context,
+                                title: Text('Wallet name'),
+                                content: Column(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: EdgeInsets.only(bottom: 10),
+                                      child: Text(
+                                        'input a name which can help you identify the wallet',
                                       ),
-                                      walletNameTextField(
-                                        focusNode: _focusNode,
-                                        controller: walletNameController,
-                                        hitText: 'Input',
-                                      ),
-                                    ],
-                                  ), confirmAction: () async {
-                                String name = walletNameController.text;
-                                if (name.isEmpty) {
-                                  return alert(
-                                    context,
-                                    Text('Invalid wallet name'),
-                                    "wallet name can't be empty",
-                                  );
-                                }
-                                Navigator.pop(context);
-                                setState(() {
-                                  walletName = name;
-                                });
-                              });
+                                    ),
+                                    walletNameTextField(
+                                      focusNode: _focusNode,
+                                      controller: walletNameController,
+                                      hitText: 'Input',
+                                    ),
+                                  ],
+                                ),
+                                confirmAction: () async {
+                                  String name = walletNameController.text;
+                                  if (name.isEmpty) {
+                                    return alert(
+                                      context,
+                                      Text('Invalid wallet name'),
+                                      "wallet name can't be empty",
+                                    );
+                                  }
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    walletName = name;
+                                  });
+                                },
+                              );
                             },
                           ),
                           Divider(
                             thickness: 1,
+                            height: 1,
                           ),
                           Expanded(
                             child: Align(

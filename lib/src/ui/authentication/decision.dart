@@ -109,25 +109,22 @@ class _DecisionState extends State<Decision> {
     return false;
   }
 
-  void _redirectToAuthenticate(Unauthenticated state) =>
-      state.hasAuthority ? _authenticate() : _applySystemAuthority();
-
-  void _authenticate() => WidgetsBinding.instance.addPostFrameCallback(
-        (_) => Future.delayed(
-          Duration(milliseconds: 200),
-          () => _bloc.emit(Authenticate()),
-        ),
-      );
-
-  void _applySystemAuthority() => customAlert(
-        context,
-        title: Text('物理识别'),
-        content: Text('去设置物理识别权限'),
-        confirmAction: () async {
-          SystemSetting.goto(SettingTarget.LOCATION);
-          Navigator.of(context).pop();
-        },
-      );
+  void _redirectToAuthenticate(Unauthenticated state) => state.hasAuthority
+      ? WidgetsBinding.instance.addPostFrameCallback(
+          (_) => Future.delayed(
+            Duration(milliseconds: 200),
+            () => _bloc.emit(Authenticate()),
+          ),
+        )
+      : customAlert(
+          context,
+          title: Text('物理识别'),
+          content: Text('去设置物理识别权限'),
+          confirmAction: () async {
+            SystemSetting.goto(SettingTarget.LOCATION);
+            Navigator.of(context).pop();
+          },
+        );
 
   void _redirectToMainUi() {
     final navigator = Navigator.of(context);

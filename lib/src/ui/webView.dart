@@ -97,7 +97,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     _currentURL = widget.initialURL;
     _appearance = widget.appearance;
     Globals.addBlockHeadHandler(_handleHeadChanged);
-    Globals.addAppearanceHandler(_handleAppearanceChanged);
     Globals.addTabHandler(_handleTabChanged);
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
@@ -290,12 +289,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
       );
 
-  String get _injectedJS =>
-      _initialParamsJS +
-      Globals.connexJS +
-      _darkMode(
-        _appearance == Appearance.dark,
-      );
+  String get _injectedJS => _initialParamsJS + Globals.connexJS;
 
   FlutterWebView.WebView get webView => FlutterWebView.WebView(
         initialUrl: widget.initialURL,
@@ -327,8 +321,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           if (controller != null) {
             await updateBookmarkID(url);
             await updateBackForwad();
-            await controller
-                .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
           }
           updateSearchBar(url, 1, !isStartSearch);
           setState(() {
@@ -390,10 +382,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     ''';
   }
 
-  String _darkMode(bool enable) {
-    String mode = enable ? 'true' : 'false';
-    return 'window.__NightMode__.setEnabled($mode);';
-  }
+  // String _darkMode(bool enable) {
+  //   String mode = enable ? 'true' : 'false';
+  //   return 'window.__NightMode__.setEnabled($mode);';
+  // }
 
   Future<void> updateBackForwad() async {
     if (controller != null) {
@@ -908,7 +900,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   @override
   void dispose() {
     Globals.removeBlockHeadHandler(_handleHeadChanged);
-    Globals.removeAppearanceHandler(_handleAppearanceChanged);
     Globals.removeTabHandler(_handleTabChanged);
     super.dispose();
   }
@@ -922,16 +913,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       await controller.setPrompt(json.encode(blockHeadForNetwork.head.encoded));
       await updateLatestActivity();
       _head.complete(blockHeadForNetwork.head);
-    }
-  }
-
-  void _handleAppearanceChanged() async {
-    setState(() {
-      _appearance = Globals.appearance;
-    });
-    if (controller != null) {
-      await controller
-          .evaluateJavascript(_darkMode(_appearance == Appearance.dark));
     }
   }
 

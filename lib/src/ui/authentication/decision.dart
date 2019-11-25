@@ -54,23 +54,28 @@ class _DecisionState extends State<Decision> {
               StreamBuilder<AuthenticationState>(
                 stream: _bloc.state,
                 initialData: _bloc.initialState,
-                builder: (context, snapshot) {
-                  final AuthenticationState state = snapshot.data;
-                  return (state is Authenticated && !state.didAuthenticate)
-                      ? Expanded(
-                          child: BlocProvider(
-                            bloc: _bloc,
-                            child: Unlock(canCancel: widget.canCancel),
-                          ),
-                        )
-                      : Container();
-                },
+                builder: (context, snapshot) =>
+                    _isShowUnlockWidget(snapshot.data)
+                        ? Expanded(
+                            child: BlocProvider(
+                              bloc: _bloc,
+                              child: Unlock(canCancel: widget.canCancel),
+                            ),
+                          )
+                        : Container(),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  bool _isShowUnlockWidget(AuthenticationState state) {
+    if (state is Unauthenticated &&
+        state.authenticationType == AuthenticationType.password) return true;
+    if (state is Authenticated && !state.didAuthenticate) return true;
+    return false;
   }
 
   void _subscribeBloc() => _bloc.state.listen((state) {

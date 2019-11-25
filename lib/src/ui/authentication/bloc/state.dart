@@ -1,12 +1,13 @@
 abstract class AuthenticationState {}
 
-enum AuthenticationType { biometrics, password }
+enum AuthType { biometrics, password }
 
 class Uninitialized extends AuthenticationState {}
 
 class Unauthenticated extends AuthenticationState {
-  Unauthenticated(this.authenticationType);
-  final AuthenticationType authenticationType;
+  Unauthenticated(this.authType, {this.hasAuthority: true});
+  final AuthType authType;
+  final bool hasAuthority;
 }
 
 class Authenticated extends AuthenticationState {

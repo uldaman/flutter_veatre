@@ -33,10 +33,15 @@ class _DecisionState extends State<Decision> {
 
   void _subscribeBloc() => _bloc.state.listen((state) {
         if (state is Unauthenticated && state.authType == AuthType.biometrics)
-          _redirectToAuthenticate(state);
+          _redirectToAuthenticate();
 
-        if (state is Authenticated && state.didAuthenticate)
-          _redirectToMainUi();
+        if (state is Authenticated) {
+          if (state.didAuthenticate) {
+            _redirectToMainUi();
+          } else if (!state.didAuthenticate && state.notAvailable) {
+            _redirectToAvailable();
+          }
+        }
       });
 
   @override
@@ -87,8 +92,7 @@ class _DecisionState extends State<Decision> {
                                     )
                                   ],
                                 ),
-                                onPressed: () =>
-                                    _redirectToAuthenticate(snapshot.data),
+                                onPressed: _redirectToAuthenticate,
                               ),
                             ],
                           ),
@@ -105,26 +109,18 @@ class _DecisionState extends State<Decision> {
   bool _isShowUnlockWidget(AuthenticationState state) {
     if (state is Unauthenticated && state.authType == AuthType.password)
       return true;
-    if (state is Authenticated && !state.didAuthenticate) return true;
+    if (state is Authenticated && !state.didAuthenticate && !state.notAvailable)
+      return true;
     return false;
   }
 
-  void _redirectToAuthenticate(Unauthenticated state) => state.hasAuthority
-      ? WidgetsBinding.instance.addPostFrameCallback(
-          (_) => Future.delayed(
-            Duration(milliseconds: 200),
-            () => _bloc.emit(Authenticate()),
-          ),
-        )
-      : customAlert(
-          context,
-          title: Text('生物识别'),
-          content: Text('去设置生物识别权限'),
-          confirmAction: () async {
-            SystemSetting.goto(SettingTarget.LOCATION);
-            Navigator.of(context).pop();
-          },
-        );
+  void _redirectToAuthenticate() =>
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => Future.delayed(
+          Duration(milliseconds: 200),
+          () => _bloc.emit(Authenticate()),
+        ),
+      );
 
   void _redirectToMainUi() {
     final navigator = Navigator.of(context);
@@ -141,4 +137,14 @@ class _DecisionState extends State<Decision> {
             ),
     );
   }
+
+  void _redirectToAvailable() => customAlert(
+        context,
+        title: Text('生物识别'),
+        content: Text('去设置生物识别权限'),
+        confirmAction: () async {
+          SystemSetting.goto(SettingTarget.LOCATION);
+          Navigator.of(context).pop();
+        },
+      );
 }

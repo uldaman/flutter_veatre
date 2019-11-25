@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:local_auth/error_codes.dart';
 import 'package:system_setting/system_setting.dart';
 
 import 'package:veatre/common/globals.dart';
@@ -110,35 +113,28 @@ class SettingsState extends State<Settings> {
                             activeColor: Theme.of(context).primaryColor,
                             onChanged: (value) async {
                               if (value) {
-                                final isAuthed =
-                                    await localAuth.authenticateWithBiometrics(
-                                        localizedReason:
-                                            'Authenticate to use connet');
-                                if (isAuthed) {
-                                  await Globals.setKeychainPass(
-                                      bytesToHex(Globals.masterPasscodes));
-                                  setState(() {
-                                    _bioEnabled = true;
-                                  });
-                                } else if (!(await localAuth
-                                    .canCheckBiometrics)) {
-                                  await customAlert(
-                                    context,
-                                    title: Text('生物识别'),
-                                    content: Text('去设置生物识别权限'),
-                                    confirmAction: () async {
-                                      SystemSetting.goto(
-                                          SettingTarget.LOCATION);
-                                      Navigator.of(context).pop();
-                                    },
-                                  );
-                                  setState(() {
-                                    _bioEnabled = false;
-                                  });
-                                } else {
-                                  setState(() {
-                                    _bioEnabled = false;
-                                  });
+                                try {
+                                  final isAuthed = await localAuth
+                                      .authenticateWithBiometrics(
+                                          localizedReason:
+                                              'Authenticate to use connet');
+                                  if (isAuthed) {
+                                    await Globals.setKeychainPass(
+                                        bytesToHex(Globals.masterPasscodes));
+                                    setState(() {
+                                      _bioEnabled = true;
+                                    });
+                                  } else if (!(await localAuth
+                                      .canCheckBiometrics)) {
+                                    await _gotoBiometricSettings();
+                                  } else {
+                                    setState(() {
+                                      _bioEnabled = false;
+                                    });
+                                  }
+                                } catch (e) {
+                                  print("authenticateWithBiometrics error: $e");
+                                  await _gotoBiometricSettings();
                                 }
                               } else {
                                 await Globals.removeKeychainPass();
@@ -354,5 +350,20 @@ class SettingsState extends State<Settings> {
     });
     passwordController.clear();
     return password;
+  }
+
+  Future<void> _gotoBiometricSettings() async {
+    await customAlert(
+      context,
+      title: Text('生物识别'),
+      content: Text('去设置生物识别权限'),
+      confirmAction: () async {
+        SystemSetting.goto(SettingTarget.LOCATION);
+        Navigator.of(context).pop();
+      },
+    );
+    setState(() {
+      _bioEnabled = false;
+    });
   }
 }

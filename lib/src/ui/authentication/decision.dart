@@ -46,7 +46,6 @@ class _DecisionState extends State<Decision> {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = Theme.of(context).primaryColor;
     return Scaffold(
       body: SafeArea(
         maintainBottomViewPadding: true,
@@ -72,30 +71,7 @@ class _DecisionState extends State<Decision> {
                 builder: (context, snapshot) => Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
-                    child: _isShowUnlockWidget(snapshot.data)
-                        ? Unlock(canCancel: widget.canCancel)
-                        : Column(
-                            children: <Widget>[
-                              SizedBox(height: 222),
-                              FlatButton(
-                                child: Column(
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.fingerprint,
-                                      size: 65,
-                                      color: primaryColor,
-                                    ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      '点击进行生物识别',
-                                      style: TextStyle(color: primaryColor),
-                                    )
-                                  ],
-                                ),
-                                onPressed: _redirectToAuthenticate,
-                              ),
-                            ],
-                          ),
+                    child: _switchUnlockWidget(snapshot.data),
                   ),
                 ),
               ),
@@ -106,13 +82,41 @@ class _DecisionState extends State<Decision> {
     );
   }
 
-  bool _isShowUnlockWidget(AuthenticationState state) {
-    if (state is Unauthenticated && state.authType == AuthType.password)
-      return true;
-    if (state is Authenticated && !state.didAuthenticate && !state.notAvailable)
-      return true;
-    return false;
-  }
+  Color get primaryColor => Theme.of(context).primaryColor;
+
+  Widget _switchUnlockWidget(AuthenticationState state) =>
+      (state is Unauthenticated && state.authType == AuthType.password)
+          ? Unlock(canCancel: widget.canCancel)
+          : Column(
+              children: <Widget>[
+                SizedBox(height: 222),
+                FlatButton(
+                  child: Column(
+                    children: <Widget>[
+                      Icon(
+                        Icons.fingerprint,
+                        size: 65,
+                        color: primaryColor,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        '点击进行生物识别',
+                        style: TextStyle(color: primaryColor),
+                      )
+                    ],
+                  ),
+                  onPressed: _redirectToAuthenticate,
+                ),
+                Spacer(),
+                FlatButton(
+                  child: Text(
+                    '使用密码登录',
+                    style: TextStyle(color: primaryColor),
+                  ),
+                  onPressed: () => _bloc.emit(Initialize(usePassword: true)),
+                ),
+              ],
+            );
 
   void _redirectToAuthenticate() =>
       WidgetsBinding.instance.addPostFrameCallback(

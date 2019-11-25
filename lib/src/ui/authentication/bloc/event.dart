@@ -11,15 +11,18 @@ abstract class AuthenticationEvent
     extends BlocEvent<AuthenticationState, AuthenticationBloc> {}
 
 class Initialize extends AuthenticationEvent {
+  Initialize({this.usePassword: false});
+  final bool usePassword;
+
   @override
   Stream<AuthenticationState> handleEvent(
     AuthenticationBloc bloc,
     AuthenticationState currentState,
   ) async* {
-    if (await Globals.getKeychainPass() != null) {
-      yield Unauthenticated(AuthType.biometrics);
-    } else {
+    if (usePassword || await Globals.getKeychainPass() == null) {
       yield Unauthenticated(AuthType.password);
+    } else {
+      yield Unauthenticated(AuthType.biometrics);
     }
   }
 }

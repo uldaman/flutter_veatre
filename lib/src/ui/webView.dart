@@ -335,7 +335,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           });
         },
         onCanGoBack: (bool canGoBack) {
-          setState(() => _canBack = canGoBack);
+          setState(
+            () => _canBack = canGoBack && _currentURL != Globals.initialURL,
+          );
         },
         onCanGoForward: (bool canGoForward) {
           setState(() => _canForward = canGoForward);

@@ -62,8 +62,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   String key;
   int id;
   bool isKeyboardVisible = false;
-  bool canBack = false;
-  bool canForward = false;
+  bool _canBack = false;
+  bool _canForward = false;
   bool isStartSearch = false;
   double progress = 0;
   bool canBookmarked = false;
@@ -301,7 +301,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         injectJavascript: _injectedJS,
         prompt: json.encode(Globals.head(network: widget.network).encoded),
         onURLChanged: (url) async {
-          await updateBackForwad();
           _currentURL = url;
           if (_currentURL != Globals.initialURL) {
             updateSearchBar(url, progress, !isStartSearch);
@@ -316,14 +315,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             _currentURL = url;
           });
           if (controller != null) {
-            await updateBackForwad();
             updateSearchBar(url, 0, !isStartSearch);
           }
         },
         onPageFinished: (String url) async {
           if (controller != null) {
             await updateBookmarkID(url);
-            await updateBackForwad();
           }
           updateSearchBar(url, 1, !isStartSearch);
           setState(() {
@@ -333,10 +330,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onProgressChanged: (double progress) {
           updateSearchBar(_currentURL, progress, !isStartSearch);
-          updateBackForwad();
           setState(() {
             this.progress = progress;
           });
+        },
+        onCanGoBack: (bool canGoBack) {
+          setState(
+            () => _canBack = canGoBack && _currentURL != Globals.initialURL,
+          );
+        },
+        onCanGoForward: (bool canGoForward) {
+          setState(() => _canForward = canGoForward);
         },
         navigationDelegate: (FlutterWebView.NavigationRequest request) {
           if (request.url.startsWith('http') ||
@@ -384,22 +388,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         isTrunk:${genesis.isTrunk}
     };
     ''';
-  }
-
-  // String _darkMode(bool enable) {
-  //   String mode = enable ? 'true' : 'false';
-  //   return 'window.__NightMode__.setEnabled($mode);';
-  // }
-
-  Future<void> updateBackForwad() async {
-    if (controller != null) {
-      bool canBack = await controller.canGoBack();
-      bool canForward = await controller.canGoForward();
-      setState(() {
-        this.canBack = canBack && _currentURL != Globals.initialURL;
-        this.canForward = canForward;
-      });
-    }
   }
 
   void updateSearchBar(String url, double progress, bool shouldCancelInput) {
@@ -606,9 +594,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         padding: EdgeInsets.only(bottom: 10),
         child: bottomItem(
           MaterialCommunityIcons.chevron_left,
-          onPressed: canBack
+          onPressed: _canBack
               ? () async {
-                  if (canBack && controller != null) {
+                  if (_canBack && controller != null) {
                     return controller.goBack();
                   }
                 }
@@ -619,9 +607,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         padding: EdgeInsets.only(bottom: 10),
         child: bottomItem(
           MaterialCommunityIcons.chevron_right,
-          onPressed: canForward
+          onPressed: _canForward
               ? () async {
-                  if (canForward && controller != null) {
+                  if (_canForward && controller != null) {
                     return controller.goForward();
                   }
                 }

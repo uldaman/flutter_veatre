@@ -1,9 +1,6 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:local_auth/error_codes.dart';
 import 'package:system_setting/system_setting.dart';
 
 import 'package:veatre/common/globals.dart';

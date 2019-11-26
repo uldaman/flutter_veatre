@@ -203,6 +203,7 @@ Widget _passcode(BuildContext context, List<String> passcodes, index) {
     width: (MediaQuery.of(context).size.width - 5 * 10 - 40) / 6,
     height: (MediaQuery.of(context).size.width - 5 * 10 - 40) / 6,
     child: Card(
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(6)),
         side: BorderSide(

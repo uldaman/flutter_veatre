@@ -333,6 +333,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onProgressChanged: (double progress) {
           updateSearchBar(_currentURL, progress, !isStartSearch);
+          updateBackForwad();
           setState(() {
             this.progress = progress;
           });

@@ -100,7 +100,7 @@ class _DecisionState extends State<Decision> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        '点击进行生物识别',
+                        'Tap to unlock with biometric',
                         style: TextStyle(color: primaryColor),
                       )
                     ],
@@ -110,7 +110,7 @@ class _DecisionState extends State<Decision> {
                 Spacer(),
                 FlatButton(
                   child: Text(
-                    '使用密码登录',
+                    'Unlock with master passcodes',
                     style: TextStyle(color: primaryColor),
                   ),
                   onPressed: () => _bloc.emit(Initialize(usePassword: true)),
@@ -144,8 +144,8 @@ class _DecisionState extends State<Decision> {
 
   void _redirectToAvailable() => customAlert(
         context,
-        title: Text('生物识别'),
-        content: Text('去设置生物识别权限'),
+        title: Text('Biometric'),
+        content: Text('You need to open biometric in the system settings'),
         confirmAction: () async {
           SystemSetting.goto(SettingTarget.LOCATION);
           Navigator.of(context).pop();

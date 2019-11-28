@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/createWallet.dart';
 import 'package:veatre/src/ui/importWallet.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
-class CreateOrImportWallet extends StatelessWidget {
+class CreateOrImportWallet extends StatefulWidget {
   final String fromRouteName;
+  CreateOrImportWallet({@required this.fromRouteName});
 
-  CreateOrImportWallet({
-    Key key,
-    @required this.fromRouteName,
-  }) : super(key: key);
+  @override
+  CreateOrImportWalletState createState() {
+    return CreateOrImportWalletState();
+  }
+}
+
+class CreateOrImportWalletState extends State<CreateOrImportWallet> {
+  int _page = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -60,17 +66,53 @@ class CreateOrImportWallet extends StatelessWidget {
             ),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(40)),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width - 120,
-                      height: MediaQuery.of(context).size.width - 120,
-                      color: Colors.grey,
-                      //TODO LOGO
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.width,
+                    child: PageView(
+                      physics: ClampingScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      onPageChanged: (page) {
+                        setState(() {
+                          _page = page;
+                        });
+                      },
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/step1.png',
+                          fit: BoxFit.fitHeight,
+                        ),
+                        Image.asset(
+                          'assets/step2.png',
+                          fit: BoxFit.fitHeight,
+                        ),
+                        Image.asset(
+                          'assets/step3.png',
+                          fit: BoxFit.fitHeight,
+                        ),
+                      ],
                     ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        child: Container(
+                          width: 150,
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              _pageDot(context, 0),
+                              _pageDot(context, 1),
+                              _pageDot(context, 2),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                 ],
               ),
@@ -89,7 +131,7 @@ class CreateOrImportWallet extends StatelessWidget {
                         await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => CreateWallet(
-                              rootRouteName: fromRouteName,
+                              rootRouteName: widget.fromRouteName,
                             ),
                           ),
                         );
@@ -109,7 +151,7 @@ class CreateOrImportWallet extends StatelessWidget {
                             context,
                             new MaterialPageRoute(
                               builder: (context) => new ImportWallet(
-                                rootRouteName: fromRouteName,
+                                rootRouteName: widget.fromRouteName,
                               ),
                             ),
                           );
@@ -126,6 +168,16 @@ class CreateOrImportWallet extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _pageDot(BuildContext context, int page) {
+    return Icon(
+      MaterialCommunityIcons.checkbox_blank_circle,
+      size: 15,
+      color: _page == page
+          ? Theme.of(context).primaryTextTheme.title.color
+          : Theme.of(context).primaryTextTheme.display3.color,
     );
   }
 }

@@ -33,72 +33,38 @@ class WelcomeState extends State<Welcome> {
                 ),
               ),
             ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.width - 120,
-              child: PageView(
-                physics: ClampingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                onPageChanged: (page) {
-                  setState(() {
-                    _page = page;
-                  });
-                },
-                children: <Widget>[
-                  Image.asset(
-                    'assets/step1.png',
-                    fit: BoxFit.fitHeight,
-                  ),
-                  Image.asset(
-                    'assets/step2.png',
-                    fit: BoxFit.fitHeight,
-                  ),
-                  Image.asset(
-                    'assets/step3.png',
-                    fit: BoxFit.fitHeight,
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                top: 0,
-              ),
-              child: Row(
+            Expanded(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Flexible(
-                    child: Container(
-                      width: 150,
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          _pageDot(context, 0),
-                          _pageDot(context, 1),
-                          _pageDot(context, 2),
-                        ],
+                  Container(
+                    width: 180,
+                    height: 180,
+                    child: Image.asset(
+                      'assets/logo.png',
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 40),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width - 60,
+                      child: Text(
+                        'Connet is designed to provide the superior user experiences for VeChain Apps,and serves as the dApp enviroment to provide unlimited potential for developers and users.',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w400,
+                          color:
+                              Theme.of(context).primaryTextTheme.display2.color,
+                        ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width - 60,
-                child: Text(
-                  'Sync is designed to provide the superior user experiences for VeChain Apps,and serves as the dApp enviroment to provide unlimited potential for developers and users.',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w400,
-                    color: Theme.of(context).primaryTextTheme.display2.color,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
+              padding: EdgeInsets.only(bottom: 80),
               child: Center(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width - 170,
@@ -117,7 +83,7 @@ class WelcomeState extends State<Welcome> {
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

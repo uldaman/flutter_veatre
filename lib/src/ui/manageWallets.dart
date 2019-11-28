@@ -101,32 +101,33 @@ class ManageWalletsState extends State<ManageWallets> {
                 },
                 itemCount: walletEntities.length,
               )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(left: 10, right: 10),
-                    child: Text(
-                      'Add your first wallet',
-                      style: TextStyle(
-                        fontSize: 22,
+            : Center(
+                child: SizedBox(
+                  height: 200,
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        'Add your first wallet',
+                        style: TextStyle(
+                          fontSize: 22,
+                        ),
                       ),
-                    ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 20, left: 40, right: 40),
+                        child: Text(
+                          "Wallet is a universal identity on blockchain,create one to explore.",
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .display2
+                                .color,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 20, right: 20, top: 10),
-                    child: Text(
-                      'Wallet is a universal identity on blockchain,create one to explore.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color:
-                            Theme.of(context).primaryTextTheme.display2.color,
-                        fontSize: 16,
-                      ),
-                    ),
-                  )
-                ],
+                ),
               ),
       ),
     );

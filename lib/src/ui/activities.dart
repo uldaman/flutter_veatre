@@ -74,38 +74,42 @@ class ActivitiesState extends State<Activities> {
         ),
         centerTitle: true,
       ),
-      body: activities.length > 0
-          ? ListView.builder(
-              itemBuilder: buildActivity,
-              itemCount: activities.length,
-              physics: ClampingScrollPhysics(),
-            )
-          : Center(
-              child: SizedBox(
-                height: 200,
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      'No Activity',
-                      style: TextStyle(
-                        fontSize: 22,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 20, left: 40, right: 40),
-                      child: Text(
-                        "Transaction and Certificate that you've signed will appear here",
+      body: SafeArea(
+        child: activities.length > 0
+            ? ListView.builder(
+                itemBuilder: buildActivity,
+                itemCount: activities.length,
+                physics: ClampingScrollPhysics(),
+              )
+            : Center(
+                child: SizedBox(
+                  height: 200,
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        'No Activity',
                         style: TextStyle(
-                          color:
-                              Theme.of(context).primaryTextTheme.display2.color,
+                          fontSize: 22,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: EdgeInsets.only(top: 20, left: 40, right: 40),
+                        child: Text(
+                          "Transaction and Certificate that you've signed will appear here",
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .display2
+                                .color,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 

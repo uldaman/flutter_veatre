@@ -2,6 +2,7 @@ import 'dart:core';
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_keychain/flutter_keychain.dart';
 
 import 'package:veatre/src/models/dapp.dart';
@@ -64,7 +65,8 @@ class BlockHeadForNetwork {
 
 class Globals {
   static Uint8List _masterPasscodes = Uint8List.fromList([]);
-
+  static const EventChannel eventChannel =
+      const EventChannel('plugins.flutter.io/native_send');
   static final Block mainNetGenesis = Block.fromJSON({
     "number": 0,
     "id": "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a",

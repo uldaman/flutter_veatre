@@ -106,7 +106,7 @@ class SignCertificateState extends State<SignCertificate>
         ),
         child: Container(
           color: Theme.of(context).backgroundColor,
-          padding: EdgeInsets.only(top: 8, left: 26, right: 26),
+          padding: EdgeInsets.only(top: 8, left: 26, right: 26, bottom: 34),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -274,7 +274,7 @@ class SignCertificateState extends State<SignCertificate>
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
+                      padding: EdgeInsets.only(bottom: 20),
                       child: Text(
                         'Your signature is being requested. Please review the content before you signed. Always make sure you trust the sites you interact with.',
                         style: TextStyle(
@@ -286,9 +286,6 @@ class SignCertificateState extends State<SignCertificate>
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 40),
                       child: Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 20,
-                        ),
                         width: _animation.value,
                         child: SwipeButton(
                           swipeController: swipeController,

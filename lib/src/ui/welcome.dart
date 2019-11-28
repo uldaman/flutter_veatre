@@ -1,18 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/enterPassword.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
-class Welcome extends StatefulWidget {
-  @override
-  WelcomeState createState() {
-    return WelcomeState();
-  }
-}
-
-class WelcomeState extends State<Welcome> {
-  int _page = 0;
-
+class Welcome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,16 +77,6 @@ class WelcomeState extends State<Welcome> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _pageDot(BuildContext context, int page) {
-    return Icon(
-      MaterialCommunityIcons.checkbox_blank_circle,
-      size: 15,
-      color: _page == page
-          ? Theme.of(context).primaryTextTheme.title.color
-          : Theme.of(context).primaryTextTheme.display3.color,
     );
   }
 }

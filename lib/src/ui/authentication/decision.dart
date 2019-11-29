@@ -84,42 +84,43 @@ class _DecisionState extends State<Decision> {
 
   Color get primaryColor => Theme.of(context).primaryColor;
 
-  Widget _switchUnlockWidget(AuthenticationState state) =>
-      (state is! Unauthenticated)
-          ? Container()
-          : (state as Unauthenticated).authType == AuthType.password
-              ? Unlock(canCancel: widget.canCancel)
-              : Column(
-                  children: <Widget>[
-                    SizedBox(height: 222),
-                    FlatButton(
-                      child: Column(
-                        children: <Widget>[
-                          Icon(
-                            Icons.fingerprint,
-                            size: 65,
-                            color: primaryColor,
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            'Tap to unlock with biometric',
-                            style: TextStyle(color: primaryColor),
-                          )
-                        ],
-                      ),
-                      onPressed: _redirectToAuthenticate,
-                    ),
-                    Spacer(),
-                    FlatButton(
-                      child: Text(
-                        'Unlock with master passcodes',
-                        style: TextStyle(color: primaryColor),
-                      ),
-                      onPressed: () =>
-                          _bloc.emit(Initialize(usePassword: true)),
-                    ),
-                  ],
-                );
+  Widget _switchUnlockWidget(AuthenticationState state) {
+    if (state is Uninitialized) return Container();
+
+    if (state is Unauthenticated && state.authType == AuthType.password)
+      return Unlock(canCancel: widget.canCancel);
+
+    return Column(
+      children: <Widget>[
+        SizedBox(height: 222),
+        FlatButton(
+          child: Column(
+            children: <Widget>[
+              Icon(
+                Icons.fingerprint,
+                size: 65,
+                color: primaryColor,
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Tap to unlock with biometric',
+                style: TextStyle(color: primaryColor),
+              )
+            ],
+          ),
+          onPressed: _redirectToAuthenticate,
+        ),
+        Spacer(),
+        FlatButton(
+          child: Text(
+            'Unlock with master passcodes',
+            style: TextStyle(color: primaryColor),
+          ),
+          onPressed: () => _bloc.emit(Initialize(usePassword: true)),
+        ),
+      ],
+    );
+  }
 
   void _redirectToAuthenticate() =>
       WidgetsBinding.instance.addPostFrameCallback(

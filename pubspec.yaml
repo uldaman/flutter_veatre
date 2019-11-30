@@ -20,7 +20,8 @@ dependencies:
   flutter:
     sdk: flutter
   sqflite: ^1.1.6+3
-  flutter_bloc_cracker: ^0.0.7
+  bloc_pattern: ^2.5.1
+  rxdart: ^0.22.6
   local_auth: ^0.6.0+1
   flutter_keychain: ^1.0.0
   system_setting: ^0.1.3

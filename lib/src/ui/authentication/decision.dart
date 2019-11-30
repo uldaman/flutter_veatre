@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:veatre/src/ui/authentication/bloc/bloc.dart';
-import 'package:veatre/src/ui/authentication/bloc/event.dart';
 import 'package:veatre/src/ui/authentication/bloc/state.dart';
 import 'package:veatre/src/ui/authentication/unlock.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
@@ -21,7 +20,7 @@ class _DecisionState extends State<Decision> {
   @override
   void initState() {
     _subscribeBloc();
-    _bloc.emit(Initialize());
+    _bloc.initialize(usePassword: false);
     super.initState();
   }
 
@@ -116,7 +115,7 @@ class _DecisionState extends State<Decision> {
             'Unlock with master passcodes',
             style: TextStyle(color: primaryColor),
           ),
-          onPressed: () => _bloc.emit(Initialize(usePassword: true)),
+          onPressed: () => _bloc.initialize(usePassword: true),
         ),
       ],
     );
@@ -126,7 +125,7 @@ class _DecisionState extends State<Decision> {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => Future.delayed(
           Duration(milliseconds: 200),
-          () => _bloc.emit(Authenticate()),
+          () => _bloc.authenticate(),
         ),
       );
 

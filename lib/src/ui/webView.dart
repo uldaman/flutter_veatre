@@ -41,14 +41,12 @@ import 'package:veatre/src/ui/apps.dart';
 class WebView extends StatefulWidget {
   final int id;
   final Network network;
-  final Appearance appearance;
   final String initialURL;
   final bool offstage;
   final String tabKey;
   WebView({
     @required this.id,
     @required this.network,
-    @required this.appearance,
     @required this.initialURL,
     @required this.offstage,
     @required this.tabKey,
@@ -61,16 +59,14 @@ class WebView extends StatefulWidget {
 class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   String key;
   int id;
-  bool isKeyboardVisible = false;
+  int _bookmarkID;
+  bool _isKeyboardVisible = false;
   bool _canBack = false;
   bool _canForward = false;
-  bool isStartSearch = false;
-  double progress = 0;
-  bool canBookmarked = false;
+  bool _isOnFocus = false;
+  double _progress = 0;
   bool _offstage;
   String _currentURL;
-  Appearance _appearance;
-  int bookmarkID;
 
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
@@ -95,7 +91,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     key = widget.tabKey;
     _offstage = widget.offstage;
     _currentURL = widget.initialURL;
-    _appearance = widget.appearance;
     Globals.addBlockHeadHandler(_handleHeadChanged);
     Globals.addTabHandler(_handleTabChanged);
     Globals.addBookmarkHandler(_handleBookmark);
@@ -103,7 +98,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
-          this.isKeyboardVisible = visible;
+          this._isKeyboardVisible = visible;
         });
       },
     );
@@ -121,7 +116,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           centerTitle: true,
           automaticallyImplyLeading: false,
           actions: <Widget>[
-            isStartSearch
+            _isOnFocus
                 ? FlatButton(
                     child: Text(
                       'Cancel',
@@ -133,7 +128,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                     onPressed: () async {
                       updateSearchBar(_currentURL, 1, true);
                       setState(() {
-                        isStartSearch = false;
+                        _isOnFocus = false;
                       });
                     },
                   )
@@ -143,7 +138,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                         padding: EdgeInsets.only(left: 5),
                         child: IconButton(
                           icon: Icon(
-                            bookmarkID == null
+                            _bookmarkID == null
                                 ? MaterialCommunityIcons.bookmark_plus_outline
                                 : MaterialCommunityIcons.bookmark_plus,
                             size: 20,
@@ -151,9 +146,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                           disabledColor: Color(0xFFCCCCCC),
                           color: Theme.of(context).primaryIconTheme.color,
                           onPressed: _currentURL == Globals.initialURL ||
-                                  progress != 1
+                                  _progress != 1
                               ? null
-                              : bookmarkID == null
+                              : _bookmarkID == null
                                   ? () async {
                                       final meta = await metaData;
                                       if (meta != null) {
@@ -168,10 +163,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                                       }
                                     }
                                   : () async {
-                                      await BookmarkStorage.delete(bookmarkID);
+                                      await BookmarkStorage.delete(_bookmarkID);
                                       Globals.updateBookmark(Bookmark(
-                                          id: bookmarkID,
-                                          network: widget.network));
+                                        id: _bookmarkID,
+                                        network: widget.network,
+                                      ));
                                       await updateBookmarkID(_currentURL);
                                     },
                         ),
@@ -201,11 +197,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         body: SafeArea(
           child: Column(
             children: <Widget>[
-              !isStartSearch && progress < 1 && progress > 0
+              !_isOnFocus && _progress < 1 && _progress > 0
                   ? SizedBox(
                       height: 1,
                       child: LinearProgressIndicator(
-                        value: progress,
+                        value: _progress,
                         valueColor: AlwaysStoppedAnimation(
                             Theme.of(context).primaryColor),
                         backgroundColor: Theme.of(context).dividerColor,
@@ -221,13 +217,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                       Offstage(
                         child: appView,
                         offstage: !(_currentURL == Globals.initialURL ||
-                            isStartSearch == true),
+                            _isOnFocus == true),
                       ),
                     ],
                   ),
                 ),
               ),
-              isKeyboardVisible
+              _isKeyboardVisible
                   ? SizedBox()
                   : SizedBox(
                       height: 59,
@@ -255,7 +251,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   Future<void> _handleLoad(String url) async {
     setState(() {
-      isStartSearch = false;
+      _isOnFocus = false;
     });
     if (controller != null) {
       await controller.loadUrl(resolveURL(url));
@@ -265,9 +261,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Widget get searchBar => SearchBar(
         context,
         searchBarController: searchBarController,
-        onStartSearch: () async {
+        onFocus: () async {
           setState(() {
-            isStartSearch = true;
+            _isOnFocus = true;
           });
         },
         onSubmitted: (text) async {
@@ -303,35 +299,35 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         onURLChanged: (url) async {
           _currentURL = url;
           if (_currentURL != Globals.initialURL) {
-            updateSearchBar(url, progress, !isStartSearch);
+            updateSearchBar(url, _progress, !_isOnFocus);
           }
         },
         onWebViewCreated: (FlutterWebView.WebViewController controller) async {
           this.controller = controller;
-          updateSearchBar(_currentURL, progress, !isStartSearch);
+          updateSearchBar(_currentURL, _progress, !_isOnFocus);
         },
         onPageStarted: (String url) async {
           setState(() {
             _currentURL = url;
           });
           if (controller != null) {
-            updateSearchBar(url, 0, !isStartSearch);
+            updateSearchBar(url, 0, !_isOnFocus);
           }
         },
         onPageFinished: (String url) async {
           if (controller != null) {
             await updateBookmarkID(url);
           }
-          updateSearchBar(url, 1, !isStartSearch);
+          updateSearchBar(url, 1, !_isOnFocus);
           setState(() {
             _currentURL = url;
-            progress = 1;
+            _progress = 1;
           });
         },
         onProgressChanged: (double progress) {
-          updateSearchBar(_currentURL, progress, !isStartSearch);
+          updateSearchBar(_currentURL, progress, !_isOnFocus);
           setState(() {
-            this.progress = progress;
+            this._progress = progress;
           });
         },
         onCanGoBack: (bool canGoBack) {
@@ -408,7 +404,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         shouldCancelInput: shouldCancelInput,
         defautText: domain == "" ? "Search" : domain,
         submitedText: url,
-        rightView: !uri.scheme.startsWith("http") || isStartSearch
+        rightView: !uri.scheme.startsWith("http") || _isOnFocus
             ? null
             : progress == 1
                 ? IconButton(
@@ -418,7 +414,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                     ),
                     onPressed: () async {
                       setState(() {
-                        isStartSearch = false;
+                        _isOnFocus = false;
                       });
                       await controller.reload();
                     })
@@ -429,7 +425,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                     ),
                     onPressed: () async {
                       setState(() {
-                        isStartSearch = false;
+                        _isOnFocus = false;
                       });
                       await controller.stopLoading();
                     }),
@@ -636,7 +632,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 currentTabKey: key,
                 url: _currentURL,
                 ratio: size.width / size.height,
-                appearance: _appearance,
               ),
               fullscreenDialog: true,
             ),
@@ -754,7 +749,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   Future<Uint8List> takeScreenshot() async {
-    if (isStartSearch || _currentURL == Globals.initialURL) {
+    if (_isOnFocus || _currentURL == Globals.initialURL) {
       try {
         RenderRepaintBoundary boundary =
             captureKey.currentContext.findRenderObject();
@@ -866,11 +861,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     );
     if (bookmark != null) {
       setState(() {
-        bookmarkID = bookmark.id;
+        _bookmarkID = bookmark.id;
       });
     } else {
       setState(() {
-        bookmarkID = null;
+        _bookmarkID = null;
       });
     }
   }

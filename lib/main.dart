@@ -29,6 +29,8 @@ void main() {
 Future<void> init() async {
   await Storage.open();
   Globals.connexJS = await rootBundle.loadString("assets/connex.js");
+  Globals.updateAppearance(await Config.appearance);
+  Globals.updateNetwork(await Config.network);
   Globals.setHead(
     BlockHeadForNetwork(
       head: BlockHead.fromJSON(Globals.mainNetGenesis.encoded),
@@ -41,8 +43,6 @@ Future<void> init() async {
       network: Network.TestNet,
     ),
   );
-  Globals.updateAppearance(await Config.appearance);
-  Globals.updateNetwork(await Config.network);
 }
 
 class App extends StatefulWidget {

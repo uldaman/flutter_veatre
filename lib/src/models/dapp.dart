@@ -13,8 +13,7 @@ class DApp {
     return DApp(
       name: parsedJSON['name'],
       url: parsedJSON['href'],
-      logo:
-          "https://raw.githubusercontent.com/vechain/app-hub/master/apps/${parsedJSON['id']}/logo.png",
+      logo: "https://vechain.github.io/app-hub/imgs/${parsedJSON['id']}.png",
     );
   }
 }

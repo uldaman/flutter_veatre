@@ -173,148 +173,6 @@ Widget cell(
   );
 }
 
-Widget buildPasscodes(
-  BuildContext context,
-  List<String> passcodes,
-  int maxLength, {
-  double paddingLeft = 30,
-  double paddingRight = 30,
-}) {
-  List<Widget> passcodeWidgets = [];
-  for (int i = 0; i < maxLength; i++) {
-    passcodeWidgets.add(_passcode(context, passcodes, i));
-  }
-  return Padding(
-    padding: EdgeInsets.only(
-      left: paddingLeft,
-      right: paddingRight,
-    ),
-    child: Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: passcodeWidgets,
-      ),
-    ),
-  );
-}
-
-Widget _passcode(BuildContext context, List<String> passcodes, index) {
-  return Container(
-    width: (MediaQuery.of(context).size.width - 5 * 10 - 40) / 6,
-    height: (MediaQuery.of(context).size.width - 5 * 10 - 40) / 6,
-    child: Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(6)),
-        side: BorderSide(
-          color: Theme.of(context).primaryTextTheme.display3.color,
-          width: 1,
-        ),
-      ),
-      child: index < passcodes.length
-          ? Align(
-              alignment: Alignment.center,
-              child: Icon(
-                MaterialCommunityIcons.checkbox_blank_circle,
-                size: 17,
-                color: Theme.of(context).primaryTextTheme.title.color,
-              ),
-            )
-          : SizedBox(),
-    ),
-  );
-}
-
-Widget passcodeKeyboard(
-  BuildContext context, {
-  Future<void> Function(String code) onCodeSelected,
-  Future<void> Function() onDelete,
-}) {
-  return Container(
-    height: 280,
-    child: GridView.builder(
-      padding: EdgeInsets.all(10),
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 0,
-        mainAxisSpacing: 0,
-        childAspectRatio: 2,
-      ),
-      itemCount: 12,
-      itemBuilder: (context, index) {
-        if (index < 9) {
-          return codeButton(context, '${index + 1}', onCodeSelected);
-        } else if (index == 9) {
-          return SizedBox(
-            height: 56,
-          );
-        } else if (index == 10) {
-          return codeButton(context, "0", onCodeSelected);
-        }
-        return SizedBox(
-          height: 56,
-          child: IconButton(
-            color: Colors.green,
-            icon: Icon(
-              Icons.backspace,
-              size: 30,
-              color: Colors.grey[500],
-            ),
-            onPressed: onDelete,
-          ),
-        );
-      },
-    ),
-  );
-}
-
-Widget codeButton(
-  BuildContext context,
-  String code,
-  Future<void> Function(String code) onCodeSelected,
-) {
-  return SizedBox(
-    width: (MediaQuery.of(context).size.width - 40) / 3,
-    height: 56,
-    child: CodeButton(
-      code: code,
-      onCodeSelected: onCodeSelected,
-    ),
-  );
-}
-
-typedef onCodeSelectedCallback = Future<void> Function(String code);
-
-class CodeButton extends StatelessWidget {
-  final String code;
-  final onCodeSelectedCallback onCodeSelected;
-
-  CodeButton({@required this.code, @required this.onCodeSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Center(
-        child: FlatButton(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          child: Text(
-            code,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.title.color,
-              fontSize: 22,
-            ),
-          ),
-          onPressed: () async {
-            await onCodeSelected(code);
-          },
-        ),
-      ),
-    );
-  }
-}
-
 class ProgressHUD extends StatelessWidget {
   final bool isLoading;
   final Widget child;
@@ -498,4 +356,161 @@ TextField walletNameTextField({
       errorText: errorText,
     ),
   );
+}
+
+class PassClearController extends ValueNotifier<bool> {
+  PassClearController({bool shouldClear = true}) : super(shouldClear);
+
+  void clear() {
+    this.value = !this.value;
+  }
+}
+
+class Passcodes extends StatefulWidget {
+  final int maxLength;
+  final ValueChanged<String> onChanged;
+  final double paddingLeft;
+  final double paddingRight;
+  final PassClearController controller;
+
+  Passcodes({
+    Key key,
+    @required this.onChanged,
+    this.maxLength,
+    this.paddingLeft,
+    this.paddingRight,
+    this.controller,
+  }) : super(key: key);
+
+  @override
+  _PasscodesState createState() => _PasscodesState();
+}
+
+class _PasscodesState extends State<Passcodes> {
+  int _maxLength;
+  double _paddingLeft;
+  double _paddingRight;
+  FocusNode _focusNode = FocusNode(canRequestFocus: true);
+  TextEditingController _controller = TextEditingController();
+  List<String> _passcodes = [];
+
+  @override
+  void initState() {
+    _maxLength = widget.maxLength ?? 6;
+    _paddingLeft = widget.paddingLeft ?? 30;
+    _paddingRight = widget.paddingRight ?? 30;
+    if (widget.controller != null) {
+      widget.controller.addListener(_handlePassClear);
+    }
+    super.initState();
+  }
+
+  _handlePassClear() {
+    if (widget.controller != null) {
+      setState(() {
+        _controller.clear();
+        _passcodes = [];
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller != null) {
+      widget.controller.removeListener(_handlePassClear);
+    }
+    _focusNode.unfocus();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        buildPasscodes(
+          context,
+          _passcodes,
+        ),
+        SizedBox(
+          height:
+              (MediaQuery.of(context).size.width - 5 * 10 - 40) / _maxLength,
+          width: (MediaQuery.of(context).size.width -
+              _paddingLeft -
+              _paddingRight),
+          child: EditableText(
+            cursorWidth: 0,
+            cursorColor: Colors.transparent,
+            backgroundCursorColor: Colors.transparent,
+            focusNode: _focusNode,
+            autofocus: true,
+            controller: _controller,
+            style: TextStyle(color: Colors.transparent),
+            keyboardType: TextInputType.number,
+            maxLines: 1,
+            obscureText: true,
+            onChanged: (text) {
+              if (text.length > _maxLength) {
+                _controller.text = text.substring(0, _maxLength);
+              }
+              setState(() {
+                _passcodes = _controller.text.split('');
+              });
+              widget.onChanged(_controller.text);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildPasscodes(
+    BuildContext context,
+    List<String> passcodes, {
+    double paddingLeft = 30,
+    double paddingRight = 30,
+  }) {
+    List<Widget> passcodeWidgets = [];
+    for (int i = 0; i < _maxLength; i++) {
+      passcodeWidgets.add(_passcode(context, passcodes, i));
+    }
+    return Padding(
+      padding: EdgeInsets.only(
+        left: paddingLeft,
+        right: paddingRight,
+      ),
+      child: Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: passcodeWidgets,
+        ),
+      ),
+    );
+  }
+
+  Widget _passcode(BuildContext context, List<String> passcodes, index) {
+    return Container(
+      width: (MediaQuery.of(context).size.width - 5 * 10 - 40) / _maxLength,
+      height: (MediaQuery.of(context).size.width - 5 * 10 - 40) / _maxLength,
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(6)),
+          side: BorderSide(
+            color: Theme.of(context).primaryTextTheme.display3.color,
+            width: 1,
+          ),
+        ),
+        child: index < passcodes.length
+            ? Align(
+                alignment: Alignment.center,
+                child: Icon(
+                  MaterialCommunityIcons.checkbox_blank_circle,
+                  size: 17,
+                  color: Theme.of(context).primaryTextTheme.title.color,
+                ),
+              )
+            : SizedBox(),
+      ),
+    );
+  }
 }

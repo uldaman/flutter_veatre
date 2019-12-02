@@ -14,9 +14,8 @@ class Unlock extends StatefulWidget {
 }
 
 class UnlockState extends State<Unlock> {
-  List<String> passcodes = [];
   String errorMsg = 'Please enter the master code';
-
+  PassClearController passClearController = PassClearController();
   @override
   void initState() {
     Globals.clearMasterPasscodes();
@@ -46,7 +45,34 @@ class UnlockState extends State<Unlock> {
                   ),
                 ),
               ),
-              buildPasscodes(context, passcodes, 6),
+              Passcodes(
+                controller: passClearController,
+                onChanged: (password) async {
+                  setState(() => errorMsg = '');
+                  if (password.length == 6) {
+                    String masterPassHash = await Config.masterPassHash;
+                    if (masterPassHash !=
+                        bytesToHex(sha512(bytesToHex(sha256(password))))) {
+                      Globals.clearMasterPasscodes();
+                      setState(() => errorMsg = 'Passcode mismatch');
+                    } else {
+                      await Globals.updateMasterPasscodes(password);
+                      final navigator = Navigator.of(context);
+                      navigator.canPop()
+                          ? navigator.pop(true)
+                          : navigator.pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                fullscreenDialog: true,
+                                builder: (_) => MainUI(),
+                                settings: RouteSettings(name: MainUI.routeName),
+                              ),
+                              (route) => route == null,
+                            );
+                    }
+                    passClearController.clear();
+                  }
+                },
+              ),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
@@ -73,45 +99,7 @@ class UnlockState extends State<Unlock> {
                 onPressed: () => Navigator.of(context).maybePop(false),
               )
             : Container(),
-        passcodeKeyboard(
-          context,
-          onCodeSelected: selectCode,
-          onDelete: () async {
-            if (passcodes.length > 0) setState(() => passcodes.removeLast());
-            if (passcodes.length < 6) setState(() => errorMsg = '');
-          },
-        ),
       ],
     );
-  }
-
-  Future<void> selectCode(String code) async {
-    if (passcodes.length < 6) {
-      passcodes.add(code);
-      setState(() => errorMsg = '');
-      if (passcodes.length == 6) {
-        String masterPassHash = await Config.masterPassHash;
-        String password = passcodes.join("");
-        if (masterPassHash !=
-            bytesToHex(sha512(bytesToHex(sha256(password))))) {
-          Globals.clearMasterPasscodes();
-          setState(() => errorMsg = 'Passcode mismatch');
-        } else {
-          await Globals.updateMasterPasscodes(password);
-          final navigator = Navigator.of(context);
-          navigator.canPop()
-              ? navigator.pop(true)
-              : navigator.pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (_) => MainUI(),
-                    settings: RouteSettings(name: MainUI.routeName),
-                  ),
-                  (route) => route == null,
-                );
-        }
-        passcodes.clear();
-      }
-    }
   }
 }

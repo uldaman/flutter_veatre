@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/reEnterPassword.dart';
@@ -15,9 +16,8 @@ class EnterPassword extends StatefulWidget {
 }
 
 class EnterPasswordState extends State<EnterPassword> {
-  List<String> passcodes = [];
   bool canback;
-
+  PassClearController controller = PassClearController();
   @override
   void initState() {
     this.canback = widget.canBack ?? false;
@@ -27,6 +27,7 @@ class EnterPasswordState extends State<EnterPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // resizeToAvoidBottomPadding: false,
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -109,10 +110,24 @@ class EnterPasswordState extends State<EnterPassword> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  buildPasscodes(
-                    context,
-                    passcodes,
-                    6,
+                  Passcodes(
+                    controller: controller,
+                    onChanged: (password) async {
+                      if (password.length == 6) {
+                        String passwordHash =
+                            bytesToHex(sha512(bytesToHex(sha256(password))));
+                        await Navigator.push(
+                          context,
+                          new MaterialPageRoute(
+                            builder: (context) => new ReEnterPassword(
+                              passwordHash: passwordHash,
+                              fromRoute: widget.fromRoute,
+                            ),
+                          ),
+                        );
+                        controller.clear();
+                      }
+                    },
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
@@ -134,44 +149,9 @@ class EnterPasswordState extends State<EnterPassword> {
                 ],
               ),
             ),
-            passcodeKeyboard(
-              context,
-              onCodeSelected: selectCode,
-              onDelete: () async {
-                if (passcodes.length > 0) {
-                  setState(() {
-                    passcodes.removeLast();
-                  });
-                }
-              },
-            ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> selectCode(String code) async {
-    if (passcodes.length < 6) {
-      setState(() {
-        passcodes.add(code);
-      });
-      if (passcodes.length == 6) {
-        String password = passcodes.join("");
-        String passwordHash = bytesToHex(sha512(bytesToHex(sha256(password))));
-        await Navigator.push(
-          context,
-          new MaterialPageRoute(
-            builder: (context) => new ReEnterPassword(
-              passwordHash: passwordHash,
-              fromRoute: widget.fromRoute,
-            ),
-          ),
-        );
-        setState(() {
-          passcodes.clear();
-        });
-      }
-    }
   }
 }

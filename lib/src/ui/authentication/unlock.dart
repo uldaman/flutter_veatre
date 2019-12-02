@@ -14,7 +14,7 @@ class Unlock extends StatefulWidget {
 }
 
 class UnlockState extends State<Unlock> {
-  String errorMsg = 'Please enter the master code';
+  String errorMsg = '';
   PassClearController passClearController = PassClearController();
   @override
   void initState() {

@@ -65,7 +65,6 @@ class WebViews {
         offstage: false,
         network: network,
         initialURL: Globals.initialURL,
-        appearance: Globals.appearance,
         tabKey: randomHex(32),
       );
       webViews.add(webView);

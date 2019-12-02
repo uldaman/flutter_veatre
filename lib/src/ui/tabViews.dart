@@ -3,19 +3,16 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
-import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/webViews.dart';
 
 class TabViews extends StatefulWidget {
   final int id;
-  final Appearance appearance;
   final double ratio;
   final String url;
   final String currentTabKey;
 
   TabViews({
     this.id,
-    this.appearance,
     this.ratio,
     this.url,
     this.currentTabKey,

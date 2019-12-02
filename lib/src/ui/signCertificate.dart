@@ -26,12 +26,12 @@ class SignCertificate extends StatefulWidget {
 
 class SignCertificateState extends State<SignCertificate>
     with SingleTickerProviderStateMixin {
-  Account account;
-  WalletEntity walletEntity;
+  Account _account;
+  WalletEntity _walletEntity;
 
   Animation _animation;
   AnimationController _controller;
-  SwipeController swipeController = SwipeController();
+  SwipeController _swipeController = SwipeController();
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class SignCertificateState extends State<SignCertificate>
     final walletEntity =
         await WalletStorage.getWalletEntity(widget.options.signer);
     setState(() {
-      this.walletEntity = walletEntity;
+      this._walletEntity = walletEntity;
     });
     await updateAccount(walletEntity.address);
     Globals.addBlockHeadHandler(_handleHeadChanged);
@@ -57,10 +57,10 @@ class SignCertificateState extends State<SignCertificate>
 
   Future<void> updateAccount(String address) async {
     try {
-      Account account = await AccountAPI.get(walletEntity.address);
+      Account account = await AccountAPI.get(_walletEntity.address);
       if (mounted) {
         setState(() {
-          this.account = account;
+          this._account = account;
         });
       }
     } catch (e) {
@@ -70,7 +70,7 @@ class SignCertificateState extends State<SignCertificate>
 
   void _handleHeadChanged() async {
     if (Globals.blockHeadForNetwork.network == Globals.network) {
-      await updateAccount(walletEntity.address);
+      await updateAccount(_walletEntity.address);
     }
   }
 
@@ -89,7 +89,7 @@ class SignCertificateState extends State<SignCertificate>
     );
     if (walletEntity != null) {
       setState(() {
-        this.walletEntity = walletEntity;
+        this._walletEntity = walletEntity;
       });
       await updateAccount(walletEntity.address);
     }
@@ -165,7 +165,7 @@ class SignCertificateState extends State<SignCertificate>
                     Row(
                       children: <Widget>[
                         Picasso(
-                          '0x${walletEntity?.address ?? ""}',
+                          '0x${_walletEntity?.address ?? ""}',
                           size: 20,
                           borderRadius: 3,
                         ),
@@ -173,14 +173,14 @@ class SignCertificateState extends State<SignCertificate>
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 4),
                             child: Text(
-                              walletEntity?.name ?? "",
+                              _walletEntity?.name ?? "",
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
                         Text(
                           '(0x' +
-                              abbreviate('${walletEntity?.address ?? ""}') +
+                              abbreviate('${_walletEntity?.address ?? ""}') +
                               ')',
                           style: TextStyle(
                             color: Theme.of(context)
@@ -198,10 +198,10 @@ class SignCertificateState extends State<SignCertificate>
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           Text(
-                            account?.formatBalance ?? '--',
+                            _account?.formatBalance ?? '--',
                           ),
                           Padding(
-                            padding: EdgeInsets.only(left: 5, right: 6, top: 2),
+                            padding: EdgeInsets.only(left: 5, right: 8, top: 2),
                             child: Text(
                               'VET',
                               style: TextStyle(
@@ -220,7 +220,7 @@ class SignCertificateState extends State<SignCertificate>
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         Text(
-                          account?.formatEnergy ?? '--',
+                          _account?.formatEnergy ?? '--',
                         ),
                         Padding(
                           padding: EdgeInsets.only(left: 5, top: 2),
@@ -288,7 +288,7 @@ class SignCertificateState extends State<SignCertificate>
                       child: Container(
                         width: _animation.value,
                         child: SwipeButton(
-                          swipeController: swipeController,
+                          swipeController: _swipeController,
                           content: Center(
                             child: Text(
                               'Slide to sign',
@@ -315,7 +315,7 @@ class SignCertificateState extends State<SignCertificate>
   }
 
   Future<void> signCert() async {
-    swipeController.valueWith(
+    _swipeController.valueWith(
       enabled: false,
       shouldLoading: true,
       rollBack: true,
@@ -323,7 +323,7 @@ class SignCertificateState extends State<SignCertificate>
     await _controller.forward();
     try {
       Uint8List privateKey =
-          await walletEntity.decryptPrivateKey(Globals.masterPasscodes);
+          await _walletEntity.decryptPrivateKey(Globals.masterPasscodes);
       final head = Globals.head();
       int timestamp = head.timestamp;
       final uri = Uri.parse(widget.options.link);
@@ -331,7 +331,7 @@ class SignCertificateState extends State<SignCertificate>
         certMessage: widget.certMessage,
         timestamp: timestamp,
         domain: uri?.host ?? '',
-        signer: '0x' + walletEntity.address,
+        signer: '0x' + _walletEntity.address,
       );
       cert.sign(privateKey);
       await ActivityStorage.insert(
@@ -339,7 +339,7 @@ class SignCertificateState extends State<SignCertificate>
           block: head.number,
           content: json.encode(cert.unserialized),
           link: widget.options.link,
-          address: walletEntity.address,
+          address: _walletEntity.address,
           type: ActivityType.Certificate,
           comment: 'Certification',
           timestamp: timestamp,
@@ -347,15 +347,15 @@ class SignCertificateState extends State<SignCertificate>
           status: ActivityStatus.Finished,
         ),
       );
-      await WalletStorage.setMainWallet(walletEntity);
-      swipeController.valueWith(
+      await WalletStorage.setMainWallet(_walletEntity);
+      _swipeController.valueWith(
         enabled: true,
         shouldLoading: false,
         rollBack: false,
       );
       Navigator.of(context).pop(cert.response);
     } catch (err) {
-      swipeController.valueWith(
+      _swipeController.valueWith(
         enabled: true,
         shouldLoading: false,
         rollBack: true,

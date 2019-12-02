@@ -47,13 +47,13 @@ class SearchBar extends StatefulWidget {
 
   final SearchBarController searchBarController;
   final void Function(String value) onSubmitted;
-  final Future<void> Function() onStartSearch;
+  final Future<void> Function() onFocus;
 
   SearchBar(
     this.context, {
     this.searchBarController,
     this.onSubmitted,
-    this.onStartSearch,
+    this.onFocus,
   });
 
   @override
@@ -85,8 +85,8 @@ class SearchBarState extends State<SearchBar>
         text: text,
         selection: TextSelection(baseOffset: 0, extentOffset: text.length),
       );
-      if (widget.onStartSearch != null) {
-        await widget.onStartSearch();
+      if (widget.onFocus != null) {
+        await widget.onFocus();
       }
     }
   }

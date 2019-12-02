@@ -18,7 +18,6 @@ class MainUI extends StatefulWidget {
 class MainUIState extends State<MainUI>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   Network network = Globals.network;
-  Appearance appearance = Globals.appearance;
   int _timestamp = 0;
   bool _pageLocked = false;
   AppLifecycleState _state = AppLifecycleState.resumed;

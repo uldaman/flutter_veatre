@@ -352,8 +352,8 @@ class SettingsState extends State<Settings> {
   Future<void> _gotoBiometricSettings() async {
     await customAlert(
       context,
-      title: Text('生物识别'),
-      content: Text('去设置生物识别权限'),
+      title: Text('Biometric'),
+      content: Text('You need to open biometric in the system settings'),
       confirmAction: () async {
         SystemSetting.goto(SettingTarget.LOCATION);
         Navigator.of(context).pop();

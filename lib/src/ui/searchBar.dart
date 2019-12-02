@@ -43,14 +43,11 @@ class SearchBarController extends ValueNotifier<SearchBarValue> {
 }
 
 class SearchBar extends StatefulWidget {
-  final BuildContext context;
-
   final SearchBarController searchBarController;
   final void Function(String value) onSubmitted;
   final Future<void> Function() onFocus;
 
-  SearchBar(
-    this.context, {
+  SearchBar({
     this.searchBarController,
     this.onSubmitted,
     this.onFocus,

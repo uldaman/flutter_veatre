@@ -17,7 +17,7 @@ class ReEnterPassword extends StatefulWidget {
 }
 
 class ReEnterPasswordState extends State<ReEnterPassword> {
-  List<String> passcodes = [];
+  PassClearController passClearController = PassClearController();
   String errorMsg = '';
 
   @override
@@ -79,10 +79,47 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  buildPasscodes(
-                    context,
-                    passcodes,
-                    6,
+                  Passcodes(
+                    controller: passClearController,
+                    onChanged: (password) async {
+                      setState(() {
+                        errorMsg = '';
+                      });
+                      if (password.length == 6) {
+                        String passwordHash =
+                            bytesToHex(sha512(bytesToHex(sha256(password))));
+                        if (passwordHash != widget.passwordHash) {
+                          setState(() {
+                            errorMsg = 'Passcode mismatch';
+                          });
+                          passClearController.clear();
+                        } else if (widget.fromRoute != null) {
+                          try {
+                            await Config.changePassword(
+                              Globals.masterPasscodes,
+                              password,
+                              passwordHash,
+                            );
+                            Navigator.of(context).popUntil(
+                                ModalRoute.withName(widget.fromRoute));
+                          } catch (e) {
+                            alert(context, Text('Change passcodes failed'),
+                                e.toString());
+                          }
+                        } else {
+                          await Config.setMasterPassHash(passwordHash);
+                          await Globals.updateMasterPasscodes(password);
+                          await Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              fullscreenDialog: true,
+                              builder: (_) => MainUI(),
+                              settings: RouteSettings(name: MainUI.routeName),
+                            ),
+                            (route) => route == null,
+                          );
+                        }
+                      }
+                    },
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
@@ -104,68 +141,9 @@ class ReEnterPasswordState extends State<ReEnterPassword> {
                 ],
               ),
             ),
-            passcodeKeyboard(
-              context,
-              onCodeSelected: selectCode,
-              onDelete: () async {
-                if (passcodes.length > 0) {
-                  setState(() {
-                    passcodes.removeLast();
-                  });
-                }
-                if (passcodes.length < 6) {
-                  setState(() {
-                    errorMsg = '';
-                  });
-                }
-              },
-            ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> selectCode(String code) async {
-    if (passcodes.length < 6) {
-      passcodes.add(code);
-      setState(() {
-        errorMsg = '';
-      });
-      if (passcodes.length == 6) {
-        String password = passcodes.join("");
-        String passwordHash = bytesToHex(sha512(bytesToHex(sha256(password))));
-        if (passwordHash != widget.passwordHash) {
-          Globals.clearMasterPasscodes();
-          passcodes.clear();
-          setState(() {
-            errorMsg = 'Passcode mismatch';
-          });
-        } else if (widget.fromRoute != null) {
-          try {
-            await Config.changePassword(
-              Globals.masterPasscodes,
-              password,
-              passwordHash,
-            );
-            Navigator.of(context)
-                .popUntil(ModalRoute.withName(widget.fromRoute));
-          } catch (e) {
-            alert(context, Text('Change passcodes failed'), e.toString());
-          }
-        } else {
-          await Config.setMasterPassHash(passwordHash);
-          await Globals.updateMasterPasscodes(password);
-          await Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (_) => MainUI(),
-              settings: RouteSettings(name: MainUI.routeName),
-            ),
-            (route) => route == null,
-          );
-        }
-      }
-    }
   }
 }

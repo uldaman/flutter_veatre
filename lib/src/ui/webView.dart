@@ -259,7 +259,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   Widget get searchBar => SearchBar(
-        context,
         searchBarController: searchBarController,
         onFocus: () async {
           setState(() {

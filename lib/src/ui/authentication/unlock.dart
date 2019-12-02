@@ -53,7 +53,6 @@ class UnlockState extends State<Unlock> {
                     String masterPassHash = await Config.masterPassHash;
                     if (masterPassHash !=
                         bytesToHex(sha512(bytesToHex(sha256(password))))) {
-                      Globals.clearMasterPasscodes();
                       setState(() => errorMsg = 'Passcode mismatch');
                     } else {
                       await Globals.updateMasterPasscodes(password);

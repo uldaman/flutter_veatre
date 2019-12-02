@@ -358,11 +358,9 @@ TextField walletNameTextField({
   );
 }
 
-class PassClearController extends ValueNotifier<bool> {
-  PassClearController({bool shouldClear = true}) : super(shouldClear);
-
+class PassClearController extends ChangeNotifier {
   void clear() {
-    this.value = !this.value;
+    notifyListeners();
   }
 }
 

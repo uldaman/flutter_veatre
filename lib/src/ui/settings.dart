@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:system_setting/system_setting.dart';
+import 'package:package_info/package_info.dart';
 
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/utils/common.dart';
@@ -20,6 +21,7 @@ class SettingsState extends State<Settings> {
   bool _bioEnabled = false;
   Network _network = Globals.network;
   Appearance _appearance = Globals.appearance;
+  PackageInfo _packageInfo;
   TextEditingController passwordController = TextEditingController();
   final LocalAuthentication localAuth = LocalAuthentication();
 
@@ -27,6 +29,11 @@ class SettingsState extends State<Settings> {
   void initState() {
     super.initState();
     updateBioEnabled();
+    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+      setState(() {
+        _packageInfo = packageInfo;
+      });
+    });
   }
 
   updateBioEnabled() async {
@@ -219,7 +226,7 @@ class SettingsState extends State<Settings> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Text(
-                            'App Ver 1.0.0',
+                            'App Ver ${_packageInfo?.version ?? ""} (${_packageInfo?.buildNumber ?? ""})',
                             style: TextStyle(
                               color: Theme.of(context)
                                   .primaryTextTheme

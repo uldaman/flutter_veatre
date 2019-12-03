@@ -339,6 +339,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         navigationDelegate: (FlutterWebView.NavigationRequest request) {
           if (request.url.startsWith('http') ||
+              request.url.startsWith('file') ||
               request.url == Globals.initialURL) {
             return FlutterWebView.NavigationDecision.navigate;
           }
@@ -346,7 +347,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onDelegateError: (String error) {
           controller.loadHTMLString('''
-            <html>
+            <html >
+              <head>
+                <meta charset="UTF-8">
+              </head>
               <body>
                   <p style="text-align:center;
                     position: absolute;
@@ -357,7 +361,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                   </p >
               </body>
             </html>
-          ''', _currentURL);
+          ''');
         },
       );
 
@@ -915,12 +919,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         setState(() {
           _offstage = true;
         });
-        await controller.loadHTMLString("", null);
+        await controller.loadHTMLString("");
       } else {
         if (tabValue.id == id) {
           if (tabValue.stage == TabStage.Removed ||
               tabValue.stage == TabStage.Coverred) {
-            await controller.loadHTMLString("", null);
+            await controller.loadHTMLString("");
           } else if (tabValue.stage == TabStage.SelectedInAlive) {
             await controller.loadUrl(tabValue.url);
           }

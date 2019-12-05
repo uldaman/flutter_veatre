@@ -84,8 +84,6 @@ class TabViewsState extends State<TabViews> {
         ? gridViewPadding
         : gridViewPadding + itemWidth + itemHorizontalSpacing;
     popItemPosition = Offset(x, y);
-
-    print("_handleScroll $popItemPosition");
   }
 
   @override
@@ -301,8 +299,9 @@ class TabViewsState extends State<TabViews> {
         Navigator.of(context).pop();
       },
       duration: Duration(milliseconds: 300),
-      margin:
-          EdgeInsets.only(left: popItemPosition.dx, top: popItemPosition.dy),
+      margin: EdgeInsets.only(
+          left: popItemPosition.dx,
+          top: popItemPosition.dy + kToolbarHeight + dividerHeight),
       width: popItemSize.width,
       height: popItemSize.height,
       decoration: BoxDecoration(
@@ -310,7 +309,7 @@ class TabViewsState extends State<TabViews> {
       ),
       child: Column(
         children: <Widget>[
-          title(snapshot, shouldHide: true),
+          // title(snapshot, shouldHide: true),
           Expanded(
             child: image(snapshot),
           ),

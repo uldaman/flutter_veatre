@@ -184,7 +184,8 @@ class WebViews {
   }
 
   static void removeAll({Network network}) {
-    if ((network ?? Globals.network) == Network.MainNet) {
+    network = network ?? Globals.network;
+    if (network == Network.MainNet) {
       _mainNetSnapshots.clear();
     } else {
       _testNetSnapshots.clear();

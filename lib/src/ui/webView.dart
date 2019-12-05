@@ -617,12 +617,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           );
           final size = captureKey.currentContext.size;
           await Navigator.of(context).push(
-            MaterialPageRoute(
+            NoAnimationMaterialPageRoute(
               builder: (_) => TabViews(
                 id: id,
                 currentTabKey: key,
                 url: _currentURL,
-                ratio: size.width / size.height,
+                size: size,
               ),
               fullscreenDialog: true,
             ),

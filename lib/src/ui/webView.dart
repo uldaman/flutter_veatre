@@ -330,9 +330,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           });
         },
         onCanGoBack: (bool canGoBack) {
-          setState(
-            () => _canBack = canGoBack && _currentURL != Globals.initialURL,
-          );
+          setState(() => _canBack = canGoBack);
         },
         onCanGoForward: (bool canGoForward) {
           setState(() => _canForward = canGoForward);
@@ -593,12 +591,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         padding: EdgeInsets.only(bottom: 10),
         child: bottomItem(
           MaterialCommunityIcons.chevron_left,
-          onPressed: _canBack
-              ? () async {
-                  if (_canBack && controller != null) {
-                    return controller.goBack();
-                  }
-                }
+          onPressed: _canBack && _currentURL != Globals.initialURL
+              ? controller?.goBack
               : null,
         ),
       ),
@@ -606,13 +600,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         padding: EdgeInsets.only(bottom: 10),
         child: bottomItem(
           MaterialCommunityIcons.chevron_right,
-          onPressed: _canForward
-              ? () async {
-                  if (_canForward && controller != null) {
-                    return controller.goForward();
-                  }
-                }
-              : null,
+          onPressed: _canForward ? controller?.goForward : null,
         ),
       ),
       bottomItem(
@@ -919,12 +907,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         setState(() {
           _offstage = true;
         });
-        await controller.loadHTMLString("");
+        await controller.goHomePage();
       } else {
         if (tabValue.id == id) {
           if (tabValue.stage == TabStage.Removed ||
               tabValue.stage == TabStage.Coverred) {
-            await controller.loadHTMLString("");
+            await controller.goHomePage();
           } else if (tabValue.stage == TabStage.SelectedInAlive) {
             await controller.loadUrl(tabValue.url);
           }

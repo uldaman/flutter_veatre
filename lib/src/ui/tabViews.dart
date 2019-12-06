@@ -48,6 +48,7 @@ class TabViewsState extends State<TabViews> {
   double itemHorizontalSpacing = 10.0;
   double toolBarHeight = 59.0;
   double dividerHeight = 1.0;
+
   @override
   void initState() {
     super.initState();
@@ -76,10 +77,16 @@ class TabViewsState extends State<TabViews> {
     final offset = controller.offset;
     final fullHeight =
         (_currentIndex ~/ 2) * (itemHeight + itemVerticalSpacing);
-    double y = (fullHeight - offset) % contenHeight;
-    if (y == itemVerticalSpacing && _currentIndex != 0) {
-      y = contenHeight - 6;
+    double y;
+    if (fullHeight > offset) {
+      y = (fullHeight - offset) % contenHeight;
+      if (y == itemVerticalSpacing && _currentIndex != 0) {
+        y = contenHeight - 6;
+      }
+    } else {
+      y = itemVerticalSpacing;
     }
+
     final x = _currentIndex % 2 == 0
         ? gridViewPadding
         : gridViewPadding + itemWidth + itemHorizontalSpacing;
@@ -165,7 +172,7 @@ class TabViewsState extends State<TabViews> {
                             onPressed: () {
                               WebViews.removeAll();
                               setState(() {
-                                snapshots = WebViews.snapshots();
+                                snapshots = [];
                               });
                               WebViews.create();
                               Navigator.of(context).pop();
@@ -298,7 +305,7 @@ class TabViewsState extends State<TabViews> {
       onEnd: () {
         Navigator.of(context).pop();
       },
-      duration: Duration(milliseconds: 300),
+      duration: Duration(milliseconds: 200),
       margin: EdgeInsets.only(
           left: popItemPosition.dx,
           top: popItemPosition.dy + kToolbarHeight + dividerHeight),
@@ -307,14 +314,7 @@ class TabViewsState extends State<TabViews> {
       decoration: BoxDecoration(
         color: Theme.of(context).backgroundColor,
       ),
-      child: Column(
-        children: <Widget>[
-          // title(snapshot, shouldHide: true),
-          Expanded(
-            child: image(snapshot),
-          ),
-        ],
-      ),
+      child: image(snapshot),
     );
   }
 
@@ -389,19 +389,17 @@ class TabViewsState extends State<TabViews> {
                     snapshot.id,
                   );
                 }
-                if (index == 0) {
-                  selectedTab = snapshots.first.id;
-                  isSelectedTabAlive = snapshots.first.isAlive;
-                  url = snapshots.first.url;
-                  selectedTabKey = snapshots.first.key;
-                  _currentIndex = index;
-                } else if (selectedTab == snapshot.id) {
-                  selectedTab = snapshots[index - 1].id;
-                  isSelectedTabAlive = snapshots[index - 1].isAlive;
-                  url = snapshots[index - 1].url;
-                  selectedTabKey = snapshots[index - 1].key;
-                  _currentIndex = index - 1;
+                if (index > 0) {
+                  if (_currentIndex >= index) {
+                    _currentIndex--;
+                  }
+                } else if (_currentIndex != 0) {
+                  _currentIndex--;
                 }
+                selectedTab = snapshots[_currentIndex].id;
+                isSelectedTabAlive = snapshots[_currentIndex].isAlive;
+                url = snapshots[_currentIndex].url;
+                selectedTabKey = snapshots[_currentIndex].key;
                 if (snapshot.isAlive) {
                   Globals.updateTabValue(
                     TabControllerValue(
@@ -447,7 +445,7 @@ class TabViewsState extends State<TabViews> {
     setState(() {
       shouldPop = true;
     });
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(Duration(milliseconds: 60));
     setState(() {
       popItemSize = widget.size;
       popItemPosition = Offset(0, 0);

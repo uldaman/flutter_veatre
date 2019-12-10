@@ -35,7 +35,7 @@ class TabViewsState extends State<TabViews> {
   double itemHorizontalSpacing = 10.0;
   double toolBarHeight = 59.0;
   double dividerHeight = 1.0;
-  bool showTitle = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,11 +49,6 @@ class TabViewsState extends State<TabViews> {
         _currentIndex = i;
       }
     }
-    WidgetsBinding.instance.addPostFrameCallback((d) {
-      setState(() {
-        showTitle = true;
-      });
-    });
   }
 
   @override
@@ -167,63 +162,54 @@ class TabViewsState extends State<TabViews> {
     Snapshot snapshot, {
     Function close,
   }) {
-    return SizedBox(
-      height: 40,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: 10, right: 10),
-              child: FutureBuilder(
-                future: snapshot.title,
-                builder: (context, shot) => Text(
-                  !shot.hasData ? '' : shot.data == "" ? "New Tab" : shot.data,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Theme.of(context).primaryTextTheme.title.color,
-                    fontWeight: FontWeight.normal,
-                    decoration: TextDecoration.none,
-                  ),
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(left: 10, right: 10),
+            child: FutureBuilder(
+              future: snapshot.title,
+              builder: (context, shot) => Text(
+                !shot.hasData ? '' : shot.data == "" ? "New Tab" : shot.data,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).primaryTextTheme.title.color,
+                  fontWeight: FontWeight.normal,
+                  decoration: TextDecoration.none,
                 ),
               ),
             ),
           ),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: EdgeInsets.only(right: 10),
-              child: Icon(
-                Icons.close,
-                size: 17,
-              ),
+        ),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: EdgeInsets.only(right: 10),
+            child: Icon(
+              Icons.close,
+              size: 17,
             ),
-            onTapUp: (d) => close(),
           ),
-        ],
-      ),
+          onTapUp: (d) => close(),
+        ),
+      ],
     );
   }
 
   Widget image(Snapshot snapshot, {BorderRadius borderRadius}) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: FutureBuilder<Uint8List>(
-        future: snapshot.data,
-        builder: (context, snapshot) => snapshot.hasData
-            ? Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      alignment: Alignment.topCenter,
-                      fit: BoxFit.fitWidth,
-                      image: MemoryImage(snapshot.data)),
-                ),
-              )
-            : Container(
-                color: Theme.of(context).backgroundColor,
-              ),
+    return FutureBuilder<Uint8List>(
+      future: snapshot.data,
+      builder: (context, s) => ClipRRect(
+        borderRadius: borderRadius,
+        child: Image(
+          alignment: Alignment.topCenter,
+          fit: BoxFit.fitWidth,
+          image:
+              s.hasData ? MemoryImage(s.data) : AssetImage("assets/blank.png"),
+        ),
       ),
     );
   }
@@ -256,61 +242,62 @@ class TabViewsState extends State<TabViews> {
     return Container(
       decoration: decoration(snapshot),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          showTitle || index != _currentIndex
-              ? title(
-                  snapshot,
-                  close: () async {
-                    WebViews.removeSnapshot(snapshot.key);
-                    setState(() {
-                      snapshots = WebViews.snapshots();
-                    });
-                    if (snapshots.length == 0) {
-                      WebViews.removeWebview(snapshot.id);
-                      WebViews.create();
-                      Navigator.of(context).pop();
-                      return;
-                    }
-                    if (snapshot.isAlive) {
-                      WebViews.removeWebview(
-                        snapshot.id,
-                      );
-                    }
-                    if (index > 0) {
-                      if (_currentIndex >= index) {
-                        _currentIndex--;
-                      }
-                    } else if (_currentIndex != 0) {
-                      _currentIndex--;
-                    }
-                    selectedTab = snapshots[_currentIndex].id;
-                    isSelectedTabAlive = snapshots[_currentIndex].isAlive;
-                    url = snapshots[_currentIndex].url;
-                    selectedTabKey = snapshots[_currentIndex].key;
-                    if (snapshot.isAlive) {
-                      Globals.updateTabValue(
-                        TabControllerValue(
-                          id: snapshot.id,
-                          url: url,
-                          network: Globals.network,
-                          stage: TabStage.Removed,
-                          tabKey: selectedTabKey,
-                        ),
-                      );
-                    }
-                  },
-                )
-              : SizedBox(),
           Expanded(
+            child: title(
+              snapshot,
+              close: () async {
+                WebViews.removeSnapshot(snapshot.key);
+                setState(() {
+                  snapshots = WebViews.snapshots();
+                });
+                if (snapshots.length == 0) {
+                  WebViews.removeWebview(snapshot.id);
+                  WebViews.create();
+                  Navigator.of(context).pop();
+                  return;
+                }
+                if (snapshot.isAlive) {
+                  WebViews.removeWebview(
+                    snapshot.id,
+                  );
+                }
+                if (index > 0) {
+                  if (_currentIndex >= index) {
+                    _currentIndex--;
+                  }
+                } else if (_currentIndex != 0) {
+                  _currentIndex--;
+                }
+                selectedTab = snapshots[_currentIndex].id;
+                isSelectedTabAlive = snapshots[_currentIndex].isAlive;
+                url = snapshots[_currentIndex].url;
+                selectedTabKey = snapshots[_currentIndex].key;
+                if (snapshot.isAlive) {
+                  Globals.updateTabValue(
+                    TabControllerValue(
+                      id: snapshot.id,
+                      url: url,
+                      network: Globals.network,
+                      stage: TabStage.Removed,
+                      tabKey: selectedTabKey,
+                    ),
+                  );
+                }
+              },
+            ),
+            flex: 1,
+          ),
+          Expanded(
+            flex: 9,
             child: GestureDetector(
               child: image(
                 snapshot,
-                borderRadius: showTitle || _currentIndex != index
-                    ? BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                      )
-                    : BorderRadius.all(Radius.circular(10)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
               ),
               onTapUp: (tap) {
                 Globals.updateTabValue(

@@ -94,7 +94,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     Globals.addBlockHeadHandler(_handleHeadChanged);
     Globals.addTabHandler(_handleTabChanged);
     Globals.addBookmarkHandler(_handleBookmark);
-
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
@@ -107,12 +106,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
-    Snapshot _currentSnapshot = Snapshot();
-    for (Snapshot snapshot in WebViews.snapshots(network: widget.network)) {
-      if (snapshot.key == key) {
-        _currentSnapshot = snapshot;
-      }
-    }
     super.build(context);
     return Offstage(
       child: Scaffold(
@@ -229,7 +222,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                         offstage: !showSnapshot,
                         child: Hero(
                           tag: "snapshot$id${widget.network}",
-                          child: snapshotCard(_currentSnapshot),
+                          child: snapshotCard(
+                            WebViews.getSnapshot(
+                                  key,
+                                  network: widget.network,
+                                ) ??
+                                Snapshot(),
+                          ),
                         ),
                       )
                     ],
@@ -923,12 +922,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   void _handleTabChanged() async {
     final tabValue = Globals.tabValue;
+    key = tabValue.tabKey;
     if (tabValue.network == widget.network) {
       if (tabValue.stage == TabStage.Created ||
           tabValue.stage == TabStage.Removed) {
         setState(() {});
       }
-      key = tabValue.tabKey;
       if (tabValue.stage == TabStage.RemoveAll) {
         setState(() {
           _offstage = true;

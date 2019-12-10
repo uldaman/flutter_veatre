@@ -183,6 +183,15 @@ class WebViews {
     }
   }
 
+  static Snapshot getSnapshot(String key, {Network network}) {
+    network = network ?? Globals.network;
+    if (network == Network.MainNet) {
+      return _mainNetSnapshots[key];
+    } else {
+      return _testNetSnapshots[key];
+    }
+  }
+
   static void removeAll({Network network}) {
     network = network ?? Globals.network;
     if (network == Network.MainNet) {

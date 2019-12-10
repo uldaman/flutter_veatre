@@ -28,32 +28,17 @@ class TabViewsState extends State<TabViews> {
   bool isSelectedTabAlive = true;
   String url;
   String selectedTabKey;
-  ScrollController controller;
   int _currentIndex;
   double ratio;
-  bool didPush = false;
-  bool shouldPop = false;
-  Size pushItemSize;
-  Size popItemSize;
-  Offset pushItemPosition;
-  Offset popItemPosition;
-
-  double itemWidth;
-  double itemHeight;
-  double contenHeight;
-  double dx;
-  double dy;
   double gridViewPadding = 15.0;
   double itemVerticalSpacing = 10.0;
   double itemHorizontalSpacing = 10.0;
   double toolBarHeight = 59.0;
   double dividerHeight = 1.0;
-
+  bool showTitle = false;
   @override
   void initState() {
     super.initState();
-    pushItemSize = widget.size;
-    pushItemPosition = Offset(0, 0);
     ratio = widget.size.width / widget.size.height;
     selectedTab = widget.id;
     url = widget.url;
@@ -64,33 +49,11 @@ class TabViewsState extends State<TabViews> {
         _currentIndex = i;
       }
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((duration) async {
+    WidgetsBinding.instance.addPostFrameCallback((d) {
       setState(() {
-        pushItemSize = Size(itemWidth, itemHeight);
-        pushItemPosition = Offset(dx, dy);
+        showTitle = true;
       });
     });
-  }
-
-  _handleScroll() {
-    final offset = controller.offset;
-    final fullHeight =
-        (_currentIndex ~/ 2) * (itemHeight + itemVerticalSpacing);
-    double y;
-    if (fullHeight > offset) {
-      y = (fullHeight - offset) % contenHeight;
-      if (y == itemVerticalSpacing && _currentIndex != 0) {
-        y = contenHeight - 6;
-      }
-    } else {
-      y = itemVerticalSpacing;
-    }
-
-    final x = _currentIndex % 2 == 0
-        ? gridViewPadding
-        : gridViewPadding + itemWidth + itemHorizontalSpacing;
-    popItemPosition = Offset(x, y);
   }
 
   @override
@@ -99,124 +62,99 @@ class TabViewsState extends State<TabViews> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, cons) {
-            itemWidth = (widget.size.width -
+            double itemWidth = (MediaQuery.of(context).size.width -
                     2 * gridViewPadding -
                     itemHorizontalSpacing) /
                 2;
-            itemHeight = itemWidth / ratio;
+            double itemHeight = itemWidth / ratio;
             final fullHeight =
                 (_currentIndex ~/ 2 + 1) * (itemHeight + itemVerticalSpacing) -
                     itemVerticalSpacing;
-            contenHeight = cons.maxHeight -
-                2 * gridViewPadding -
+            double contenHeight = cons.maxHeight -
                 toolBarHeight -
-                dividerHeight;
+                dividerHeight -
+                2 * gridViewPadding;
             double offset = 0;
             if (fullHeight > contenHeight) {
               offset = fullHeight - contenHeight;
             }
-            if (dx == null) {
-              dx = _currentIndex % 2 == 0
-                  ? gridViewPadding
-                  : gridViewPadding + itemWidth + itemHorizontalSpacing;
-              dy = fullHeight > contenHeight
-                  ? contenHeight - itemHeight + gridViewPadding
-                  : fullHeight - itemHeight + gridViewPadding;
-              popItemSize = Size(itemWidth, itemHeight);
-              popItemPosition = Offset(dx, dy);
-              controller = ScrollController(initialScrollOffset: offset);
-            }
-            return Stack(
+            return Column(
               children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    Expanded(
-                      child: Stack(
-                        children: <Widget>[
-                          GridView.builder(
-                            controller: controller,
-                            scrollDirection: Axis.vertical,
-                            padding: EdgeInsets.all(gridViewPadding),
-                            physics: ClampingScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: itemHorizontalSpacing,
-                              mainAxisSpacing: itemVerticalSpacing,
-                              childAspectRatio: ratio,
-                            ),
-                            itemCount: snapshots.length,
-                            itemBuilder: (context, index) {
-                              return snapshotCard(index);
-                            },
-                          ),
-                          pushSnapshot(),
-                          Visibility(
-                            visible: shouldPop,
-                            child: popSnapshot(),
-                          ),
-                        ],
-                      ),
+                Expanded(
+                  child: GridView.builder(
+                    controller: ScrollController(initialScrollOffset: offset),
+                    scrollDirection: Axis.vertical,
+                    padding: EdgeInsets.all(gridViewPadding),
+                    physics: ClampingScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: itemHorizontalSpacing,
+                      mainAxisSpacing: itemVerticalSpacing,
+                      childAspectRatio: ratio,
                     ),
-                    Divider(
-                      thickness: 1,
-                      height: dividerHeight,
-                    ),
-                    Container(
-                      height: toolBarHeight,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          FlatButton(
-                            child: Text('Close All'),
-                            onPressed: () {
-                              WebViews.removeAll();
-                              setState(() {
-                                snapshots = [];
-                              });
-                              WebViews.create();
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.add,
-                              size: 35,
-                            ),
-                            onPressed: () {
-                              WebViews.create();
-                              snapshots.add(
-                                Snapshot(
-                                  title: Future.value(""),
-                                  data: Future.value(null),
-                                ),
-                              );
-                              _currentIndex = snapshots.length - 1;
-                              handlePop();
-                            },
-                          ),
-                          FlatButton(
-                            child: Text('Done'),
-                            onPressed: () {
-                              Globals.updateTabValue(
-                                TabControllerValue(
-                                  id: selectedTab,
-                                  url: url,
-                                  network: Globals.network,
-                                  stage: isSelectedTabAlive
-                                      ? TabStage.SelectedAlive
-                                      : TabStage.SelectedInAlive,
-                                  tabKey: selectedTabKey,
-                                ),
-                              );
-                              handlePop();
-                            },
-                          )
-                        ],
-                      ),
-                    )
-                  ],
+                    itemCount: snapshots.length,
+                    itemBuilder: (context, index) {
+                      return snapshotCard(index);
+                    },
+                  ),
                 ),
+                Divider(
+                  thickness: 1,
+                  height: dividerHeight,
+                ),
+                Container(
+                  height: toolBarHeight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      FlatButton(
+                        child: Text('Close All'),
+                        onPressed: () {
+                          WebViews.removeAll();
+                          setState(() {
+                            snapshots = [];
+                          });
+                          WebViews.create();
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 35,
+                        ),
+                        onPressed: () {
+                          WebViews.create();
+                          snapshots.add(
+                            Snapshot(
+                              title: Future.value(""),
+                              data: Future.value(null),
+                            ),
+                          );
+                          _currentIndex = snapshots.length - 1;
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      FlatButton(
+                        child: Text('Done'),
+                        onPressed: () {
+                          Globals.updateTabValue(
+                            TabControllerValue(
+                              id: selectedTab,
+                              url: url,
+                              network: Globals.network,
+                              stage: isSelectedTabAlive
+                                  ? TabStage.SelectedAlive
+                                  : TabStage.SelectedInAlive,
+                              tabKey: selectedTabKey,
+                            ),
+                          );
+                          Navigator.of(context).pop();
+                        },
+                      )
+                    ],
+                  ),
+                )
               ],
             );
           },
@@ -228,120 +166,64 @@ class TabViewsState extends State<TabViews> {
   Widget title(
     Snapshot snapshot, {
     Function close,
-    bool shouldHide = false,
   }) {
-    return Stack(
-      children: <Widget>[
-        SizedBox(
-          height: 36,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(left: 10, right: 40),
-                  child: FutureBuilder<String>(
-                    future: snapshot.title,
-                    builder: (context, snapshot) => Text(
-                      shouldHide
-                          ? ""
-                          : !snapshot.hasData
-                              ? 'New Tab'
-                              : snapshot.data == '' ? 'New Tab' : snapshot.data,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.left,
-                    ),
+    return SizedBox(
+      height: 40,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 10, right: 10),
+              child: FutureBuilder(
+                future: snapshot.title,
+                builder: (context, shot) => Text(
+                  !shot.hasData ? '' : shot.data == "" ? "New Tab" : shot.data,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Theme.of(context).primaryTextTheme.title.color,
+                    fontWeight: FontWeight.normal,
+                    decoration: TextDecoration.none,
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-        SizedBox(
-          height: 36,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.close,
-                  size: 17,
-                ),
-                onPressed: close,
-              )
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget image(Snapshot snapshot) {
-    return FutureBuilder<Uint8List>(
-      future: snapshot.data,
-      builder: (context, snapshot) => snapshot.hasData
-          ? Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-                image: DecorationImage(
-                    alignment: Alignment.topCenter,
-                    fit: BoxFit.fitWidth,
-                    image: MemoryImage(snapshot.data)),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: EdgeInsets.only(right: 10),
+              child: Icon(
+                Icons.close,
+                size: 17,
               ),
-            )
-          : Container(
-              color: Theme.of(context).backgroundColor,
             ),
-    );
-  }
-
-  Widget popSnapshot() {
-    Snapshot snapshot = snapshots[_currentIndex];
-    return AnimatedContainer(
-      onEnd: () {
-        Navigator.of(context).pop();
-      },
-      duration: Duration(milliseconds: 200),
-      margin: EdgeInsets.only(
-          left: popItemPosition.dx,
-          top: popItemPosition.dy + kToolbarHeight + dividerHeight),
-      width: popItemSize.width,
-      height: popItemSize.height,
-      decoration: BoxDecoration(
-        color: Theme.of(context).backgroundColor,
+            onTapUp: (d) => close(),
+          ),
+        ],
       ),
-      child: image(snapshot),
     );
   }
 
-  Widget pushSnapshot() {
-    Snapshot snapshot = snapshots[_currentIndex];
-    return Offstage(
-      offstage: didPush,
-      child: AnimatedContainer(
-        onEnd: () {
-          setState(() {
-            didPush = true;
-          });
-        },
-        duration: Duration(milliseconds: 300),
-        margin: EdgeInsets.only(
-            left: pushItemPosition.dx, top: pushItemPosition.dy),
-        width: pushItemSize.width,
-        height: pushItemSize.height,
-        decoration: decoration(snapshot),
-        child: Column(
-          children: <Widget>[
-            title(snapshot, shouldHide: true),
-            Expanded(
-              child: image(snapshot),
-            ),
-          ],
-        ),
+  Widget image(Snapshot snapshot, {BorderRadius borderRadius}) {
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: FutureBuilder<Uint8List>(
+        future: snapshot.data,
+        builder: (context, snapshot) => snapshot.hasData
+            ? Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      alignment: Alignment.topCenter,
+                      fit: BoxFit.fitWidth,
+                      image: MemoryImage(snapshot.data)),
+                ),
+              )
+            : Container(
+                color: Theme.of(context).backgroundColor,
+              ),
       ),
     );
   }
@@ -361,94 +243,94 @@ class TabViewsState extends State<TabViews> {
 
   Widget snapshotCard(int index) {
     Snapshot snapshot = snapshots[index];
-    return Offstage(
-      offstage: (!didPush || shouldPop) && index == _currentIndex,
-      child: Container(
-        decoration: decoration(snapshot),
-        child: Column(
-          children: <Widget>[
-            title(
-              snapshot,
-              close: () async {
-                WebViews.removeSnapshot(
-                  snapshot.key,
-                );
-                setState(() {
-                  snapshots = WebViews.snapshots();
-                });
-                if (snapshots.length == 0) {
-                  WebViews.removeWebview(
-                    snapshot.id,
-                  );
-                  WebViews.create();
-                  Navigator.of(context).pop();
-                  return;
-                }
-                if (snapshot.isAlive) {
-                  WebViews.removeWebview(
-                    snapshot.id,
-                  );
-                }
-                if (index > 0) {
-                  if (_currentIndex >= index) {
-                    _currentIndex--;
-                  }
-                } else if (_currentIndex != 0) {
-                  _currentIndex--;
-                }
-                selectedTab = snapshots[_currentIndex].id;
-                isSelectedTabAlive = snapshots[_currentIndex].isAlive;
-                url = snapshots[_currentIndex].url;
-                selectedTabKey = snapshots[_currentIndex].key;
-                if (snapshot.isAlive) {
-                  Globals.updateTabValue(
-                    TabControllerValue(
-                      id: snapshot.id,
-                      url: url,
-                      network: Globals.network,
-                      stage: TabStage.Removed,
-                      tabKey: selectedTabKey,
-                    ),
-                  );
-                }
-                _handleScroll();
-              },
-            ),
-            Expanded(
-              child: GestureDetector(
-                child: image(snapshot),
-                onTapUp: (tap) {
-                  Globals.updateTabValue(
-                    TabControllerValue(
-                      id: snapshot.id,
-                      network: Globals.network,
-                      url: snapshot.url,
-                      stage: snapshot.isAlive
-                          ? TabStage.SelectedAlive
-                          : TabStage.SelectedInAlive,
-                      tabKey: snapshot.key,
-                    ),
-                  );
-                  _currentIndex = index;
-                  handlePop();
-                },
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+    return _currentIndex == index
+        ? Hero(
+            tag: "snapshot${snapshot.id}${Globals.network}",
+            child: card(index),
+          )
+        : card(index);
   }
 
-  handlePop() async {
-    _handleScroll();
-    setState(() {
-      shouldPop = true;
-    });
-    await Future.delayed(Duration(milliseconds: 60));
-    setState(() {
-      popItemSize = widget.size;
-      popItemPosition = Offset(0, 0);
-    });
+  Widget card(int index) {
+    Snapshot snapshot = snapshots[index];
+    return Container(
+      decoration: decoration(snapshot),
+      child: Column(
+        children: <Widget>[
+          showTitle || index != _currentIndex
+              ? title(
+                  snapshot,
+                  close: () async {
+                    WebViews.removeSnapshot(snapshot.key);
+                    setState(() {
+                      snapshots = WebViews.snapshots();
+                    });
+                    if (snapshots.length == 0) {
+                      WebViews.removeWebview(snapshot.id);
+                      WebViews.create();
+                      Navigator.of(context).pop();
+                      return;
+                    }
+                    if (snapshot.isAlive) {
+                      WebViews.removeWebview(
+                        snapshot.id,
+                      );
+                    }
+                    if (index > 0) {
+                      if (_currentIndex >= index) {
+                        _currentIndex--;
+                      }
+                    } else if (_currentIndex != 0) {
+                      _currentIndex--;
+                    }
+                    selectedTab = snapshots[_currentIndex].id;
+                    isSelectedTabAlive = snapshots[_currentIndex].isAlive;
+                    url = snapshots[_currentIndex].url;
+                    selectedTabKey = snapshots[_currentIndex].key;
+                    if (snapshot.isAlive) {
+                      Globals.updateTabValue(
+                        TabControllerValue(
+                          id: snapshot.id,
+                          url: url,
+                          network: Globals.network,
+                          stage: TabStage.Removed,
+                          tabKey: selectedTabKey,
+                        ),
+                      );
+                    }
+                  },
+                )
+              : SizedBox(),
+          Expanded(
+            child: GestureDetector(
+              child: image(
+                snapshot,
+                borderRadius: showTitle || _currentIndex != index
+                    ? BorderRadius.only(
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      )
+                    : BorderRadius.all(Radius.circular(10)),
+              ),
+              onTapUp: (tap) {
+                Globals.updateTabValue(
+                  TabControllerValue(
+                    id: snapshot.id,
+                    network: Globals.network,
+                    url: snapshot.url,
+                    stage: snapshot.isAlive
+                        ? TabStage.SelectedAlive
+                        : TabStage.SelectedInAlive,
+                    tabKey: snapshot.key,
+                  ),
+                );
+                _currentIndex = index;
+                Navigator.of(context).pop();
+              },
+            ),
+          )
+        ],
+      ),
+    );
   }
 }

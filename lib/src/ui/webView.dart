@@ -83,7 +83,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   );
   Activity latestActivity;
   bool btnEnabled = true;
-
+  bool showSnapshot = false;
   @override
   void initState() {
     super.initState();
@@ -107,6 +107,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
+    Snapshot _currentSnapshot = Snapshot();
+    for (Snapshot snapshot in WebViews.snapshots(network: widget.network)) {
+      if (snapshot.key == key) {
+        _currentSnapshot = snapshot;
+      }
+    }
     super.build(context);
     return Offstage(
       child: Scaffold(
@@ -219,6 +225,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                         offstage: !(_currentURL == Globals.initialURL ||
                             _isOnFocus == true),
                       ),
+                      Offstage(
+                        offstage: !showSnapshot,
+                        child: Hero(
+                          tag: "snapshot$id${widget.network}",
+                          child: snapshotCard(_currentSnapshot),
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -615,18 +628,31 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             data: takeScreenshot(),
             url: _currentURL,
           );
+          setState(() {
+            showSnapshot = true;
+          });
           final size = captureKey.currentContext.size;
-          await Navigator.of(context).push(
-            NoAnimationMaterialPageRoute(
-              builder: (_) => TabViews(
-                id: id,
-                currentTabKey: key,
-                url: _currentURL,
-                size: size,
-              ),
+          await Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (BuildContext context, Animation animation,
+                  Animation secondaryAnimation) {
+                return new FadeTransition(
+                  opacity: animation,
+                  child: TabViews(
+                    id: id,
+                    currentTabKey: key,
+                    url: _currentURL,
+                    size: size,
+                  ),
+                );
+              },
               fullscreenDialog: true,
             ),
           );
+          setState(() {
+            showSnapshot = false;
+          });
         },
       ),
       Stack(
@@ -914,6 +940,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               tabValue.stage == TabStage.Coverred) {
             await controller.goHomePage();
           } else if (tabValue.stage == TabStage.SelectedInAlive) {
+            await controller.goHomePage();
             await controller.loadUrl(tabValue.url);
           }
           setState(() {
@@ -935,5 +962,27 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     if (Globals.bookmark.network == Globals.network) {
       await updateBookmarkID(_currentURL);
     }
+  }
+
+  Widget snapshotCard(Snapshot snapshot) {
+    return Container(
+      color: Theme.of(context).backgroundColor,
+      child: FutureBuilder(
+        future: snapshot.data,
+        builder: (context, s) {
+          if (s.hasData) {
+            return Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    alignment: Alignment.topCenter,
+                    fit: BoxFit.fitWidth,
+                    image: MemoryImage(s.data)),
+              ),
+            );
+          }
+          return SizedBox();
+        },
+      ),
+    );
   }
 }

@@ -204,9 +204,14 @@ class TabViewsState extends State<TabViews> {
       future: snapshot.data,
       builder: (context, s) => ClipRRect(
         borderRadius: borderRadius,
-        child: Image(
+        child: FadeInImage(
+          fadeOutCurve: Curves.fastOutSlowIn,
+          fadeInCurve: Curves.fastOutSlowIn,
+          fadeOutDuration: Duration(milliseconds: 100),
+          fadeInDuration: Duration(milliseconds: 100),
           alignment: Alignment.topCenter,
           fit: BoxFit.fitWidth,
+          placeholder: AssetImage("assets/blank.png"),
           image:
               s.hasData ? MemoryImage(s.data) : AssetImage("assets/blank.png"),
         ),

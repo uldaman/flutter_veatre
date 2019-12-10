@@ -634,9 +634,16 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           await Navigator.push(
             context,
             PageRouteBuilder(
+              transitionDuration: Duration(milliseconds: 300),
               pageBuilder: (BuildContext context, Animation animation,
                   Animation secondaryAnimation) {
-                return new FadeTransition(
+                // return TabViews(
+                //   id: id,
+                //   currentTabKey: key,
+                //   url: _currentURL,
+                //   size: size,
+                // );
+                return FadeTransition(
                   opacity: animation,
                   child: TabViews(
                     id: id,

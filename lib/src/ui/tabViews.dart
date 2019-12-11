@@ -205,10 +205,10 @@ class TabViewsState extends State<TabViews> {
       builder: (context, s) => ClipRRect(
         borderRadius: borderRadius,
         child: FadeInImage(
-          fadeOutCurve: Curves.fastOutSlowIn,
-          fadeInCurve: Curves.fastOutSlowIn,
-          fadeOutDuration: Duration(milliseconds: 100),
-          fadeInDuration: Duration(milliseconds: 100),
+          fadeOutCurve: Curves.linear,
+          fadeInCurve: Curves.linear,
+          // fadeOutDuration: Duration(milliseconds: 100),
+          // fadeInDuration: Duration(milliseconds: 100),
           alignment: Alignment.topCenter,
           fit: BoxFit.fitWidth,
           placeholder: AssetImage("assets/blank.png"),
@@ -305,6 +305,9 @@ class TabViewsState extends State<TabViews> {
                 ),
               ),
               onTapUp: (tap) {
+                setState(() {
+                  _currentIndex = index;
+                });
                 Globals.updateTabValue(
                   TabControllerValue(
                     id: snapshot.id,
@@ -316,7 +319,6 @@ class TabViewsState extends State<TabViews> {
                     tabKey: snapshot.key,
                   ),
                 );
-                _currentIndex = index;
                 Navigator.of(context).pop();
               },
             ),

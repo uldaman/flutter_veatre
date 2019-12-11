@@ -84,6 +84,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Activity latestActivity;
   bool btnEnabled = true;
   bool showSnapshot = false;
+
   @override
   void initState() {
     super.initState();
@@ -637,12 +638,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               transitionDuration: Duration(milliseconds: 300),
               pageBuilder: (BuildContext context, Animation animation,
                   Animation secondaryAnimation) {
-                // return TabViews(
-                //   id: id,
-                //   currentTabKey: key,
-                //   url: _currentURL,
-                //   size: size,
-                // );
                 return FadeTransition(
                   opacity: animation,
                   child: TabViews(

@@ -624,20 +624,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             id,
             key,
             widget.network,
-            title: title,
-            data: takeScreenshot(),
+            title: await controller?.getTitle(),
+            data: await takeScreenshot(),
             url: _currentURL,
           );
-          setState(() {
-            showSnapshot = true;
-          });
+          setState(() => showSnapshot = true);
           final size = captureKey.currentContext.size;
           await Navigator.push(
             context,
             PageRouteBuilder(
               transitionDuration: Duration(milliseconds: 300),
-              pageBuilder: (BuildContext context, Animation animation,
-                  Animation secondaryAnimation) {
+              pageBuilder: (context, animation, _) {
                 return FadeTransition(
                   opacity: animation,
                   child: TabViews(
@@ -651,9 +648,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
               fullscreenDialog: true,
             ),
           );
-          setState(() {
-            showSnapshot = false;
-          });
+          setState(() => showSnapshot = false);
         },
       ),
       Stack(
@@ -784,8 +779,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     }
     return null;
   }
-
-  Future<String> get title async => controller?.getTitle();
 
   Widget _sheet(
     String text,
@@ -968,22 +961,16 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Widget snapshotCard(Snapshot snapshot) {
     return Container(
       color: Theme.of(context).backgroundColor,
-      child: FutureBuilder(
-        future: snapshot.data,
-        builder: (context, s) {
-          if (s.hasData) {
-            return Container(
+      child: snapshot.data != null
+          ? Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
                     alignment: Alignment.topCenter,
                     fit: BoxFit.fitWidth,
-                    image: MemoryImage(s.data)),
+                    image: MemoryImage(snapshot.data)),
               ),
-            );
-          }
-          return SizedBox();
-        },
-      ),
+            )
+          : SizedBox(),
     );
   }
 }

@@ -8,8 +8,8 @@ import 'package:veatre/src/utils/common.dart';
 class Snapshot {
   int id;
   String key;
-  Future<Uint8List> data;
-  Future<String> title;
+  Uint8List data;
+  String title;
   String url;
   int timestamp;
   bool isAlive;
@@ -60,7 +60,7 @@ class WebViews {
   ) {
     if (webViews.length < maxTabLen) {
       final id = webViews.length;
-      WebView webView = new WebView(
+      WebView webView = WebView(
         id: id,
         offstage: false,
         network: network,
@@ -163,8 +163,8 @@ class WebViews {
     int id,
     String key,
     Network network, {
-    Future<Uint8List> data,
-    Future<String> title,
+    Uint8List data,
+    String title,
     String url,
   }) {
     Snapshot snapshot = Snapshot(

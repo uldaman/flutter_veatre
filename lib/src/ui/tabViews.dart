@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
@@ -120,12 +118,7 @@ class TabViewsState extends State<TabViews> {
                         ),
                         onPressed: () {
                           WebViews.create();
-                          snapshots.add(
-                            Snapshot(
-                              title: Future.value(""),
-                              data: Future.value(null),
-                            ),
-                          );
+                          snapshots.add(Snapshot(title: '', data: null));
                           _currentIndex = snapshots.length - 1;
                           Navigator.of(context).pop();
                         },
@@ -167,19 +160,16 @@ class TabViewsState extends State<TabViews> {
         Expanded(
           child: Padding(
             padding: EdgeInsets.only(left: 10, right: 10),
-            child: FutureBuilder(
-              future: snapshot.title,
-              builder: (context, shot) => Text(
-                !shot.hasData ? '' : shot.data == "" ? "New Tab" : shot.data,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).primaryTextTheme.title.color,
-                  fontWeight: FontWeight.normal,
-                  decoration: TextDecoration.none,
-                ),
+            child: Text(
+              snapshot.title == '' ? 'New Tab' : snapshot.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).primaryTextTheme.title.color,
+                fontWeight: FontWeight.normal,
+                decoration: TextDecoration.none,
               ),
             ),
           ),
@@ -196,26 +186,6 @@ class TabViewsState extends State<TabViews> {
           onTapUp: (d) => close(),
         ),
       ],
-    );
-  }
-
-  Widget image(Snapshot snapshot, {BorderRadius borderRadius}) {
-    return FutureBuilder<Uint8List>(
-      future: snapshot.data,
-      builder: (context, s) => ClipRRect(
-        borderRadius: borderRadius,
-        child: FadeInImage(
-          fadeOutCurve: Curves.linear,
-          fadeInCurve: Curves.linear,
-          // fadeOutDuration: Duration(milliseconds: 100),
-          // fadeInDuration: Duration(milliseconds: 100),
-          alignment: Alignment.topCenter,
-          fit: BoxFit.fitWidth,
-          placeholder: AssetImage("assets/blank.png"),
-          image:
-              s.hasData ? MemoryImage(s.data) : AssetImage("assets/blank.png"),
-        ),
-      ),
     );
   }
 
@@ -236,7 +206,7 @@ class TabViewsState extends State<TabViews> {
     Snapshot snapshot = snapshots[index];
     return _currentIndex == index
         ? Hero(
-            tag: "snapshot${snapshot.id}${Globals.network}",
+            tag: 'snapshot${snapshot.id}${Globals.network}',
             child: card(index),
           )
         : card(index);
@@ -297,11 +267,16 @@ class TabViewsState extends State<TabViews> {
           Expanded(
             flex: 9,
             child: GestureDetector(
-              child: image(
-                snapshot,
+              child: ClipRRect(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10),
+                ),
+                child: Image(
+                  gaplessPlayback: true,
+                  alignment: Alignment.topCenter,
+                  fit: BoxFit.fitWidth,
+                  image: MemoryImage(snapshot.data),
                 ),
               ),
               onTapUp: (tap) {

@@ -25,9 +25,9 @@ class AddressDetailState extends State<AddressDetail> {
         child: Stack(
           children: <Widget>[
             Opacity(
-              opacity: 0.5,
+              opacity: 0.3,
               child: Container(
-                color: Colors.blueGrey,
+                color: Colors.black,
               ),
             ),
             Column(

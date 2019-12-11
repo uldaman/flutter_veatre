@@ -101,7 +101,7 @@ class WalletInfoState extends State<WalletInfo> {
         children: <Widget>[
           buildWalletCard(context, walletEntity),
           Padding(
-            padding: EdgeInsets.only(left: 15, right: 15),
+            padding: EdgeInsets.only(top: 15, left: 15, right: 15),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -114,12 +114,39 @@ class WalletInfoState extends State<WalletInfo> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: activities.length>0?ListView.builder(
               padding: EdgeInsets.only(bottom: 15),
               itemBuilder: buildActivity,
               itemCount: activities.length,
               physics: ClampingScrollPhysics(),
-            ),
+            ):Center(
+                child: SizedBox(
+                  height: 200,
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        'No Activity',
+                        style: TextStyle(
+                          fontSize: 22,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 20, left: 40, right: 40),
+                        child: Text(
+                          "Transaction and Certificate that you've signed will appear here",
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .display2
+                                .color,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ),
         ],
       ),
@@ -127,73 +154,77 @@ class WalletInfoState extends State<WalletInfo> {
   }
 
   Widget buildWalletCard(BuildContext context, WalletEntity walletEntity) {
-    return Card(
-      margin: EdgeInsets.all(15),
-      child: Container(
-        margin: EdgeInsets.all(10),
-        child: Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10, right: 10),
-                  child: Picasso(
-                    '0x${walletEntity.address}',
-                    size: 60,
-                    borderRadius: 10,
+    return Hero(
+      tag: "0x${walletEntity.address}",
+      child: Card(
+        margin: EdgeInsets.only(left: 15, right: 15, top: 15),
+        child: Container(
+          margin: EdgeInsets.all(10),
+          child: Column(
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(left: 10, top: 10, right: 10),
+                    child: Picasso(
+                      '0x${walletEntity.address}',
+                      size: 60,
+                      borderRadius: 10,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: 10),
-                        child: Text(
-                          walletEntity?.name,
-                          style: TextStyle(
-                            fontSize: 22,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Text(
+                            walletEntity?.name,
+                            style: TextStyle(
+                              fontSize: 22,
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 5),
-                        child: Text(
-                          '0x${abbreviate(walletEntity?.address)}',
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .primaryTextTheme
-                                .display2
-                                .color,
+                        Padding(
+                          padding: EdgeInsets.only(top: 5),
+                          child: Text(
+                            '0x${abbreviate(walletEntity?.address)}',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .primaryTextTheme
+                                  .display2
+                                  .color,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: 10,
+                  left: 15,
+                  right: 15,
                 ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                top: 10,
-                left: 15,
-                right: 15,
+                child: Divider(
+                  thickness: 1,
+                  height: 1,
+                ),
               ),
-              child: Divider(
-                thickness: 1,
-              ),
-            ),
-            FutureBuilder(
-              future: AccountAPI.get(walletEntity?.address),
-              builder: (context, shot) {
-                Account account = shot.data;
-                return balance(
-                  account?.formatBalance ?? '--',
-                  account?.formatEnergy ?? '--',
-                );
-              },
-            )
-          ],
+              FutureBuilder(
+                future: AccountAPI.get(walletEntity?.address),
+                builder: (context, shot) {
+                  Account account = shot.data;
+                  return balance(
+                    account?.formatBalance ?? '--',
+                    account?.formatEnergy ?? '--',
+                  );
+                },
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -203,13 +234,17 @@ class WalletInfoState extends State<WalletInfo> {
     return Column(
       children: <Widget>[
         Container(
-          margin: EdgeInsets.only(top: 0),
+          margin: EdgeInsets.only(top: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Text(
                 balance,
-                style: TextStyle(fontSize: 22),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.normal,
+                  color: Theme.of(context).primaryTextTheme.title.color,
+                ),
               ),
               Container(
                 margin: EdgeInsets.only(left: 5, right: 22, top: 10),
@@ -217,6 +252,7 @@ class WalletInfoState extends State<WalletInfo> {
                   'VET',
                   style: TextStyle(
                     color: Theme.of(context).primaryTextTheme.display2.color,
+                    fontWeight: FontWeight.normal,
                     fontSize: 12,
                   ),
                 ),

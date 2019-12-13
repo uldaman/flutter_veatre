@@ -2,17 +2,58 @@ import 'dart:async';
 import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/api/accountAPI.dart';
-import 'package:veatre/src/ui/commonComponents.dart';
-import 'package:veatre/src/utils/common.dart';
+import 'package:veatre/src/ui/walletCard.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/addressDetail.dart';
 import 'package:veatre/src/ui/createOrImportWallet.dart';
 import 'package:veatre/src/ui/walletInfo.dart';
+
+Map<Network, List<WalletEntity>> _walletEntities = {
+  Network.MainNet: [],
+  Network.TestNet: [],
+};
+//_accounts's length should be equal to _walletEntities
+Map<Network, Map<String, Account>> _accounts = {
+  Network.MainNet: {},
+  Network.TestNet: {},
+};
+
+List<WalletEntity> walletEntities({Network network}) {
+  return _walletEntities[network ?? Globals.network];
+}
+
+Map<String, Account> accounts({Network network}) {
+  return Map.from(_accounts[network ?? Globals.network]);
+}
+
+Future<void> syncWallets({Network network}) async {
+  network = network ?? Globals.network;
+  List<WalletEntity> walletEntities =
+      await WalletStorage.readAll(network: network);
+  _walletEntities[network] = List.from(walletEntities);
+  Map<String, Account> copy = Map.from(_accounts[network]);
+  for (String addr in copy.keys) {
+    final existedWalletEntity =
+        walletEntities.firstWhere((w) => w.address == addr, orElse: () => null);
+    if (existedWalletEntity == null) {
+      _accounts[network].remove(addr);
+    }
+  }
+  for (WalletEntity entity in walletEntities) {
+    String address = entity.address;
+    if (!_accounts[network].containsKey(address)) {
+      _accounts[network][address] = null;
+    }
+  }
+}
+
+void updateAccount(String address, Account account, {Network network}) {
+  _accounts[network ?? Globals.network][address] = account;
+}
 
 class ManageWallets extends StatefulWidget {
   static final routeName = '/wallets';
@@ -22,32 +63,29 @@ class ManageWallets extends StatefulWidget {
 }
 
 class ManageWalletsState extends State<ManageWallets> {
-  List<WalletEntity> walletEntities = [];
+  List<WalletEntity> _walletEntities;
+  Map<String, Account> _accounts;
+
   @override
   void initState() {
+    _walletEntities = walletEntities();
+    _accounts = accounts();
+    _load();
+    Globals.addBlockHeadHandler(_load);
     super.initState();
-    updateWallets(Globals.network);
-    Globals.addBlockHeadHandler(_handleHeadChanged);
   }
 
-  void _handleHeadChanged() async {
-    if (Globals.blockHeadForNetwork.network == Globals.network) {
-      await updateWallets(Globals.network);
-    }
-  }
-
-  Future<void> updateWallets(Network network) async {
-    List<WalletEntity> walletEntities = await WalletStorage.readAll();
-    if (mounted) {
-      setState(() {
-        this.walletEntities = walletEntities;
-      });
-    }
+  Future<void> _load() async {
+    await syncWallets();
+    setState(() {
+      _walletEntities = walletEntities();
+      _accounts = accounts();
+    });
   }
 
   @override
   void dispose() {
-    Globals.removeBlockHeadHandler(_handleHeadChanged);
+    Globals.removeBlockHeadHandler(_load);
     super.dispose();
   }
 
@@ -86,20 +124,18 @@ class ManageWalletsState extends State<ManageWallets> {
                   ),
                 ),
               );
-              await updateWallets(Globals.network);
+              await _load();
             },
           )
         ],
       ),
       body: SafeArea(
-        child: walletEntities.length > 0
+        child: _walletEntities.length > 0
             ? ListView.builder(
                 padding: EdgeInsets.only(bottom: 10),
                 physics: ClampingScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return buildWalletCard(context, walletEntities[index]);
-                },
-                itemCount: walletEntities.length,
+                itemBuilder: buildWalletCard,
+                itemCount: _walletEntities.length,
               )
             : Center(
                 child: SizedBox(
@@ -133,122 +169,42 @@ class ManageWalletsState extends State<ManageWallets> {
     );
   }
 
-  Widget buildWalletCard(BuildContext context, WalletEntity walletEntity) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      child: Hero(
-        tag: '0x${walletEntity.address}',
-        child: Card(
-          margin: EdgeInsets.only(left: 15, right: 15, top: 15),
-          child: Container(
-            margin: EdgeInsets.all(10),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(left: 10, top: 10, right: 10),
-                      child: Picasso(
-                        '0x${walletEntity.address}',
-                        size: 60,
-                        borderRadius: 10,
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(top: 10),
-                            child: Text(
-                              walletEntity.name,
-                              style: TextStyle(
-                                fontSize: 22,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5),
-                            child: Text(
-                              '0x${abbreviate(walletEntity.address)}',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .primaryTextTheme
-                                    .display2
-                                    .color,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10),
-                      child: IconButton(
-                        icon: Icon(
-                          MaterialCommunityIcons.qrcode,
-                          size: 30,
-                        ),
-                        onPressed: () async {
-                          await showGeneralDialog(
-                            context: context,
-                            transitionDuration: Duration(milliseconds: 300),
-                            barrierDismissible: false,
-                            pageBuilder: (context, a, b) {
-                              return ScaleTransition(
-                                scale: Tween(begin: 0.0, end: 1.0).animate(a),
-                                child: AddressDetail(
-                                  walletEntity: walletEntity,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10),
-                      child: IconButton(
-                        icon: Icon(
-                          MaterialCommunityIcons.file_find_outline,
-                          size: 30,
-                        ),
-                        onPressed: () async {
-                          final url =
-                              "https://insight.vecha.in/#/${Globals.network == Network.MainNet ? 'main' : 'test'}/accounts/0x${walletEntity.address}";
-                          Navigator.of(context).pop(url);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: 10,
-                    left: 15,
-                    right: 15,
-                  ),
-                  child: Divider(
-                    thickness: 1,
-                    height: 1,
-                  ),
-                ),
-                FutureBuilder(
-                  future: AccountAPI.get(walletEntity.address),
-                  builder: (context, shot) {
-                    Account account = shot.data;
-                    return balance(
-                      account?.formatBalance ?? '--',
-                      account?.formatEnergy ?? '--',
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      onTapUp: (details) async {
+  Widget buildWalletCard(BuildContext context, int index) {
+    WalletEntity walletEntity = _walletEntities[index];
+    Account account = _accounts[walletEntity.address];
+    return WalletCard(
+      context,
+      walletEntity,
+      key: ValueKey(walletEntity.address),
+      initialAccount: account,
+      getAccount: () async {
+        account = await AccountAPI.get(walletEntity.address);
+        if (account != null) {
+          updateAccount(walletEntity.address, account);
+        }
+        return account;
+      },
+      onQrcodeSelected: () async {
+        await showGeneralDialog(
+          context: context,
+          transitionDuration: Duration(milliseconds: 300),
+          barrierDismissible: false,
+          pageBuilder: (context, a, b) {
+            return ScaleTransition(
+              scale: Tween(begin: 0.0, end: 1.0).animate(a),
+              child: AddressDetail(
+                walletEntity: walletEntity,
+              ),
+            );
+          },
+        );
+      },
+      onSearchSelected: () async {
+        final url =
+            "https://insight.vecha.in/#/${Globals.network == Network.MainNet ? 'main' : 'test'}/accounts/0x${walletEntity.address}";
+        Navigator.of(context).pop(url);
+      },
+      onSelected: () async {
         final result = await Navigator.push(
           context,
           PageRouteBuilder(
@@ -258,73 +214,18 @@ class ManageWalletsState extends State<ManageWallets> {
                 opacity: animation,
                 child: WalletInfo(
                   walletEntity: walletEntity,
+                  account: account,
                 ),
               );
             },
-            fullscreenDialog: false,
           ),
         );
-        // final result = await Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (context) => WalletInfo(
-        //       walletEntity: walletEntity,
-        //     ),
-        //   ),
-        // );
         if (result != null) {
           Navigator.of(context).pop(result);
         } else {
-          await updateWallets(Globals.network);
+          await _load();
         }
       },
-    );
-  }
-
-  Widget balance(String balance, String energy) {
-    return Column(
-      children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(top: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                balance,
-                style: TextStyle(fontSize: 22),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 5, right: 22, top: 10),
-                child: Text(
-                  'VET',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryTextTheme.display2.color,
-                    fontSize: 12,
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(energy, style: TextStyle(fontSize: 14)),
-              Container(
-                margin: EdgeInsets.only(left: 5, right: 12, top: 2),
-                child: Text(
-                  'VTHO',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryTextTheme.display2.color,
-                    fontSize: 12,
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

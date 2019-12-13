@@ -5,19 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/configStorage.dart';
+import 'package:veatre/src/ui/walletCard.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/api/accountAPI.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/storage/activitiyStorage.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
-import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/walletOperation.dart';
 import 'package:veatre/src/ui/sign_dialog/bottom_modal/summary.dart';
 
 class WalletInfo extends StatefulWidget {
   final WalletEntity walletEntity;
+  final Account account;
 
-  WalletInfo({this.walletEntity});
+  WalletInfo({
+    this.walletEntity,
+    this.account,
+  });
 
   @override
   WalletInfoState createState() => WalletInfoState();
@@ -26,11 +30,12 @@ class WalletInfo extends StatefulWidget {
 class WalletInfoState extends State<WalletInfo> {
   List<Activity> activities = [];
   WalletEntity walletEntity;
-
+  Account initialAccount;
   @override
   void initState() {
-    super.initState();
     walletEntity = widget.walletEntity;
+    initialAccount = widget.account;
+    super.initState();
     _handleHeadChanged();
     Globals.addBlockHeadHandler(_handleHeadChanged);
   }
@@ -114,39 +119,42 @@ class WalletInfoState extends State<WalletInfo> {
             ),
           ),
           Expanded(
-            child: activities.length>0?ListView.builder(
-              padding: EdgeInsets.only(bottom: 15),
-              itemBuilder: buildActivity,
-              itemCount: activities.length,
-              physics: ClampingScrollPhysics(),
-            ):Center(
-                child: SizedBox(
-                  height: 200,
-                  child: Column(
-                    children: <Widget>[
-                      Text(
-                        'No Activity',
-                        style: TextStyle(
-                          fontSize: 22,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 20, left: 40, right: 40),
-                        child: Text(
-                          "Transaction and Certificate that you've signed will appear here",
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .primaryTextTheme
-                                .display2
-                                .color,
+            child: activities.length > 0
+                ? ListView.builder(
+                    padding: EdgeInsets.only(bottom: 15),
+                    itemBuilder: buildActivity,
+                    itemCount: activities.length,
+                    physics: ClampingScrollPhysics(),
+                  )
+                : Center(
+                    child: SizedBox(
+                      height: 200,
+                      child: Column(
+                        children: <Widget>[
+                          Text(
+                            'No Activity',
+                            style: TextStyle(
+                              fontSize: 22,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
+                          Padding(
+                            padding:
+                                EdgeInsets.only(top: 20, left: 40, right: 40),
+                            child: Text(
+                              "Transaction and Certificate that you've signed will appear here",
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .primaryTextTheme
+                                    .display2
+                                    .color,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
           ),
         ],
       ),
@@ -154,135 +162,11 @@ class WalletInfoState extends State<WalletInfo> {
   }
 
   Widget buildWalletCard(BuildContext context, WalletEntity walletEntity) {
-    return Hero(
-      tag: "0x${walletEntity.address}",
-      child: Card(
-        margin: EdgeInsets.only(left: 15, right: 15, top: 15),
-        child: Container(
-          margin: EdgeInsets.all(10),
-          child: Column(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(left: 10, top: 10, right: 10),
-                    child: Picasso(
-                      '0x${walletEntity.address}',
-                      size: 60,
-                      borderRadius: 10,
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 10),
-                          child: Text(
-                            walletEntity?.name,
-                            style: TextStyle(
-                              fontSize: 22,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                          child: Text(
-                            '0x${abbreviate(walletEntity?.address)}',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .primaryTextTheme
-                                  .display2
-                                  .color,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                  top: 10,
-                  left: 15,
-                  right: 15,
-                ),
-                child: Divider(
-                  thickness: 1,
-                  height: 1,
-                ),
-              ),
-              FutureBuilder(
-                future: AccountAPI.get(walletEntity?.address),
-                builder: (context, shot) {
-                  Account account = shot.data;
-                  return balance(
-                    account?.formatBalance ?? '--',
-                    account?.formatEnergy ?? '--',
-                  );
-                },
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget balance(String balance, String energy) {
-    return Column(
-      children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(top: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                balance,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.normal,
-                  color: Theme.of(context).primaryTextTheme.title.color,
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 5, right: 22, top: 10),
-                child: Text(
-                  'VET',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryTextTheme.display2.color,
-                    fontWeight: FontWeight.normal,
-                    fontSize: 12,
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                energy,
-                style: TextStyle(fontSize: 14),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 5, right: 12, top: 2),
-                child: Text(
-                  'VTHO',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryTextTheme.display2.color,
-                    fontSize: 12,
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ],
+    return WalletCard(
+      context,
+      walletEntity,
+      initialAccount: initialAccount,
+      getAccount: () => AccountAPI.get(walletEntity.address),
     );
   }
 

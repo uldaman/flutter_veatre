@@ -5,12 +5,14 @@ class SnapshotCard extends StatelessWidget {
   SnapshotCard(
     this.snapshot,
     this.showTitle, {
+    this.hasCorner = false,
     this.isSelected = false,
     this.onClosed,
     this.onSelected,
   });
 
   final Snapshot snapshot;
+  final bool hasCorner;
   final bool showTitle;
   final bool isSelected;
   final Function onClosed;
@@ -35,10 +37,12 @@ class SnapshotCard extends StatelessWidget {
         flex: 9,
         child: GestureDetector(
           child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(10),
-              bottomRight: Radius.circular(10),
-            ),
+            borderRadius: hasCorner
+                ? BorderRadius.only(
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10),
+                  )
+                : BorderRadius.zero,
             child: snapshot.data != null
                 ? Image(
                     gaplessPlayback: true,
@@ -59,7 +63,9 @@ class SnapshotCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
+        borderRadius: hasCorner
+            ? BorderRadius.all(Radius.circular(10))
+            : BorderRadius.zero,
         border: Border.all(
           width: 1,
           color:

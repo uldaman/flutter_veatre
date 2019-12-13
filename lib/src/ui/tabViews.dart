@@ -105,10 +105,10 @@ class TabViewsState extends State<TabViews> {
                         child: Text('Close All'),
                         onPressed: () {
                           WebViews.removeAll();
+                          WebViews.create();
                           setState(() {
                             snapshots = [];
                           });
-                          WebViews.create();
                           Navigator.of(context).pop();
                         },
                       ),
@@ -120,7 +120,9 @@ class TabViewsState extends State<TabViews> {
                         onPressed: () {
                           WebViews.create();
                           snapshots.add(Snapshot(title: '', data: null));
-                          _currentIndex = snapshots.length - 1;
+                          setState(() {
+                            _currentIndex = snapshots.length - 1;
+                          });
                           Navigator.of(context).pop();
                         },
                       ),
@@ -157,8 +159,77 @@ class TabViewsState extends State<TabViews> {
     return _currentIndex == index
         ? Hero(
             tag: 'snapshot${snapshot.id}${Globals.network}',
-            child: SnapshotCard(snapshot, true),
+            child: SnapshotCard(
+              snapshot,
+              true,
+              isSelected: true,
+              onClosed: () => close(snapshot, index),
+              onSelected: () => select(snapshot, index),
+            ),
           )
-        : SnapshotCard(snapshot, true);
+        : SnapshotCard(
+            snapshot,
+            true,
+            onClosed: () => close(snapshot, index),
+            onSelected: () => select(snapshot, index),
+          );
+  }
+
+  void select(Snapshot snapshot, int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    Globals.updateTabValue(
+      TabControllerValue(
+        id: snapshot.id,
+        network: Globals.network,
+        url: snapshot.url,
+        stage: snapshot.isAlive
+            ? TabStage.SelectedAlive
+            : TabStage.SelectedInAlive,
+        tabKey: snapshot.key,
+      ),
+    );
+    Navigator.of(context).pop();
+  }
+
+  void close(Snapshot snapshot, int index) {
+    WebViews.removeSnapshot(snapshot.key);
+    setState(() {
+      snapshots = WebViews.snapshots();
+    });
+    if (snapshots.length == 0) {
+      WebViews.removeWebview(snapshot.id);
+      WebViews.create();
+      Navigator.of(context).pop();
+      return;
+    }
+    if (snapshot.isAlive) {
+      WebViews.removeWebview(
+        snapshot.id,
+      );
+    }
+    if (index > 0) {
+      if (_currentIndex >= index) {
+        _currentIndex--;
+      }
+    } else if (_currentIndex != 0) {
+      _currentIndex--;
+    }
+    selectedTab = snapshots[_currentIndex].id;
+    isSelectedTabAlive = snapshots[_currentIndex].isAlive;
+    url = snapshots[_currentIndex].url;
+    selectedTabKey = snapshots[_currentIndex].key;
+    if (snapshot.isAlive) {
+      Globals.updateTabValue(
+        TabControllerValue(
+          id: snapshot.id,
+          url: url,
+          network: Globals.network,
+          stage: TabStage.Removed,
+          tabKey: selectedTabKey,
+        ),
+      );
+    }
   }
 }

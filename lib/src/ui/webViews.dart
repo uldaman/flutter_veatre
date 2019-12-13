@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/configStorage.dart';

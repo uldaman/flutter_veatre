@@ -162,6 +162,7 @@ class TabViewsState extends State<TabViews> {
             child: SnapshotCard(
               snapshot,
               true,
+              hasCorner: true,
               isSelected: true,
               onClosed: () => close(snapshot, index),
               onSelected: () => select(snapshot, index),
@@ -170,6 +171,7 @@ class TabViewsState extends State<TabViews> {
         : SnapshotCard(
             snapshot,
             true,
+            hasCorner: true,
             onClosed: () => close(snapshot, index),
             onSelected: () => select(snapshot, index),
           );

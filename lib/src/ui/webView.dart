@@ -12,9 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:veatre/src/ui/signCertificate.dart';
-import 'package:veatre/src/ui/snapshotCard.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
+
 import 'package:veatre/common/net.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/models/account.dart';
@@ -32,9 +31,11 @@ import 'package:veatre/src/ui/mainUI.dart';
 import 'package:veatre/src/ui/createBookmark.dart';
 import 'package:veatre/src/ui/settings.dart';
 import 'package:veatre/src/ui/tabViews.dart';
+import 'package:veatre/src/ui/manageWallets.dart';
 import 'package:veatre/src/ui/webViews.dart';
 import 'package:veatre/src/ui/sign_dialog/transaction_dialog.dart';
-import 'package:veatre/src/ui/manageWallets.dart';
+import 'package:veatre/src/ui/signCertificate.dart';
+import 'package:veatre/src/ui/snapshotCard.dart';
 import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/searchBar.dart';
 import 'package:veatre/src/ui/apps.dart';
@@ -45,6 +46,7 @@ class WebView extends StatefulWidget {
   final String initialURL;
   final bool offstage;
   final String tabKey;
+
   WebView({
     @required this.id,
     @required this.network,

@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:veatre/src/ui/signCertificate.dart';
+import 'package:veatre/src/ui/snapshotCard.dart';
 import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 import 'package:veatre/common/net.dart';
 import 'package:veatre/common/globals.dart';
@@ -223,12 +224,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                         offstage: !showSnapshot,
                         child: Hero(
                           tag: "snapshot$id${widget.network}",
-                          child: snapshotCard(
+                          child: SnapshotCard(
                             WebViews.getSnapshot(
                                   key,
                                   network: widget.network,
                                 ) ??
                                 Snapshot(),
+                            false,
                           ),
                         ),
                       )
@@ -956,21 +958,5 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     if (Globals.bookmark.network == Globals.network) {
       await updateBookmarkID(_currentURL);
     }
-  }
-
-  Widget snapshotCard(Snapshot snapshot) {
-    return Container(
-      color: Theme.of(context).backgroundColor,
-      child: snapshot.data != null
-          ? Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    alignment: Alignment.topCenter,
-                    fit: BoxFit.fitWidth,
-                    image: MemoryImage(snapshot.data)),
-              ),
-            )
-          : SizedBox(),
-    );
   }
 }

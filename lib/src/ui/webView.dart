@@ -227,10 +227,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                           child: SnapshotCard(
                             WebViews.getSnapshot(
                                   key,
-                                  network: widget.network,
+                                  network: Globals.network,
                                 ) ??
                                 Snapshot(),
                             false,
+                            isSelected: true,
                           ),
                         ),
                       )
@@ -921,10 +922,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     final tabValue = Globals.tabValue;
     key = tabValue.tabKey;
     if (tabValue.network == widget.network) {
-      if (tabValue.stage == TabStage.Created ||
-          tabValue.stage == TabStage.Removed) {
-        setState(() {});
-      }
       if (tabValue.stage == TabStage.RemoveAll) {
         setState(() {
           _offstage = true;

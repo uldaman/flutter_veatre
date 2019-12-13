@@ -29,6 +29,13 @@ class MainUIState extends State<MainUI>
     WebViews.create(network: Network.MainNet);
     WebViews.create(network: Network.TestNet);
     Globals.addNetworkHandler(_hanleNetworkChanged);
+    Globals.addTabHandler(_handleTabChanged);
+  }
+
+  _handleTabChanged() {
+    if (Globals.tabValue.stage == TabStage.Created) {
+      setState(() {});
+    }
   }
 
   @override

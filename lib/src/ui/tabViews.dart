@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/ui/snapshotCard.dart';
 import 'package:veatre/src/ui/webViews.dart';
 
 class TabViews extends StatefulWidget {
@@ -151,155 +152,13 @@ class TabViewsState extends State<TabViews> {
     );
   }
 
-  Widget title(
-    Snapshot snapshot, {
-    Function close,
-  }) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(left: 10, right: 10),
-            child: Text(
-              snapshot.title == '' ? 'New Tab' : snapshot.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).primaryTextTheme.title.color,
-                fontWeight: FontWeight.normal,
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ),
-        ),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: EdgeInsets.only(right: 10),
-            child: Icon(
-              Icons.close,
-              size: 17,
-            ),
-          ),
-          onTapUp: (d) => close(),
-        ),
-      ],
-    );
-  }
-
-  BoxDecoration decoration(Snapshot snapshot) {
-    return BoxDecoration(
-      color: Theme.of(context).backgroundColor,
-      borderRadius: BorderRadius.all(Radius.circular(10)),
-      border: Border.all(
-        width: 2,
-        color: selectedTabKey == snapshot.key
-            ? Theme.of(context).primaryColor
-            : Color(0xFF666666),
-      ),
-    );
-  }
-
   Widget snapshotCard(int index) {
     Snapshot snapshot = snapshots[index];
     return _currentIndex == index
         ? Hero(
             tag: 'snapshot${snapshot.id}${Globals.network}',
-            child: card(index),
+            child: SnapshotCard(snapshot, true),
           )
-        : card(index);
-  }
-
-  Widget card(int index) {
-    Snapshot snapshot = snapshots[index];
-    return Container(
-      decoration: decoration(snapshot),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Expanded(
-            child: title(
-              snapshot,
-              close: () async {
-                WebViews.removeSnapshot(snapshot.key);
-                setState(() {
-                  snapshots = WebViews.snapshots();
-                });
-                if (snapshots.length == 0) {
-                  WebViews.removeWebview(snapshot.id);
-                  WebViews.create();
-                  Navigator.of(context).pop();
-                  return;
-                }
-                if (snapshot.isAlive) {
-                  WebViews.removeWebview(
-                    snapshot.id,
-                  );
-                }
-                if (index > 0) {
-                  if (_currentIndex >= index) {
-                    _currentIndex--;
-                  }
-                } else if (_currentIndex != 0) {
-                  _currentIndex--;
-                }
-                selectedTab = snapshots[_currentIndex].id;
-                isSelectedTabAlive = snapshots[_currentIndex].isAlive;
-                url = snapshots[_currentIndex].url;
-                selectedTabKey = snapshots[_currentIndex].key;
-                if (snapshot.isAlive) {
-                  Globals.updateTabValue(
-                    TabControllerValue(
-                      id: snapshot.id,
-                      url: url,
-                      network: Globals.network,
-                      stage: TabStage.Removed,
-                      tabKey: selectedTabKey,
-                    ),
-                  );
-                }
-              },
-            ),
-            flex: 1,
-          ),
-          Expanded(
-            flex: 9,
-            child: GestureDetector(
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-                child: Image(
-                  gaplessPlayback: true,
-                  alignment: Alignment.topCenter,
-                  fit: BoxFit.fitWidth,
-                  image: MemoryImage(snapshot.data),
-                ),
-              ),
-              onTapUp: (tap) {
-                setState(() {
-                  _currentIndex = index;
-                });
-                Globals.updateTabValue(
-                  TabControllerValue(
-                    id: snapshot.id,
-                    network: Globals.network,
-                    url: snapshot.url,
-                    stage: snapshot.isAlive
-                        ? TabStage.SelectedAlive
-                        : TabStage.SelectedInAlive,
-                    tabKey: snapshot.key,
-                  ),
-                );
-                Navigator.of(context).pop();
-              },
-            ),
-          )
-        ],
-      ),
-    );
+        : SnapshotCard(snapshot, true);
   }
 }

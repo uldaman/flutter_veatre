@@ -44,6 +44,7 @@ class _TransactionState extends State<TransactionDialog>
   int _intrinsicGas;
   int _totalGas;
   List<Clause> _clauses = [];
+  bool _detect = true;
   StreamController<String> _vmErrStreamController = StreamController<String>();
 
   BigInt _totalVet = BigInt.from(0);
@@ -83,7 +84,7 @@ class _TransactionState extends State<TransactionDialog>
   }
 
   Future<void> _handleHeadChanged() async {
-    if (Globals.blockHeadForNetwork.network == Globals.network)
+    if (_detect && Globals.blockHeadForNetwork.network == Globals.network)
       await _completeByEntity(_entity);
   }
 
@@ -199,7 +200,7 @@ class _TransactionState extends State<TransactionDialog>
       );
       tx.sign(privateKey);
       WalletStorage.setMainWallet(_entity);
-      Globals.removeBlockHeadHandler(_handleHeadChanged);
+      _detect = false;
       TransactionAPI.send(tx.serialized).then((result) {
         List<Map<String, dynamic>> content = [];
         for (final clause in widget.txMessages) {
@@ -244,7 +245,7 @@ class _TransactionState extends State<TransactionDialog>
           enabled: true,
           rollBack: true,
         );
-      }).whenComplete(() => Globals.addBlockHeadHandler(_handleHeadChanged));
+      }).whenComplete(() => _detect = true);
     });
   }
 

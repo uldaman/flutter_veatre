@@ -121,12 +121,7 @@ class WalletCard extends StatelessWidget {
                   initialData: initialAccount,
                   future: getAccount(),
                   builder: (context, shot) {
-                    Account account = shot.data;
-                    return balance(
-                      account?.formatBalance ?? '--',
-                      account?.formatEnergy ?? '--',
-                      walletEntity.address,
-                    );
+                    return balance(shot.data, initialAccount);
                   },
                 ),
               ],
@@ -140,7 +135,44 @@ class WalletCard extends StatelessWidget {
     );
   }
 
-  Widget balance(String balance, String energy, String address) {
+  Widget value(
+    Account account,
+    Account initialAccount, {
+    bool isBalance = true,
+  }) {
+    if (initialAccount == null && account != null) {
+      return _ValueChange(
+        key: ValueKey(
+          isBalance ? account.formatBalance : account.formatEnergy,
+        ),
+        value: isBalance ? account.balance : account.energy,
+        style: TextStyle(fontSize: isBalance ? 22 : 14),
+      );
+    }
+    return initialAccount == null
+        ? Text(
+            '--',
+            style: TextStyle(fontSize: isBalance ? 22 : 14),
+          )
+        : account == null
+            ? Text(
+                isBalance
+                    ? initialAccount.formatBalance
+                    : initialAccount.formatEnergy,
+                style: TextStyle(fontSize: isBalance ? 22 : 14),
+              )
+            : _ValueChange(
+                key: ValueKey(
+                  isBalance ? account.formatBalance : account.formatEnergy,
+                ),
+                value: isBalance ? account.balance : account.energy,
+                oldValue:
+                    isBalance ? initialAccount.balance : initialAccount.energy,
+                style: TextStyle(fontSize: isBalance ? 22 : 14),
+              );
+  }
+
+  Widget balance(Account account, Account initialAccount) {
     return Column(
       children: <Widget>[
         Container(
@@ -148,12 +180,9 @@ class WalletCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              valueAnimation(
-                Text(
-                  balance,
-                  key: ValueKey("$balance"),
-                  style: TextStyle(fontSize: 22),
-                ),
+              value(
+                account,
+                initialAccount,
               ),
               Container(
                 margin: EdgeInsets.only(left: 5, right: 22, top: 10),
@@ -173,12 +202,10 @@ class WalletCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              valueAnimation(
-                Text(
-                  energy,
-                  key: ValueKey("$energy"),
-                  style: TextStyle(fontSize: 14),
-                ),
+              value(
+                account,
+                initialAccount,
+                isBalance: false,
               ),
               Container(
                 margin: EdgeInsets.only(left: 5, right: 12, top: 2),
@@ -196,18 +223,87 @@ class WalletCard extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget valueAnimation(Widget child) {
-    return AnimatedSwitcher(
-        duration: const Duration(seconds: 1),
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return ScaleTransition(
-            child: child,
-            scale: animation.drive(
-              Tween(begin: 0.0, end: 1.0),
-            ),
-          );
-        },
-        child: child);
+class _ValueAnimation extends AnimatedWidget {
+  final BigInt oldValue;
+  final BigInt value;
+  final TextStyle style;
+  static final _valueTween = Tween<double>(begin: 0.0, end: 1000.0);
+
+  _ValueAnimation({
+    Key key,
+    Animation<double> animation,
+    this.value,
+    this.oldValue,
+    this.style,
+  }) : super(key: key, listenable: animation);
+
+  Widget build(BuildContext context) {
+    final animation = listenable as Animation<double>;
+    final vt = _valueTween.evaluate(animation);
+    final diff = value - oldValue;
+    final bigVT = BigInt.from(vt.toInt());
+    final currentValue = oldValue + (diff * bigVT) ~/ BigInt.from(1000);
+    return Text(
+      '${formatNum(fixed2Value(currentValue))}',
+      style: style,
+    );
+  }
+}
+
+class _ValueChange extends StatefulWidget {
+  final BigInt value;
+  final BigInt oldValue;
+  final TextStyle style;
+
+  _ValueChange({
+    Key key,
+    this.value,
+    this.oldValue,
+    this.style,
+  }) : super(key: key);
+
+  _ValueChangeState createState() => _ValueChangeState();
+}
+
+class _ValueChangeState extends State<_ValueChange>
+    with SingleTickerProviderStateMixin {
+  Animation<double> animation;
+  AnimationController controller;
+  BigInt value;
+  BigInt oldValue;
+
+  @override
+  void initState() {
+    super.initState();
+    value = widget.value ?? BigInt.zero;
+    oldValue = widget.oldValue ?? BigInt.zero;
+    controller = AnimationController(
+        duration: const Duration(milliseconds: 1500), vsync: this);
+    animation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
+    controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (fixed2Value(value) == fixed2Value(oldValue)) {
+      return Text(
+        '${formatNum(fixed2Value(value))}',
+        style: widget.style,
+      );
+    }
+    return _ValueAnimation(
+      animation: animation,
+      value: value,
+      oldValue: oldValue,
+      style: widget.style,
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }

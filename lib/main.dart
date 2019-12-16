@@ -130,6 +130,7 @@ class AppState extends State<App> {
         primaryColor: MaterialColor(0xFF410FE6, {0: Color(0xFF410FE6)}), //主色调
         accentColor: Colors.white,
         backgroundColor: Color(0xFFF8F8F8), //背景色
+        scaffoldBackgroundColor: Color(0xFFF8F8F8),
         brightness: Brightness.light,
         primaryIconTheme: IconThemeData(color: Color(0xFF410FE6)),
         iconTheme: IconThemeData(color: Color(0xFF666666)),

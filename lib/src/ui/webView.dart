@@ -129,10 +129,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                       ),
                     ),
                     onPressed: () async {
-                      updateSearchBar(_currentURL, 1, true);
                       setState(() {
                         _isOnFocus = false;
                       });
+                      updateSearchBar(_currentURL, 1, true);
                     },
                   )
                 : Row(

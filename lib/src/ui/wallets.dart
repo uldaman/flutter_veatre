@@ -46,6 +46,7 @@ class WalletsState extends State<Wallets> {
         centerTitle: true,
       ),
       body: ListView.builder(
+        padding: EdgeInsets.only(top: 15),
         itemBuilder: buildWalletCard,
         itemCount: _walletEntities.length,
         physics: ClampingScrollPhysics(),

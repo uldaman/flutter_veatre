@@ -13,6 +13,8 @@ class WalletCard extends StatelessWidget {
     this.onQrcodeSelected,
     this.onSearchSelected,
     this.initialAccount,
+    this.hasHorizontalPadding = true,
+    this.elevation = 2.0,
     @required this.getAccount,
   }) : super(key: key);
 
@@ -23,7 +25,8 @@ class WalletCard extends StatelessWidget {
   final Future<Account> Function() getAccount;
   final WalletEntity walletEntity;
   final Account initialAccount;
-
+  final bool hasHorizontalPadding;
+  final double elevation;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -31,7 +34,12 @@ class WalletCard extends StatelessWidget {
       child: Hero(
         tag: '0x${walletEntity.address}',
         child: Card(
-          margin: EdgeInsets.only(left: 15, right: 15, top: 15),
+          elevation: elevation,
+          // margin: EdgeInsets.only(left: 15, right: 15, top: 15),
+          margin: EdgeInsets.only(
+              left: hasHorizontalPadding ? 15 : 0,
+              right: hasHorizontalPadding ? 15 : 0,
+              bottom: 15),
           child: Container(
             margin: EdgeInsets.all(10),
             child: Column(
@@ -62,12 +70,15 @@ class WalletCard extends StatelessWidget {
                           Padding(
                             padding: EdgeInsets.only(top: 5),
                             child: Text(
+                              // '0x${walletEntity.address}',
                               '0x${abbreviate(walletEntity.address)}',
                               style: TextStyle(
                                 color: Theme.of(context)
                                     .primaryTextTheme
                                     .display2
                                     .color,
+                                fontSize: 13,
+                                // fontSize: 17,
                               ),
                             ),
                           ),
@@ -229,7 +240,7 @@ class _ValueAnimation extends AnimatedWidget {
   final BigInt oldValue;
   final BigInt value;
   final TextStyle style;
-  static final _valueTween = Tween<double>(begin: 0.0, end: 1000.0);
+  final _valueTween = Tween<double>(begin: 0.0, end: 100.0);
 
   _ValueAnimation({
     Key key,
@@ -244,11 +255,19 @@ class _ValueAnimation extends AnimatedWidget {
     final vt = _valueTween.evaluate(animation);
     final diff = value - oldValue;
     final bigVT = BigInt.from(vt.toInt());
-    final currentValue = oldValue + (diff * bigVT) ~/ BigInt.from(1000);
+    final currentValue = oldValue + (diff * bigVT) ~/ BigInt.from(100);
     return Text(
-      '${formatNum(fixed2Value(currentValue))}',
+      currentValue != value
+          ? '${fixedToInt(currentValue)}'
+          : '${formatNum(fixed2Value(currentValue))}',
       style: style,
     );
+  }
+
+  fixedToInt(BigInt value) {
+    double v = (value / BigInt.from(1e18)).toDouble();
+    String fixed = v.toStringAsFixed(0);
+    return formatNum(fixed);
   }
 }
 
@@ -280,8 +299,9 @@ class _ValueChangeState extends State<_ValueChange>
     value = widget.value ?? BigInt.zero;
     oldValue = widget.oldValue ?? BigInt.zero;
     controller = AnimationController(
-        duration: const Duration(milliseconds: 1500), vsync: this);
-    animation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
+        duration: const Duration(milliseconds: 2000), vsync: this);
+    animation =
+        CurvedAnimation(parent: controller, curve: Curves.linearToEaseOut);
     controller.forward();
   }
 

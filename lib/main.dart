@@ -123,6 +123,7 @@ class AppState extends State<App> {
 
   ThemeData get lightTheme => ThemeData(
         appBarTheme: AppBarTheme(
+          elevation: 1,
           color: Color(0xFFF8F8F8),
           iconTheme: IconThemeData(color: Color(0xFF666666)),
           brightness: Brightness.light,

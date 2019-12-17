@@ -132,7 +132,7 @@ class ManageWalletsState extends State<ManageWallets> {
       body: SafeArea(
         child: _walletEntities.length > 0
             ? ListView.builder(
-                padding: EdgeInsets.only(bottom: 10),
+                padding: EdgeInsets.only(top: 15),
                 physics: ClampingScrollPhysics(),
                 itemBuilder: buildWalletCard,
                 itemCount: _walletEntities.length,

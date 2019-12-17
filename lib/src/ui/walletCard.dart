@@ -236,41 +236,6 @@ class WalletCard extends StatelessWidget {
   }
 }
 
-class _ValueAnimation extends AnimatedWidget {
-  final BigInt oldValue;
-  final BigInt value;
-  final TextStyle style;
-  final _valueTween = Tween<double>(begin: 0.0, end: 100.0);
-
-  _ValueAnimation({
-    Key key,
-    Animation<double> animation,
-    this.value,
-    this.oldValue,
-    this.style,
-  }) : super(key: key, listenable: animation);
-
-  Widget build(BuildContext context) {
-    final animation = listenable as Animation<double>;
-    final vt = _valueTween.evaluate(animation);
-    final diff = value - oldValue;
-    final bigVT = BigInt.from(vt.toInt());
-    final currentValue = oldValue + (diff * bigVT) ~/ BigInt.from(100);
-    return Text(
-      currentValue != value
-          ? '${fixedToInt(currentValue)}'
-          : '${formatNum(fixed2Value(currentValue))}',
-      style: style,
-    );
-  }
-
-  fixedToInt(BigInt value) {
-    double v = (value / BigInt.from(1e18)).toDouble();
-    String fixed = v.toStringAsFixed(0);
-    return formatNum(fixed);
-  }
-}
-
 class _ValueChange extends StatefulWidget {
   final BigInt value;
   final BigInt oldValue;
@@ -301,8 +266,14 @@ class _ValueChangeState extends State<_ValueChange>
     controller = AnimationController(
         duration: const Duration(milliseconds: 2000), vsync: this);
     animation =
-        CurvedAnimation(parent: controller, curve: Curves.linearToEaseOut);
+        CurvedAnimation(parent: controller, curve: Curves.linearToEaseOut)
+            .drive(Tween<double>(begin: 0.0, end: 100.0));
     controller.forward();
+  }
+
+  fixedToInt(BigInt value) {
+    String fixed = (value / BigInt.from(1e18)).toDouble().toStringAsFixed(0);
+    return formatNum(fixed);
   }
 
   @override
@@ -313,11 +284,19 @@ class _ValueChangeState extends State<_ValueChange>
         style: widget.style,
       );
     }
-    return _ValueAnimation(
+    final diff = value - oldValue;
+    return AnimatedBuilder(
       animation: animation,
-      value: value,
-      oldValue: oldValue,
-      style: widget.style,
+      builder: (context, _) {
+        final bigVT = BigInt.from(animation.value.toInt());
+        final currentValue = oldValue + (diff * bigVT) ~/ BigInt.from(100);
+        return Text(
+          currentValue != value
+              ? '${fixedToInt(currentValue)}'
+              : '${formatNum(fixed2Value(currentValue))}',
+          style: widget.style,
+        );
+      },
     );
   }
 

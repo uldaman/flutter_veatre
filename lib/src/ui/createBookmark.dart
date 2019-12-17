@@ -75,6 +75,7 @@ class CreateBookmarkState extends State<CreateBookmark> {
                 favicon: widget.documentMetaData.icon,
                 title: titleEditingController.text,
                 url: widget.documentMetaData.url,
+                network: Globals.network,
               );
               if (widget.eidtBookmarkID != null) {
                 await BookmarkStorage.update(

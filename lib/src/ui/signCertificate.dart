@@ -350,7 +350,7 @@ class SignCertificateState extends State<SignCertificate>
       await WalletStorage.setMainWallet(_walletEntity);
       _swipeController.valueWith(
         enabled: true,
-        shouldLoading: false,
+        shouldLoading: true,
         rollBack: false,
       );
       Navigator.of(context).pop(cert.response);

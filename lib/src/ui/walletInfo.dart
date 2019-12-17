@@ -80,7 +80,7 @@ class WalletInfoState extends State<WalletInfo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Wallets'),
+        title: Text('Details'),
         centerTitle: true,
         actions: <Widget>[
           IconButton(
@@ -104,7 +104,10 @@ class WalletInfoState extends State<WalletInfo> {
       ),
       body: Column(
         children: <Widget>[
-          buildWalletCard(context, walletEntity),
+          Padding(
+            padding: EdgeInsets.only(top: 1),
+            child: buildWalletCard(context, walletEntity),
+          ),
           Padding(
             padding: EdgeInsets.only(top: 15, left: 15, right: 15),
             child: Align(
@@ -165,6 +168,8 @@ class WalletInfoState extends State<WalletInfo> {
     return WalletCard(
       context,
       walletEntity,
+      hasHorizontalPadding: false,
+      elevation: 1,
       initialAccount: initialAccount,
       getAccount: () => AccountAPI.get(walletEntity.address),
     );

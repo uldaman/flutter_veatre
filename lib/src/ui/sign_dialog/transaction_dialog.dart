@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:veatre/src/ui/clauses.dart';
@@ -117,9 +118,11 @@ class _TransactionState extends State<TransactionDialog>
             borderRadius: BorderRadius.all(Radius.circular(27)),
             height: 54,
             onDragEnd: () async {
+              _detect = false;
               _swipeController.valueWith(shouldLoading: true, enabled: false);
               await _animationController.forward();
               _signTx();
+              _detect = true;
             },
           ),
         ),
@@ -183,10 +186,12 @@ class _TransactionState extends State<TransactionDialog>
     );
   }
 
-  void _signTx() {
-    _entity.decryptPrivateKey(Globals.masterPasscodes).then((privateKey) {
-      int nonce = Random(DateTime.now().millisecond).nextInt(1 << 32);
-      int chainTag = Globals.network == Network.MainNet ? 0x4a : 0x27;
+  Future<void> _signTx() async {
+    try {
+      final Uint8List privateKey =
+          await _entity.decryptPrivateKey(Globals.masterPasscodes);
+      final int nonce = Random(DateTime.now().millisecond).nextInt(1 << 32);
+      final int chainTag = Globals.network == Network.MainNet ? 0x4a : 0x27;
       final head = Globals.head();
       Transaction tx = Transaction(
         blockRef: BlockRef(number32: head.number),
@@ -200,53 +205,52 @@ class _TransactionState extends State<TransactionDialog>
       );
       tx.sign(privateKey);
       WalletStorage.setMainWallet(_entity);
-      _detect = false;
-      TransactionAPI.send(tx.serialized).then((result) {
-        List<Map<String, dynamic>> content = [];
-        for (final clause in widget.txMessages) {
-          content.add(clause.encoded);
-        }
-        ActivityStorage.insert(
-          Activity(
-            hash: result['id'],
-            block: head.number,
-            content: json.encode({
-              'messages': content,
-              'fee': _estimatedFee.toRadixString(16),
-              'gas': _totalGas,
-              'priority': _priority,
-            }),
-            link: widget.options.link,
-            address: _entity.address,
-            type: ActivityType.Transaction,
-            comment: _makeSummary(shotSummary: true),
-            timestamp: head.timestamp,
-            network: Globals.network,
-            status: ActivityStatus.Pending,
-          ),
+      final Map<String, dynamic> txResult =
+          await TransactionAPI.send(tx.serialized);
+      List<Map<String, dynamic>> content = [];
+      for (final clause in widget.txMessages) {
+        content.add(clause.encoded);
+      }
+      await ActivityStorage.insert(
+        Activity(
+          hash: txResult['id'],
+          block: head.number,
+          content: json.encode({
+            'messages': content,
+            'fee': _estimatedFee.toRadixString(16),
+            'gas': _totalGas,
+            'priority': _priority,
+          }),
+          link: widget.options.link,
+          address: _entity.address,
+          type: ActivityType.Transaction,
+          comment: _makeSummary(shotSummary: true),
+          timestamp: head.timestamp,
+          network: Globals.network,
+          status: ActivityStatus.Pending,
+        ),
+      );
+      Navigator.of(context).pop(
+        SigningTxResponse(
+          txid: txResult['id'],
+          signer: '0x' + _entity.address,
+        ),
+      );
+    } on DioError catch (err) {
+      if (err.response != null) {
+        await alert(
+          context,
+          Text('Send transaction failed'),
+          '${err.response.data}',
         );
-        Navigator.of(context).pop(
-          SigningTxResponse(
-            txid: result['id'],
-            signer: '0x' + _entity.address,
-          ),
-        );
-      }).catchError((err) async {
-        if (err.response != null) {
-          await alert(
-            context,
-            Text('Send transaction failed'),
-            '${err.response.data}',
-          );
-        }
-        await _animationController.reverse();
-        _swipeController.valueWith(
-          shouldLoading: false,
-          enabled: true,
-          rollBack: true,
-        );
-      }).whenComplete(() => _detect = true);
-    });
+      }
+      await _animationController.reverse();
+      _swipeController.valueWith(
+        shouldLoading: false,
+        enabled: true,
+        rollBack: true,
+      );
+    }
   }
 
   String _makeSummary({bool shotSummary = false}) {
@@ -328,14 +332,16 @@ class _TransactionState extends State<TransactionDialog>
         vtho: _account?.formatEnergy ?? '--',
       ),
       onExpand: () async {
-        WalletEntity newEntity = await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => Wallets(),
-          ),
-        );
-        if (newEntity != null) {
-          _swipeController.valueWith(shouldLoading: true, enabled: false);
-          await _completeByEntity(newEntity);
+        if (_detect) {
+          WalletEntity newEntity = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Wallets(),
+            ),
+          );
+          if (newEntity != null) {
+            _swipeController.valueWith(shouldLoading: true, enabled: false);
+            await _completeByEntity(newEntity);
+          }
         }
       },
     );
@@ -366,13 +372,17 @@ class _TransactionState extends State<TransactionDialog>
     return RowElement(
       prefix: 'Clauses',
       content: Text('${_clauses.length} Clauses'),
-      onExpand: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => Clauses(
-            txMessages: widget.txMessages,
-          ),
-        ),
-      ),
+      onExpand: () {
+        if (_detect) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Clauses(
+                txMessages: widget.txMessages,
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 

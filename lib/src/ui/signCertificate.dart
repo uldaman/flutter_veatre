@@ -28,11 +28,10 @@ class SignCertificateState extends State<SignCertificate>
     with SingleTickerProviderStateMixin {
   Account _account;
   WalletEntity _walletEntity;
-
+  bool _canInteractInterface = true;
   Animation _animation;
   AnimationController _controller;
   SwipeController _swipeController = SwipeController();
-
   @override
   void initState() {
     init();
@@ -240,7 +239,11 @@ class SignCertificateState extends State<SignCertificate>
                   ],
                 ),
                 showIcon: true,
-                onPressed: changeWallet,
+                onPressed: () async {
+                  if (_canInteractInterface) {
+                    await changeWallet();
+                  }
+                },
               ),
               cell(
                 context,
@@ -300,6 +303,8 @@ class SignCertificateState extends State<SignCertificate>
                           ),
                           borderRadius: BorderRadius.all(Radius.circular(27)),
                           height: 54,
+                          onStarted: () => _canInteractInterface = false,
+                          onCancelled: () => _canInteractInterface = true,
                           onEnded: signCert,
                         ),
                       ),
@@ -315,6 +320,7 @@ class SignCertificateState extends State<SignCertificate>
   }
 
   Future<void> signCert() async {
+    _canInteractInterface = false;
     _swipeController.valueWith(
       enabled: false,
       shouldLoading: true,
@@ -362,5 +368,6 @@ class SignCertificateState extends State<SignCertificate>
       );
       return alert(context, Text("Error"), "$err");
     }
+    _canInteractInterface = true;
   }
 }

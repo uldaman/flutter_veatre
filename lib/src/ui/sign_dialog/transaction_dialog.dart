@@ -41,7 +41,7 @@ class _TransactionState extends State<TransactionDialog>
     with SingleTickerProviderStateMixin {
   Account _account;
   WalletEntity _entity;
-  BigInt _estimatedFee;
+  Future<BigInt> Function() _baseGasPrice;
   int _intrinsicGas;
   int _totalGas;
   List<Clause> _clauses = [];
@@ -54,8 +54,24 @@ class _TransactionState extends State<TransactionDialog>
   AnimationController _animationController;
   Animation _animation;
 
+  Future<BigInt> get _estimatedFee async =>
+      await _baseGasPrice() *
+      BigInt.from((1 + _priority / 255) * 1e10) *
+      BigInt.from(_totalGas) ~/
+      BigInt.from(1e10);
+
+  Future<BigInt> Function() _initialBaseGasPrice() {
+    BigInt basePrice;
+    return () async {
+      if (basePrice != null) return basePrice;
+      basePrice = await initialBaseGasPrice();
+      return basePrice;
+    };
+  }
+
   @override
   void initState() {
+    _baseGasPrice = _initialBaseGasPrice();
     _swipeController.valueWith(shouldLoading: true, enabled: false);
     _animationController = AnimationController(
       vsync: this,
@@ -217,7 +233,7 @@ class _TransactionState extends State<TransactionDialog>
           block: head.number,
           content: json.encode({
             'messages': content,
-            'fee': _estimatedFee.toRadixString(16),
+            'fee': (await _estimatedFee).toRadixString(16),
             'gas': _totalGas,
             'priority': _priority,
           }),
@@ -299,10 +315,6 @@ class _TransactionState extends State<TransactionDialog>
   Future<void> _completeByEntity(WalletEntity entity) async {
     dynamic updateUI = (int gas) async {
       _totalGas = widget.options.gas ?? gas;
-      _estimatedFee = await initialBaseGasPrice() *
-          BigInt.from((1 + _priority / 255) * 1e10) *
-          BigInt.from(_totalGas) ~/
-          BigInt.from(1e10);
       setState(
         () => _swipeController.valueWith(shouldLoading: false, enabled: true),
       );
@@ -467,13 +479,16 @@ class _TransactionState extends State<TransactionDialog>
           child: Row(
             children: <Widget>[
               Expanded(
-                child: Text(
-                  _estimatedFee != null
-                      ? formatNum(fixed2Value(_estimatedFee))
-                      : '--',
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
-                    color: Theme.of(context).primaryTextTheme.display2.color,
+                child: FutureBuilder<BigInt>(
+                  future: _estimatedFee,
+                  builder: (_, snapshot) => Text(
+                    snapshot.hasData
+                        ? formatNum(fixed2Value(snapshot.data))
+                        : '--',
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      color: Theme.of(context).primaryTextTheme.display2.color,
+                    ),
                   ),
                 ),
               ),

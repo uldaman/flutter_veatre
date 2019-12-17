@@ -13,7 +13,7 @@ class WalletCard extends StatelessWidget {
     this.onQrcodeSelected,
     this.onSearchSelected,
     this.initialAccount,
-    this.hasHorizontalPadding = true,
+    this.hasHorizontalMargin = true,
     this.elevation = 2.0,
     @required this.getAccount,
   }) : super(key: key);
@@ -25,7 +25,7 @@ class WalletCard extends StatelessWidget {
   final Future<Account> Function() getAccount;
   final WalletEntity walletEntity;
   final Account initialAccount;
-  final bool hasHorizontalPadding;
+  final bool hasHorizontalMargin;
   final double elevation;
 
   @override
@@ -37,9 +37,10 @@ class WalletCard extends StatelessWidget {
         child: Card(
           elevation: elevation,
           margin: EdgeInsets.only(
-              left: hasHorizontalPadding ? 15 : 0,
-              right: hasHorizontalPadding ? 15 : 0,
-              bottom: 15),
+            left: hasHorizontalMargin ? 15 : 0,
+            right: hasHorizontalMargin ? 15 : 0,
+            bottom: 15,
+          ),
           child: Container(
             margin: EdgeInsets.all(10),
             child: Column(

@@ -300,7 +300,7 @@ class SignCertificateState extends State<SignCertificate>
                           ),
                           borderRadius: BorderRadius.all(Radius.circular(27)),
                           height: 54,
-                          onDragEnd: signCert,
+                          onEnded: signCert,
                         ),
                       ),
                     ),

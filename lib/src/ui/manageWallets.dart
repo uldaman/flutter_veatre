@@ -190,11 +190,8 @@ class ManageWalletsState extends State<ManageWallets> {
           transitionDuration: Duration(milliseconds: 300),
           barrierDismissible: false,
           pageBuilder: (context, a, b) {
-            return ScaleTransition(
-              scale: Tween(begin: 0.0, end: 1.0).animate(a),
-              child: AddressDetail(
-                walletEntity: walletEntity,
-              ),
+            return AddressDetail(
+              walletEntity: walletEntity,
             );
           },
         );

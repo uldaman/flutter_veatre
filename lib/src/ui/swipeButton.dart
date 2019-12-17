@@ -41,8 +41,10 @@ class SwipeButton extends StatefulWidget {
     BorderRadius borderRadius,
     this.swipeController,
     this.height = 56.0,
-    @required this.onDragEnd,
-  })  : assert(onDragEnd != null && height != null),
+    this.onStarted,
+    this.onCancelled,
+    @required this.onEnded,
+  })  : assert(onEnded != null && height != null),
         this.borderRadius = borderRadius ?? BorderRadius.zero,
         super(key: key);
 
@@ -50,7 +52,9 @@ class SwipeButton extends StatefulWidget {
   final BorderRadius borderRadius;
   final double height;
   final SwipeController swipeController;
-  final Function onDragEnd;
+  final Function onEnded;
+  final Function onCancelled;
+  final Function onStarted;
 
   @override
   SwipeButtonState createState() => SwipeButtonState();
@@ -185,11 +189,14 @@ class SwipeButtonState extends State<SwipeButton>
     );
   }
 
-  void _onDragStart(DragStartDetails details) {
+  void _onDragStart(DragStartDetails details) async {
     if (enabled) {
       final pos = _positioned.globalToLocal(details.globalPosition);
       _start = Offset(pos.dx, 0.0);
       _controller.stop(canceled: true);
+      if (widget.onStarted != null) {
+        await widget.onStarted();
+      }
     }
   }
 
@@ -222,9 +229,12 @@ class SwipeButtonState extends State<SwipeButton>
         1.0,
         velocity,
       );
+      if (_controller.value < 0.9 && widget.onCancelled != null) {
+        await widget.onCancelled();
+      }
       await _controller.animateWith(simulation);
       if (_controller.value == 1.0) {
-        await widget.onDragEnd();
+        await widget.onEnded();
       }
     }
   }

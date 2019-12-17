@@ -156,8 +156,9 @@ class AddressDetailState extends State<AddressDetail> {
                                           child: Text(
                                             'copied',
                                             style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.amber),
+                                              fontSize: 12,
+                                              color: Colors.black,
+                                            ),
                                           ),
                                           padding: EdgeInsets.all(8),
                                         ),

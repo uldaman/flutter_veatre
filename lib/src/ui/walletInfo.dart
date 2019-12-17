@@ -168,7 +168,7 @@ class WalletInfoState extends State<WalletInfo> {
     return WalletCard(
       context,
       walletEntity,
-      hasHorizontalPadding: false,
+      hasHorizontalMargin: false,
       elevation: 1,
       initialAccount: initialAccount,
       getAccount: () => AccountAPI.get(walletEntity.address),

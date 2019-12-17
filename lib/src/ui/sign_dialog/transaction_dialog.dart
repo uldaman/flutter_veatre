@@ -133,8 +133,9 @@ class _TransactionState extends State<TransactionDialog>
             ),
             borderRadius: BorderRadius.all(Radius.circular(27)),
             height: 54,
+            onStarted: () => _detect = false,
+            onCancelled: () => _detect = true,
             onEnded: () async {
-              _detect = false;
               _swipeController.valueWith(shouldLoading: true, enabled: false);
               await _animationController.forward();
               _signTx();

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/ui/picasso.dart';
 import 'package:veatre/src/utils/common.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 class WalletCard extends StatelessWidget {
   const WalletCard(
@@ -27,6 +27,7 @@ class WalletCard extends StatelessWidget {
   final Account initialAccount;
   final bool hasHorizontalPadding;
   final double elevation;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -35,7 +36,6 @@ class WalletCard extends StatelessWidget {
         tag: '0x${walletEntity.address}',
         child: Card(
           elevation: elevation,
-          // margin: EdgeInsets.only(left: 15, right: 15, top: 15),
           margin: EdgeInsets.only(
               left: hasHorizontalPadding ? 15 : 0,
               right: hasHorizontalPadding ? 15 : 0,
@@ -70,7 +70,6 @@ class WalletCard extends StatelessWidget {
                           Padding(
                             padding: EdgeInsets.only(top: 5),
                             child: Text(
-                              // '0x${walletEntity.address}',
                               '0x${abbreviate(walletEntity.address)}',
                               style: TextStyle(
                                 color: Theme.of(context)
@@ -78,7 +77,6 @@ class WalletCard extends StatelessWidget {
                                     .display2
                                     .color,
                                 fontSize: 13,
-                                // fontSize: 17,
                               ),
                             ),
                           ),
@@ -151,26 +149,27 @@ class WalletCard extends StatelessWidget {
     Account initialAccount, {
     bool isBalance = true,
   }) {
+    final textStyle = TextStyle(fontSize: isBalance ? 22 : 14);
     if (initialAccount == null && account != null) {
       return _ValueChange(
         key: ValueKey(
           isBalance ? account.formatBalance : account.formatEnergy,
         ),
         value: isBalance ? account.balance : account.energy,
-        style: TextStyle(fontSize: isBalance ? 22 : 14),
+        style: textStyle,
       );
     }
     return initialAccount == null
         ? Text(
             '--',
-            style: TextStyle(fontSize: isBalance ? 22 : 14),
+            style: textStyle,
           )
         : account == null
             ? Text(
                 isBalance
                     ? initialAccount.formatBalance
                     : initialAccount.formatEnergy,
-                style: TextStyle(fontSize: isBalance ? 22 : 14),
+                style: textStyle,
               )
             : _ValueChange(
                 key: ValueKey(
@@ -179,7 +178,7 @@ class WalletCard extends StatelessWidget {
                 value: isBalance ? account.balance : account.energy,
                 oldValue:
                     isBalance ? initialAccount.balance : initialAccount.energy,
-                style: TextStyle(fontSize: isBalance ? 22 : 14),
+                style: textStyle,
               );
   }
 
@@ -257,12 +256,14 @@ class _ValueChangeState extends State<_ValueChange>
   AnimationController controller;
   BigInt value;
   BigInt oldValue;
+  int _fixed;
 
   @override
   void initState() {
     super.initState();
     value = widget.value ?? BigInt.zero;
     oldValue = widget.oldValue ?? BigInt.zero;
+    _fixed = getFixed(value);
     controller = AnimationController(
         duration: const Duration(milliseconds: 2000), vsync: this);
     animation =
@@ -271,19 +272,27 @@ class _ValueChangeState extends State<_ValueChange>
     controller.forward();
   }
 
-  fixedToInt(BigInt value) {
-    String fixed = (value / BigInt.from(1e18)).toDouble().toStringAsFixed(0);
-    return formatNum(fixed);
+  int getFixed(BigInt value) {
+    double v = (value / BigInt.from(1e18)).toDouble();
+    String fixed = v.toStringAsFixed(2);
+    if (fixed.split('.')[1].endsWith('0')) {
+      String fixed1 = v.toStringAsFixed(1);
+      if (fixed1.split('.')[1].endsWith('0')) {
+        return 0;
+      }
+      return 1;
+    }
+    return 2;
+  }
+
+  fixedValue(BigInt value, int fixed) {
+    String fixedV =
+        (value / BigInt.from(1e18)).toDouble().toStringAsFixed(fixed);
+    return formatNum(fixedV);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (fixed2Value(value) == fixed2Value(oldValue)) {
-      return Text(
-        '${formatNum(fixed2Value(value))}',
-        style: widget.style,
-      );
-    }
     final diff = value - oldValue;
     return AnimatedBuilder(
       animation: animation,
@@ -291,9 +300,7 @@ class _ValueChangeState extends State<_ValueChange>
         final bigVT = BigInt.from(animation.value.toInt());
         final currentValue = oldValue + (diff * bigVT) ~/ BigInt.from(100);
         return Text(
-          currentValue != value
-              ? '${fixedToInt(currentValue)}'
-              : '${formatNum(fixed2Value(currentValue))}',
+          '${fixedValue(currentValue, _fixed)}',
           style: widget.style,
         );
       },

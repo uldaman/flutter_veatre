@@ -914,7 +914,10 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   void _handleHeadChanged() async {
     final blockHeadForNetwork = Globals.blockHeadForNetwork;
     if (blockHeadForNetwork.network == widget.network && !_head.isCompleted) {
-      await controller.setPrompt(json.encode(blockHeadForNetwork.head.encoded));
+      if (controller != null) {
+        await controller
+            .setPrompt(json.encode(blockHeadForNetwork.head.encoded));
+      }
       await updateLatestActivity();
       _head.complete(blockHeadForNetwork.head);
     }

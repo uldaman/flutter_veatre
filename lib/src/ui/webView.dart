@@ -342,6 +342,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onPageStarted: (String url) async {
           setState(() {
+            _canForward = false;
             _currentURL = url;
           });
           if (controller != null) {
@@ -351,6 +352,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         onPageFinished: (String url) async {
           if (controller != null) {
             await updateBookmarkID(url);
+            _canForward = await controller.canGoForward();
           }
           updateSearchBar(url, 1, !_isOnFocus);
           setState(() {

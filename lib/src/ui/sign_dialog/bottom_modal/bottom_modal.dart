@@ -74,7 +74,10 @@ class BottomModal extends StatelessWidget {
           flex: 2,
           child: Container(
             height: 3,
-            decoration: ShapeDecoration(shape: StadiumBorder()),
+            decoration: ShapeDecoration(
+              shape: StadiumBorder(),
+              color: Theme.of(context).primaryTextTheme.display3.color,
+            ),
           ),
         ),
         Spacer(

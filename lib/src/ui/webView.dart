@@ -342,7 +342,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onPageStarted: (String url) async {
           setState(() {
-            _canForward = false;
             _currentURL = url;
           });
           if (controller != null) {
@@ -352,7 +351,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         onPageFinished: (String url) async {
           if (controller != null) {
             await updateBookmarkID(url);
-            _canForward = await controller.canGoForward();
           }
           updateSearchBar(url, 1, !_isOnFocus);
           setState(() {
@@ -931,6 +929,14 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  Future<void> _loadHomePage() async {
+    await controller?.goHomePage();
+    setState(() {
+      _canBack = false;
+      _canForward = false;
+    });
+  }
+
   void _handleTabChanged() async {
     final tabValue = Globals.tabValue;
     key = tabValue.tabKey;
@@ -939,14 +945,14 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         setState(() {
           _offstage = true;
         });
-        await controller.goHomePage();
+        await _loadHomePage();
       } else {
         if (tabValue.id == id) {
           if (tabValue.stage == TabStage.Removed ||
               tabValue.stage == TabStage.Coverred) {
-            await controller.goHomePage();
+            await _loadHomePage();
           } else if (tabValue.stage == TabStage.SelectedInAlive) {
-            await controller.goHomePage();
+            await _loadHomePage();
             await controller.loadUrl(tabValue.url);
           }
           setState(() {

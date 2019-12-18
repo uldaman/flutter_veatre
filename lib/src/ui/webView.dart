@@ -70,6 +70,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   double _progress = 0;
   bool _offstage;
   String _currentURL;
+  Future<dynamic> Function(Widget) _showSovereignDialog;
 
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
@@ -90,7 +91,22 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   @override
   void initState() {
-    super.initState();
+    _showSovereignDialog = () {
+      bool isShowing = false;
+      return (Widget dialog) async {
+        if (isShowing) throw 'request is in progress';
+        isShowing = true;
+        dynamic result = await showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (_) => dialog,
+        );
+        isShowing = false;
+        if (result == null) throw 'user cancelled';
+        return result.encoded;
+      };
+    }();
     id = widget.id;
     key = widget.tabKey;
     _offstage = widget.offstage;
@@ -106,6 +122,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       },
     );
     updateLatestActivity();
+    super.initState();
   }
 
   @override
@@ -567,7 +584,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       for (Map<String, dynamic> txMsg in arguments[1]) {
         txMessages.add(SigningTxMessage.fromJSON(txMsg));
       }
-      return showDialog(
+      return _showSovereignDialog(
         TransactionDialog(
           options: options,
           txMessages: txMessages,
@@ -579,20 +596,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       SigningCertOptions options =
           SigningCertOptions.fromJSON(arguments[2], _currentURL);
       await _validate(options.signer);
-      return showDialog(SignCertificate(certMessage, options));
+      return _showSovereignDialog(SignCertificate(certMessage, options));
     }
     throw 'unsupported method';
-  }
-
-  Future<dynamic> showDialog(Widget dialog) async {
-    dynamic result = await showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => dialog,
-    );
-    if (result == null) throw 'user cancelled';
-    return result.encoded;
   }
 
   List<Widget> get bottomItems {

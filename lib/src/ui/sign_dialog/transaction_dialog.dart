@@ -60,18 +60,16 @@ class _TransactionState extends State<TransactionDialog>
       BigInt.from(_totalGas) ~/
       BigInt.from(1e10);
 
-  Future<BigInt> Function() _initialBaseGasPrice() {
-    BigInt basePrice;
-    return () async {
-      if (basePrice != null) return basePrice;
-      basePrice = await initialBaseGasPrice();
-      return basePrice;
-    };
-  }
-
   @override
   void initState() {
-    _baseGasPrice = _initialBaseGasPrice();
+    _baseGasPrice = () {
+      BigInt basePrice;
+      return () async {
+        if (basePrice != null) return basePrice;
+        basePrice = await initialBaseGasPrice();
+        return basePrice;
+      };
+    }();
     _swipeController.valueWith(shouldLoading: true, enabled: false);
     _animationController = AnimationController(
       vsync: this,

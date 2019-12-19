@@ -150,37 +150,42 @@ class WalletCard extends StatelessWidget {
     Account initialAccount, {
     bool isBalance = true,
   }) {
-    final textStyle = TextStyle(fontSize: isBalance ? 22 : 14);
-    if (initialAccount == null && account != null) {
-      return _ValueChange(
-        key: ValueKey(
-          isBalance ? account.formatBalance : account.formatEnergy,
-        ),
-        value: isBalance ? account.balance : account.energy,
-        style: textStyle,
-      );
-    }
-    return initialAccount == null
-        ? Text(
-            '--',
-            style: textStyle,
-          )
-        : account == null
-            ? Text(
-                isBalance
-                    ? initialAccount.formatBalance
-                    : initialAccount.formatEnergy,
-                style: textStyle,
-              )
-            : _ValueChange(
-                key: ValueKey(
-                  isBalance ? account.formatBalance : account.formatEnergy,
-                ),
-                value: isBalance ? account.balance : account.energy,
-                oldValue:
-                    isBalance ? initialAccount.balance : initialAccount.energy,
-                style: textStyle,
-              );
+    return DefaultTextStyle(
+      child: initialAccount == null && account != null
+          ? _ValueChange(
+              key: ValueKey(
+                isBalance ? account.formatBalance : account.formatEnergy,
+              ),
+              value: isBalance ? account.balance : account.energy,
+            )
+          : initialAccount == null
+              ? Text('--')
+              : account == null
+                  ? Text(
+                      isBalance
+                          ? initialAccount.formatBalance
+                          : initialAccount.formatEnergy,
+                    )
+                  : _ValueChange(
+                      key: ValueKey(
+                        isBalance
+                            ? account.formatBalance
+                            : account.formatEnergy,
+                      ),
+                      value: isBalance ? account.balance : account.energy,
+                      oldValue: isBalance
+                          ? initialAccount.balance
+                          : initialAccount.energy,
+                    ),
+      style: TextStyle(
+        fontSize: isBalance ? 22 : 14,
+        color: Theme.of(context).primaryTextTheme.title.color,
+        fontWeight: FontWeight.normal,
+        decoration: TextDecoration.none,
+      ),
+      overflow: TextOverflow.clip,
+      maxLines: 1,
+    );
   }
 
   Widget balance(Account account, Account initialAccount) {
@@ -239,13 +244,11 @@ class WalletCard extends StatelessWidget {
 class _ValueChange extends StatefulWidget {
   final BigInt value;
   final BigInt oldValue;
-  final TextStyle style;
 
   _ValueChange({
     Key key,
     this.value,
     this.oldValue,
-    this.style,
   }) : super(key: key);
 
   _ValueChangeState createState() => _ValueChangeState();
@@ -257,6 +260,7 @@ class _ValueChangeState extends State<_ValueChange>
   AnimationController controller;
   BigInt value;
   BigInt oldValue;
+  BigInt _diff;
   int _fixed;
 
   @override
@@ -264,6 +268,7 @@ class _ValueChangeState extends State<_ValueChange>
     super.initState();
     value = widget.value ?? BigInt.zero;
     oldValue = widget.oldValue ?? BigInt.zero;
+    _diff = value - oldValue;
     _fixed = getFixed(value);
     controller = AnimationController(
         duration: const Duration(milliseconds: 2000), vsync: this);
@@ -294,16 +299,12 @@ class _ValueChangeState extends State<_ValueChange>
 
   @override
   Widget build(BuildContext context) {
-    final diff = value - oldValue;
     return AnimatedBuilder(
       animation: animation,
       builder: (context, _) {
         final bigVT = BigInt.from(animation.value.toInt());
-        final currentValue = oldValue + (diff * bigVT) ~/ BigInt.from(100);
-        return Text(
-          '${fixedValue(currentValue, _fixed)}',
-          style: widget.style,
-        );
+        final currentValue = oldValue + (_diff * bigVT) ~/ BigInt.from(100);
+        return Text('${fixedValue(currentValue, _fixed)}');
       },
     );
   }

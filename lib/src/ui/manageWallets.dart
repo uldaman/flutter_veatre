@@ -77,10 +77,12 @@ class ManageWalletsState extends State<ManageWallets> {
 
   Future<void> _load() async {
     await syncWallets();
-    setState(() {
-      _walletEntities = walletEntities();
-      _accounts = accounts();
-    });
+    if (mounted) {
+      setState(() {
+        _walletEntities = walletEntities();
+        _accounts = accounts();
+      });
+    }
   }
 
   @override

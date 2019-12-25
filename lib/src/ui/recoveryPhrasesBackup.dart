@@ -151,6 +151,9 @@ class _RecoveryPhraseBackupState extends State<RecoveryPhraseBackup> {
                       },
                     ),
                   ),
+                  SizedBox(
+                    height: 20,
+                  ),
                 ],
               ),
             )

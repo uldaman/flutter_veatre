@@ -7,8 +7,14 @@ import 'package:veatre/src/ui/mainUI.dart';
 import 'package:system_setting/system_setting.dart';
 
 class Decision extends StatefulWidget {
-  Decision({Key key, this.canCancel: false}) : super(key: key);
+  Decision({
+    Key key,
+    this.canCancel: false,
+    this.isForVerification: false,
+  }) : super(key: key);
+
   final bool canCancel;
+  final bool isForVerification;
 
   @override
   _DecisionState createState() => _DecisionState();
@@ -52,18 +58,55 @@ class _DecisionState extends State<Decision> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 60),
-                child: Text(
-                  'Welcome back',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).primaryTextTheme.title.color,
-                    fontSize: 28,
-                  ),
-                ),
-              ),
+              widget.canCancel
+                  ? Column(
+                      children: <Widget>[
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: IconButton(
+                              padding: EdgeInsets.all(0),
+                              icon: Icon(Icons.arrow_back_ios),
+                              onPressed: () async {
+                                Navigator.of(context).pop(false);
+                              },
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: 20,
+                          ),
+                          child: SizedBox(
+                            width: 200,
+                            child: Text(
+                              widget.isForVerification
+                                  ? 'Verify'
+                                  : 'Welcome back',
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Padding(
+                      padding: EdgeInsets.only(top: 60),
+                      child: Text(
+                        widget.isForVerification ? 'Verify' : 'Welcome back',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).primaryTextTheme.title.color,
+                          fontSize: 28,
+                        ),
+                      ),
+                    ),
               StreamBuilder<AuthenticationState>(
                 stream: _bloc.state,
                 initialData: _bloc.initialState,
@@ -87,7 +130,7 @@ class _DecisionState extends State<Decision> {
     if (state is Uninitialized) return Container();
 
     if (state is Unauthenticated && state.authType == AuthType.password)
-      return Unlock(canCancel: widget.canCancel);
+      return Unlock();
 
     return Column(
       children: <Widget>[

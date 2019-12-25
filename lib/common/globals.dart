@@ -1,10 +1,10 @@
 import 'dart:core';
 import 'dart:async';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_keychain/flutter_keychain.dart';
-
 import 'package:veatre/src/models/dapp.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/storage/bookmarkStorage.dart';
@@ -250,10 +250,6 @@ class Globals {
     if (await getKeychainPass() != null) {
       await setKeychainPass(bytesToHex(_masterPasscodes));
     }
-  }
-
-  static void clearMasterPasscodes() {
-    _masterPasscodes = Uint8List.fromList([]);
   }
 
   static Uint8List get masterPasscodes {

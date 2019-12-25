@@ -6,8 +6,9 @@ import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/ui/mainUI.dart';
 
 class Unlock extends StatefulWidget {
-  Unlock({Key key, this.canCancel: false}) : super(key: key);
-  final bool canCancel;
+  Unlock({
+    Key key,
+  }) : super(key: key);
 
   @override
   UnlockState createState() => UnlockState();
@@ -16,11 +17,6 @@ class Unlock extends StatefulWidget {
 class UnlockState extends State<Unlock> {
   String errorMsg = '';
   PassClearController passClearController = PassClearController();
-  @override
-  void initState() {
-    Globals.clearMasterPasscodes();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,15 +85,6 @@ class UnlockState extends State<Unlock> {
             ],
           ),
         ),
-        widget.canCancel
-            ? FlatButton(
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ),
-                onPressed: () => Navigator.of(context).maybePop(false),
-              )
-            : Container(),
       ],
     );
   }

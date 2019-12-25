@@ -27,7 +27,6 @@ class EnterPasswordState extends State<EnterPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // resizeToAvoidBottomPadding: false,
       body: SafeArea(
         child: Column(
           children: <Widget>[

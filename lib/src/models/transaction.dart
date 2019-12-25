@@ -235,7 +235,7 @@ class SigningTxMessage {
 
   Clause toClause() {
     return Clause(
-      to: hexToBytes(to),
+      to: to != null ? hexToBytes(to) : null,
       value: BigInt.parse(value),
       data: hexToBytes(data),
     );

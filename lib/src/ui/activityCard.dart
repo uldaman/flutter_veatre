@@ -133,11 +133,13 @@ class ActivityCard extends StatelessWidget {
                                 padding: EdgeInsets.only(left: 2, right: 2),
                                 child: Picasso(
                                   '0x${activity.address}',
+                                  key: ValueKey('0x${activity.address}'),
                                   size: 20,
                                   borderRadius: 4,
                                 ),
                               ),
                               FutureBuilder(
+                                key: ValueKey('0x${activity.address}'),
                                 future: WalletStorage.read(
                                   activity.address,
                                   network: activity.network,

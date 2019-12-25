@@ -6,7 +6,8 @@ class Picasso extends StatelessWidget {
   final double size;
   final double borderRadius;
 
-  Picasso(this.content, {this.size = 60, this.borderRadius = 10});
+  Picasso(this.content, {this.size = 60, this.borderRadius = 10, Key key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

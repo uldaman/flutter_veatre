@@ -126,7 +126,10 @@ class WalletOperationState extends State<WalletOperation> {
             onTap: () async {
               final bool isOK = await Navigator.of(context).push<bool>(
                 MaterialPageRoute(
-                  builder: (_) => Decision(canCancel: true),
+                  builder: (_) => Decision(
+                    canCancel: true,
+                    isForVerification: true,
+                  ),
                   fullscreenDialog: true,
                 ),
               );

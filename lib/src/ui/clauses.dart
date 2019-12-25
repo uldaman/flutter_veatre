@@ -37,7 +37,9 @@ class Clauses extends StatelessWidget {
               Row(
                 children: <Widget>[
                   Text(
-                    "To: 0x${abbreviate(txMessage.to.substring(2))}",
+                    txMessage.to == null
+                        ? "To: --"
+                        : "To: 0x${abbreviate(txMessage.to.substring(2))}",
                   ),
                   Expanded(
                     child: Align(
@@ -158,7 +160,7 @@ class Clauses extends StatelessWidget {
   }
 
   String typeOf(SigningTxMessage signingTxMessage) {
-    if (signingTxMessage.to == '0x') {
+    if (signingTxMessage.to == null) {
       return 'Create';
     }
     if (signingTxMessage.data.length == 2) {

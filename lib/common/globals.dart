@@ -56,11 +56,21 @@ class BookmarkController extends ValueNotifier<Bookmark> {
   BookmarkController(Bookmark value) : super(value);
 }
 
+class ClipboardController extends ValueNotifier<ClipboardValue> {
+  ClipboardController(ClipboardValue value) : super(value);
+}
+
 class BlockHeadForNetwork {
   Network network;
   BlockHead head;
 
   BlockHeadForNetwork({this.network, this.head});
+}
+
+class ClipboardValue {
+  String data;
+
+  ClipboardValue({this.data});
 }
 
 class Globals {
@@ -135,6 +145,23 @@ class Globals {
 
   static BookmarkController _bookmarkController =
       BookmarkController(Bookmark());
+
+  static ClipboardController _clipboardController =
+      ClipboardController(ClipboardValue());
+
+  static void addClipboardHandler(void Function() handler) {
+    _clipboardController.addListener(handler);
+  }
+
+  static void updateClipboardValue(ClipboardValue clipboardValue) {
+    _clipboardController.value = clipboardValue;
+  }
+
+  static void removeClipboardHandler(void Function() handler) {
+    _clipboardController.removeListener(handler);
+  }
+
+  static ClipboardValue get clipboardValue => _clipboardController.value;
 
   static void addTabHandler(void Function() handler) {
     _tabController.addListener(handler);
@@ -272,6 +299,7 @@ class Globals {
   static void destroy() {
     _appearanceController.dispose();
     _blockHeadController.dispose();
+    _clipboardController.dispose();
     _tabController.dispose();
     _networkController.dispose();
   }

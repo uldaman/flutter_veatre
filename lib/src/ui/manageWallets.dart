@@ -200,7 +200,7 @@ class ManageWalletsState extends State<ManageWallets> {
       },
       onSearchSelected: () async {
         final url =
-            "https://insight.vecha.in/#/${Globals.network == Network.MainNet ? 'main' : 'test'}/accounts/0x${walletEntity.address}";
+            "https://${Globals.network == Network.MainNet ? 'explore' : '/explore-testnet'}.vechain.org/search?content=0x${walletEntity.address}";
         Navigator.of(context).pop(url);
       },
       onSelected: () async {

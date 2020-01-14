@@ -40,7 +40,7 @@ class Storage {
         if (rows.length == 0) {
           await db.insert(configTableName, {
             'theme': 0,
-            'network': 0,
+            'network': 1,
           });
         }
       },

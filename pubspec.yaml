@@ -20,6 +20,7 @@ dependencies:
   flutter:
     sdk: flutter
   sqflite: ^1.1.6+3
+  provider: 3.2.0
   bloc_pattern: ^2.5.1
   rxdart: ^0.22.6
   local_auth: ^0.6.0+1
@@ -61,7 +62,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - "assets/resource/en-mnemonic-word-list.txt"
     - "assets/blank.png"
     - "assets/logo.png"
     - "assets/step1.png"

@@ -21,15 +21,6 @@ class ActivityCard extends StatelessWidget {
     this.hasAvatar = false,
   }) : super(key: key);
 
-  String getDomain(Uri uri) {
-    String host = uri.host;
-    List<String> components = host.split('.');
-    if (components.length <= 3) {
-      return host;
-    }
-    return "${components[1]}.${components[2]}";
-  }
-
   String formatMonth(int month) {
     switch (month) {
       case 1:
@@ -78,20 +69,23 @@ class ActivityCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 10),
-                width: 40,
-                color: activity.type == ActivityType.Transaction
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).primaryTextTheme.title.color,
-                child: Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Text(
-                    activity.type == ActivityType.Transaction ? 'TX' : 'CERT',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
+              SizedBox(
+                width: 60,
+                child: Card(
+                  elevation: 0,
+                  margin: EdgeInsets.only(left: 10),
+                  color: activity.type == ActivityType.Transaction
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).primaryTextTheme.title.color,
+                  child: Padding(
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      activity.type == ActivityType.Transaction ? 'TX' : 'CERT',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                      ),
                     ),
                   ),
                 ),
@@ -338,7 +332,7 @@ class ActivityCard extends StatelessWidget {
                       FlatButton(
                         padding: EdgeInsets.only(left: 5),
                         child: Text(
-                          getDomain(Uri.parse(activity.link)),
+                          Uri.parse(activity.link).host,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
@@ -379,7 +373,7 @@ class ActivityCard extends StatelessWidget {
                               ),
                               onPressed: () async {
                                 final url =
-                                    "https://insight.vecha.in/#${Globals.network == Network.MainNet ? '' : '/test'}/txs/${activity.hash}";
+                                    "https://${Globals.network == Network.MainNet ? 'explore' : '/explore-testnet'}.vechain.org/search?content=${activity.hash}";
                                 Navigator.of(context).pop(url);
                               },
                             )

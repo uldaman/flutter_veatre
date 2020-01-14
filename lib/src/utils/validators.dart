@@ -16,12 +16,12 @@ bool isByteString(String byStr, {int length}) {
       validators.isLength(str, length, length);
 }
 
-bool isAddress(String str) {
-  return isByteString(str, length: 40);
+bool isHash(String str) {
+  return isByteString(str, length: 64);
 }
 
-bool isPrivateKey(String str) {
-  return isByteString(str, length: 64);
+bool isAddress(String str) {
+  return isByteString(str, length: 40);
 }
 
 bool isPublicKey(String str) {

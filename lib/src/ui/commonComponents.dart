@@ -103,19 +103,25 @@ Widget commonButton(
   Color color,
   Color textColor,
   Color disabledColor,
+  BorderSide side,
+  TextStyle style,
 }) {
   return FlatButton(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5)),
-      side: BorderSide.none,
+      side: side ?? BorderSide.none,
     ),
     color: color ?? Theme.of(context).primaryColor,
+    splashColor: Colors.transparent,
+    highlightColor: Colors.transparent,
     child: Text(
       title,
-      style: TextStyle(
-        color: textColor ?? Theme.of(context).accentColor,
-        fontSize: 17,
-      ),
+      style: style ??
+          TextStyle(
+            color: textColor ?? Theme.of(context).accentColor,
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
+          ),
     ),
     disabledColor:
         disabledColor ?? Theme.of(context).primaryTextTheme.display3.color,

@@ -210,14 +210,10 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 150,
                   height: 44,
-                  child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                        color: Theme.of(context).primaryTextTheme.title.color,
-                      ),
-                    ),
-                    child: Text('Copy address'),
-                    onPressed: () async {
+                  child: commonButton(
+                    context,
+                    'Copy address',
+                    () async {
                       await Clipboard.setData(
                           new ClipboardData(text: '0x' + address));
                       setState(() {
@@ -228,6 +224,9 @@ class _ImportWalletGenerationState extends State<ImportWalletGeneration> {
                         isCopied = false;
                       });
                     },
+                    color: Colors.transparent,
+                    textColor: Theme.of(context).primaryTextTheme.title.color,
+                    side: BorderSide(width: 1),
                   ),
                 )
               ],

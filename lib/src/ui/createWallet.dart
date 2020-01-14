@@ -246,14 +246,10 @@ class _CreateWalletState extends State<CreateWallet> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width - 150,
                     height: 44,
-                    child: FlatButton(
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          color: Theme.of(context).primaryTextTheme.title.color,
-                        ),
-                      ),
-                      child: Text('Copy address'),
-                      onPressed: () async {
+                    child: commonButton(
+                      context,
+                      'Copy address',
+                      () async {
                         await Clipboard.setData(
                             new ClipboardData(text: '0x' + address));
                         setState(() {
@@ -264,6 +260,9 @@ class _CreateWalletState extends State<CreateWallet> {
                           isCopied = false;
                         });
                       },
+                      color: Colors.transparent,
+                      textColor: Theme.of(context).primaryTextTheme.title.color,
+                      side: BorderSide(width: 1),
                     ),
                   )
                 ],
@@ -301,32 +300,32 @@ class _CreateWalletState extends State<CreateWallet> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 60,
-                      height: 44,
-                      child: commonButton(
-                        context,
-                        'Skip Now',
-                        () async {
-                          await WalletStorage.saveWallet(
-                            address,
-                            walletName,
-                            mnemonic,
-                            Globals.masterPasscodes,
-                          );
-                          Navigator.popUntil(
-                            context,
-                            ModalRoute.withName(widget.rootRouteName),
-                          );
-                        },
-                        color: Colors.transparent,
-                        textColor:
-                            Theme.of(context).primaryTextTheme.title.color,
+                    Padding(
+                      padding: EdgeInsets.only(top: 15, bottom: 15),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width - 60,
+                        height: 44,
+                        child: commonButton(
+                          context,
+                          'Skip Now',
+                          () async {
+                            await WalletStorage.saveWallet(
+                              address,
+                              walletName,
+                              mnemonic,
+                              Globals.masterPasscodes,
+                            );
+                            Navigator.popUntil(
+                              context,
+                              ModalRoute.withName(widget.rootRouteName),
+                            );
+                          },
+                          color: Colors.transparent,
+                          textColor:
+                              Theme.of(context).primaryTextTheme.title.color,
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               )

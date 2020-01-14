@@ -16,6 +16,7 @@ import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 
 import 'package:veatre/common/net.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/utils/validators.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/dapp.dart';
@@ -112,8 +113,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     _offstage = widget.offstage;
     _currentURL = widget.initialURL;
     Globals.addBlockHeadHandler(_handleHeadChanged);
-    Globals.addTabHandler(_handleTabChanged);
     Globals.addBookmarkHandler(_handleBookmark);
+    Globals.addTabHandler(_handleTabChanged);
+    Globals.addClipboardHandler(_handleClipboard);
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
@@ -431,7 +433,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       } else {
         icon = Icons.lock_open;
       }
-      String domain = getDomain(uri);
+      String domain = uri.host;
       searchBarController.valueWith(
         leftView: Icon(
           icon,
@@ -480,16 +482,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  String getDomain(Uri uri) {
-    String host = uri.host;
-    List<String> components = host.split('.');
-    if (components.length <= 3) {
-      return host;
-    }
-    return "${components[1]}.${components[2]}";
-  }
-
   String resolveURL(String url) {
+    if (isAddress(url) || isHash(url)) {
+      if (!url.startsWith('0x')) {
+        url = '0x$url';
+      }
+      return "https://${widget.network == Network.MainNet ? 'explore' : '/explore-testnet'}.vechain.org/search?content=$url";
+    }
     RegExp domainRegExp = RegExp(
         r"^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$");
     if (domainRegExp.hasMatch(url)) {
@@ -607,7 +606,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ? 1
         : snapshotLength +
             ((Globals.tabValue.stage == TabStage.Created ||
-                    Globals.tabValue.stage == TabStage.Coverred)
+                        Globals.tabValue.stage == TabStage.Coverred) &&
+                    !showSnapshot
                 ? 1
                 : 0);
     return [
@@ -754,9 +754,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       onPressed: onPressed != null
           ? () async {
               if (btnEnabled) {
-                btnEnabled = false;
-                await onPressed();
-                btnEnabled = true;
+                try {
+                  btnEnabled = false;
+                  await onPressed();
+                } finally {
+                  btnEnabled = true;
+                }
               }
             }
           : null,
@@ -767,6 +770,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     if (controller != null) {
       final result =
           await controller.evaluateJavascript("window.__getMetaData__();");
+      print('result $result');
       return DocumentMetaData.fromJSON(json.decode(result));
     }
     return null;
@@ -973,6 +977,28 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Future<void> _handleBookmark() async {
     if (Globals.bookmark.network == Globals.network) {
       await updateBookmarkID(_currentURL);
+    }
+  }
+
+  Future<void> _handleClipboard() async {
+    final data = Globals.clipboardValue.data;
+    final uri = Uri.parse(_currentURL);
+    final isOnExplore = uri.host == 'explore.vechain.org' ||
+        uri.host == 'explore-testnet.vechain.org';
+    if (!_offstage &&
+        Globals.network == widget.network &&
+        !(_currentURL.indexOf(data) != -1 && isOnExplore)) {
+      await customAlert(
+        context,
+        title: Text(
+          "Search ${isAddress(data) ? 'Address' : 'Hash'}",
+        ),
+        content: Text(data),
+        confirmAction: () async {
+          Navigator.of(context).pop();
+          await _handleLoad(data);
+        },
+      );
     }
   }
 }

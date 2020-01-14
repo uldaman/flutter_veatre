@@ -28,13 +28,35 @@ class WalletInfoState extends State<WalletInfo> {
   List<Activity> activities = [];
   WalletEntity walletEntity;
   Account initialAccount;
+  ScrollController scrollController = ScrollController(initialScrollOffset: 0);
+  bool loading = false;
+  int limit = 10;
+  int offset = 0;
+
   @override
   void initState() {
     walletEntity = widget.walletEntity;
     initialAccount = widget.account;
     super.initState();
     _handleHeadChanged();
+    scrollController.addListener(_handleScroll);
     Globals.addBlockHeadHandler(_handleHeadChanged);
+  }
+
+  void _handleScroll() async {
+    if (scrollController.offset == scrollController.position.maxScrollExtent &&
+        !loading) {
+      setState(() {
+        loading = true;
+      });
+      await Future.delayed(Duration(milliseconds: 300));
+      await loadActivities();
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
+    }
   }
 
   Future<void> updateWalletEntity() async {
@@ -54,16 +76,16 @@ class WalletInfoState extends State<WalletInfo> {
   }
 
   Future<void> loadActivities() async {
-    try {
-      List<Activity> activities =
-          await ActivityStorage.query(widget.walletEntity.address);
-      if (mounted) {
-        setState(() {
-          this.activities = activities;
-        });
-      }
-    } catch (e) {
-      print("loadActivities error: $e");
+    List<Activity> acs = await ActivityStorage.query(
+      address: widget.walletEntity.address,
+      limit: limit,
+      offset: offset,
+    );
+    if (mounted) {
+      setState(() {
+        this.activities.addAll(acs);
+        offset = this.activities.length;
+      });
     }
   }
 
@@ -99,64 +121,66 @@ class WalletInfoState extends State<WalletInfo> {
           ),
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: 1),
-            child: buildWalletCard(context, walletEntity),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Activities',
-                style: TextStyle(
-                  color: Theme.of(context).primaryTextTheme.subtitle.color,
-                  fontSize: 22,
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: 1),
+              child: buildWalletCard(context, walletEntity),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 15, left: 15, right: 15),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Activities',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryTextTheme.subtitle.color,
+                    fontSize: 22,
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: activities.length > 0
-                ? ListView.builder(
-                    padding: EdgeInsets.only(bottom: 15, top: 10),
-                    itemBuilder: buildActivity,
-                    itemCount: activities.length,
-                    physics: ClampingScrollPhysics(),
-                  )
-                : Center(
-                    child: SizedBox(
-                      height: 200,
-                      child: Column(
-                        children: <Widget>[
-                          Text(
-                            'No Activity',
-                            style: TextStyle(
-                              fontSize: 22,
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                EdgeInsets.only(top: 20, left: 40, right: 40),
-                            child: Text(
-                              "Transaction and Certificate that you've signed will appear here",
+            Expanded(
+              child: activities.length > 0
+                  ? ListView.builder(
+                      controller: scrollController,
+                      padding: EdgeInsets.only(bottom: 15, top: 10),
+                      itemBuilder: buildActivity,
+                      itemCount: activities.length,
+                    )
+                  : Center(
+                      child: SizedBox(
+                        height: 200,
+                        child: Column(
+                          children: <Widget>[
+                            Text(
+                              'No Activity',
                               style: TextStyle(
-                                color: Theme.of(context)
-                                    .primaryTextTheme
-                                    .display2
-                                    .color,
+                                fontSize: 22,
                               ),
-                              textAlign: TextAlign.center,
                             ),
-                          ),
-                        ],
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(top: 20, left: 40, right: 40),
+                              child: Text(
+                                "Transaction and Certificate that you've signed will appear here",
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .primaryTextTheme
+                                      .display2
+                                      .color,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -174,6 +198,32 @@ class WalletInfoState extends State<WalletInfo> {
 
   Widget buildActivity(BuildContext context, int index) {
     Activity activity = activities[index];
-    return ActivityCard(activity);
+    return Column(
+      children: <Widget>[
+        ActivityCard(activity),
+        Visibility(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: loading
+                  ? CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(
+                          Theme.of(context).primaryColor),
+                    )
+                  : Text(
+                      'load more',
+                      style: TextStyle(
+                        color:
+                            Theme.of(context).primaryTextTheme.display2.color,
+                        fontSize: 17,
+                      ),
+                    ),
+            ),
+          ),
+          visible: index == offset - 1,
+        )
+      ],
+    );
   }
 }

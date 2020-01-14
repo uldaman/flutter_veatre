@@ -70,6 +70,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   bool _isOnFocus = false;
   double _progress = 0;
   bool _offstage;
+  bool _isHomePage = true;
   String _currentURL;
   Future<dynamic> Function(Widget) _showSovereignDialog;
 
@@ -352,6 +353,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onPageFinished: (String url) async {
           if (controller != null) {
+            _canBack = !_isHomePage && await controller.canGoBack();
+            _canForward = !_isHomePage && await controller.canGoForward();
+            _isHomePage = false;
             await updateBookmarkID(url);
           }
           updateSearchBar(url, 1, !_isOnFocus);
@@ -624,7 +628,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         padding: EdgeInsets.only(bottom: 10),
         child: bottomItem(
           MaterialCommunityIcons.chevron_right,
-          onPressed: _canForward ? controller?.goForward : null,
+          onPressed: _canForward && !_isHomePage ? controller?.goForward : null,
         ),
       ),
       bottomItem(
@@ -936,8 +940,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Future<void> _loadHomePage() async {
     await controller?.goHomePage();
     setState(() {
-      _canBack = false;
-      _canForward = false;
+      _isHomePage = true;
     });
   }
 

@@ -774,7 +774,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     if (controller != null) {
       final result =
           await controller.evaluateJavascript("window.__getMetaData__();");
-      print('result $result');
       return DocumentMetaData.fromJSON(json.decode(result));
     }
     return null;

@@ -72,7 +72,19 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   bool _offstage;
   bool _isHomePage = true;
   String _currentURL;
-  Future<dynamic> Function(Widget) _showSovereignDialog;
+
+  Future<dynamic> _showModalBottomSheet(Widget dialog) async {
+    dynamic result = await showSovereignDialog(
+      () => showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (_) => dialog,
+      ),
+    );
+    if (result == null) throw 'user cancelled';
+    return result.encoded;
+  }
 
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
@@ -93,22 +105,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   @override
   void initState() {
-    _showSovereignDialog = () {
-      bool isShowing = false;
-      return (Widget dialog) async {
-        if (isShowing) throw 'request is in progress';
-        isShowing = true;
-        dynamic result = await showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          backgroundColor: Colors.transparent,
-          builder: (_) => dialog,
-        );
-        isShowing = false;
-        if (result == null) throw 'user cancelled';
-        return result.encoded;
-      };
-    }();
     id = widget.id;
     key = widget.tabKey;
     _offstage = widget.offstage;
@@ -545,15 +541,15 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           List<WalletEntity> walletEntities =
               await WalletStorage.readAll(network: widget.network);
           if (walletEntities.length == 0) {
-            bool isConfirmd = await customAlert(
-              context,
-              title: Text('No wallet available'),
-              content: Text('Create or import a new wallet?'),
-              confirmAction: () async {
-                Navigator.of(context).pop(true);
-              },
+            dynamic isConfirmd = await showSovereignDialog(
+              () => customAlert(
+                context,
+                title: Text('No wallet available'),
+                content: Text('Create or import a new wallet?'),
+                confirmAction: () async => Navigator.of(context).pop(true),
+              ),
             );
-            if (isConfirmd) {
+            if (isConfirmd is bool && isConfirmd) {
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => CreateOrImportWallet(
@@ -587,7 +583,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       for (Map<String, dynamic> txMsg in arguments[1]) {
         txMessages.add(SigningTxMessage.fromJSON(txMsg));
       }
-      return _showSovereignDialog(
+      return _showModalBottomSheet(
         TransactionDialog(
           options: options,
           txMessages: txMessages,
@@ -599,7 +595,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       SigningCertOptions options =
           SigningCertOptions.fromJSON(arguments[2], _currentURL);
       await _validate(options.signer);
-      return _showSovereignDialog(SignCertificate(certMessage, options));
+      return _showModalBottomSheet(
+        SignCertificate(certMessage, options),
+      );
     }
     throw 'unsupported method';
   }

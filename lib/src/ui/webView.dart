@@ -220,17 +220,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         body: SafeArea(
           child: Column(
             children: <Widget>[
-              !_isOnFocus && _progress < 1 && _progress > 0
-                  ? SizedBox(
-                      height: 1,
-                      child: LinearProgressIndicator(
-                        value: _progress,
-                        valueColor: AlwaysStoppedAnimation(
-                            Theme.of(context).primaryColor),
-                        backgroundColor: Theme.of(context).dividerColor,
-                      ),
-                    )
-                  : Divider(height: 1, thickness: 1),
               Expanded(
                 child: RepaintBoundary(
                   key: captureKey,
@@ -348,7 +337,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             _currentURL = url;
           });
           if (controller != null) {
-            updateSearchBar(url, 0, !_isOnFocus);
+            updateSearchBar(url, _progress, !_isOnFocus);
           }
         },
         onPageFinished: (String url) async {
@@ -429,6 +418,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   void updateSearchBar(String url, double progress, bool shouldCancelInput) {
+    _progress = progress;
     Uri uri = Uri.parse(url);
     if (url != Globals.initialURL) {
       IconData icon;
@@ -446,6 +436,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         shouldCancelInput: shouldCancelInput,
         defautText: domain == "" ? "Search" : domain,
         submitedText: url,
+        progress: progress,
         rightView: !uri.scheme.startsWith("http") || _isOnFocus
             ? null
             : progress == 1
@@ -480,6 +471,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ),
         defautText: 'Search',
         rightView: null,
+        progress: progress,
         shouldCancelInput: shouldCancelInput,
         submitedText: _currentURL,
       );

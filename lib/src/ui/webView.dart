@@ -65,8 +65,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   int id;
   int _bookmarkID;
   bool _isKeyboardVisible = false;
-  bool _canBack = false;
-  bool _canForward = false;
+  StreamController<bool> _canBackController = StreamController.broadcast();
+  StreamController<bool> _canForwardController = StreamController.broadcast();
   bool _isOnFocus = false;
   double _progress = 0;
   bool _offstage;
@@ -349,9 +349,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         },
         onPageFinished: (String url) async {
           if (controller != null) {
-            _canBack = !_isHomePage && await controller.canGoBack();
-            _canForward = !_isHomePage && await controller.canGoForward();
-            _isHomePage = false;
+            _isHomePage = _isHomePage && url == Globals.initialURL;
+            updateCanBackForward();
             await updateBookmarkID(url);
           }
           updateSearchBar(url, 1, !_isOnFocus);
@@ -360,17 +359,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             _progress = 1;
           });
         },
-        onProgressChanged: (double progress) {
+        onProgressChanged: (double progress) async {
           updateSearchBar(_currentURL, progress, !_isOnFocus);
+          updateCanBackForward();
           setState(() {
             this._progress = progress;
           });
-        },
-        onCanGoBack: (bool canGoBack) {
-          setState(() => _canBack = canGoBack);
-        },
-        onCanGoForward: (bool canGoForward) {
-          setState(() => _canForward = canGoForward);
         },
         navigationDelegate: (FlutterWebView.NavigationRequest request) {
           if (request.url.startsWith('http') ||
@@ -422,6 +416,11 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         isTrunk:${genesis.isTrunk}
     };
     ''';
+  }
+
+  Future<void> updateCanBackForward() async {
+    _canBackController.add(await controller.canGoBack());
+    _canForwardController.add(await controller.canGoForward());
   }
 
   void updateSearchBar(String url, double progress, bool shouldCancelInput) {
@@ -613,20 +612,24 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 ? 1
                 : 0);
     return [
-      Padding(
-        padding: EdgeInsets.only(bottom: 10),
-        child: bottomItem(
+      streamBottomItemBuilder(
+        _canBackController.stream,
+        (context, snapshot) => bottomItem(
           MaterialCommunityIcons.chevron_left,
-          onPressed: _canBack && _currentURL != Globals.initialURL
+          onPressed: snapshot.hasData &&
+                  snapshot.data &&
+                  _currentURL != Globals.initialURL
               ? controller?.goBack
               : null,
         ),
       ),
-      Padding(
-        padding: EdgeInsets.only(bottom: 10),
-        child: bottomItem(
+      streamBottomItemBuilder(
+        _canForwardController.stream,
+        (context, snapshot) => bottomItem(
           MaterialCommunityIcons.chevron_right,
-          onPressed: _canForward && !_isHomePage ? controller?.goForward : null,
+          onPressed: snapshot.hasData && snapshot.data && !_isHomePage
+              ? controller?.goForward
+              : null,
         ),
       ),
       bottomItem(
@@ -737,6 +740,20 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       default:
         return MaterialCommunityIcons.numeric_9_plus_box_multiple_outline;
     }
+  }
+
+  Widget streamBottomItemBuilder(
+    Stream<bool> stream,
+    AsyncWidgetBuilder builder,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10),
+      child: StreamBuilder<bool>(
+        stream: stream.distinct((previous, current) => previous == current),
+        initialData: false,
+        builder: builder,
+      ),
+    );
   }
 
   Widget bottomItem(
@@ -916,6 +933,8 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     Globals.removeBlockHeadHandler(_handleHeadChanged);
     Globals.removeTabHandler(_handleTabChanged);
     Globals.removeBookmarkHandler(_handleBookmark);
+    _canBackController.close();
+    _canForwardController.close();
     super.dispose();
   }
 

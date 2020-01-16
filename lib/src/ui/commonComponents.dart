@@ -346,6 +346,23 @@ class _DrawCircle extends CustomPainter {
   bool shouldRebuildSemantics(_DrawCircle oldDelegate) => false;
 }
 
+typedef Future<dynamic> DialogFn();
+
+typedef Future<dynamic> SovereignDialogFn(DialogFn fn);
+
+SovereignDialogFn _buildSovereignDialog() {
+  bool isShowing = false;
+  return (DialogFn fn) async {
+    if (isShowing) throw 'request is in progress';
+    isShowing = true;
+    dynamic result = await fn();
+    isShowing = false;
+    return result;
+  };
+}
+
+SovereignDialogFn showSovereignDialog = _buildSovereignDialog();
+
 TextField walletNameTextField({
   TextEditingController controller,
   String hitText,

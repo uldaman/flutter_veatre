@@ -246,24 +246,25 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                   ),
                 ),
               ),
-              _isKeyboardVisible
-                  ? SizedBox()
-                  : SizedBox(
-                      height: 59,
-                      child: Column(
-                        children: <Widget>[
-                          Divider(
-                            thickness: 1,
-                            height: 1,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: bottomItems,
-                          ),
-                        ],
+              Visibility(
+                visible: !_isKeyboardVisible,
+                child: SizedBox(
+                  height: 59,
+                  child: Column(
+                    children: <Widget>[
+                      Divider(
+                        thickness: 1,
+                        height: 1,
                       ),
-                    ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: bottomItems,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),

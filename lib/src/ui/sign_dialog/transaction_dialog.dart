@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math';
+import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -269,7 +270,7 @@ class _TransactionState extends State<TransactionDialog>
   }
 
   String _makeSummary({bool shotSummary = false}) {
-    if (widget.options.comment != null) {
+    if (widget.options.comment != null && widget.options.comment != '') {
       return widget.options.comment;
     }
     switch (_clauses.length) {
@@ -342,19 +343,22 @@ class _TransactionState extends State<TransactionDialog>
         vet: _account?.formatBalance ?? '--',
         vtho: _account?.formatEnergy ?? '--',
       ),
-      onExpand: () async {
-        if (_detect) {
-          WalletEntity newEntity = await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => Wallets(),
-            ),
-          );
-          if (newEntity != null) {
-            _swipeController.valueWith(shouldLoading: true, enabled: false);
-            await _completeByEntity(newEntity);
-          }
-        }
-      },
+      onExpand: widget.options.signer == null
+          ? () async {
+              if (_detect) {
+                WalletEntity newEntity = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Wallets(),
+                  ),
+                );
+                if (newEntity != null) {
+                  _swipeController.valueWith(
+                      shouldLoading: true, enabled: false);
+                  await _completeByEntity(newEntity);
+                }
+              }
+            }
+          : null,
     );
   }
 
@@ -366,7 +370,7 @@ class _TransactionState extends State<TransactionDialog>
         maxLines: 5,
         overflow: TextOverflow.ellipsis,
       ),
-      onExpand: widget.options.comment != null
+      onExpand: widget.options.comment != null && widget.options.comment != ''
           ? () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => Summary(

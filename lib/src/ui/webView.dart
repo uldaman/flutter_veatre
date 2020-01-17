@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:core';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:convert';
 
+import 'package:tuple/tuple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -65,8 +66,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   int id;
   int _bookmarkID;
   bool _isKeyboardVisible = false;
-  StreamController<bool> _canBackController = StreamController.broadcast();
-  StreamController<bool> _canForwardController = StreamController.broadcast();
+  StreamController<Tuple2<bool, bool>> _canBackForwardController;
   bool _isOnFocus = false;
   double _progress = 0;
   bool _offstage;
@@ -105,6 +105,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   @override
   void initState() {
+    _canBackForwardController = StreamController.broadcast();
     id = widget.id;
     key = widget.tabKey;
     _offstage = widget.offstage;
@@ -409,8 +410,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   Future<void> updateCanBackForward() async {
-    _canBackController.add(await controller.canGoBack());
-    _canForwardController.add(await controller.canGoForward());
+    _canBackForwardController.add(
+      Tuple2<bool, bool>(
+        await controller.canGoBack(),
+        await controller.canGoForward(),
+      ),
+    );
   }
 
   void updateSearchBar(String url, double progress, bool shouldCancelInput) {
@@ -606,21 +611,19 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                 : 0);
     return [
       streamBottomItemBuilder(
-        _canBackController.stream,
+        _canBackForwardController.stream,
         (context, snapshot) => bottomItem(
           MaterialCommunityIcons.chevron_left,
-          onPressed: snapshot.hasData &&
-                  snapshot.data &&
-                  _currentURL != Globals.initialURL
+          onPressed: snapshot.data.item1 && _currentURL != Globals.initialURL
               ? controller?.goBack
               : null,
         ),
       ),
       streamBottomItemBuilder(
-        _canForwardController.stream,
+        _canBackForwardController.stream,
         (context, snapshot) => bottomItem(
           MaterialCommunityIcons.chevron_right,
-          onPressed: snapshot.hasData && snapshot.data && !_isHomePage
+          onPressed: snapshot.data.item2 && !_isHomePage
               ? controller?.goForward
               : null,
         ),
@@ -736,14 +739,15 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   }
 
   Widget streamBottomItemBuilder(
-    Stream<bool> stream,
+    Stream<Tuple2<bool, bool>> stream,
     AsyncWidgetBuilder builder,
   ) {
     return Padding(
       padding: EdgeInsets.only(bottom: 10),
-      child: StreamBuilder<bool>(
-        stream: stream.distinct((previous, current) => previous == current),
-        initialData: false,
+      child: StreamBuilder<Tuple2<bool, bool>>(
+        stream: stream.distinct((previous, current) =>
+            previous.item1 == current.item1 && previous.item2 == current.item2),
+        initialData: Tuple2<bool, bool>(false, false),
         builder: builder,
       ),
     );
@@ -926,8 +930,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     Globals.removeBlockHeadHandler(_handleHeadChanged);
     Globals.removeTabHandler(_handleTabChanged);
     Globals.removeBookmarkHandler(_handleBookmark);
-    _canBackController.close();
-    _canForwardController.close();
+    _canBackForwardController.close();
     super.dispose();
   }
 

@@ -62,7 +62,8 @@ class ManageWallets extends StatefulWidget {
   ManageWalletsState createState() => ManageWalletsState();
 }
 
-class ManageWalletsState extends State<ManageWallets> {
+class ManageWalletsState extends State<ManageWallets>
+    with SingleTickerProviderStateMixin {
   List<WalletEntity> _walletEntities;
   Map<String, Account> _accounts;
 
@@ -204,17 +205,12 @@ class ManageWalletsState extends State<ManageWallets> {
         Navigator.of(context).pop(url);
       },
       onSelected: () async {
-        final result = await Navigator.push(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (BuildContext context, Animation animation,
-                Animation secondaryAnimation) {
-              return FadeTransition(
-                opacity: animation,
-                child: WalletInfo(
-                  walletEntity: walletEntity,
-                  account: account,
-                ),
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) {
+              return WalletInfo(
+                walletEntity: walletEntity,
+                account: account,
               );
             },
           ),

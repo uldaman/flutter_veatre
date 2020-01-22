@@ -974,6 +974,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             await _loadHomePage();
             await controller.loadUrl(tabValue.url);
           }
+          updateCanBackForward();
           setState(() {
             _offstage = !(tabValue.stage == TabStage.SelectedInAlive ||
                 tabValue.stage == TabStage.SelectedAlive ||

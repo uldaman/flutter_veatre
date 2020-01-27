@@ -1,10 +1,12 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/storage/configStorage.dart';
 import 'package:veatre/src/ui/authentication/decision.dart';
 import 'package:veatre/src/ui/webViews.dart';
+import 'package:veatre/src/utils/validators.dart';
 
 class MainUI extends StatefulWidget {
   static const routeName = '/home';
@@ -26,6 +28,8 @@ class MainUIState extends State<MainUI>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance
+        .addPostFrameCallback((duration) => updateClipboard());
     WebViews.create(network: Network.MainNet);
     WebViews.create(network: Network.TestNet);
     Globals.addNetworkHandler(_hanleNetworkChanged);
@@ -49,13 +53,20 @@ class MainUIState extends State<MainUI>
     } else if (state == AppLifecycleState.resumed) {
       if ((_state == AppLifecycleState.paused ||
               _state == AppLifecycleState.inactive) &&
-          currentTime - _timestamp > 5 * 1000 &&
+          currentTime - _timestamp > 30 * 1000 &&
           !_pageLocked) {
         _present(Decision());
+      } else {
+        updateClipboard();
       }
       _state = AppLifecycleState.resumed;
     }
     super.didChangeAppLifecycleState(state);
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) {
+    return super.didPushRoute(route);
   }
 
   void _hanleNetworkChanged() {
@@ -80,7 +91,19 @@ class MainUIState extends State<MainUI>
         settings: RouteSettings(isInitialRoute: true),
       ),
     );
+    await updateClipboard();
     _pageLocked = false;
+  }
+
+  Future<void> updateClipboard() async {
+    final data = await Clipboard.getData('text/plain');
+    if (data != null) {
+      final text = data.text;
+      if (Globals.clipboardValue.data != text &&
+          (isAddress(text) || isHash(text))) {
+        Globals.updateClipboardValue(ClipboardValue(data: text));
+      }
+    }
   }
 
   @override

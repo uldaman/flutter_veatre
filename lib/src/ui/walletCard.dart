@@ -261,7 +261,6 @@ class _ValueChangeState extends State<_ValueChange>
   BigInt value;
   BigInt oldValue;
   BigInt _diff;
-  int _fixed;
 
   @override
   void initState() {
@@ -269,32 +268,12 @@ class _ValueChangeState extends State<_ValueChange>
     value = widget.value ?? BigInt.zero;
     oldValue = widget.oldValue ?? BigInt.zero;
     _diff = value - oldValue;
-    _fixed = getFixed(value);
     controller = AnimationController(
         duration: const Duration(milliseconds: 2000), vsync: this);
     animation =
         CurvedAnimation(parent: controller, curve: Curves.linearToEaseOut)
             .drive(Tween<double>(begin: 0.0, end: 100.0));
     controller.forward();
-  }
-
-  int getFixed(BigInt value) {
-    double v = (value / BigInt.from(1e18)).toDouble();
-    String fixed = v.toStringAsFixed(2);
-    if (fixed.split('.')[1].endsWith('0')) {
-      String fixed1 = v.toStringAsFixed(1);
-      if (fixed1.split('.')[1].endsWith('0')) {
-        return 0;
-      }
-      return 1;
-    }
-    return 2;
-  }
-
-  fixedValue(BigInt value, int fixed) {
-    String fixedV =
-        (value / BigInt.from(1e18)).toDouble().toStringAsFixed(fixed);
-    return formatNum(fixedV);
   }
 
   @override
@@ -304,7 +283,7 @@ class _ValueChangeState extends State<_ValueChange>
       builder: (context, _) {
         final bigVT = BigInt.from(animation.value.toInt());
         final currentValue = oldValue + (_diff * bigVT) ~/ BigInt.from(100);
-        return Text('${fixedValue(currentValue, _fixed)}');
+        return Text('${formatNum(fixed2Value(currentValue))}');
       },
     );
   }

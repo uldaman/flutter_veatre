@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:veatre/src/ui/commonComponents.dart';
 import 'package:veatre/src/utils/common.dart';
 import 'package:veatre/src/storage/walletStorage.dart';
 
@@ -40,86 +41,54 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
 
   Widget buildIdleWord(int index) {
     IdleWord idleWord = idleWords[index];
-    if (!idleWord.isMarked) {
-      return Align(
-        alignment: Alignment.center,
-        child: Text(
-          '${index + 1}',
-          style: TextStyle(
-            color: Theme.of(context).primaryTextTheme.display2.color,
-            fontSize: 17,
-          ),
-        ),
-      );
-    }
-    return FlatButton(
-      child: Text(
-        '${idleWord.word}',
-        style: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(5)),
-        side: BorderSide(
-          color: Theme.of(context).primaryTextTheme.title.color,
-          width: 0,
-        ),
-      ),
-      onPressed: () async {
-        setState(() {
-          randomWords[idleWord.originIndex].isSelected = false;
-          idleWords[index].clear();
-          errorMsg = null;
-        });
-      },
+    return commonButton(
+      context,
+      idleWord.isMarked ? '${idleWord.word}' : '${index + 1}',
+      idleWord.isMarked
+          ? () async {
+              setState(() {
+                randomWords[idleWord.originIndex].isSelected = false;
+                idleWords[index].clear();
+                errorMsg = null;
+              });
+            }
+          : null,
+      style: !idleWord.isMarked
+          ? TextStyle(
+              color: Theme.of(context).primaryTextTheme.title.color,
+              fontSize: 17,
+            )
+          : null,
     );
   }
 
   Widget buildRandomWord(int index) {
     RandomWord randomWord = randomWords[index];
-    if (!randomWord.isSelected) {
-      return FlatButton(
-        child: Text(
-          '${randomWord.word}',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          side: BorderSide(
-            color: Theme.of(context).textTheme.title.color,
-            width: 0,
-          ),
-        ),
-        onPressed: () async {
-          setState(() {
-            randomWords[index].isSelected = true;
-            for (IdleWord idleWord in idleWords) {
-              if (!idleWord.isMarked) {
-                idleWord.word = randomWord.word;
-                idleWord.originIndex = index;
-                idleWord.isMarked = true;
-                break;
-              }
-            }
-            errorMsg = null;
-          });
-        },
-      );
-    }
-    return Align(
-      alignment: Alignment.center,
-      child: Text(
-        '${randomWord.word}',
-        style: TextStyle(
-          color: Theme.of(context).primaryTextTheme.display2.color,
-          fontSize: 17,
-        ),
-      ),
+    return commonButton(
+      context,
+      randomWord.isSelected ? '${randomWord.word}' : '${randomWord.word}',
+      randomWord.isSelected
+          ? null
+          : () async {
+              setState(() {
+                randomWords[index].isSelected = true;
+                for (IdleWord idleWord in idleWords) {
+                  if (!idleWord.isMarked) {
+                    idleWord.word = randomWord.word;
+                    idleWord.originIndex = index;
+                    idleWord.isMarked = true;
+                    break;
+                  }
+                }
+                errorMsg = null;
+              });
+            },
+      style: randomWord.isSelected
+          ? TextStyle(
+              color: Theme.of(context).primaryTextTheme.title.color,
+              fontSize: 17,
+            )
+          : null,
     );
   }
 
@@ -231,10 +200,7 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(5)),
-                  side: BorderSide(
-                    color: Theme.of(context).textTheme.title.color,
-                    width: 0,
-                  ),
+                  side: BorderSide.none,
                 ),
                 color: Theme.of(context).primaryColor,
                 child: Text(

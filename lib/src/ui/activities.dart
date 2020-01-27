@@ -11,27 +11,51 @@ class Activities extends StatefulWidget {
 
 class ActivitiesState extends State<Activities> {
   List<Activity> activities = [];
+  int limit = 10;
+  int offset = 0;
+  ScrollController scrollController = ScrollController(initialScrollOffset: 0);
+  bool loading = false;
 
   @override
   void initState() {
     super.initState();
     ActivityStorage.updateHasShown();
     loadActivities();
+    scrollController.addListener(_handleScroll);
     Globals.addBlockHeadHandler(_handleHeadChanged);
+  }
+
+  void _handleScroll() async {
+    if (scrollController.offset == scrollController.position.maxScrollExtent &&
+        !loading) {
+      setState(() {
+        loading = true;
+      });
+      await Future.delayed(Duration(milliseconds: 300));
+      await loadActivities();
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
+    }
   }
 
   void _handleHeadChanged() async {
     if (Globals.blockHeadForNetwork.network == Globals.network) {
       await ActivityStorage.updateHasShown();
-      await loadActivities();
     }
   }
 
   Future<void> loadActivities() async {
-    List<Activity> activities = await ActivityStorage.queryAll();
+    List<Activity> acs = await ActivityStorage.query(
+      limit: limit,
+      offset: offset,
+    );
     if (mounted) {
       setState(() {
-        this.activities = activities;
+        this.activities.addAll(acs);
+        offset = this.activities.length;
       });
     }
   }
@@ -69,9 +93,10 @@ class ActivitiesState extends State<Activities> {
       body: SafeArea(
         child: activities.length > 0
             ? ListView.builder(
+                padding: EdgeInsets.only(bottom: 15),
+                controller: scrollController,
                 itemBuilder: buildActivity,
                 itemCount: activities.length,
-                physics: ClampingScrollPhysics(),
               )
             : Center(
                 child: SizedBox(
@@ -107,9 +132,35 @@ class ActivitiesState extends State<Activities> {
 
   Widget buildActivity(BuildContext context, int index) {
     Activity activity = activities[index];
-    return ActivityCard(
-      activity,
-      hasAvatar: true,
+    return Column(
+      children: <Widget>[
+        ActivityCard(
+          activity,
+          hasAvatar: true,
+        ),
+        Visibility(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: loading
+                  ? CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(
+                          Theme.of(context).primaryColor),
+                    )
+                  : Text(
+                      'load more',
+                      style: TextStyle(
+                        color:
+                            Theme.of(context).primaryTextTheme.display2.color,
+                        fontSize: 17,
+                      ),
+                    ),
+            ),
+          ),
+          visible: index == offset - 1,
+        )
+      ],
     );
   }
 }

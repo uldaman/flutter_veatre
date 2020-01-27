@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+
 import 'package:veatre/common/globals.dart';
 import 'package:veatre/src/ui/snapshotCard.dart';
 import 'package:veatre/src/ui/webViews.dart';
@@ -101,14 +103,37 @@ class TabViewsState extends State<TabViews> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      FlatButton(
-                        child: Text('Close All'),
+                      IconButton(
+                        icon: Icon(
+                          MaterialCommunityIcons.trash_can_outline,
+                          size: 32,
+                        ),
                         onPressed: () {
                           WebViews.removeAll();
                           WebViews.create();
                           setState(() {
                             snapshots = [];
                           });
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          MaterialCommunityIcons.chevron_down,
+                          size: 40,
+                        ),
+                        onPressed: () {
+                          Globals.updateTabValue(
+                            TabControllerValue(
+                              id: selectedTab,
+                              url: url,
+                              network: Globals.network,
+                              stage: isSelectedTabAlive
+                                  ? TabStage.SelectedAlive
+                                  : TabStage.SelectedInAlive,
+                              tabKey: selectedTabKey,
+                            ),
+                          );
                           Navigator.of(context).pop();
                         },
                       ),
@@ -126,23 +151,6 @@ class TabViewsState extends State<TabViews> {
                           Navigator.of(context).pop();
                         },
                       ),
-                      FlatButton(
-                        child: Text('Done'),
-                        onPressed: () {
-                          Globals.updateTabValue(
-                            TabControllerValue(
-                              id: selectedTab,
-                              url: url,
-                              network: Globals.network,
-                              stage: isSelectedTabAlive
-                                  ? TabStage.SelectedAlive
-                                  : TabStage.SelectedInAlive,
-                              tabKey: selectedTabKey,
-                            ),
-                          );
-                          Navigator.of(context).pop();
-                        },
-                      )
                     ],
                   ),
                 )

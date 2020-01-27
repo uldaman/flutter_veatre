@@ -44,17 +44,24 @@ class Clauses extends StatelessWidget {
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: Container(
+                      child: Card(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5))),
                         color: Theme.of(context).primaryColor,
-                        padding: EdgeInsets.symmetric(
+                        margin: EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 2,
                         ),
-                        child: Text(
-                          typeOf(txMessage),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
+                        child: Padding(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                          child: Text(
+                            typeOf(txMessage),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),

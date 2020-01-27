@@ -6,6 +6,7 @@ class SearchBarValue {
   String defautText;
   String submitedText;
   bool shouldCancelInput;
+  double progress;
 
   SearchBarValue({
     Widget leftView,
@@ -13,12 +14,14 @@ class SearchBarValue {
     String defautText,
     String submitedText,
     bool shouldCancelInput,
+    double progress,
   }) {
     this.leftView = leftView;
     this.rightView = rightView;
     this.defautText = defautText ?? 'Search';
     this.submitedText = submitedText ?? '';
     this.shouldCancelInput = shouldCancelInput ?? false;
+    this.progress = progress ?? 0;
   }
 }
 
@@ -31,6 +34,7 @@ class SearchBarController extends ValueNotifier<SearchBarValue> {
     String defautText,
     String submitedText,
     bool shouldCancelInput,
+    double progress,
   }) {
     this.value = SearchBarValue(
       leftView: leftView ?? this.value.leftView,
@@ -38,6 +42,7 @@ class SearchBarController extends ValueNotifier<SearchBarValue> {
       defautText: defautText ?? this.value.defautText,
       submitedText: submitedText ?? this.value.submitedText,
       shouldCancelInput: shouldCancelInput ?? this.value.shouldCancelInput,
+      progress: progress ?? this.value.progress,
     );
   }
 }
@@ -63,6 +68,8 @@ class SearchBarState extends State<SearchBar>
   Widget leftView;
   Widget rightView;
   String defautText;
+  double progress;
+
   final _searchTextEditingController = TextEditingController();
   final _focusNode = FocusNode();
 
@@ -94,6 +101,7 @@ class SearchBarState extends State<SearchBar>
       leftView = value.leftView;
       rightView = value.rightView;
       defautText = value.defautText;
+      progress = value.progress;
       if (showTextField == value.shouldCancelInput) {
         showTextField = !value.shouldCancelInput;
       }
@@ -143,64 +151,81 @@ class SearchBarState extends State<SearchBar>
       },
     );
     return Container(
-      height: 40,
+      height: 41,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(
-          Radius.circular(10),
+          Radius.circular(5),
         ),
-      ),
-      child: Card(
         color: Colors.grey[300],
-        elevation: 0,
-        margin: EdgeInsets.all(0),
-        child: Row(
-          children: <Widget>[
-            leftView == null
-                ? SizedBox()
-                : Padding(
+      ),
+      child: Column(
+        children: <Widget>[
+          SizedBox(
+            height: 40,
+            child: Row(
+              children: <Widget>[
+                Visibility(
+                  child: Padding(
                     padding: EdgeInsets.only(left: 10),
                     child: leftView,
                   ),
-            Expanded(
-              child: showTextField
-                  ? Padding(
-                      padding: EdgeInsets.only(left: 5, top: 0),
-                      child: searchTextField,
-                    )
-                  : FlatButton(
-                      padding: EdgeInsets.only(left: 5),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          defautText,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Theme.of(context).textTheme.title.color,
-                            fontSize: 14,
+                  visible: leftView != null,
+                ),
+                Expanded(
+                  child: showTextField
+                      ? Padding(
+                          padding: EdgeInsets.only(left: 5, top: 0),
+                          child: searchTextField,
+                        )
+                      : FlatButton(
+                          padding: EdgeInsets.only(left: 5),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              defautText,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Theme.of(context).textTheme.title.color,
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
+                          onPressed: () async {
+                            setState(() {
+                              showTextField = true;
+                            });
+                          },
                         ),
-                      ),
-                      onPressed: () async {
-                        setState(() {
-                          showTextField = true;
-                        });
-                      },
-                    ),
+                ),
+                showTextField
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.cancel,
+                          color: Colors.grey,
+                          size: 14,
+                        ),
+                        onPressed: () {
+                          _searchTextEditingController.clear();
+                        },
+                      )
+                    : rightView == null ? SizedBox() : rightView,
+              ],
             ),
-            showTextField
-                ? IconButton(
-                    icon: Icon(
-                      Icons.cancel,
-                      color: Colors.grey,
-                      size: 14,
-                    ),
-                    onPressed: () {
-                      _searchTextEditingController.clear();
-                    },
-                  )
-                : rightView == null ? SizedBox() : rightView,
-          ],
-        ),
+          ),
+          Visibility(
+            visible: !showTextField && progress < 1 && progress > 0,
+            child: SizedBox(
+              height: 1,
+              child: LinearProgressIndicator(
+                value: progress,
+                valueColor:
+                    AlwaysStoppedAnimation(Theme.of(context).primaryColor),
+                backgroundColor: Theme.of(context).dividerColor,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

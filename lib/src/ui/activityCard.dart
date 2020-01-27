@@ -21,15 +21,6 @@ class ActivityCard extends StatelessWidget {
     this.hasAvatar = false,
   }) : super(key: key);
 
-  String getDomain(Uri uri) {
-    String host = uri.host;
-    List<String> components = host.split('.');
-    if (components.length <= 3) {
-      return host;
-    }
-    return "${components[1]}.${components[2]}";
-  }
-
   String formatMonth(int month) {
     switch (month) {
       case 1:
@@ -78,243 +69,264 @@ class ActivityCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 10),
-                width: 40,
-                color: activity.type == ActivityType.Transaction
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).primaryTextTheme.title.color,
-                child: Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Text(
-                    activity.type == ActivityType.Transaction ? 'TX' : 'CERT',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
+              SizedBox(
+                width: 60,
+                child: Card(
+                  elevation: 0,
+                  margin: EdgeInsets.only(left: 10),
+                  color: activity.type == ActivityType.Transaction
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).primaryTextTheme.title.color,
+                  child: Padding(
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      activity.type == ActivityType.Transaction ? 'TX' : 'CERT',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                      ),
                     ),
                   ),
                 ),
               ),
+              visibleText(
+                activity.comment,
+                visible: !hasAvatar,
+              ),
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
-                              activity.comment,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.left,
-                              maxLines: 2,
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          child: visibleText(
+                            activity.comment,
+                            visible: hasAvatar,
+                            top: 10,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(right: 10, top: 10),
+                          child: Text(
+                            dateString,
+                            textAlign: TextAlign.right,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .primaryTextTheme
+                                  .display2
+                                  .color,
+                              fontSize: 12,
                             ),
-                          )
-                        ],
-                      ),
-                      Visibility(
-                        visible: hasAvatar,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 5),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          child: Visibility(
+                            visible: hasAvatar,
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10, top: 5),
+                              child: Row(
+                                children: <Widget>[
+                                  Text(
+                                    'Signed by',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .primaryTextTheme
+                                          .display2
+                                          .color,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 2, right: 2),
+                                    child: Picasso(
+                                      '0x${activity.address}',
+                                      key: ValueKey('0x${activity.address}'),
+                                      size: 20,
+                                      borderRadius: 4,
+                                    ),
+                                  ),
+                                  FutureBuilder(
+                                    key: ValueKey('0x${activity.address}'),
+                                    future: WalletStorage.read(
+                                      activity.address,
+                                      network: activity.network,
+                                    ),
+                                    builder: (context, shot) {
+                                      if (shot.hasData) {
+                                        final walletEntity = shot.data;
+                                        return Flexible(
+                                          child: Text(
+                                            walletEntity.name,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }
+                                      return Text('Unkown');
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              EdgeInsets.only(top: 10, right: 10, bottom: 10),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
-                              Text(
-                                'Signed by',
-                                style: TextStyle(
-                                  color: Theme.of(context)
-                                      .primaryTextTheme
-                                      .display2
-                                      .color,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 2, right: 2),
-                                child: Picasso(
-                                  '0x${activity.address}',
-                                  key: ValueKey('0x${activity.address}'),
-                                  size: 20,
-                                  borderRadius: 4,
-                                ),
-                              ),
-                              FutureBuilder(
-                                key: ValueKey('0x${activity.address}'),
-                                future: WalletStorage.read(
-                                  activity.address,
-                                  network: activity.network,
-                                ),
-                                builder: (context, shot) {
-                                  if (shot.hasData) {
-                                    final walletEntity = shot.data;
-                                    return Text(walletEntity.name);
-                                  }
-                                  return Text('Unkown');
-                                },
-                              ),
+                              activity.status == ActivityStatus.Finished
+                                  ? Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.check_circle_outline,
+                                          color: Color(0xFF57BD89),
+                                          size: 16,
+                                        ),
+                                        Text(
+                                          'Confirmed',
+                                          style: TextStyle(
+                                            color: Color(0xFF57BD89),
+                                            fontSize: 12,
+                                          ),
+                                        )
+                                      ],
+                                    )
+                                  : activity.status == ActivityStatus.Pending
+                                      ? Row(
+                                          children: <Widget>[
+                                            Icon(
+                                              MaterialCommunityIcons
+                                                  .progress_upload,
+                                              color: Color(0xFF57BD89),
+                                              size: 16,
+                                            ),
+                                            Text(
+                                              'Sending',
+                                              style: TextStyle(
+                                                color: Color(0xFF57BD89),
+                                                fontSize: 12,
+                                              ),
+                                            )
+                                          ],
+                                        )
+                                      : activity.status ==
+                                              ActivityStatus.Expired
+                                          ? Row(
+                                              children: <Widget>[
+                                                Icon(
+                                                  Icons.alarm_off,
+                                                  color: Color(0xFFEF8816),
+                                                  size: 16,
+                                                ),
+                                                Text(
+                                                  'Expired',
+                                                  style: TextStyle(
+                                                    color: Color(0xFFEF8816),
+                                                    fontSize: 12,
+                                                  ),
+                                                )
+                                              ],
+                                            )
+                                          : activity.status ==
+                                                  ActivityStatus.Reverted
+                                              ? Row(
+                                                  children: <Widget>[
+                                                    Icon(
+                                                      Icons.error,
+                                                      color: Theme.of(context)
+                                                          .errorColor,
+                                                      size: 16,
+                                                    ),
+                                                    Text(
+                                                      'Reverted',
+                                                      style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .errorColor,
+                                                        fontSize: 12,
+                                                      ),
+                                                    )
+                                                  ],
+                                                )
+                                              : Globals.head().number -
+                                                          processBlock >=
+                                                      12
+                                                  ? Row(
+                                                      children: <Widget>[
+                                                        Icon(
+                                                          Icons
+                                                              .check_circle_outline,
+                                                          color:
+                                                              Color(0xFF57BD89),
+                                                          size: 16,
+                                                        ),
+                                                        Text(
+                                                          'Confirmed',
+                                                          style: TextStyle(
+                                                            color: Color(
+                                                                0xFF57BD89),
+                                                            fontSize: 12,
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )
+                                                  : Row(
+                                                      children: <Widget>[
+                                                        SizedBox(
+                                                          width: 18,
+                                                          height: 18,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            backgroundColor: Theme
+                                                                    .of(context)
+                                                                .primaryTextTheme
+                                                                .display3
+                                                                .color,
+                                                            value: (Globals.head()
+                                                                        .number -
+                                                                    processBlock) /
+                                                                12,
+                                                            valueColor: AlwaysStoppedAnimation(
+                                                                Theme.of(
+                                                                        context)
+                                                                    .primaryColor),
+                                                            strokeWidth: 2,
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 35,
+                                                          child: Text(
+                                                            '${Globals.head().number - processBlock}/12',
+                                                            textAlign:
+                                                                TextAlign.right,
+                                                            style: TextStyle(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryTextTheme
+                                                                  .display2
+                                                                  .color,
+                                                              fontSize: 12,
+                                                            ),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )
                             ],
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(right: 10, top: 10),
-                    child: Text(
-                      dateString,
-                      textAlign: TextAlign.right,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color:
-                            Theme.of(context).primaryTextTheme.display2.color,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 10, right: 10, bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        activity.status == ActivityStatus.Finished
-                            ? Row(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.check_circle_outline,
-                                    color: Color(0xFF57BD89),
-                                    size: 16,
-                                  ),
-                                  Text(
-                                    'Confirmed',
-                                    style: TextStyle(
-                                      color: Color(0xFF57BD89),
-                                      fontSize: 12,
-                                    ),
-                                  )
-                                ],
-                              )
-                            : activity.status == ActivityStatus.Pending
-                                ? Row(
-                                    children: <Widget>[
-                                      Icon(
-                                        MaterialCommunityIcons.progress_upload,
-                                        color: Color(0xFF57BD89),
-                                        size: 16,
-                                      ),
-                                      Text(
-                                        'Sending',
-                                        style: TextStyle(
-                                          color: Color(0xFF57BD89),
-                                          fontSize: 12,
-                                        ),
-                                      )
-                                    ],
-                                  )
-                                : activity.status == ActivityStatus.Expired
-                                    ? Row(
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.alarm_off,
-                                            color: Color(0xFFEF8816),
-                                            size: 16,
-                                          ),
-                                          Text(
-                                            'Expired',
-                                            style: TextStyle(
-                                              color: Color(0xFFEF8816),
-                                              fontSize: 12,
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    : activity.status == ActivityStatus.Reverted
-                                        ? Row(
-                                            children: <Widget>[
-                                              Icon(
-                                                Icons.error,
-                                                color: Theme.of(context)
-                                                    .errorColor,
-                                                size: 16,
-                                              ),
-                                              Text(
-                                                'Reverted',
-                                                style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .errorColor,
-                                                  fontSize: 12,
-                                                ),
-                                              )
-                                            ],
-                                          )
-                                        : Globals.head().number -
-                                                    processBlock >=
-                                                12
-                                            ? Row(
-                                                children: <Widget>[
-                                                  Icon(
-                                                    Icons.check_circle_outline,
-                                                    color: Color(0xFF57BD89),
-                                                    size: 16,
-                                                  ),
-                                                  Text(
-                                                    'Confirmed',
-                                                    style: TextStyle(
-                                                      color: Color(0xFF57BD89),
-                                                      fontSize: 12,
-                                                    ),
-                                                  )
-                                                ],
-                                              )
-                                            : Row(
-                                                children: <Widget>[
-                                                  SizedBox(
-                                                    width: 18,
-                                                    height: 18,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      backgroundColor:
-                                                          Theme.of(context)
-                                                              .primaryTextTheme
-                                                              .display3
-                                                              .color,
-                                                      value: (Globals.head()
-                                                                  .number -
-                                                              processBlock) /
-                                                          12,
-                                                      valueColor:
-                                                          AlwaysStoppedAnimation(
-                                                              Theme.of(context)
-                                                                  .primaryColor),
-                                                      strokeWidth: 2,
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 35,
-                                                    child: Text(
-                                                      '${Globals.head().number - processBlock}/12',
-                                                      textAlign:
-                                                          TextAlign.right,
-                                                      style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .primaryTextTheme
-                                                            .display2
-                                                            .color,
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                  )
-                                                ],
-                                              )
                       ],
-                    ),
-                  ),
-                ],
+                    )
+                  ],
+                ),
               ),
             ],
           ),
@@ -338,7 +350,7 @@ class ActivityCard extends StatelessWidget {
                       FlatButton(
                         padding: EdgeInsets.only(left: 5),
                         child: Text(
-                          getDomain(Uri.parse(activity.link)),
+                          Uri.parse(activity.link).host,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
@@ -379,7 +391,7 @@ class ActivityCard extends StatelessWidget {
                               ),
                               onPressed: () async {
                                 final url =
-                                    "https://insight.vecha.in/#${Globals.network == Network.MainNet ? '' : '/test'}/txs/${activity.hash}";
+                                    "https://${Globals.network == Network.MainNet ? 'explore' : '/explore-testnet'}.vechain.org/search?content=${activity.hash}";
                                 Navigator.of(context).pop(url);
                               },
                             )
@@ -412,6 +424,28 @@ class ActivityCard extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  Widget visibleText(
+    String text, {
+    bool visible = true,
+    double top = 0,
+  }) {
+    return Visibility(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 10,
+          top: top,
+        ),
+        child: Text(
+          text,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.left,
+          maxLines: 1,
+        ),
+      ),
+      visible: visible,
     );
   }
 }

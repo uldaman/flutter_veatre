@@ -57,24 +57,20 @@ class ActivityStorage {
     return List.from(rows.map((row) => Activity.fromJSON(row)));
   }
 
-  static Future<List<Activity>> queryAll({Network network}) async {
+  static Future<List<Activity>> query({
+    String address,
+    Network network,
+    int limit,
+    int offset,
+  }) async {
     List<Map<String, dynamic>> rows = await Storage.query(
       activityTableName,
-      where: 'network = ?',
-      whereArgs: [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
-      orderBy: 'timestamp desc',
-    );
-    return List.from(rows.map((row) => Activity.fromJSON(row)));
-  }
-
-  static Future<List<Activity>> query(String address, {Network network}) async {
-    List<Map<String, dynamic>> rows = await Storage.query(
-      activityTableName,
-      where: 'address = ? and network = ?',
-      whereArgs: [
-        address,
-        (network ?? Globals.network) == Network.MainNet ? 0 : 1
-      ],
+      where: address != null ? 'address = ? and network = ?' : 'network = ?',
+      whereArgs: address != null
+          ? [address, (network ?? Globals.network) == Network.MainNet ? 0 : 1]
+          : [(network ?? Globals.network) == Network.MainNet ? 0 : 1],
+      limit: limit,
+      offset: offset,
       orderBy: 'timestamp desc',
     );
     return List.from(rows.map((row) => Activity.fromJSON(row)));

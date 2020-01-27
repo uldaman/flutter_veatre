@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:core';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:convert';
 
+import 'package:tuple/tuple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -16,6 +17,7 @@ import 'package:webview_flutter/webview_flutter.dart' as FlutterWebView;
 
 import 'package:veatre/common/net.dart';
 import 'package:veatre/common/globals.dart';
+import 'package:veatre/src/utils/validators.dart';
 import 'package:veatre/src/models/account.dart';
 import 'package:veatre/src/models/block.dart';
 import 'package:veatre/src/models/dapp.dart';
@@ -64,13 +66,25 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   int id;
   int _bookmarkID;
   bool _isKeyboardVisible = false;
-  bool _canBack = false;
-  bool _canForward = false;
+  StreamController<Tuple2<bool, bool>> _canBackForwardController;
   bool _isOnFocus = false;
   double _progress = 0;
   bool _offstage;
+  bool _isHomePage = true;
   String _currentURL;
-  Future<dynamic> Function(Widget) _showSovereignDialog;
+
+  Future<dynamic> _showModalBottomSheet(Widget dialog) async {
+    dynamic result = await showSovereignDialog(
+      () => showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (_) => dialog,
+      ),
+    );
+    if (result == null) throw 'user cancelled';
+    return result.encoded;
+  }
 
   final GlobalKey captureKey = GlobalKey();
   FlutterWebView.WebViewController controller;
@@ -91,29 +105,15 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
 
   @override
   void initState() {
-    _showSovereignDialog = () {
-      bool isShowing = false;
-      return (Widget dialog) async {
-        if (isShowing) throw 'request is in progress';
-        isShowing = true;
-        dynamic result = await showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          backgroundColor: Colors.transparent,
-          builder: (_) => dialog,
-        );
-        isShowing = false;
-        if (result == null) throw 'user cancelled';
-        return result.encoded;
-      };
-    }();
+    _canBackForwardController = StreamController.broadcast();
     id = widget.id;
     key = widget.tabKey;
     _offstage = widget.offstage;
     _currentURL = widget.initialURL;
     Globals.addBlockHeadHandler(_handleHeadChanged);
-    Globals.addTabHandler(_handleTabChanged);
     Globals.addBookmarkHandler(_handleBookmark);
+    Globals.addTabHandler(_handleTabChanged);
+    Globals.addClipboardHandler(_handleClipboard);
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
@@ -217,17 +217,6 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         body: SafeArea(
           child: Column(
             children: <Widget>[
-              !_isOnFocus && _progress < 1 && _progress > 0
-                  ? SizedBox(
-                      height: 1,
-                      child: LinearProgressIndicator(
-                        value: _progress,
-                        valueColor: AlwaysStoppedAnimation(
-                            Theme.of(context).primaryColor),
-                        backgroundColor: Theme.of(context).dividerColor,
-                      ),
-                    )
-                  : Divider(height: 1, thickness: 1),
               Expanded(
                 child: RepaintBoundary(
                   key: captureKey,
@@ -258,24 +247,25 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
                   ),
                 ),
               ),
-              _isKeyboardVisible
-                  ? SizedBox()
-                  : SizedBox(
-                      height: 59,
-                      child: Column(
-                        children: <Widget>[
-                          Divider(
-                            thickness: 1,
-                            height: 1,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: bottomItems,
-                          ),
-                        ],
+              Visibility(
+                visible: !_isKeyboardVisible,
+                child: SizedBox(
+                  height: 59,
+                  child: Column(
+                    children: <Widget>[
+                      Divider(
+                        thickness: 1,
+                        height: 1,
                       ),
-                    ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: bottomItems,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -345,11 +335,13 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             _currentURL = url;
           });
           if (controller != null) {
-            updateSearchBar(url, 0, !_isOnFocus);
+            updateSearchBar(url, _progress, !_isOnFocus);
           }
         },
         onPageFinished: (String url) async {
           if (controller != null) {
+            _isHomePage = _isHomePage && url == Globals.initialURL;
+            updateCanBackForward();
             await updateBookmarkID(url);
           }
           updateSearchBar(url, 1, !_isOnFocus);
@@ -358,17 +350,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             _progress = 1;
           });
         },
-        onProgressChanged: (double progress) {
+        onProgressChanged: (double progress) async {
           updateSearchBar(_currentURL, progress, !_isOnFocus);
+          updateCanBackForward();
           setState(() {
             this._progress = progress;
           });
-        },
-        onCanGoBack: (bool canGoBack) {
-          setState(() => _canBack = canGoBack);
-        },
-        onCanGoForward: (bool canGoForward) {
-          setState(() => _canForward = canGoForward);
         },
         navigationDelegate: (FlutterWebView.NavigationRequest request) {
           if (request.url.startsWith('http') ||
@@ -422,7 +409,17 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     ''';
   }
 
+  Future<void> updateCanBackForward() async {
+    _canBackForwardController.add(
+      Tuple2<bool, bool>(
+        await controller.canGoBack(),
+        await controller.canGoForward(),
+      ),
+    );
+  }
+
   void updateSearchBar(String url, double progress, bool shouldCancelInput) {
+    _progress = progress;
     Uri uri = Uri.parse(url);
     if (url != Globals.initialURL) {
       IconData icon;
@@ -431,7 +428,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       } else {
         icon = Icons.lock_open;
       }
-      String domain = getDomain(uri);
+      String domain = uri.host;
       searchBarController.valueWith(
         leftView: Icon(
           icon,
@@ -440,6 +437,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         shouldCancelInput: shouldCancelInput,
         defautText: domain == "" ? "Search" : domain,
         submitedText: url,
+        progress: progress,
         rightView: !uri.scheme.startsWith("http") || _isOnFocus
             ? null
             : progress == 1
@@ -474,22 +472,20 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ),
         defautText: 'Search',
         rightView: null,
+        progress: progress,
         shouldCancelInput: shouldCancelInput,
         submitedText: _currentURL,
       );
     }
   }
 
-  String getDomain(Uri uri) {
-    String host = uri.host;
-    List<String> components = host.split('.');
-    if (components.length <= 3) {
-      return host;
-    }
-    return "${components[1]}.${components[2]}";
-  }
-
   String resolveURL(String url) {
+    if (isAddress(url) || isHash(url)) {
+      if (!url.startsWith('0x')) {
+        url = '0x$url';
+      }
+      return "https://${widget.network == Network.MainNet ? 'explore' : '/explore-testnet'}.vechain.org/search?content=$url";
+    }
     RegExp domainRegExp = RegExp(
         r"^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$");
     if (domainRegExp.hasMatch(url)) {
@@ -542,15 +538,15 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
           List<WalletEntity> walletEntities =
               await WalletStorage.readAll(network: widget.network);
           if (walletEntities.length == 0) {
-            bool isConfirmd = await customAlert(
-              context,
-              title: Text('No wallet available'),
-              content: Text('Create or import a new wallet?'),
-              confirmAction: () async {
-                Navigator.of(context).pop(true);
-              },
+            dynamic isConfirmd = await showSovereignDialog(
+              () => customAlert(
+                context,
+                title: Text('No wallet available'),
+                content: Text('Create or import a new wallet?'),
+                confirmAction: () async => Navigator.of(context).pop(true),
+              ),
             );
-            if (isConfirmd) {
+            if (isConfirmd is bool && isConfirmd) {
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => CreateOrImportWallet(
@@ -584,7 +580,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       for (Map<String, dynamic> txMsg in arguments[1]) {
         txMessages.add(SigningTxMessage.fromJSON(txMsg));
       }
-      return _showSovereignDialog(
+      return _showModalBottomSheet(
         TransactionDialog(
           options: options,
           txMessages: txMessages,
@@ -596,7 +592,9 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       SigningCertOptions options =
           SigningCertOptions.fromJSON(arguments[2], _currentURL);
       await _validate(options.signer);
-      return _showSovereignDialog(SignCertificate(certMessage, options));
+      return _showModalBottomSheet(
+        SignCertificate(certMessage, options),
+      );
     }
     throw 'unsupported method';
   }
@@ -607,24 +605,27 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
         ? 1
         : snapshotLength +
             ((Globals.tabValue.stage == TabStage.Created ||
-                    Globals.tabValue.stage == TabStage.Coverred)
+                        Globals.tabValue.stage == TabStage.Coverred) &&
+                    !showSnapshot
                 ? 1
                 : 0);
     return [
-      Padding(
-        padding: EdgeInsets.only(bottom: 10),
-        child: bottomItem(
+      streamBottomItemBuilder(
+        _canBackForwardController.stream,
+        (context, snapshot) => bottomItem(
           MaterialCommunityIcons.chevron_left,
-          onPressed: _canBack && _currentURL != Globals.initialURL
+          onPressed: snapshot.data.item1 && _currentURL != Globals.initialURL
               ? controller?.goBack
               : null,
         ),
       ),
-      Padding(
-        padding: EdgeInsets.only(bottom: 10),
-        child: bottomItem(
+      streamBottomItemBuilder(
+        _canBackForwardController.stream,
+        (context, snapshot) => bottomItem(
           MaterialCommunityIcons.chevron_right,
-          onPressed: _canForward ? controller?.goForward : null,
+          onPressed: snapshot.data.item2 && !_isHomePage
+              ? controller?.goForward
+              : null,
         ),
       ),
       bottomItem(
@@ -737,6 +738,21 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  Widget streamBottomItemBuilder(
+    Stream<Tuple2<bool, bool>> stream,
+    AsyncWidgetBuilder builder,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10),
+      child: StreamBuilder<Tuple2<bool, bool>>(
+        stream: stream.distinct((previous, current) =>
+            previous.item1 == current.item1 && previous.item2 == current.item2),
+        initialData: Tuple2<bool, bool>(false, false),
+        builder: builder,
+      ),
+    );
+  }
+
   Widget bottomItem(
     IconData iconData, {
     double size = 40,
@@ -754,9 +770,12 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
       onPressed: onPressed != null
           ? () async {
               if (btnEnabled) {
-                btnEnabled = false;
-                await onPressed();
-                btnEnabled = true;
+                try {
+                  btnEnabled = false;
+                  await onPressed();
+                } finally {
+                  btnEnabled = true;
+                }
               }
             }
           : null,
@@ -911,6 +930,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
     Globals.removeBlockHeadHandler(_handleHeadChanged);
     Globals.removeTabHandler(_handleTabChanged);
     Globals.removeBookmarkHandler(_handleBookmark);
+    _canBackForwardController.close();
     super.dispose();
   }
 
@@ -932,8 +952,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Future<void> _loadHomePage() async {
     await controller?.goHomePage();
     setState(() {
-      _canBack = false;
-      _canForward = false;
+      _isHomePage = true;
     });
   }
 
@@ -955,6 +974,7 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
             await _loadHomePage();
             await controller.loadUrl(tabValue.url);
           }
+          updateCanBackForward();
           setState(() {
             _offstage = !(tabValue.stage == TabStage.SelectedInAlive ||
                 tabValue.stage == TabStage.SelectedAlive ||
@@ -973,6 +993,28 @@ class WebViewState extends State<WebView> with AutomaticKeepAliveClientMixin {
   Future<void> _handleBookmark() async {
     if (Globals.bookmark.network == Globals.network) {
       await updateBookmarkID(_currentURL);
+    }
+  }
+
+  Future<void> _handleClipboard() async {
+    final data = Globals.clipboardValue.data;
+    final uri = Uri.parse(_currentURL);
+    final isOnExplore = uri.host == 'explore.vechain.org' ||
+        uri.host == 'explore-testnet.vechain.org';
+    if (!_offstage &&
+        Globals.network == widget.network &&
+        !(_currentURL.indexOf(data) != -1 && isOnExplore)) {
+      await customAlert(
+        context,
+        title: Text(
+          "Search ${isAddress(data) ? 'Address' : 'Hash'}",
+        ),
+        content: Text(data),
+        confirmAction: () async {
+          Navigator.of(context).pop();
+          await _handleLoad(data);
+        },
+      );
     }
   }
 }

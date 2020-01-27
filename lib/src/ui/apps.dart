@@ -35,7 +35,7 @@ class DAppsState extends State<DApps> {
   final double crossAxisSpacing = 15;
   final double mainAxisSpacing = 15;
   List<Bookmark> bookmarks = [];
-  List<DApp> recomendedApps = Globals.apps;
+  List<DApp> recommendedApps = Globals.apps;
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class DAppsState extends State<DApps> {
       }
       if (mounted) {
         setState(() {
-          recomendedApps = Globals.apps;
+          recommendedApps = Globals.apps;
         });
       }
     }
@@ -92,22 +92,22 @@ class DAppsState extends State<DApps> {
                 )
               : SizedBox(),
           bookmarks.length > 0 ? bookmarkApps : SizedBox(),
-          recomendedApps.length > 0
+          recommendedApps.length > 0
               ? Padding(
                   child: Text(
-                    'Recomends',
+                    'Recommends',
                     style: Theme.of(context).primaryTextTheme.subtitle,
                   ),
                   padding: EdgeInsets.all(15),
                 )
               : SizedBox(),
-          recomendedApps.length > 0 ? recomendApps : SizedBox(),
+          recommendedApps.length > 0 ? recommendApps : SizedBox(),
         ],
       ),
     );
   }
 
-  Widget get recomendApps => GridView.builder(
+  Widget get recommendApps => GridView.builder(
         physics: NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         padding: EdgeInsets.all(15),
@@ -116,7 +116,7 @@ class DAppsState extends State<DApps> {
           crossAxisSpacing: crossAxisSpacing,
           mainAxisSpacing: mainAxisSpacing,
         ),
-        itemCount: recomendedApps.length,
+        itemCount: recommendedApps.length,
         itemBuilder: (context, index) {
           return Column(
             children: <Widget>[
@@ -125,16 +125,16 @@ class DAppsState extends State<DApps> {
                 child: FlatButton(
                   onPressed: () async {
                     if (widget.onAppSelected != null) {
-                      widget.onAppSelected(recomendedApps[index]);
+                      widget.onAppSelected(recommendedApps[index]);
                     }
                   },
-                  child: image(recomendedApps[index].logo),
+                  child: image(recommendedApps[index].logo),
                 ),
               ),
               Padding(
                 padding: EdgeInsets.only(top: 4),
                 child: Text(
-                  recomendedApps[index].name ?? '',
+                  recommendedApps[index].name ?? '',
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: TextStyle(

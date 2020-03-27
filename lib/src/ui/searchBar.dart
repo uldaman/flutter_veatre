@@ -150,82 +150,83 @@ class SearchBarState extends State<SearchBar>
         }
       },
     );
-    return Container(
-      height: 41,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(
-          Radius.circular(5),
-        ),
-        color: Colors.grey[300],
+    return ClipRRect(
+      borderRadius: BorderRadius.all(
+        Radius.circular(5),
       ),
-      child: Column(
-        children: <Widget>[
-          SizedBox(
-            height: 40,
-            child: Row(
-              children: <Widget>[
-                Visibility(
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 10),
-                    child: leftView,
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        height: 41,
+        color: Colors.grey[300],
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 40,
+              child: Row(
+                children: <Widget>[
+                  Visibility(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: leftView,
+                    ),
+                    visible: leftView != null,
                   ),
-                  visible: leftView != null,
-                ),
-                Expanded(
-                  child: showTextField
-                      ? Padding(
-                          padding: EdgeInsets.only(left: 5, top: 0),
-                          child: searchTextField,
-                        )
-                      : FlatButton(
-                          padding: EdgeInsets.only(left: 5),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              defautText,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Theme.of(context).textTheme.title.color,
-                                fontSize: 14,
+                  Expanded(
+                    child: showTextField
+                        ? Padding(
+                            padding: EdgeInsets.only(left: 5, top: 0),
+                            child: searchTextField,
+                          )
+                        : FlatButton(
+                            padding: EdgeInsets.only(left: 5),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                defautText,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).textTheme.title.color,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
+                            onPressed: () async {
+                              setState(() {
+                                showTextField = true;
+                              });
+                            },
                           ),
-                          onPressed: () async {
-                            setState(() {
-                              showTextField = true;
-                            });
+                  ),
+                  showTextField
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.cancel,
+                            color: Colors.grey,
+                            size: 14,
+                          ),
+                          onPressed: () {
+                            _searchTextEditingController.clear();
                           },
-                        ),
-                ),
-                showTextField
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.cancel,
-                          color: Colors.grey,
-                          size: 14,
-                        ),
-                        onPressed: () {
-                          _searchTextEditingController.clear();
-                        },
-                      )
-                    : rightView == null ? SizedBox() : rightView,
-              ],
-            ),
-          ),
-          Visibility(
-            visible: !showTextField && progress < 1 && progress > 0,
-            child: SizedBox(
-              height: 1,
-              child: LinearProgressIndicator(
-                value: progress,
-                valueColor:
-                    AlwaysStoppedAnimation(Theme.of(context).primaryColor),
-                backgroundColor: Theme.of(context).dividerColor,
+                        )
+                      : rightView == null ? SizedBox() : rightView,
+                ],
               ),
             ),
-          ),
-        ],
+            Visibility(
+              visible: !showTextField && progress < 1 && progress > 0,
+              child: SizedBox(
+                height: 1,
+                child: LinearProgressIndicator(
+                  value: progress,
+                  valueColor:
+                      AlwaysStoppedAnimation(Theme.of(context).primaryColor),
+                  backgroundColor: Theme.of(context).dividerColor,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
